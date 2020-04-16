@@ -410,8 +410,6 @@ apply IHwft1_2. auto.
 apply sym_orthos. auto.
 Admitted.
 
-(* Soundness of the disjointness algorithm: Theorem 7 *)
-
 Lemma ortho_and : forall {A B C}, OrthoS A C -> OrthoS B C -> OrthoS (AndT A B) C.
 Proof.
 intros.
@@ -419,22 +417,22 @@ unfold OrthoS. intros.
 unfold OrthoS in H.
 unfold OrthoS in H0.
 dependent induction C0; eauto.
-inversion H1.
-apply H; auto.
-apply H0; auto.
-inversion H1.
-apply H; auto.
-apply H0; auto.
-apply TLAnd.
-apply IHC0_1.
-apply inv_ands1 in H1. destruct H1. auto.
-apply inv_ands1 in H2. destruct H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
-apply IHC0_2.
-apply inv_ands1 in H1. destruct H1. auto.
-apply inv_ands1 in H2. destruct H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
-dependent destruction H3; inversion H4.
+ - inversion H1.
+   apply H; auto.
+   apply H0; auto.
+ - inversion H1.
+   apply H; auto.
+   apply H0; auto.
+ - apply TLAnd.
+   + apply IHC0_1.
+     apply inv_ands1 in H1. destruct H1. auto.
+     apply inv_ands1 in H2. destruct H2. auto.
+     apply inv_ands1 in H3. destruct H3. auto.
+   + apply IHC0_2.
+     apply inv_ands1 in H1. destruct H1. auto.
+     apply inv_ands1 in H2. destruct H2. auto.
+     apply inv_ands1 in H3. destruct H3. auto.
+ - dependent destruction H3; inversion H4.
 Defined.
 
 Lemma orthos_or1 : forall {A B C}, OrthoS A C -> OrthoS (OrT A B) C.
@@ -442,22 +440,66 @@ Proof.
 intros.
 unfold OrthoS in *.
 intros.
-apply H.
-apply inv_ors1 in H0. destruct H0. auto. auto.
-apply inv_ors1 in H0. destruct H0.
-eapply SAnd2 in H0; eauto.
-Admitted.
+induction C0; eauto.
+ - apply inv_ors1 in H0; destruct H0; auto.
+ - apply inv_ors1 in H0; destruct H0; auto.
+ - apply TLAnd.
+  + apply IHC0_1.
+    apply inv_ands1 in H0; destruct H0; auto.
+    apply inv_ands1 in H1; destruct H1; auto.
+    apply inv_ands1 in H2; destruct H2; auto.
+  + apply IHC0_2.
+    apply inv_ands1 in H0; destruct H0; auto.
+    apply inv_ands1 in H1; destruct H1; auto.
+    apply inv_ands1 in H2; destruct H2; auto.
+ - dependent destruction H2; inversion H3.
+Defined.
 
 Lemma orthos_or2 : forall {A B C}, OrthoS B C -> OrthoS (OrT A B) C.
 Proof.
 intros.
 unfold OrthoS in *.
 intros.
-apply H; eauto.
-apply inv_ors1 in H0. destruct H0. auto.
-apply inv_ors1 in H0. destruct H0.
-eapply SAnd2; eauto.
-Admitted.
+induction C0; eauto.
+ - apply inv_ors1 in H0; destruct H0; auto.
+ - apply inv_ors1 in H0; destruct H0; auto.
+ - apply TLAnd.
+  + apply IHC0_1.
+    apply inv_ands1 in H0; destruct H0; auto.
+    apply inv_ands1 in H1; destruct H1; auto.
+    apply inv_ands1 in H2; destruct H2; auto.
+  + apply IHC0_2.
+    apply inv_ands1 in H0; destruct H0; auto.
+    apply inv_ands1 in H1; destruct H1; auto.
+    apply inv_ands1 in H2; destruct H2; auto.
+ - dependent destruction H2; inversion H3.
+Defined.
+
+Lemma orthos_or3 : forall {A B C}, OrthoS A C \/ OrthoS B C -> OrthoS (OrT A B) C.
+Proof.
+intros.
+unfold OrthoS. intros.
+unfold OrthoS in H.
+induction C0; eauto.
+ - destruct H.
+  + apply inv_ors1 in H0; destruct H0; auto.
+  + apply inv_ors1 in H0; destruct H0; auto.
+ - destruct H.
+  + apply inv_ors1 in H0; destruct H0; auto.
+  + apply inv_ors1 in H0; destruct H0; auto.
+ - apply TLAnd.
+  + apply IHC0_1.
+    apply inv_ands1 in H0. destruct H0. auto.
+    apply inv_ands1 in H1. destruct H1. auto.
+    apply inv_ands1 in H2. destruct H2. auto.
+  + apply IHC0_2.
+    apply inv_ands1 in H0. destruct H0. auto.
+    apply inv_ands1 in H1. destruct H1. auto.
+    apply inv_ands1 in H2. destruct H2. auto.
+ - dependent destruction H2; inversion H3.
+Defined.
+
+(* Soundness of the disjointness algorithm: Theorem 7 *)
 
 Lemma ortho_soundness : forall (t1 t2 : typ), WFTyp t1 -> WFTyp t2 -> Ortho t1 t2 -> OrthoS t1 t2.
 intros.
