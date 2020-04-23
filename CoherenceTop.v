@@ -237,16 +237,6 @@ apply completeTopLike in H1. auto.
 dependent induction C; auto.
 Admitted.
 
-
-(* Well-formed types *)
-
-Inductive WFTyp : typ -> Prop :=
-  | WFTop : WFTyp TopT
-  | WFInt : WFTyp IntT
-  | WFFun : forall t1 t2, WFTyp t1 -> WFTyp t2 -> WFTyp (FunT t1 t2)
-  | WFAnd : forall t1 t2, WFTyp t1 -> WFTyp t2 -> OrthoS t1 t2 -> WFTyp (AndT t1 t2)
-  | WOr   : forall t1 t2, WFTyp t1 -> WFTyp t2 -> WFTyp (OrT t1 t2).
-
 Lemma sym_orthos : forall t1 t2, OrthoS t1 t2 -> OrthoS t2 t1.
 Proof.
 intros.
@@ -369,6 +359,12 @@ apply inv_ands1 in H2; destruct H2; auto.
 dependent destruction H2; inversion H3.
 Admitted.
 
+Lemma toplike_fun_false : forall t1 t2, TopLike (FunT t1 t2) -> False.
+Proof.
+intros.
+inversion H.
+Defined. 
+
 Lemma orthos_fun_false : forall t1 t2 t3 t4, OrthoS (FunT t1 t2) (FunT t3 t4) -> False.
 Proof.
 intros.
@@ -378,65 +374,65 @@ Admitted.
 
 (* completeness lemma of the disjointness algorithm *)
 
-Lemma ortho_completness : forall t1, WFTyp t1 -> forall t2, WFTyp t2 -> OrthoS t1 t2 -> Ortho t1 t2.
+Lemma ortho_completness : forall t1 t2, OrthoS t1 t2 -> Ortho t1 t2.
 Proof.
-intros t1 wft1.
-induction wft1; intros.
+intros t1.
+induction t1; intros.
 apply OTop2.
 (* Case IntT *)
-induction H; intros; eauto.
-unfold OrthoS in H0; eauto.
+induction t2; intros; eauto.
+unfold OrthoS in H; eauto.
 assert (t0: TopLike IntT); auto. inversion t0.
-apply OAnd2. apply IHWFTyp1.
-apply inv_orthos_and in H0.
-destruct H0; auto. 
-apply inv_orthos_and in H0.
-destruct H0; auto.
-apply inv_orthos_or2 in H0.
-destruct H0.
+apply OAnd2. apply IHt2_1.
+apply inv_orthos_and in H.
+destruct H; auto. 
+apply inv_orthos_and in H.
+destruct H; auto.
+apply inv_orthos_or2 in H.
+destruct H.
 apply Or1.
-apply IHWFTyp1. auto.
+apply IHt2_1. auto.
 apply Or2.
-apply IHWFTyp2. auto.
+apply IHt2_2. auto.
 (* Case FunT t1 t2 *)
-induction H; eauto.
+dependent induction t2; eauto.
 (* Case FunT t1 t2 | FunT t0 t3 *)
 admit.
 (* Case t11 -> t12 _|_ t21 & t22 *)
-apply OAnd2. apply IHWFTyp1.
-apply inv_orthos_and in H0.
-destruct H0; auto.
-apply IHWFTyp2.
-apply inv_orthos_and in H0.
-destruct H0; auto.
+apply OAnd2. apply IHt2_1.
+apply inv_orthos_and in H.
+destruct H; auto.
+apply IHt2_2.
+apply inv_orthos_and in H.
+destruct H; auto.
 (* Case t11 -> t12 _|_ t21 | t22 *)
-apply inv_orthos_or2 in H0.
-destruct H0.
+apply inv_orthos_or2 in H.
+destruct H.
 apply Or1.
-apply IHWFTyp1. auto.
+apply IHt2_1. auto.
 apply Or2.
-apply IHWFTyp2. auto.
+apply IHt2_2. auto.
 (* Case (t11 & t12) _|_ t2 *)
 apply OAnd1.
-apply IHwft1_1; auto.
-apply sym_orthos in H1.
-apply inv_orthos_and in H1.
+apply IHt1_1; auto.
+apply sym_orthos in H.
+apply inv_orthos_and in H.
 apply sym_orthos.
-destruct H1; auto.
-apply IHwft1_2; auto.
-apply sym_orthos in H1.
-apply inv_orthos_and in H1.
+destruct H; auto.
+apply IHt1_2; auto.
+apply sym_orthos in H.
+apply inv_orthos_and in H.
 apply sym_orthos.
-destruct H1; auto.
+destruct H; auto.
 (* Case (t11 | t12) _|_ t2 *)
-apply sym_orthos in H0.
-apply inv_orthos_or2 in H0.
-destruct H0.
+apply sym_orthos in H.
+apply inv_orthos_or2 in H.
+destruct H.
 apply Or3.
-apply IHwft1_1. auto.
+apply IHt1_1. auto.
 apply sym_orthos. auto.
 apply Or4.
-apply IHwft1_2. auto.
+apply IHt1_2. auto.
 apply sym_orthos. auto.
 Admitted.
 
@@ -531,62 +527,61 @@ Defined.
 
 (* Soundness of the disjointness algorithm: Theorem 7 *)
 
-Lemma ortho_soundness : forall (t1 t2 : typ), WFTyp t1 -> WFTyp t2 -> Ortho t1 t2 -> OrthoS t1 t2.
+Lemma ortho_soundness : forall (t1 t2 : typ), Ortho t1 t2 -> OrthoS t1 t2.
 intros.
-induction H1.
+induction H.
 (*Case t1 TopT*)
 unfold OrthoS; intros.
-induction C; eauto. inversion H2. inversion H2.
+induction C; eauto. inversion H0. inversion H0.
 apply TLAnd. apply IHC1.
+apply inv_ands1 in H. destruct H. auto.
+apply inv_ands1 in H0. destruct H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
-apply inv_ands1 in H2. destruct H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
 apply IHC2.
+apply inv_ands1 in H. destruct H. auto.
+apply inv_ands1 in H0. destruct H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
-apply inv_ands1 in H2. destruct H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
-dependent destruction H3; inversion H4.
+dependent destruction H1; inversion H2.
 (*Case TopT t1*)
 unfold OrthoS. intros.
 induction C.
 apply TLTop.
-inversion H1. inversion H1.
+inversion H. inversion H.
 apply TLAnd. apply IHC1.
+apply inv_ands1 in H. destruct H. auto.
+apply inv_ands1 in H0. destruct H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
-apply inv_ands1 in H2. destruct H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
 apply IHC2.
+apply inv_ands1 in H. destruct H. auto.
+apply inv_ands1 in H0. destruct H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
-apply inv_ands1 in H2. destruct H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
-dependent destruction H3; inversion H4.
+dependent destruction H1; inversion H2.
 (* Hard case: (AndT t1 t2) t3 *)
 apply ortho_and.
-apply IHOrtho1; eauto. inversion H. auto.
-apply IHOrtho2; eauto. inversion H. auto.
+apply IHOrtho1. auto. auto.
 apply sym_orthos.
 apply ortho_and.
 apply sym_orthos.
-apply IHOrtho1; eauto. inversion H0. auto.
+auto.
 apply sym_orthos.
-apply IHOrtho2; eauto. inversion H0. auto.
+auto.
 (* Case IntFunT *)
 unfold OrthoS.
-induction C; intros. apply TLTop. inversion H2. inversion H1.
-apply TLAnd. apply IHC1. inversion H1. auto. inversion H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
-apply IHC2. inversion H1. auto. inversion H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
-dependent destruction H3; inversion H4.
+induction C; intros. apply TLTop. inversion H0. inversion H.
+apply TLAnd. apply IHC1. inversion H. auto. inversion H0. auto.
+apply inv_ands1 in H1. destruct H1. auto.
+apply IHC2. inversion H. auto. inversion H0. auto.
+apply inv_ands1 in H1. destruct H1. auto.
+dependent destruction H1; inversion H2.
 (* Case FunTInt *)
 unfold OrthoS.
-induction C; intros. apply TLTop. inversion H1. inversion H2.
+induction C; intros. apply TLTop. inversion H. inversion H0.
 apply TLAnd.
-apply IHC1. inversion H1. auto. inversion H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
-apply IHC2. inversion H1. auto. inversion H2. auto.
-apply inv_ands1 in H3. destruct H3. auto.
-dependent destruction H3; inversion H4.
+apply IHC1. inversion H. auto. inversion H0. auto.
+apply inv_ands1 in H1. destruct H1. auto.
+apply IHC2. inversion H. auto. inversion H0. auto.
+apply inv_ands1 in H1. destruct H1. auto.
+dependent destruction H1; inversion H2.
 (* FunTFunT *)
 (*unfold OrthoS.
 intros.
@@ -603,13 +598,11 @@ dependent destruction H4; inversion H5.*)
 apply sym_orthos.
 apply orthos_or1.
 apply sym_orthos.
-apply IHOrtho; auto. inversion H0. auto.
+auto.
 apply sym_orthos.
 apply orthos_or2.
 apply sym_orthos.
-apply IHOrtho; auto. inversion H0. auto.
-apply orthos_or1.
-apply IHOrtho; auto. inversion H. auto.
-apply orthos_or2.
-apply IHOrtho; auto. inversion H. auto.
+auto.
+apply orthos_or1. auto.
+apply orthos_or2. auto.
 Defined.
