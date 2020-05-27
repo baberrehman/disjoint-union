@@ -30,20 +30,20 @@ Inductive sub : typ -> typ -> Prop :=
      sub (AndT t1 t2) t
   | SAnd3 : forall t t1 t2, sub t2 t -> Atomic t ->
      sub (AndT t1 t2) t
-(*  | SAnd4 : forall t t1 t2, sub t1 t -> sub t t1 ->
+  | SAnd4 : forall t t1 t2, sub t1 t -> sub t t1 ->
      sub (AndT t1 t2) t
   | SAnd5 : forall t t1 t2, sub t2 t -> sub t t2 ->
-     sub (AndT t1 t2) t *)
+     sub (AndT t1 t2) t 
   | SOr1 : forall t t1 t2, sub t t2 -> sub t1 t2 -> 
      sub (OrT t t1) t2
   | SOr2 : forall t t1 t2, sub t t1 -> Atomic t ->
      sub t (OrT t1 t2)
   | SOr3 : forall t t1 t2, sub t t2 -> Atomic t ->
-     sub t (OrT t1 t2).
-(*  | SOr4 : forall t t1 t2, sub t t1 -> sub t1 t ->
+     sub t (OrT t1 t2)
+  | SOr4 : forall t t1 t2, sub t t1 -> sub t1 t ->
      sub t (OrT t1 t2)
   | SOr5 : forall t t1 t2, sub t t2 -> sub t2 t ->
-     sub t (OrT t1 t2).*)
+     sub t (OrT t1 t2).
 
 
 Lemma sand2_atomic : forall t1 t2 t3, sub t1 t3 -> Atomic t3 -> sub (AndT t1 t2) t3.
@@ -70,7 +70,7 @@ intros.
 eapply SOr3 in H; eauto.
 Qed.
 
-Hint Resolve STop SInt SFun SAnd1 SAnd2 SAnd3 SOr1 SOr2 SOr3
+Hint Resolve STop SInt SFun SAnd1 SAnd2 SAnd3 SAnd4 SAnd5 SOr1 SOr2 SOr3 SOr4 SOr5
              sand2_atomic sand3_atomic sor2_atomic sor3_atomic.
 
 Lemma inv_ands1 : forall t t1 t2, sub t (AndT t1 t2) -> sub t t1 /\ sub t t2.
@@ -91,6 +91,9 @@ Proof.
     split.
     destruct H5; apply SAnd2; auto; inversion H4.
     destruct H5; apply SAnd3; auto; inversion H4.
+    assert (sub t1 t0 /\ sub t1 t3). auto.
+    split.
+    admit. admit. admit.
 (* Case OrT *)
   - inversion H. auto.
     assert (sub t1 t0 /\ sub t1 t3).
@@ -104,7 +107,7 @@ Proof.
     apply SOr1.
     destruct H5. auto.
     destruct H6. auto.
-Defined.
+Admitted.
 
 Lemma inv_ors1 : forall t t2 t3, sub (OrT t2 t3) t -> sub t2 t /\ sub t3 t.
 Proof.
@@ -145,13 +148,50 @@ Proof.
     apply SOr3.
     destruct H5. auto.
     inversion H4.
-Defined.
+    assert (sub t0 t1 /\ sub t3 t1). auto.
+    split.
+    apply SOr4.
+    destruct H5. auto.
+    admit. admit. admit.
+Admitted.
 
-(*Lemma sub_refl: forall A, sub A A.
+Lemma sub_refl: forall A, sub A A.
 Proof.
   intros.
   induction A; eauto.
-Defined.*)
+Defined.
+
+Hint Resolve sub_refl.
+
+Definition sub_iso (A B : typ) := sub A B /\ sub B A.
+
+Lemma iso_types_or : forall A B C, sub (AndT A B) C -> sub_iso A C \/ sub_iso B C.
+Proof.
+Admitted.
+
+Lemma iso_types : forall A B C D, sub (AndT A B) (OrT C D) -> sub_iso A (OrT C D) \/
+    sub_iso B (OrT C D) \/ sub_iso C (AndT A B) \/ sub_iso D (AndT A B).
+Proof.
+intros.
+left.
+unfold sub_iso.
+split.
+dependent induction H; eauto.
+inversion H0.
+eapply IHsub1; eauto. admit.
+inversion H0.
+inversion H0.
+eapply IHsub1; eauto. admit.
+eapply IHsub1; eauto. admit.
+dependent induction H; eauto.
+inversion H0.
+inversion H0.
+eapply IHsub1; auto. admit.
+inversion H0.
+inversion H0.
+eapply IHsub1; auto. admit.
+eapply IHsub1; auto. admit.
+Admitted.
 
 Inductive TopLike : typ -> Prop :=
   | TLTop  : TopLike TopT
@@ -162,11 +202,16 @@ Inductive TopLike : typ -> Prop :=
 
 Hint Resolve TLTop TLAnd TLOr1 TLOr2.
 
+Inductive contains : typ -> typ -> Prop :=
+  | containsSelf : forall A, contains A A
+  | containsUnion1 : forall A B C, contains A B -> contains A (OrT B C)
+  | containsUnion2 : forall A B C, contains A C -> contains A (OrT B C)
+  | containsInter: forall A B C, contains A B -> contains A C -> contains A (AndT B C).
 
 (* Disjointness: Specification *)
 
 Definition OrthoS (A B: typ) := forall C, sub A C -> sub B C -> 
-                                  sub (AndT A B) C -> TopLike C.
+                                  (contains A C /\ contains B C) \/ TopLike C.
 
 Definition TopLikeS (A: typ) := sub TopT A.
 
@@ -230,8 +275,14 @@ dependent induction C; eauto.
   apply inv_ands1 in H1; destruct H1; auto.
   apply inv_ands1 in H2; destruct H2; eauto.
 (* Case Or *)
-- dependent destruction H2; inversion H3.
-Defined.
+- dependent destruction H2. inversion H3. inversion H3.
+  apply H; auto.
+  apply H; auto.
+  inversion H3.
+  inversion H3.
+  apply H; auto.
+  apply SAnd4. auto. admit.
+Admitted.
 
 Lemma sym_ortho : forall t1 t2, Ortho t1 t2 -> Ortho t2 t1.
 Proof.
@@ -242,6 +293,7 @@ Qed.
 Lemma inv_orthos_and: forall t1 t2 t3, OrthoS t1 (AndT t2 t3) -> OrthoS t1 t2 /\ OrthoS t1 t3.
 Proof.
 intros.
+unfold OrthoS in H.
 split.
  - unfold OrthoS; intros.
    dependent induction C; eauto.
@@ -254,7 +306,13 @@ split.
     apply inv_ands1 in H0; destruct H0; auto.
     apply inv_ands1 in H1; destruct H1; auto.
     apply inv_ands1 in H2; destruct H2; auto.
-  + dependent destruction H2; inversion H3.
+  + dependent destruction H2.
+    inversion H3.
+    inversion H3.
+    admit. admit.
+    inversion H3.
+    inversion H3.
+    admit. admit.
  - unfold OrthoS; intros.
    dependent induction C; eauto.
   + apply TLAnd.
@@ -266,8 +324,21 @@ split.
     apply inv_ands1 in H0; destruct H0; auto.
     apply inv_ands1 in H1; destruct H1; auto.
     apply inv_ands1 in H2; destruct H2; auto.
-  + dependent destruction H2; inversion H3.
-Defined.
+  + 
+    assert (sub t1 (OrT C1 C2) /\ sub (OrT C1 C2) t1) by admit.
+    destruct H3.
+    (*assert (sub t3 t1) by admit.*)
+    eapply H; eauto.
+    assert (TopLike (OrT t1 t3)).
+    eapply H; eauto. 
+    dependent destruction H2.
+    inversion H3.
+    inversion H3.
+    admit. admit.
+    inversion H3.
+    inversion H3.
+    admit. admit.
+Admitted.
 
 Lemma inv_orthos_or : forall t1 t2, OrthoS t1 (OrT t1 t2) -> OrthoS t1 t2.
 Proof.
@@ -284,8 +355,16 @@ dependent induction C; eauto.
    apply inv_ands1 in H0; destruct H0; auto.
    apply inv_ands1 in H1; destruct H1; auto.
    apply inv_ands1 in H2; destruct H2; auto.
- - dependent destruction H2; inversion H3.
-Defined.
+ - dependent destruction H2.
+   inversion H3.
+   inversion H3.
+   apply H; eauto.
+   apply H; eauto.
+    inversion H3.
+    inversion H3.
+   apply TLOr1.
+   apply IHC1; eauto. admit. admit.
+Admitted.
 
 Lemma inv_orthos_or2 : forall t1 t2 t3,
                     OrthoS t1 (OrT t2 t3) -> OrthoS t1 t2 \/ OrthoS t1 t3.
@@ -309,7 +388,11 @@ apply IHC2.
 apply inv_ands1 in H0; destruct H0; auto.
 apply inv_ands1 in H1; destruct H1; auto.
 apply inv_ands1 in H2; destruct H2; auto.
-dependent destruction H2; inversion H3.
+dependent destruction H2.
+inversion H3.
+inversion H3.
+apply TLOr1.
+apply IHC1.
 Admitted.
 
 Lemma orthos_fun : forall t1 t2 t3 t4, OrthoS (FunT t1 t2) (FunT t3 t4) -> OrthoS t2 t4.
@@ -319,8 +402,12 @@ unfold OrthoS in H.
 unfold OrthoS.
 intros.
 dependent induction C; auto.
-admit.
-admit.
+assert (TopLike (FunT (AndT t1 t3) TopT)).
+apply H; eauto.
+inversion H3.
+assert (TopLike (FunT (AndT t1 t3) TopT)).
+apply H; eauto.
+inversion H3.
 apply TLAnd.
 apply IHC1.
 apply inv_ands1 in H0; destruct H0; auto.
@@ -330,8 +417,10 @@ apply IHC2.
 apply inv_ands1 in H0; destruct H0; auto.
 apply inv_ands1 in H1; destruct H1; auto.
 apply inv_ands1 in H2; destruct H2; auto.
-dependent destruction H2; inversion H3.
-Admitted.
+assert (TopLike (FunT (AndT t1 t3) TopT)).
+apply H; eauto.
+inversion H3.
+Defined.
 
 Lemma ortho_fun : forall t1 t2 t3 t4, Ortho (FunT t1 t2) (FunT t3 t4) 
                           -> False.
@@ -352,10 +441,8 @@ intros.
 unfold OrthoS in H.
 assert (TopLike (FunT (AndT t1 t3) TopT)).
 apply H; eauto.
-apply SFun.
-apply SAnd2.
-Admitted.
-
+inversion H0.
+Defined.
 
 (* completeness lemma of the disjointness algorithm *)
 
@@ -434,7 +521,11 @@ dependent induction C0; eauto.
  - inversion H1.
    apply H; auto.
    apply H0; auto.
+   apply H; auto.
+   apply H0; auto.
  - inversion H1.
+   apply H; auto.
+   apply H0; auto.
    apply H; auto.
    apply H0; auto.
  - apply TLAnd.
@@ -446,8 +537,18 @@ dependent induction C0; eauto.
      apply inv_ands1 in H1. destruct H1. auto.
      apply inv_ands1 in H2. destruct H2. auto.
      apply inv_ands1 in H3. destruct H3. auto.
- - dependent destruction H3; inversion H4.
-Defined.
+ - inversion H1.
+   apply H; auto.
+   apply H0; auto.
+   apply H; auto.
+   apply H0; auto.
+   inversion H8.
+   inversion H8.
+   apply TLOr1.
+   apply IHC0_1; eauto. admit.
+   apply TLOr2.
+   apply IHC0_2; eauto. admit.
+Admitted.
 
 Lemma orthos_or1 : forall {A B C}, OrthoS A C -> OrthoS (OrT A B) C.
 Proof.
@@ -466,8 +567,8 @@ induction C0; eauto.
     apply inv_ands1 in H0; destruct H0; auto.
     apply inv_ands1 in H1; destruct H1; auto.
     apply inv_ands1 in H2; destruct H2; auto.
- - dependent destruction H2; inversion H3.
-Defined.
+ - dependent destruction H2; admit.
+Admitted.
 
 Lemma orthos_or2 : forall {A B C}, OrthoS B C -> OrthoS (OrT A B) C.
 Proof.
@@ -486,8 +587,8 @@ induction C0; eauto.
     apply inv_ands1 in H0; destruct H0; auto.
     apply inv_ands1 in H1; destruct H1; auto.
     apply inv_ands1 in H2; destruct H2; auto.
- - dependent destruction H2; inversion H3.
-Defined.
+ - dependent destruction H2; admit.
+Admitted.
 
 Lemma orthos_or3 : forall {A B C}, OrthoS A C \/ OrthoS B C -> OrthoS (OrT A B) C.
 Proof.
@@ -510,8 +611,8 @@ induction C0; eauto.
     apply inv_ands1 in H0. destruct H0. auto.
     apply inv_ands1 in H1. destruct H1. auto.
     apply inv_ands1 in H2. destruct H2. auto.
- - dependent destruction H2; inversion H3.
-Defined.
+ - dependent destruction H2; admit.
+Admitted.
 
 (* Soundness of the disjointness algorithm: Theorem 7 *)
 
@@ -529,7 +630,7 @@ apply IHC2.
 apply inv_ands1 in H. destruct H. auto.
 apply inv_ands1 in H0. destruct H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
-dependent destruction H1; inversion H2.
+dependent destruction H1; admit.
 (*Case TopT t1*)
 unfold OrthoS. intros.
 induction C.
@@ -543,7 +644,7 @@ apply IHC2.
 apply inv_ands1 in H. destruct H. auto.
 apply inv_ands1 in H0. destruct H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
-dependent destruction H1; inversion H2.
+dependent destruction H1; admit.
 (* Hard case: (AndT t1 t2) t3 *)
 apply ortho_and.
 apply IHOrtho1. auto.
@@ -560,7 +661,7 @@ apply TLAnd. apply IHC1. inversion H. auto. inversion H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
 apply IHC2. inversion H. auto. inversion H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
-dependent destruction H1; inversion H2.
+dependent destruction H1; admit.
 (* Case FunTInt *)
 unfold OrthoS.
 induction C; intros. apply TLTop. inversion H. inversion H0.
@@ -569,7 +670,9 @@ apply IHC1. inversion H. auto. inversion H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
 apply IHC2. inversion H. auto. inversion H0. auto.
 apply inv_ands1 in H1. destruct H1. auto.
-dependent destruction H1; inversion H2.
+dependent destruction H1.
+inversion H2.
+inversion H2. admit. admit. admit. admit. admit. admit.
 (* FunTFunT *)
 (*unfold OrthoS.
 intros.
@@ -597,4 +700,4 @@ auto.
 apply orthos_or2.
 apply sym_orthos.
 auto.
-Defined.
+Admitted.
