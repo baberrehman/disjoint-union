@@ -17,69 +17,6 @@ Inductive typ : Set :=
 (*  | typ_and       : typ -> typ -> typ *)
 | typ_or    : typ -> typ -> typ.
 
-(** Representation of pre-terms *)
-
-Inductive trm : Set :=
-  | trm_bvar : nat -> trm
-  | trm_fvar : var -> trm
-  | trm_abs  : typ -> trm -> trm
-  | trm_app  : trm -> trm -> trm.
-
-(** Opening up a term binder occuring in a term *)
-
-Fixpoint open_ee_rec (k : nat) (f : trm) (e : trm) {struct e} : trm :=
-  match e with
-  | trm_bvar i    => If k = i then f else (trm_bvar i)
-  | trm_fvar x     => trm_fvar x
-  | trm_abs V e1  => trm_abs V (open_ee_rec (S k) f e1)
-  | trm_app e1 e2 => trm_app (open_ee_rec k f e1) (open_ee_rec k f e2)
-  end.
-
-Definition open_ee t u := open_ee_rec 0 u t.
-
-(** Notation for opening up binders with type or term variables *)
-
-Notation "t 'open_ee_var' x" := (open_ee t (trm_fvar x)) (at level 67).
-
-(** Terms as locally closed pre-terms *)
-
-Inductive term : trm -> Prop :=
-  | term_var : forall x,
-      term (trm_fvar x)
-  | term_abs : forall L V e1,
-      (forall x, x \notin L -> term (e1 open_ee_var x)) ->
-      term (trm_abs V e1)
-  | term_app : forall e1 e2,
-      term e1 ->
-      term e2 ->
-      term (trm_app e1 e2).
-
-(** Binding are mapping to term variables. 
- [x ~: T] is a typing assumption *)
-
-Inductive bind : Set :=
-  | bind_typ : typ -> bind.
-
-(*Notation "X <: T" := (X ~ T)
-  (at level 23, left associativity) : env_scope.*)
-
-Notation "x ~: T" := (x ~ T)
-  (at level 23, left associativity) : env_scope.
-
-(** Environment is an associative list of bindings. *)
-
-Definition env := LibEnv.env typ.
-
-Print LibEnv.env.
-
-(** A environment E is well-formed if it contains no duplicate bindings *)
-
-Inductive okt : env -> Prop :=
-  | okt_empty :
-      okt empty
-  | okt_typ : forall E x T,
-      okt E-> x # E -> okt (E & x ~: T).
-
 (** Subtyping relation *)
 
 Inductive sub : typ -> typ -> Prop :=
@@ -324,33 +261,147 @@ Proof.
     dependent induction H; eauto.
 Defined.
 
+(** Representation of pre-terms *)
+
+Inductive trm : Set :=
+  | trm_bvar  : nat -> trm
+  | trm_fvar  : var -> trm
+  | trm_abs   : typ -> trm -> typ -> trm
+  | trm_app   : trm -> trm -> trm
+  | trm_nat   : nat -> trm
+  | trm_typof : trm -> typ -> trm -> typ -> trm -> trm
+  | trm_anno   : trm -> typ -> trm.
+
+(** Opening up a term binder occuring in a term *)
+
+Fixpoint open_ee_rec (k : nat) (f : trm) (e : trm) {struct e} : trm :=
+  match e with
+  | trm_bvar i    => If k = i then f else (trm_bvar i)
+  | trm_fvar x     => trm_fvar x
+  | trm_abs V e1 V1  => trm_abs V (open_ee_rec (S k) f e1) V1
+  | trm_app e1 e2 => trm_app (open_ee_rec k f e1) (open_ee_rec k f e2)
+  | trm_nat i     => trm_nat i
+  | trm_typof e t1 e1 t2 e2    =>  trm_typof (open_ee_rec k f e) t1 
+                                    (open_ee_rec (S k) f e1) t2 (open_ee_rec (S k) f e2)
+  | trm_anno e1 t1   => trm_anno (open_ee_rec k f e1) t1
+  end.
+
+Definition open_ee t u := open_ee_rec 0 u t.
+
+(** Notation for opening up binders with type or term variables *)
+
+Notation "t 'open_ee_var' x" := (open_ee t (trm_fvar x)) (at level 67).
+
+(** Terms as locally closed pre-terms *)
+
+Inductive term : trm -> Prop :=
+  | term_var : forall x,
+      term (trm_fvar x)
+  | term_abs : forall L V e1 V1,
+      (forall x, x \notin L -> term (e1 open_ee_var x)) ->
+      term (trm_abs V e1 V1)
+  | term_app : forall e1 e2,
+      term e1 ->
+      term e2 ->
+      term (trm_app e1 e2)
+  | term_nat : forall i,
+      term (trm_nat i)
+  | term_typeof : forall e t1 e1 t2 e2,
+       term e ->
+       term e1 ->
+       term e2 ->
+       term (trm_typof e t1 e1 t2 e2)
+  | term_anno : forall e t,
+      term e ->
+      term (trm_anno e t).
+
+(** Binding are mapping to term variables. 
+ [x ~: T] is a typing assumption *)
+
+Inductive bind : Set :=
+  | bind_typ : typ -> bind.
+
+(*Notation "X <: T" := (X ~ T)
+  (at level 23, left associativity) : env_scope.*)
+
+Notation "x ~: T" := (x ~ T)
+  (at level 23, left associativity) : env_scope.
+
+(** Environment is an associative list of bindings. *)
+
+Definition env := LibEnv.env typ.
+
+(** A environment E is well-formed if it contains no duplicate bindings *)
+
+Inductive okt : env -> Prop :=
+  | okt_empty :
+      okt empty
+  | okt_typ : forall E x T,
+      okt E-> x # E -> okt (E & x ~: T).
+
+
+Inductive flag : Set :=
+  | inf : flag
+  | chk : flag.
+
 (* Int -> Char * Bool -> String *)
 
 (** Typing relation *)
 
-Inductive typing : env -> trm -> typ -> Prop :=
+Inductive typing : env -> trm -> flag -> typ -> Prop :=
   | typing_var : forall E x T,
       okt E ->
       binds x T E ->
-      typing E (trm_fvar x) T
-  | typing_abs : forall L E V e1 T1,
+      typing E (trm_fvar x) inf T
+  | typing_abs : forall L E V e1 T1 V1,
       (forall x, x \notin L ->
-        typing (E & x ~: V) (e1 open_ee_var x) T1) ->
-      typing E (trm_abs V e1) (typ_arrow V T1)
+        typing (E & x ~: V) (e1 open_ee_var x) chk T1) ->
+      typing E (trm_abs V e1 V1) inf (typ_arrow V T1)
   | typing_app : forall T1 E e1 e2 T2,
-      typing E e1 (typ_arrow T1 T2) ->
-      typing E e2 T1 ->
-      typing E (trm_app e1 e2) T2
+      typing E e1 inf (typ_arrow T1 T2) ->
+      typing E e2 chk T1 ->
+      typing E (trm_app e1 e2) inf T2
+  | typing_nat : forall E i,
+      okt E ->
+      typing E (trm_nat i) inf typ_int
   | typing_sub : forall S E e T,
-      typing E e S ->
+      typing E e inf S ->
       sub S T ->
-      typing E e T.
+      typing E e chk T
+  | typing_anno : forall env e1 T,
+      typing env e1 chk T ->
+      typing env (trm_anno e1 T) inf T
+  | typing_typeof : forall L E e e1 e2 T1 T2 T3,
+      typing E e chk (typ_or T1 T2) ->
+      (forall x, x \notin L ->
+      typing (E & x ~: T1) (e1 open_ee_var x) chk T3) ->
+      (forall x, x \notin L ->
+      typing (E & x ~: T2) (e2 open_ee_var x) chk T3 ) ->
+      DisjSpec T1 T2 ->
+      typing E (trm_typof e T1 e1 T2 e2) chk T3.
+(* Type reduction *)
+
+Inductive typ_red : trm -> typ -> trm -> Prop :=
+  | tred_nat : forall i,
+      typ_red (trm_nat i) typ_int (trm_nat i)
+  | tred_arrow : forall e A1 A2 B1 B2,
+      sub A1 B1 ->
+      sub B2 A2 ->
+      typ_red (trm_abs B1 e B2) (typ_arrow A1 A2) (trm_abs B1 e A2)
+  | tred_or1 : forall e e' A B,
+      typ_red e A e' ->
+      typ_red e (typ_or A B) e'
+  | tred_or2 : forall e e' A B,
+      typ_red e B e' ->
+      typ_red e (typ_or A B) e'.
 
 (** Values *)
 
 Inductive value : trm -> Prop :=
-  | value_abs  : forall V e1, term (trm_abs V e1) ->
-                 value (trm_abs V e1).
+  | value_abs  : forall V e1 V1, term (trm_abs V e1 V1) ->
+                 value (trm_abs V e1 V1)
+  | value_nat : forall i, term (trm_nat i) ->
+                 value (trm_nat i).
 
 (** One-step reduction *)
 
@@ -363,20 +414,36 @@ Inductive red : trm -> trm -> Prop :=
       value e1 ->
       red e2 e2' ->
       red (trm_app e1 e2) (trm_app e1 e2')
-  | red_abs : forall V e1 v2,
-      term (trm_abs V e1) ->
+  | red_abs : forall V e1 v2 V2,
+      term (trm_abs V e1 V2) ->
       value v2 ->
-      red (trm_app (trm_abs V e1) v2) (open_ee e1 v2).
+      red (trm_app (trm_abs V e1 V2) v2) (open_ee e1 v2)
+  | red_anno : forall e T e',
+      term (trm_anno e T) ->
+      red e e' ->
+      red (trm_anno e T) (trm_anno e' T)
+  | red_typeoft : forall e e' e1 e2 T1 T2,
+      term (trm_typof e T1 e1 T2 e2) ->
+      red e e' ->
+      red (trm_typof e T1 e1 T2 e2) (trm_typof e' T1 e1 T2 e2)
+  | red_typeofv1 : forall v e1 e2 T1 T2,
+      term (trm_typof v T1 e1 T2 e2) ->
+      value v ->
+      red (trm_typof v T1 e1 T2 e2) (open_ee e1 v)
+  | red_typeofv2 : forall v e1 e2 T1 T2,
+      term (trm_typof v T1 e1 T2 e2) ->
+      value v ->
+      red (trm_typof v T1 e1 T2 e2) (open_ee e2 v).
 
 (** Our goal is to prove preservation and progress *)
 
-Definition preservation := forall E e e' T,
-  typing E e T -> 
+Definition preservation := forall E e e' dir T,
+  typing E e dir T -> 
   red e e' -> 
-  typing E e' T.
+  typing E e' dir T.
 
-Definition progress := forall e T,
-  typing empty e T -> 
+Definition progress := forall e dir T,
+  typing empty e dir T -> 
      value e 
   \/ exists e', red e e'.
 
@@ -384,10 +451,13 @@ Definition progress := forall e T,
 
 Fixpoint fv_ee (e : trm) {struct e} : vars :=
   match e with
-  | trm_bvar i    => \{}
-  | trm_fvar x    => \{x}
-  | trm_abs V e1  => (fv_ee e1)
-  | trm_app e1 e2 => (fv_ee e1) \u (fv_ee e2)
+  | trm_bvar i      => \{}
+  | trm_fvar x      => \{x}
+  | trm_abs V e1 V2 => (fv_ee e1)
+  | trm_app e1 e2   => (fv_ee e1) \u (fv_ee e2)
+  | trm_nat i       => \{}
+  | trm_typof e1 T1 e2 T2 e3 => (fv_ee e1) \u (fv_ee e2) \u (fv_ee e3)
+  | trm_anno e T    => (fv_ee e)
   end.
 
 (** Substitution for free term variables in terms. *)
@@ -396,8 +466,11 @@ Fixpoint subst_ee (z : var) (u : trm) (e : trm) {struct e} : trm :=
   match e with
   | trm_bvar i    => trm_bvar i
   | trm_fvar x    => If x = z then u else (trm_fvar x)
-  | trm_abs V e1  => trm_abs V (subst_ee z u e1)
+  | trm_abs V e1 V1  => trm_abs V (subst_ee z u e1) V1
   | trm_app e1 e2 => trm_app (subst_ee z u e1) (subst_ee z u e2)
+  | trm_nat i     => trm_nat i
+  | trm_typof e1 T1 e2 T2 e3   => trm_typof (subst_ee z u e1) T1 (subst_ee z u e2) T2 (subst_ee z u e3)
+  | trm_anno e T   => trm_anno (subst_ee z u e) T 
   end.
 
 (* ********************************************************************** *)
@@ -405,7 +478,7 @@ Fixpoint subst_ee (z : var) (u : trm) (e : trm) {struct e} : trm :=
 
 (** Constructors as hints. *)
 
-Hint Constructors term ok okt value red.
+Hint Constructors term ok okt value red typ_red.
 
 (** Gathering free names already used in the proofs *)
 
@@ -576,8 +649,8 @@ Hint Immediate okt_strengthen.
 
 (** The typing relation is restricted to well-formed objects. *)
 
-Lemma typing_regular : forall E e T,
-  typing E e T -> okt E /\ term e.
+Lemma typing_regular : forall E e dir T,
+  typing E e dir T -> okt E /\ term e.
 Proof.
 
   induction 1; try splits*.
@@ -585,7 +658,13 @@ Proof.
   apply okt_push_inv in H0. destruct H0. auto. 
    apply_fresh* term_abs as y. 
       specializes H0 y. destructs~ H0.
-Qed.
+    apply term_typeof.
+    destruct IHtyping. auto.
+    pick_fresh y.
+    specializes H1 y. destructs~ H1.
+    admit.
+    admit. 
+Admitted.
 
 (** The value relation is restricted to well-formed objects. *)
 
@@ -595,6 +674,15 @@ Proof.
   induction 1; autos*.
 Qed.
 
+
+Lemma term_open : forall e, term e -> forall n e1, term e1 -> term (open_ee_rec n e1 e).
+Proof.
+  induction 1; intros; simpl in *; eauto.
+  - pick_fresh X.
+    apply term_abs with (L := L); intros.
+    specialize (H0 x H2 (S n) e0 H1).
+Admitted.
+
 (** The reduction relation is restricted to well-formed objects. *)
 
 Lemma red_regular : forall t t',
@@ -602,6 +690,13 @@ Lemma red_regular : forall t t',
 Proof.
   induction 1; split; autos* value_regular.
   inversions H. pick_fresh y. rewrite* (@subst_ee_intro y).
+  dependent destruction H.
+  apply term_typeof; auto.
+  destruct~ IHred.
+  eapply term_open; auto.
+  dependent destruction H. auto.
+  apply term_open; auto.
+  dependent destruction H; auto.
 Qed.
 
 (** Automation *)
@@ -652,7 +747,6 @@ Lemma sub_transitivity1 : forall Q,
 Proof.
   induction Q; unfold transitivity_on; intros;
   generalize H0 H; clear H0; clear H; generalize S; clear S.
-  - induction T; intro; intro; try (inversion H0); auto.
   - intros; dependent induction H; eauto.
   - intros; induction T; dependent induction H0; eauto.
   - induction T; intros; try (inversion H0); eauto.
@@ -661,42 +755,64 @@ Proof.
     dependent induction H; eauto.
 Defined.
 
-
 (* ********************************************************************** *)
 (** Weakening (5) *)
 
-Lemma typing_weakening : forall E F G e T,
-   typing (E & G) e T -> 
+Lemma typing_weakening : forall E F G e dir T,
+   typing (E & G) e dir T -> 
    okt (E & F & G) ->
-   typing (E & F & G) e T.
+   typing (E & F & G) e dir T.
 Proof. 
   introv Typ. gen F. inductions Typ; introv Ok.
-  apply* typing_var. apply* binds_weaken.
+  apply* typing_var. apply binds_weaken. apply H0.
+  apply ok_from_okt. apply Ok.
   apply_fresh* typing_abs as x. forwards~ K: (H x).
    apply_ih_bind (H0 x); eauto.
   apply* typing_app.
-  apply* typing_sub. 
+  apply typing_nat. apply Ok.
+  eapply typing_sub with (S:=S). apply IHTyp.
+  reflexivity. apply Ok. apply H.
+  apply typing_anno. apply IHTyp. reflexivity.
+  apply Ok.
+  apply_fresh* typing_typeof as x.
+  forwards~ K: (H x).
+  apply_ih_bind (H0 x); eauto.
+  forwards~ K: (H1 x).
+  apply_ih_bind (H2 x); eauto.
 Qed.
 
 (************************************************************************ *)
 (** Preservation by Term Substitution (8) *)
 
-Lemma typing_through_subst_ee : forall U E F x T e u,
-  typing (E & x ~: U & F) e T ->
-  typing E u U ->
-  typing (E & F) (subst_ee x u e) T.
+Lemma typing_through_subst_ee : forall U E F x T e u dir,
+  typing (E & x ~: U & F) e dir T ->
+  typing E u inf U ->
+  typing (E & F) (subst_ee x u e) dir T.
 Proof.
    introv TypT TypU. inductions TypT; introv; simpl.
   case_var.
-    binds_get H0. apply_empty* typing_weakening.
+    binds_get H0.
+      lets M: (@typing_weakening E F empty u inf U).
+      do 2 rewrite concat_empty_r in M.
+      apply* M.
     binds_cases H0; apply* typing_var.
   apply_fresh* typing_abs as y.
     rewrite* subst_ee_open_ee_var.
     apply_ih_bind* H0.
   apply typing_regular in TypU. destruct TypU. auto.
   apply* typing_app.
+  apply* typing_nat.
   apply* typing_sub.
+  apply* typing_anno.
+  apply_fresh* typing_typeof as y.
+    rewrite* subst_ee_open_ee_var.
+    apply_ih_bind* H0.
+  apply typing_regular in TypU. destruct TypU. auto.
+    rewrite* subst_ee_open_ee_var.
+    apply_ih_bind* H2.
+  apply typing_regular in TypU. destruct TypU. auto.
 Qed.
+
 
 (* ********************************************************************** *)
 (** * Preservation *)
@@ -704,14 +820,14 @@ Qed.
 (* ********************************************************************** *)
 (** Inversions for Typing (13) *)
 
-Lemma typing_inv_abs : forall E S1 e1 T,
-  typing E (trm_abs S1 e1) T -> 
+Lemma typing_inv_abs : forall E S1 S2 e1 T,
+  typing E (trm_abs S1 e1 S2) inf T -> 
   forall U1 U2, sub T (typ_arrow U1 U2) ->
      sub U1 S1
   /\ exists S2, exists L, forall x, x \notin L ->
-     typing (E & x ~: S1) (e1 open_ee_var x) S2 /\ sub S2 U2.
+     typing (E & x ~: S1) (e1 open_ee_var x) chk S2 /\ sub S2 U2.
 Proof.
-  introv Typ. gen_eq e: (trm_abs S1 e1). gen S1 e1.
+  introv Typ. gen_eq e: (trm_abs S1 e1 S2). gen S1 e1.
   induction Typ; intros S1 b1 EQ U1 U2 Sub; inversions EQ.
   inversions* Sub.
   apply IHTyp. auto.
@@ -727,16 +843,25 @@ Proof.
   introv Typ. gen e'. induction Typ; introv Red; 
    try solve [ inversion Red ].
   (* case: app *) 
-  inversions Red; try solve [ apply* typing_app ].
+  (*inversions Red; try solve [ apply* typing_app ].
   destruct~ (typing_inv_abs Typ1 (U1:=T1) (U2:=T2)) as [P1 [S2 [L P2]]].
     pick_fresh X. forwards~ K: (P2 X). destruct K.
-     rewrite* (@subst_ee_intro X).
-     apply_empty (@typing_through_subst_ee V).
-       apply* (@typing_sub S2).
-       autos*. admit.
-    apply* value_regular.
-  (* case sub *)
-  apply* typing_sub.
+     rewrite* (@subst_ee_intro X); eauto.*)
+  dependent destruction Red.
+  eapply typing_app; auto.
+  eapply typing_app; auto.
+  apply Typ1.
+       destruct~ (typing_inv_abs Typ1 (U1:=T1) (U2:=T2)) as [P1 [S2 [L P2]]].
+       pick_fresh X. forwards~ K: (P2 X). destruct K.
+       admit.
+  apply typing_sub with (S:=S). apply IHTyp.
+  apply Red. apply H.
+  inversion Red. subst.
+  apply typing_anno.
+  apply IHTyp. apply H3.
+  inversion Red. subst.
+  eapply typing_typeof; eauto.
+  admit.
 Admitted.
 
 (* ********************************************************************** *)
@@ -745,9 +870,9 @@ Admitted.
 (* ********************************************************************** *)
 (** Canonical Forms (14) *)
 
-Lemma canonical_form_abs : forall t U1 U2,
-  value t -> typing empty t (typ_arrow U1 U2) -> 
-  exists V, exists e1, t = trm_abs V e1.
+Lemma canonical_form_abs : forall t U1 U2 dir,
+  value t -> typing empty t dir (typ_arrow U1 U2) -> 
+  exists V, exists e1, exists V1, t = trm_abs V e1 V1.
 Proof.
   introv Val Typ. 
   gen_eq T: (typ_arrow U1 U2). intro st.
@@ -774,13 +899,7 @@ Proof.
   (* case: abs *)
   left*. apply value_abs. apply* typing_regular.
   (* case: app *)
-  right. destruct* IHTyp1 as [Val1 | [e1' Rede1']].
-    destruct* IHTyp2 as [Val2 | [e2' Rede2']].
-      destruct (canonical_form_abs Val1 Typ1) as [S [e3 EQ]].
-        subst. exists* (open_ee e3 e2).  apply red_abs.
-        apply* typing_regular. auto.
-        exists (trm_app e1' e2). apply red_app_1. apply* typing_regular.
-        auto.
-  (* case: sub *)
-  autos*.
-Qed.
+  right.
+  exists e1.
+  dependent destruction Typ'.
+Admitted.

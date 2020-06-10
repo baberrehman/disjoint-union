@@ -151,26 +151,12 @@ Hint Resolve sub_refl.
 
 Definition sub_iso (A B : typ) := sub A B /\ sub B A.
 
-Lemma iso_types_or : forall A B C, sub (AndT A B) C -> sub_iso A C \/ sub_iso B C.
-Proof.
-intros.
-left.
-unfold sub_iso.
-split.
-dependent induction H; eauto.
-eapply IHsub with (B0:=B); eauto.
-Admitted.
-
 Lemma iso_types : forall A B C D, sub (AndT A B) (OrT C D) -> sub_iso A (OrT C D) \/
     sub_iso B (OrT C D) \/ sub_iso C (AndT A B) \/ sub_iso D (AndT A B).
 Proof.
 intros.
 unfold sub_iso.
-dependent induction H; eauto.
-inversion H0.
-inversion H0.
-inversion H0.
-inversion H0.
+dependent induction H; eauto; inversion H0.
 Defined.
 
 Inductive TopLike : typ -> Prop :=
