@@ -426,13 +426,13 @@ Inductive red : trm -> trm -> Prop :=
   | red_abs : forall V e1 v2 V2,
       term (trm_abs V e1 V2) ->
       value v2 ->
-      red (trm_app (trm_abs V e1 V2) v2) (open_ee e1 (trm_anno v2 V))
+      red (trm_app (trm_abs V e1 V2) v2) (open_ee e1 v2)
   | red_anno : forall e T e',
       red e e' ->
       red (trm_anno e T) (trm_anno e' T)
   | red_annov : forall e T,
       value e ->
-      red (trm_anno e T) (trm_anno e T)
+      red (trm_anno e T) e
   | red_typeoft : forall e e' e1 e2 T1 T2,
       term (trm_typof e T1 e1 T2 e2) ->
       red e e' ->
@@ -441,12 +441,12 @@ Inductive red : trm -> trm -> Prop :=
       term (trm_typof v T1 e1 T2 e2) ->
       value v ->
       sub (checkType v) T1 ->
-      red (trm_typof v T1 e1 T2 e2) (open_ee e1 (trm_anno v T1))
+      red (trm_typof v T1 e1 T2 e2) (open_ee e1 v)
   | red_typeofv2 : forall v e1 e2 T1 T2,
       term (trm_typof v T1 e1 T2 e2) ->
       value v ->
       sub (checkType v) T2 ->
-      red (trm_typof v T1 e1 T2 e2) (open_ee e2 (trm_anno v T2)).
+      red (trm_typof v T1 e1 T2 e2) (open_ee e2 v).
 
 (** Our goal is to prove preservation and progress *)
 
@@ -795,26 +795,26 @@ Qed.
 (************************************************************************ *)
 (** Preservation by Term Substitution (8) *)
 
-Lemma typing_through_subst_ee : forall U E F x T e u dir,
-  typing (E & x ~: U & F) e dir T ->
-  typing E u dir U ->
-  typing (E & F) (subst_ee x (trm_anno u U) e) dir T.
+(*Lemma typing_through_subst_ee : forall U E F x T e u dir,
+  typing (E & x ~: U & F) e dir T -> forall dir2,
+  typing E u dir2 U ->
+  typing (E & F) (subst_ee x u e) dir T.
 Proof.
    introv TypT TypU. inductions TypT; introv; simpl.
   case_var.
     binds_get H0.
-      lets M: (@typing_weakening E F empty (trm_anno u U) inf U).
+      lets M: (@typing_weakening E F empty u inf U).
       do 2 rewrite concat_empty_r in M.
-      apply* M. apply typing_anno. apply TypU.
+      apply* M.
     binds_cases H0; apply* typing_var.
   apply_fresh* typing_abs as y.
     rewrite* subst_ee_open_ee_var.
-    apply_ih_bind* H0.
+    apply_ih_bind* H0. eapply typing_sub; eauto.
   apply typing_regular in TypU. destruct TypU. auto.
-  apply* typing_app.
+  apply* typing_app. eapply IHTypT2; eauto. eapply typing_sub; eauto.
   apply* typing_nat.
-  eapply typing_sub; eauto.
-  apply* typing_anno.
+  admit.
+  apply* typing_anno. admit.
   apply_fresh* typing_typeof as y.
     rewrite* subst_ee_open_ee_var.
     apply_ih_bind* H0.
@@ -822,7 +822,38 @@ Proof.
     rewrite* subst_ee_open_ee_var.
     apply_ih_bind* H2.
   apply typing_regular in TypU. destruct TypU. auto.
-Qed.
+Admitted.*)
+
+
+
+Lemma typing_through_subst_ee : forall U E F x T e u dir,
+  typing (E & x ~: U & F) e dir T ->
+  typing E u dir U ->
+  typing (E & F) (subst_ee x u e) dir T.
+Proof.
+   introv TypT TypU. inductions TypT; introv; simpl.
+  case_var.
+    binds_get H0.
+      lets M: (@typing_weakening E F empty u inf U).
+      do 2 rewrite concat_empty_r in M.
+      apply* M.
+    binds_cases H0; apply* typing_var.
+  apply_fresh* typing_abs as y.
+    rewrite* subst_ee_open_ee_var.
+    apply_ih_bind* H0. eapply typing_sub; eauto.
+  apply typing_regular in TypU. destruct TypU. auto.
+  apply* typing_app. eapply IHTypT2; eauto. eapply typing_sub; eauto.
+  apply* typing_nat.
+  admit.
+  apply* typing_anno. admit.
+  apply_fresh* typing_typeof as y.
+    rewrite* subst_ee_open_ee_var.
+    apply_ih_bind* H0.
+  apply typing_regular in TypU. destruct TypU. auto.
+    rewrite* subst_ee_open_ee_var.
+    apply_ih_bind* H2.
+  apply typing_regular in TypU. destruct TypU. auto.
+Admitted.
 
 
 (* ********************************************************************** *)
@@ -913,8 +944,15 @@ Proof.
      apply (@typing_through_subst_ee V).
      apply* (@typing_sub 2).*)
   - dependent destruction Red.
-   + eapply typing_sub; eauto.
-     eapply typing_app with (T1:=T1); eauto. admit.
+   + 
+     assert (H2 := Red).
+     eapply IHTyp1 in Red.
+     dependent destruction Red; eauto. 
+     dependent destruction Typ1. 
+     dependent destruction H3. dependent destruction H2.
+     eapply typing_sub; eauto.
+     eapply typing_app with (T1:=T1); eauto.
+     admit.
      
    + eapply typing_sub; eauto.
      eapply typing_app with (T1:=T1). auto. auto.
@@ -928,13 +966,15 @@ Proof.
        rewrite concat_empty_r.
        apply typing_chk_sub with (B:=T2) in H1. auto. auto.
        eapply typing_chk_sub; eauto.
-       apply value_regular. admit.
+       apply value_regular. auto.
 
   (* adding annotations in value should solve this *)
 
   - apply typing_chk_sub with (A:=S). auto. auto.
-  - apply IHTyp. subst. admit.
-  
+  - dependent destruction Red.
+    eapply typing_sub; eauto.
+    apply typing_anno; eauto. auto.
+    
   (* missing annotation rule in reduction *)
   
   - dependent destruction Red.
