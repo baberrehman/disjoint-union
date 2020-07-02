@@ -698,7 +698,7 @@ Lemma red_regular : forall t t',
   red t t' -> term t /\ term t'.
 Proof.
   induction 1; split; autos* value_regular.
-  inversions H. pick_fresh y. rewrite (@subst_ee_intro y); auto.
+  inversions H. pick_fresh y. rewrite (@subst_ee_intro y). auto.
   dependent destruction H.
   apply term_typeof with (L:=L); auto.
   destruct~ IHred.
