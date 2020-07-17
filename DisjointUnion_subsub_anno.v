@@ -456,31 +456,6 @@ Inductive red : trm -> trm -> Prop :=
       (*sub (checkType v) T2 ->*)
       red (trm_typof v T1 e1 T2 e2) (open_ee e2 v').
 
-(** Our goal is to prove preservation and progress *)
-
-(*Definition preservation_result dir : Prop := match dir with
-| chk => ...
-| inf => ...
-end.*)
-
-
-(*Definition preservation := forall E e e' dir T,
-  typing E e dir T -> 
-  red e e' -> 
-  (dir = chk /\ typing E e' chk T) \/
-  (dir = inf /\ exists T', typing E e' inf T' /\ sub T' T).*)
-
-  Definition preservation := forall E e e' dir T,
-  typing E e dir T -> 
-  red e e' -> 
-  typing E e' chk T.
-
-
-Definition progress := forall e dir T,
-  typing empty e dir T -> 
-     value e 
-  \/ exists e', red e e'.
-
 (** Computing free term variables in terms *)
 
 Fixpoint fv_ee (e : trm) {struct e} : vars :=
@@ -1045,15 +1020,41 @@ Qed.
 (* ********************************************************************** *)
 (** Preservation Result (20) *)
 
+(** Our goal is to prove preservation and progress *)
+
+(*Definition preservation_result dir : Prop := match dir with
+| chk => ...
+| inf => ...
+end.*)
+
+
+(*Definition preservation := forall E e e' dir T,
+  typing E e dir T -> 
+  red e e' -> 
+  (dir = chk /\ typing E e' chk T) \/
+  (dir = inf /\ exists T', typing E e' inf T' /\ sub T' T).*)
+
+  Definition preservation := forall E e e' dir T,
+  typing E e dir T -> 
+  red e e' -> 
+  typing E e' dir T.
+
+
+Definition progress := forall e dir T,
+  typing empty e dir T -> 
+     value e 
+  \/ exists e', red e e'.
+
+
 Lemma preservation_result : preservation.
 Proof.
   unfold preservation.
   introv Typ. gen e'. induction Typ; introv Red; 
    try solve [ inversion Red ].
   - inductions Red.
-   + eapply typing_sub; eauto.
-     eapply typing_app; eauto. admit. 
-   + eapply typing_sub; eauto.
+   + 
+     eapply typing_app; eauto. 
+   + 
      eapply typing_app with (T1:=T1). auto. auto.
    + destruct~ (typing_inv_abs Typ1 (U1:=T1) (U2:=T2)) as [P1 [L P2]].
        pick_fresh X. forwards~ K: (P2 X). destruct K.

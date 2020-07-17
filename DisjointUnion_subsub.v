@@ -17,6 +17,15 @@ Inductive typ : Set :=
 (*  | typ_and       : typ -> typ -> typ *)
 | typ_or    : typ -> typ -> typ.
 
+
+(** Ordinary Types **)
+
+Inductive atomic : typ -> Prop :=
+   | typ_int_at : atomic typ_int
+   | typ_arr_at : forall T1 T2, atomic (typ_arrow T1 T2).
+
+Hint Constructors atomic.
+
 (** Subtyping relation *)
 
 Inductive sub : typ -> typ -> Prop :=
@@ -32,6 +41,23 @@ Inductive sub : typ -> typ -> Prop :=
   | sub_or2   : forall t t1 t2, sub t t1 -> sub t (typ_or t1 t2)
   | sub_or3   : forall t t1 t2, sub t t2 -> sub t (typ_or t1 t2).
 
+
+(** Subset of subtyping **)
+
+Inductive subsub : typ -> typ -> Prop :=
+  | subsub_refl  : forall A, subsub A A
+  | subsub_arrow : forall A1 A2 B1 B2,
+                   sub B1 A1 ->
+                   subsub A2 B2 ->
+                   subsub (typ_arrow A1 A2) (typ_arrow B1 B2)
+  | subsub_or1   : forall A B C,
+                   subsub A B ->
+                   subsub A (typ_or B C)
+  | subsub_or2   : forall A B C,
+                   subsub A C ->
+                   subsub A (typ_or B C).
+
+Hint Constructors subsub.                   
 
 
 (* Intuition with disjoint intersection types:
@@ -249,6 +275,23 @@ Proof.
   apply sub_or3; auto.
 Defined.
 
+Lemma invOrsubsub : forall t t1 t2, subsub (typ_or t1 t2) t -> subsub t1 t /\ subsub t2 t.
+Proof.
+  intros.
+  dependent induction H; eauto. 
+  assert (subsub t1 B /\ subsub t2 B). auto.
+  destruct H0.
+  split.
+  apply subsub_or1; auto.
+  apply subsub_or1; auto.
+  assert (subsub t1 C /\ subsub t2 C). auto.
+  destruct H0.
+  split.
+  apply subsub_or2; auto.
+  apply subsub_or2; auto.
+Defined.
+
+
 Lemma sub_transitivity : forall B A C, sub A B -> sub B C -> sub A C.
 Proof.
   induction B; intros;
@@ -462,24 +505,6 @@ Inductive red : trm -> trm -> Prop :=
 | chk => ...
 | inf => ...
 end.*)
-
-
-(*Definition preservation := forall E e e' dir T,
-  typing E e dir T -> 
-  red e e' -> 
-  (dir = chk /\ typing E e' chk T) \/
-  (dir = inf /\ exists T', typing E e' inf T' /\ sub T' T).*)
-
-  Definition preservation := forall E e e' dir T,
-  typing E e dir T -> 
-  red e e' -> 
-  typing E e' chk T.
-
-
-Definition progress := forall e dir T,
-  typing empty e dir T -> 
-     value e 
-  \/ exists e', red e e'.
 
 (** Computing free term variables in terms *)
 
@@ -713,7 +738,9 @@ Proof.
   induction 1; autos*.
 Qed.
 
-(** The reduction relation is restricted to well-formed objects. *)
+(*************************************************)
+(**************** Helping Lemmas *****************)
+(*************************************************)
 
 Lemma typ_red_val : forall v v' A, 
                  value v -> typ_red v A v' -> value v'.
@@ -724,6 +751,294 @@ Proof.
   inverts H0; eauto.
 Qed.
 
+Lemma typing_chk_sub: forall E e A B,
+    typing E e chk A -> sub A B -> typing E e chk B.
+Proof.
+  intros.
+  inductions H.
+  apply (@typing_sub S). auto.
+  apply (@sub_transitivity T S B); auto.
+  apply typing_typeof with (L:=L); auto.
+Qed.
+
+Lemma typing_sub_inf : forall E v A, value v -> typing E v chk A -> exists B,
+                                           typing E v inf B /\ sub B A.
+Proof.
+  intros.
+  dependent induction H0; eauto.
+  dependent destruction H.
+Qed.
+
+Lemma typing_subsub_inf : forall E v, value v -> 
+                           forall A, typing E v chk A -> 
+                                  exists B, typing E v inf B /\ subsub B A.
+Proof.
+  intros E v H1 A H2.
+  lets H2': H2.
+  dependent induction H2; eauto.
+  exists T. split*.
+  admit.
+  dependent destruction H1.
+Admitted.
+
+Lemma check_or_typ : forall E e A B,  
+   value e ->
+   DisjSpec A B ->
+   typing E e chk (typ_or A B) ->
+   typing E e chk A \/ typing E e chk B.
+Proof.
+  intros.
+  inductions H1.
+  inversions H1; try solve [dependent destruction H].
+  dependent destruction H2.
+  left.
+  eapply typing_sub.
+  eapply typing_abs. intros. eauto. auto.
+  right.
+  eapply typing_sub.
+  eapply typing_abs. intros. eauto. auto.
+  dependent destruction H2.
+  left.
+  eapply typing_sub.
+  eapply typing_nat; eauto. auto.
+  right.
+  eapply typing_sub.
+  eapply typing_nat; eauto. auto.
+  dependent destruction H.
+Qed.
+
+
+Lemma typ_red_chk : forall E v v' A B,
+                    value v ->
+                    okt E ->
+                    typing E v chk B ->
+                    typ_red v A v' ->
+                    typing E v' chk A.
+Proof.
+intros.
+generalize B.
+inductions H2; intros.
+eapply typing_sub; eauto.
+apply typing_nat; auto.
+eapply typing_sub with (S:=(typ_arrow B1 A2)).
+inversion H1.
+inversion H5. subst.
+eapply typing_abs.
+intros.
+eapply typing_chk_sub; eauto.
+apply sub_arrow; auto.
+eapply typing_chk_sub; eauto.
+eapply typing_chk_sub; eauto.
+Qed.
+
+Lemma typ_red_sub : forall v v' A B, 
+                     value v ->
+                     value v' ->
+                     typ_red v A v' -> 
+                     sub A B -> 
+                     exists v'', typ_red v B v''.
+Proof.
+intros.
+induction* H2.
+- dependent destruction H1.
+- dependent destruction H1. 
+  exists (trm_abs B1 e T2).
+  apply tred_arrow; auto.
+  eapply sub_transitivity; eauto.
+  eapply sub_transitivity; eauto.
+- dependent destruction H1; auto.
+- destruct~ IHsub.
+  exists x.
+  apply* tred_or1.
+- destruct~ IHsub.
+  exists x.
+  apply* tred_or2.
+Qed.
+
+Lemma typ_red_val_dir : forall E v A dir,
+       value v ->
+       typing E v dir A ->
+       exists v', typ_red v A v'.
+Proof.
+intros.
+inductions H0; eauto.
+- dependent destruction H.
+- exists (trm_abs V e1 T1).
+  apply tred_arrow; auto.
+  inversion H. auto.
+- dependent destruction H.
+-  destruct IHtyping; auto.
+  eapply typ_red_sub in H2; eauto.
+  eapply typ_red_val; eauto.
+- dependent destruction H.
+- dependent destruction H.
+Qed.
+
+Lemma typ_red_chk_prev : forall E v v' A B,
+                    value v ->
+                    okt E ->
+                    typing E v chk B ->
+                    typ_red v A v' ->
+                    exists A', typing E v' inf A' /\ sub A' A.
+Proof.
+intros.
+inductions H2.
+exists typ_int. split*.
+apply* typing_nat.
+dependent destruction H1.
+exists (typ_arrow B1 A2).
+split*.
+dependent destruction H1.
+eapply typing_abs; eauto. intros.
+eapply typing_chk_sub; eauto.
+destruct~ IHtyp_red.
+exists x.
+split*.
+destruct~ IHtyp_red.
+exists x.
+split*.
+Qed.
+
+Lemma typ_red_chk_prev1 : forall E v v' A B,
+                    value v ->
+                    okt E ->
+                    typing E v chk B ->
+                    typ_red v A v' ->
+                    exists A', typing E v' inf A' /\ subsub A' A.
+Proof.
+intros.
+inductions H2.
+exists typ_int. split*.
+apply* typing_nat.
+dependent destruction H1.
+exists (typ_arrow B1 A2).
+split*.
+dependent destruction H1.
+eapply typing_abs; eauto. intros.
+eapply typing_chk_sub; eauto.
+destruct~ IHtyp_red.
+exists x.
+split*.
+destruct~ IHtyp_red.
+exists x.
+split*.
+Qed.
+
+
+Lemma val_red_ord : forall v E A, 
+                    value v ->
+                    typing E v inf A ->
+                    atomic A.
+Proof.
+intros.
+inductions H0.
+dependent destruction H.
+apply typ_arr_at.
+dependent destruction H.
+apply typ_int_at.
+dependent destruction H.
+Qed.
+
+Lemma arrow_subsub : forall S T1 T2,
+                  subsub S (typ_arrow T1 T2) ->
+                  exists S1 S2, S = (typ_arrow S1 S2) /\
+                   subsub S2 T2 /\ sub T1 S1.
+Proof.
+intros.
+inductions H.
+exists T1 T2. repeat split*.
+exists A1 A2; auto.
+Qed.
+
+Lemma arrow_sub : forall S T1 T2,
+                  sub S (typ_arrow T1 T2) -> (S = typ_bot) \/
+                  (exists S1 S2, S = (typ_arrow S1 S2) /\
+                   sub S2 T2 /\ sub T1 S1).
+Proof.
+intros.
+inductions H. left. auto.
+right. exists S1 S2. repeat split*.
+admit.
+Admitted.
+
+Lemma subsub_sub : forall A B, subsub A B -> sub A B.
+Proof.
+intros.
+induction* H.
+Qed.
+
+
+Lemma subsub_subsub_trans : forall B A, subsub A B -> forall C, subsub B C -> subsub A C.
+Proof.
+induction 1.
+intros.
+induction* H.
+intros.
+dependent induction C.
+inversion H1.
+inversion H1.
+dependent destruction H1.
+apply subsub_arrow; auto.
+apply subsub_arrow; auto.
+eapply sub_transitivity; eauto.
+dependent destruction H1.
+apply subsub_or1; apply IHC1; auto.
+apply subsub_or2; apply IHC2; auto.
+intros.
+apply IHsubsub.
+apply invOrsubsub in H0. destruct~ H0.
+intros.
+apply IHsubsub.
+apply invOrsubsub in H0. destruct~ H0.
+Defined.
+
+
+(* Following lemma is incorrect 
+
+Counter Example:
+
+A = Btm
+B = Btm
+C = Int
+
+Btm <<: Btm      Btm <: Int
+----------------------------
+      Btm <<: Int (not correct)
+
+We do not have Btm <<: A in <<: relation.
+
+*)
+
+Lemma subsub_sub_trans : forall B A, subsub A B -> forall C, sub B C -> subsub A C.
+Proof.
+intros B A H.
+induction H.
+intros.
+dependent induction H; eauto. admit. admit.
+intros.
+dependent induction C.
+inversion H1.
+inversion H1.
+dependent destruction H1.
+apply subsub_arrow; auto.
+eapply sub_transitivity; eauto.
+dependent destruction H1.
+apply subsub_or1. apply IHC1. auto.
+apply subsub_or2. apply IHC2. auto.
+intros.
+apply IHsubsub. apply invOrS1 in H0. destruct H0. auto.
+intros.
+apply IHsubsub. apply invOrS1 in H0. destruct H0. auto.
+Admitted.
+
+
+
+(*************************************************)
+(*********** Helping Lemmas End Here *************)
+(*************************************************)
+
+
+(** The reduction relation is restricted to well-formed objects. *)
 
 Lemma red_regular : forall t t',
   red t t' -> term t /\ term t'.
@@ -834,61 +1149,138 @@ Qed.
 (************************************************************************ *)
 (** Preservation by Term Substitution (8) *)
 
-Lemma typing_chk_sub: forall E e A B,
-    typing E e chk A -> sub A B -> typing E e chk B.
-Proof.
-  intros.
-  inductions H.
-  apply (@typing_sub S). auto.
-  apply (@sub_transitivity T S B); auto.
-  apply typing_typeof with (L:=L); auto.
-Qed.
 
-
-(*Lemma typing_through_subst_ee1 : forall U E F x T e u dir,
+Lemma typing_through_subst_ee_subsub : forall U E F x T e u dir,
   typing (E & x ~: U & F) e dir T ->
   typing E u chk U ->
   value u ->
-  (dir = inf /\ exists T', typing (E & F) (subst_ee x u e) inf T' /\ sub T' T)
-  \/
-  (dir = chk /\ typing (E & F) (subst_ee x u e) chk T).
+  exists T', typing (E & F) (subst_ee x u e) dir T' /\ subsub T' T.
 Proof.
-introv TypT TypU. inductions TypT; introv; simpl.
+introv TypT TypU valu. 
+lets TypT': TypT. 
+inductions TypT; introv; simpl.
+- case_var.
+ + binds_get H0.
+   eapply typing_subsub_inf in valu; eauto.
+   lets M: (@typing_weakening E F empty u chk U).
+   do 2 rewrite concat_empty_r in M.
+   apply* M.
+ + exists T. split*.
+   binds_cases H0; apply* typing_var.
+- exists (typ_arrow V T1). split*.
+  apply_fresh* typing_abs as y.
+  rewrite* subst_ee_open_ee_var.
+  admit.
+  apply typing_regular in TypU. destruct~ TypU.
+- forwards * : IHTypT1.
+  destruct H.
+  destruct H.
+  apply arrow_subsub in H0.
+  destruct H0 as [S1[S2]].
+  destruct H0. destruct H1.
+  exists S2. split*.
+  eapply typing_app with (T1:=S1); eauto.
+  rewrite H0 in H. auto.
+  rewrite H0 in H.
+  forwards * : IHTypT2.
+  destruct H3.
+  destruct H3.
+  apply subsub_sub in H4.
+  eapply typing_chk_sub; eauto.
+  eapply sub_transitivity; eauto.
+- exists typ_int. split*.
+  apply* typing_nat.
+- forwards * : IHTypT.
+  destruct H0. destruct H0.
+  exists T. split*.
+  eapply typing_sub; eauto.
+  apply subsub_sub in H1.
+  eapply sub_transitivity; eauto.
+- forwards * : IHTypT.
+  destruct H. destruct H.
+  exists T. split*.
+  eapply typing_anno.
+  apply subsub_sub in H0.
+  eapply typing_chk_sub; eauto.
+- exists T3. split*.
+  apply_fresh* typing_typeof as y.
+ + forwards * : IHTypT.
+  destruct H4. destruct H4.
+  apply subsub_sub in H5.
+  eapply typing_chk_sub; eauto.
+ + specialize (@H0 y).
+  forwards * : H0. admit. admit.
+   destruct H4.
+   destruct H4.
+  rewrite* subst_ee_open_ee_var.
+  eapply typing_chk_sub; eauto.
+  admit.
+Admitted.
 
-case_var.
-binds_get H0.
-  lets M: (@typing_weakening E F empty u inf U).
-  do 2 rewrite concat_empty_r in M.
-  left. split*.
-left.
+Lemma typing_through_subst_ee_sub : forall U E F x T e u dir,
+  typing (E & x ~: U & F) e dir T ->
+  typing E u chk U ->
+  value u ->
+  exists T', typing (E & F) (subst_ee x u e) dir T' /\ sub T' T.
+Proof.
+introv TypT TypU valu; inductions TypT; introv; simpl.
+- case_var.
+ + binds_get H0.
+   lets M: (@typing_weakening E F empty u chk U).
+   eapply typing_sub_inf in valu; eauto.
+   do 2 rewrite concat_empty_r in M.
+   apply* M.
+  + exists T. split*.
+    binds_cases H0; apply* typing_var.
+- exists (typ_arrow V T1). split*.
+  apply_fresh* typing_abs as y.
+  rewrite* subst_ee_open_ee_var.
+  specialize (@H y). admit.
+  apply typing_regular in TypU. destruct TypU. auto.
+- forwards * : IHTypT1.
+  destruct H. destruct H.
+apply arrow_sub in H0.
+destruct H0. admit.
+destruct H0 as [S1[S2]].
+exists S2. destruct H0. destruct H1.
 split*.
-exists T. split*.
-binds_cases H0; apply* typing_var.
-left. split*.
-exists (typ_arrow V T1). split*.
-apply_fresh* typing_abs as y.
-rewrite* subst_ee_open_ee_var.
+eapply typing_app with (T1:=S1); eauto.
+rewrite H0 in H. auto.
+rewrite H0 in H.
 admit.
-apply typing_regular in TypU. destruct TypU. auto.
-left.
-split*.
-exists T2.
-split*.
-eapply typing_app; eauto.
-admit. admit. admit.
-right.
-split*.
-forwards * : IHTypT.
-destruct H0.
-destruct H0.
-destruct H1.
-destruct H1.
-apply sub_transitivity with (A:=x0) (B:=S) (C:=T) in H2; eauto.
-eapply typing_sub; eauto.
-destruct H0.
-inversion H0.
-Admitted.*)
-
+- exists typ_int. split*.
+  apply* typing_nat.
+- forwards * : IHTypT.
+  destruct H0.
+  destruct H0.
+  apply sub_transitivity with (A:=x0) (B:=S) (C:=T) in H1; eauto.
+  exists x0. split*.
+  eapply typing_sub; eauto.
+- forwards * : IHTypT.
+  destruct H. destruct H.
+  exists T. split*.
+  apply typing_anno.
+  eapply typing_chk_sub; eauto.
+- exists T3. split*.
+  apply_fresh* typing_typeof as y.
+ + forwards * : IHTypT.
+   destruct H4. destruct H4.
+   eapply typing_chk_sub; eauto.
+ + specialize (@H0 y).
+   forwards* : H0. admit.
+   destruct H4. destruct H4.
+   rewrite* subst_ee_open_ee_var.
+   eapply typing_chk_sub; eauto.
+   admit.
+   apply typing_regular in TypU. destruct TypU. auto.
+   + specialize (@H2 y).
+   forwards* : H2. admit.
+   destruct H4. destruct H4.
+   rewrite* subst_ee_open_ee_var.
+   eapply typing_chk_sub; eauto.
+   admit.
+   apply typing_regular in TypU. destruct TypU. auto.
+Admitted.
 
 Lemma typing_through_subst_ee : forall U E F x T e u dir,
   typing (E & x ~: U & F) e dir T ->
@@ -940,141 +1332,168 @@ Proof.
   eapply sub_transitivity. apply H. auto.
 Qed.
 
-Lemma inv_typing_sub : forall E e A, value e -> typing E e chk A -> exists B,
-                                           typing E e inf B /\ sub B A.
-Proof.
-  intros.
-  dependent induction H0; eauto.
-  dependent destruction H.
-Qed.
-
-(*Lemma inv_or_disj : forall S A B, sub S (typ_or A B) -> DisjSpec A B ->
-                     sub S A \/ sub S B.
-Proof.
-intros.
-inductions H; auto.
-specialize (IHsub1 A B).
-specialize (IHsub2 A B).
-destruct IHsub1. auto. auto.
-destruct IHsub2. auto. auto.
-left.
-apply sub_or1; auto.
-left.
-apply sub_or1; auto.
-admit.
-destruct IHsub2. auto. auto.
-admit.
-right.
-apply sub_or1; auto.
-Admitted.*)
-
-(*Lemma check_or_sub_disj : forall E e S A B, value e -> DisjSpec A B ->
-           typing E e chk S -> sub S (typ_or A B) ->
-           typing E e chk A \/ typing E e chk B.
-Proof.
-intros.
-inductions H1.
-eapply typing_sub in H1; eauto.*)
-
-Lemma check_or_typ : forall E e A B,  
-   value e ->
-   DisjSpec A B ->
-   typing E e chk (typ_or A B) ->
-   typing E e chk A \/ typing E e chk B.
-Proof.
-  intros.
-  inductions H1.
-  inversions H1; try solve [dependent destruction H].
-  dependent destruction H2.
-  left.
-  eapply typing_sub.
-  eapply typing_abs. intros. eauto. auto.
-  right.
-  eapply typing_sub.
-  eapply typing_abs. intros. eauto. auto.
-  dependent destruction H2.
-  left.
-  eapply typing_sub.
-  eapply typing_nat; eauto. auto.
-  right.
-  eapply typing_sub.
-  eapply typing_nat; eauto. auto.
-  dependent destruction H.
-Qed.
-
-
-(*Lemma value_red_eq : forall v A v', value v -> typ_red v A v' -> v = v'.
-Proof.
-intros.
-inductions H0; eauto.
-inverts* H0.
-Admitted.
-
-Lemma typ_red_red : forall v v' A, value v -> typ_red v A v' -> red v v'.
-Proof.
-intros.
-inductions H0; eauto.
-eapply value_red_eq in H; eauto.
-Admitted.*)
-
-
-Lemma typ_red_chk : forall E v v' A B,
-                    value v ->
-                    okt E ->
-                    typing E v chk B ->
-                    typ_red v A v' ->
-                    typing E v' chk A.
-Proof.
-intros.
-generalize B.
-inductions H2; intros.
-eapply typing_sub; eauto.
-apply typing_nat; auto.
-eapply typing_sub with (S:=(typ_arrow B1 A2)).
-inversion H1.
-inversion H5. subst.
-eapply typing_abs.
-intros.
-eapply typing_chk_sub; eauto.
-apply sub_arrow; auto.
-eapply typing_chk_sub; eauto.
-eapply typing_chk_sub; eauto.
-Qed.
-
 
 (* ********************************************************************** *)
 (** Preservation Result (20) *)
+                    
+(*Definition preservation := forall E e e' dir T,
+  typing E e dir T -> 
+  red e e' -> 
+  (dir = chk /\ typing E e' chk T) \/
+  (dir = inf /\ exists T', typing E e' inf T' /\ sub T' T).*)
+
+  (*Definition preservation := forall E e e' dir T,
+  typing E e dir T -> 
+  red e e' -> 
+  typing E e' chk T.*)
+
+Definition preservation := forall E e e' dir T,
+  typing E e dir T -> 
+  red e e' -> 
+  exists T', typing E e' dir T' /\ subsub T' T.
+
 
 Lemma preservation_result : preservation.
 Proof.
   unfold preservation.
-  introv Typ. gen e'. induction Typ; introv Red; 
-   try solve [ inversion Red ].
-  - inductions Red.
-   + eapply typing_sub; eauto.
-     eapply typing_app; eauto. admit. 
-   + eapply typing_sub; eauto.
-     eapply typing_app with (T1:=T1). auto. auto.
+  introv Typ. gen e'.
+  lets Typ': Typ.
+  induction Typ; introv Red; try solve [ inversion Red ].
+  - dependent destruction Red.
+   + forwards * : IHTyp1.
+    destruct H0 as [S].
+    destruct H0.
+    apply arrow_subsub in H1.
+    destruct H1 as [S1[S2 H4]].
+    destruct H4.
+    destruct H2.
+    exists S2. split*.
+    eapply typing_app with (T1 := S1).
+    rewrite <- H1. auto.
+    apply typing_chk_sub with (A:=T1); auto.
+(*   + right. split*.
+     forwards * : IHTyp1.
+     destruct H0.
+     destruct H0.
+     inversion H0.
+     destruct H0.
+     destruct H1.
+     destruct H1.
+     lets H12: H2.
+     dependent destruction Typ1.
+     dependent destruction Red.
+     dependent destruction Red.
+     admit.
+     dependent destruction Red.
+     dependent destruction H1.
+     exists T2. split*.
+     eapply typing_app; eauto.
+     apply* typing_anno.
+     eapply typ_red_val in H0; eauto.
+     lets H31 : H3.
+     apply val_red_ord in H3.
+     dependent destruction H3.
+     dependent destruction H4.
+     exists T3.
+     dependent destruction H4. split*.
+     eapply typing_app; eauto.
+     eapply typing_chk_sub; eauto. auto. *)
+   + exists T2. split*.
+     eapply typing_app; eauto.
+     forwards * : IHTyp2.
+     destruct H0 as [S1].
+     destruct H0.
+     eapply typing_chk_sub; eauto.
+     apply* subsub_sub.
+ (* + right. split*.
+     exists T2. split*.
+     eapply typing_app; eauto.
+     forwards * : IHTyp2.
+     destruct H0. destruct~ H0.
+     destruct H0. inversion H0.*)
    + destruct~ (typing_inv_abs Typ1 (U1:=T1) (U2:=T2)) as [P1 [L P2]].
+    pick_fresh X. forwards~ K: (P2 X). destruct K.
+    rewrite* (@subst_ee_intro X).
+    assert (E = E&empty).
+    rewrite concat_empty_r. reflexivity.
+    rewrite H4.
+    apply (@typing_through_subst_ee_subsub A).
+    rewrite concat_empty_r.
+
+    apply typing_chk_sub with (B:=T2) in H2. admit. auto.
+    eapply typ_red_chk with (v:=e2); eauto.
+    apply typing_regular in Typ1. destruct Typ1. auto.
+    eapply typ_red_val; eauto.
+    apply value_regular.
+    apply typ_red_val with (v:=e2) (A:=A). auto. auto.
+    
+(*   + destruct~ (typing_inv_abs Typ1 (U1:=T1) (U2:=T2)) as [P1 [L P2]].
        pick_fresh X. forwards~ K: (P2 X). destruct K.
        rewrite* (@subst_ee_intro X).
        assert (E = E&empty).
        rewrite concat_empty_r. reflexivity.
        rewrite H4.
+       right. split*.
+       exists T2. split*.
        apply typing_through_subst_ee with (U:=A).
        rewrite concat_empty_r.
        apply typing_chk_sub with (B:=T2) in H2. auto. auto.
        eapply typ_red_chk with (v:=e2); eauto.
        apply typing_regular in Typ1. destruct Typ1. auto. auto.
        apply value_regular.
-       apply typ_red_val with (v:=e2) (A:=A). auto. auto.
-  - apply typing_chk_sub with (A:=S). auto. auto.
-  - dependent destruction Red.
+       apply typ_red_val with (v:=e2) (A:=A). auto. auto. *)
+  - forwards * : IHTyp.
+    destruct H0.
+    destruct H0.
+    exists T. split*.
+    apply subsub_sub in H1.
     eapply typing_sub; eauto.
-    apply typing_anno. apply IHTyp. auto.
-    eapply typ_red_chk with (v:=e1); eauto.
-    apply typing_regular in Typ. destruct Typ. auto.
+    eapply sub_transitivity; eauto.
   - dependent destruction Red.
+   + forwards * : IHTyp.
+    destruct H as [S].
+    destruct H.
+    exists T. split*.
+    apply typing_anno.
+    apply subsub_sub in H0.
+    eapply typing_chk_sub; eauto.
+   + eapply typ_red_chk_prev1 with (B:=T) (E:=E) in H; eauto.
+     apply typing_regular in Typ.
+     destruct~ Typ. 
+  - dependent destruction Red.
+   + forwards * : IHTyp.
+    destruct H5 as [S].
+    destruct H5.   
+    exists T3. split*.
+    apply typing_typeof with (L:=L); eauto.
+    eapply subsub_sub in H6.
+    eapply typing_chk_sub; eauto.
+   + pick_fresh X.
+     rewrite* (@subst_ee_intro X).
+     assert (E = E&empty).
+     rewrite concat_empty_r. reflexivity.
+     rewrite H7.
+     apply (@typing_through_subst_ee_subsub T1).
+     rewrite concat_empty_r. auto.
+     eapply typ_red_chk with (v:=e); eauto.
+     apply typing_regular in Typ. destruct Typ. auto.
+     eapply typ_red_val; eauto.
+     apply value_regular.
+     apply typ_red_val with (v:=e) (A:=T1). auto. auto.
+     + pick_fresh X.
+     rewrite* (@subst_ee_intro X).
+     assert (E = E&empty).
+     rewrite concat_empty_r. reflexivity.
+     rewrite H7.
+     apply (@typing_through_subst_ee_subsub T2).
+     rewrite concat_empty_r. auto.
+     eapply typ_red_chk with (v:=e); eauto.
+     apply typing_regular in Typ. destruct Typ. auto.
+     eapply typ_red_val; eauto.
+     apply value_regular.
+     apply typ_red_val with (v:=e) (A:=T2). auto. auto.
+ 
+(*    - dependent destruction Red.
    + apply typing_typeof with (L:=L); eauto.
    + pick_fresh X.
      rewrite* (@subst_ee_intro X).
@@ -1097,7 +1516,7 @@ Proof.
      eapply typ_red_chk with (v:=e); eauto.
      apply typing_regular in Typ. destruct Typ. auto.
      apply value_regular.
-     apply typ_red_val with (v:=e) (A:=T2). auto. auto.
+     apply typ_red_val with (v:=e) (A:=T2). auto. auto.*)
 Admitted.
 
 (* ********************************************************************** *)
@@ -1127,66 +1546,11 @@ Qed.
 (** Progress Result (16) *)
 
 
-Lemma typ_red_sub : forall v v' A B, 
-                     value v ->
-                     value v' ->
-                     typ_red v A v' -> 
-                     sub A B -> 
-                     exists v'', typ_red v B v''.
-Proof.
-intros.
-induction* H2.
-- dependent destruction H1.
-- dependent destruction H1. 
-  exists (trm_abs B1 e T2).
-  apply tred_arrow; auto.
-  eapply sub_transitivity; eauto.
-  eapply sub_transitivity; eauto.
-- dependent destruction H1; auto.
-- destruct~ IHsub.
-  exists x.
-  apply* tred_or1.
-- destruct~ IHsub.
-  exists x.
-  apply* tred_or2.
-Qed.
+Definition progress := forall e dir T,
+  typing empty e dir T -> 
+     value e 
+  \/ exists e', red e e'.
 
-
-Lemma typ_red_val_dir : forall E v A dir,
-       value v ->
-       typing E v dir A ->
-       exists v', typ_red v A v'.
-Proof.
-intros.
-inductions H0; eauto.
-- dependent destruction H.
-- exists (trm_abs V e1 T1).
-  apply tred_arrow; auto.
-  inversion H. auto.
-- dependent destruction H.
--  destruct IHtyping; auto.
-  eapply typ_red_sub in H2; eauto.
-  eapply typ_red_val; eauto.
-- dependent destruction H.
-- dependent destruction H.
-Qed.
-
-
-(*Lemma typ_red_val_chk : forall E v A dir,
-       value v ->
-       typing E v dir A ->
-       typ_red v A v.
-Proof.
-intros.
-inductions H0; eauto.
-- dependent destruction H.
-- apply tred_arrow; eauto.
-  apply value_regular. auto.
-- dependent destruction H.
-- admit.
-- dependent destruction H.
-- dependent destruction H.
-Admitted.*)
 
 Lemma progress_result : progress.
 Proof.
