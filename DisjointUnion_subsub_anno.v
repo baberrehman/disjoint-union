@@ -1567,17 +1567,31 @@ Proof.
      destruct H0.
      eapply typing_chk_sub; eauto.
      apply* subsub_sub.
-   + destruct~ (typing_inv_abs Typ1 (U1:=T1) (U2:=T2)) as [P1 [L P2]].
+   + inverts Typ1.
+     exists T2. split*.
+     constructor.
+     forwards~ Val : typ_red_val H1.
+     lets Typ2': Typ2.
+     apply typing_regular in Typ2'. destruct Typ2'.
+     forwards * : typ_red_chk_prev1 Typ2 H1.
+     destruct H5 as [A]. destruct H5.
+     pick_fresh y.
+     forwards~ Typ_chk: H4 y.
+     assert (E & y ~: T1 = E & y ~: T1 &empty).
+     rewrite concat_empty_r. reflexivity.
+     rewrite H7 in Typ_chk.
+     forwards*  : typing_through_subst_ee_inf.
+     destruct H8. destruct H8.
+     rewrite* (@subst_ee_intro y).
+     apply subsub_sub in H9.
+     assert (E = E&empty).
+     rewrite concat_empty_r. reflexivity.
+     rewrite H10.
+     eapply typing_chk_sub; eauto.
+     apply value_regular in Val. auto.
+    (*destruct~ (typing_inv_abs Typ1 (U1:=T1) (U2:=T2)) as [P1 [L P2]].
     pick_fresh X. forwards~ K: (P2 X). destruct K.
     rewrite* (@subst_ee_intro X).
-    
-    assert (E = E&empty).
-    rewrite concat_empty_r. reflexivity.
-    rewrite H4.
-
-
-    eapply typing_through_subst_ee_inf_anno with (U:=A); eauto.
-
     exists B. split*.
     eapply typing_anno.
     assert (E = E&empty).
@@ -1588,7 +1602,7 @@ Proof.
     eapply typ_red_chk with (v:=e2); eauto.
     apply typing_regular in Typ1. destruct Typ1. auto.
     apply value_regular.
-    apply typ_red_val with (v:=e2) (A:=A). auto. auto.
+    apply typ_red_val with (v:=e2) (A:=A). auto. auto.*)
   - forwards * : IHTyp.
     destruct H0.
     destruct H0.
