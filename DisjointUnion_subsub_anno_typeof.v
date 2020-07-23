@@ -499,12 +499,6 @@ Inductive red : trm -> trm -> Prop :=
       (*sub (checkType v) T2 ->*)
       red (trm_typof v T1 e1 T2 e2) (open_ee e2 v').
 
-(** Our goal is to prove preservation and progress *)
-
-(*Definition preservation_result dir : Prop := match dir with
-| chk => ...
-| inf => ...
-end.*)
 
 (** Computing free term variables in terms *)
 
@@ -968,6 +962,15 @@ apply IHsubsub.
 apply invOrsubsub in H0. destruct~ H0.
 Defined.
 
+Lemma anno_inv : forall E e A B dir, typing E (trm_anno e A) dir B ->
+                                   typing E e chk A.
+Proof.
+intros E e A B dir H1.
+dependent destruction H1.
+dependent destruction H1.
+auto. auto.
+Qed.
+
 
 (* Following lemma is incorrect 
 
@@ -1126,15 +1129,6 @@ Qed.
 (************************************************************************ *)
 (** Preservation by Term Substitution (8) *)
 
-Lemma anno_inv : forall E e A B dir, typing E (trm_anno e A) dir B ->
-                                   typing E e chk A.
-Proof.
-intros E e A B dir H1.
-dependent destruction H1.
-dependent destruction H1.
-auto. auto.
-Qed.
-
 Lemma typing_through_subst_ee_inf : forall E F x T e u dir U U',
    typing (E & x ~: U & F) e dir T ->
    typing E u inf U' ->
@@ -1162,7 +1156,6 @@ inductions TypT; introv; simpl.
   assert (y \notin L) by eauto.
    lets : (H0 y H3 E).
    lets : (@H4 (F & y ~: V) x U).
-   Search LibEnv.env.
    forwards * : H5.
    rewrite concat_assoc. reflexivity.
    rewrite concat_assoc. auto.
@@ -1242,7 +1235,6 @@ Definition preservation := forall E e e' dir T,
   typing E e dir T -> 
   red e e' -> 
   exists T', typing E e' dir T' /\ subsub T' T.
-
 
 Lemma preservation_result : preservation.
 Proof.
@@ -1336,7 +1328,7 @@ Proof.
      rewrite concat_empty_r. reflexivity.
      rewrite H14. auto.
      apply value_regular in Val. auto.
-     + forwards~ Val : typ_red_val H6.
+   + forwards~ Val : typ_red_val H6.
      lets Typ2': Typ.
      apply typing_regular in Typ2'. destruct Typ2'.
      forwards * : typ_red_chk_prev1 Typ H6.
@@ -1388,7 +1380,6 @@ Definition progress := forall e dir T,
   typing empty e dir T -> 
      value e 
   \/ exists e', red e e'.
-
 
 Lemma progress_result : progress.
 Proof.
