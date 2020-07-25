@@ -971,6 +971,12 @@ dependent destruction H1.
 auto. auto.
 Qed.
 
+Lemma typing_inf_chk : forall E e A, typing E e inf A ->
+                                     typing E e chk A.
+Proof.
+  intros.
+  eapply typing_sub; eauto.
+Qed.
 
 (* Following lemma is incorrect 
 
@@ -1017,6 +1023,42 @@ Admitted.*)
 (*********** Helping Lemmas End Here *************)
 (*************************************************)
 
+Lemma determinism : forall E e e1 e2 A, typing E e chk A -> 
+                         red e e1 -> red e e2 -> e1 = e2.
+Proof.
+introv Typ Red1.
+gen A e2.
+lets Red1': Red1.
+induction Red1; introv Typ Red2.
+ - inverts* Red2.
+  + inverts* Typ. inverts H0.
+    forwards* : IHRed1 (typ_arrow T1 S).
+    eapply typing_sub; eauto.
+    rewrite H0. reflexivity.
+  + inverts* Typ. inverts* H0.
+    admit.
+  + inverts* Typ. inverts* H0.
+    forwards* : IHRed1 (typ_arrow T1 S).
+    eapply typing_sub; eauto.
+    admit.
+ - inverts* Red2.
+  + inverts* Typ. inverts* H0.
+    forwards* : IHRed1 T1. admit.
+  + inverts* Typ. inverts* H0.
+    forwards* : IHRed1 T1.
+    rewrite H0. reflexivity.
+  + admit.
+ - inverts* Red2. 
+  + inverts* H6.
+  + admit.
+  + inverts* Typ. inverts* H2.
+    admit.
+ - admit.
+ - admit.
+ - admit.
+ - admit.
+ - admit.
+Admitted.         
 
 (** The reduction relation is restricted to well-formed objects. *)
 
@@ -1074,8 +1116,6 @@ Qed.
  
 (* ********************************************************************** *)
 (** Narrowing and transitivity (3) *)
-
-Section NarrowTrans.
 
 (*Definition transitivity_on Q := forall S T,
   sub S Q -> sub Q T -> sub S T.
