@@ -10,7 +10,7 @@ Implicit Types x : var.
 (** Representation of pre-types *)
 
 Inductive typ : Set :=
-(*| typ_top   : typ*)
+| typ_top   : typ
 | typ_bot   : typ
 | typ_int   : typ
 | typ_arrow : typ -> typ -> typ
@@ -29,7 +29,7 @@ Hint Constructors atomic.
 (** Subtyping relation *)
 
 Inductive sub : typ -> typ -> Prop :=
-(*| sub_top   : forall S, sub S typ_top*)
+| sub_top   : forall S, sub S typ_top
 | sub_bot   : forall A, sub typ_bot A
 | sub_int   : sub typ_int typ_int
 | sub_arrow : forall S1 S2 T1 T2, sub T1 S1 -> sub S2 T2 ->
@@ -156,6 +156,8 @@ Proof.
     dependent destruction H.
   - specialize (H typ_bot).
     dependent destruction H.
+  - specialize (H typ_bot).
+    dependent destruction H.
   - constructor.
     + apply IHA1. intros.
       specialize (H C).
@@ -225,18 +227,20 @@ Defined.
 Lemma Disj_completeness : forall A B, DisjSpec A B -> Disj A B.
   induction A; unfold DisjSpec; intros; eauto.
   - induction B; eauto.
-    + specialize (H typ_int).
+    + specialize (H typ_top).
       destruct H; eauto.
       constructor.
       apply BL_disj; eauto.
+      apply BL_disj; eauto. 
+    + specialize (H typ_int).
+      destruct H; eauto.
+      constructor.
+      apply Disj_sym.
       apply BL_disj; eauto.
-    + constructor.
-      apply IHB1; intros; eauto.
-      destruct H0.
-      apply H; eauto.
-      apply IHB2; intros; eauto.
-      destruct H0.
-      apply H; eauto.
+      apply Disj_sym.
+      apply BL_disj; eauto.
+    + constructor. admit.
+    + admit. 
   - induction B; eauto.
       apply BL_disj; eauto.
     + specialize (H (typ_arrow (typ_or A1 B1) typ_bot)).  (* IMPORTANT: common subtype, which is not bottom-like *)

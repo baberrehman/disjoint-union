@@ -789,6 +789,21 @@ Proof.
   dependent destruction H.
 Qed.
 
+Lemma typ_red_disj : forall E v A B, value v -> DisjSpec A B -> typing E v chk (typ_or A B) ->
+       typing E v chk A -> typing E v chk B -> False.
+intros.
+lets H2': H2.
+lets H3': H3. 
+inductions H1.
+inverts* H1. 
+inversion H.
+admit. 
+inversion H. 
+admit. 
+inversion H.
+inversion H.
+Admitted.
+
 
 Lemma typ_red_chk : forall E v v' A B,
                     value v ->
@@ -812,6 +827,28 @@ apply sub_arrow; auto.
 eapply typing_chk_sub; eauto.
 eapply typing_chk_sub; eauto.
 Qed.
+
+Lemma typ_red_chk1 : forall E v v' A B,
+                    value v ->
+                    okt E ->
+                    typing E v chk B ->
+                    typ_red v A v' ->
+                    typing E v chk A.
+Proof.
+intros.
+generalize B.
+inductions H2; intros.
+eapply typing_sub; eauto.
+apply typing_nat; auto.
+eapply typing_sub with (S:=(typ_arrow B1 B2)).
+inversion H1. inversion H5. subst. auto.
+apply sub_arrow; auto.
+forwards * : IHtyp_red.
+eapply typing_chk_sub; eauto.
+forwards * : IHtyp_red.
+eapply typing_chk_sub; eauto.
+Qed.
+
 
 Lemma typ_red_sub : forall v v' A B, 
                      value v ->
@@ -1023,6 +1060,52 @@ Admitted.*)
 (*********** Helping Lemmas End Here *************)
 (*************************************************)
 
+
+Lemma typ_red_determinism : forall v v1 v2 A,
+                            value v ->
+                            typ_red v A v1 -> 
+                            typ_red v A v2 -> 
+                            v1 = v2.
+Proof.
+intros.
+Admitted.
+
+Lemma typ_red_atomic : forall v v1 v2 A B, value v ->
+ (exists T, typing nil v inf T) -> typ_red v A v1 -> sub A B -> 
+ typ_red v B v2 -> typ_red v A v2.
+Proof.
+intros.
+destruct H0.
+lets H0': H0.
+lets H1': H1.
+apply val_red_ord in H0; auto.
+inductions x.
+inversion H0.
+inductions H1.
+admit.
+admit.
+admit.
+admit.
+admit.
+Admitted.
+
+Lemma typ_red_determinism1 : forall E v v1 v2 A,
+                            value v ->
+                            (exists B, typing E v inf B) ->
+                            typ_red v A v1 -> 
+                            typ_red v A v2 -> 
+                            v1 = v2.
+Proof.
+intros E v v1 v2 A val H R1 R2.
+gen v2.
+lets R1': R1.
+inductions R1; introv R2.
+ - inverts* R2.
+ - inverts* R2.
+ -     
+Admitted.
+
+
 Lemma determinism : forall E e e1 e2 A, typing E e chk A -> 
                          red e e1 -> red e e2 -> e1 = e2.
 Proof.
@@ -1035,29 +1118,60 @@ induction Red1; introv Typ Red2.
     forwards* : IHRed1 (typ_arrow T1 S).
     eapply typing_sub; eauto.
     rewrite H0. reflexivity.
-  + inverts* Typ. inverts* H0.
-    admit.
-  + inverts* Typ. inverts* H0.
-    forwards* : IHRed1 (typ_arrow T1 S).
-    eapply typing_sub; eauto.
-    admit.
+  + inversion H2; subst; inversion Red1.
+  + inversion H3; subst; inversion Red1. 
  - inverts* Red2.
-  + inverts* Typ. inverts* H0.
-    forwards* : IHRed1 T1. admit.
+  + inversion H; subst; inversion H4.
   + inverts* Typ. inverts* H0.
     forwards* : IHRed1 T1.
     rewrite H0. reflexivity.
-  + admit.
- - inverts* Red2. 
-  + inverts* H6.
-  + admit.
-  + inverts* Typ. inverts* H2.
+  + inversion H3; subst; inversion Red1.
+ - inductions Red2. 
+  + inversion Red2.
+  + inversion H0; subst; inversion Red2.
+  + forwards * : typ_red_determinism H4 H1. (*need type reduction determinism here*)
+    rewrite H5. auto. 
+ - inverts* Red2.
+  + apply anno_inv in Typ.
+    forwards * : IHRed1.
+    rewrite H. auto.
+  + inversion H1; subst; inversion Red1. 
+ - inverts* Red2.
+  + inversion H; subst; inversion H4.
+  + (*need type reduction determinism here*)
+    forwards * : typ_red_determinism H0 H5.
+ - inverts* Red2.
+  + inverts* Typ. inverts* H0.
+    forwards * : IHRed1.
+    rewrite H0. auto.
+  + inversion H7; subst; inversion Red1.
+  + inversion H7; subst; inversion Red1. 
+ - inverts* Red2.
+  + inversion H0; subst; inversion H9.
+  + (*need type reduction determinism here*)
+    forwards * : typ_red_determinism H1 H10.
+    rewrite H2. auto.
+  + dependent destruction Typ.
+    dependent destruction Typ.
+    lets Typ': Typ.
+    apply typing_regular in Typ'.
+    destruct Typ'.
+    lets* chk1 : typ_red_chk1 Typ H1.
+    lets* chk2 : typ_red_chk1 Typ H10.
     admit.
- - admit.
- - admit.
- - admit.
- - admit.
- - admit.
+ - inverts* Red2.
+  + inversion H0; subst; inversion H9.
+  + dependent destruction Typ.
+    dependent destruction Typ.
+    lets Typ': Typ.
+    apply typing_regular in Typ'.
+    destruct Typ'.
+    lets* chk1 : typ_red_chk1 Typ H10.
+    lets* chk2 : typ_red_chk1 Typ H1.
+    admit.
+  + (*need type reduction determinism here*)
+    forwards * : typ_red_determinism H1 H10.
+    rewrite H2. auto.
 Admitted.         
 
 (** The reduction relation is restricted to well-formed objects. *)
