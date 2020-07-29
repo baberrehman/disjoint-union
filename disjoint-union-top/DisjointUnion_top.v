@@ -22,7 +22,8 @@ Inductive typ : Set :=
 
 Inductive atomic : typ -> Prop :=
    | typ_int_at : atomic typ_int
-   | typ_arr_at : forall T1 T2, atomic (typ_arrow T1 T2).
+   | typ_arr_at : forall T1 T2, atomic (typ_arrow T1 T2)
+   | typ_top_at : atomic typ_top.
 
 Hint Constructors atomic.
 
@@ -226,22 +227,36 @@ Defined.
    
 Lemma Disj_completeness : forall A B, DisjSpec A B -> Disj A B.
   induction A; unfold DisjSpec; intros; eauto.
+  - specialize (H B).
+    destruct H. split; eauto.
+    constructor.
+    constructor.
+    apply Disj_or2.
+    apply Disj_sym. apply BL_disj; eauto.
+    apply Disj_sym. apply BL_disj; eauto.
   - induction B; eauto.
-    + specialize (H typ_top).
-      destruct H; eauto.
-      constructor.
-      apply BL_disj; eauto.
-      apply BL_disj; eauto. 
     + specialize (H typ_int).
       destruct H; eauto.
       constructor.
-      apply Disj_sym.
       apply BL_disj; eauto.
-      apply Disj_sym.
       apply BL_disj; eauto.
-    + constructor. admit.
-    + admit. 
+    + specialize (H typ_int).
+      destruct H; eauto.
+      constructor.
+      apply BL_disj; eauto.
+      apply BL_disj; eauto.
+    + constructor.
+      apply IHB1; intros; eauto.
+      destruct H0.
+      apply H; eauto.
+      apply IHB2; intros; eauto.
+      destruct H0.
+      apply H; eauto.
   - induction B; eauto.
+    + specialize (H (typ_arrow A1 A2)).
+      destruct H; eauto. 
+      constructor.
+      apply BL_disj; eauto.
       apply BL_disj; eauto.
     + specialize (H (typ_arrow (typ_or A1 B1) typ_bot)).  (* IMPORTANT: common subtype, which is not bottom-like *)
       assert (BotLike (typ_arrow (typ_or A1 B1) typ_bot)).
@@ -261,7 +276,7 @@ Lemma Disj_completeness : forall A B, DisjSpec A B -> Disj A B.
     apply IHA2. unfold DisjSpec. intros.
     destruct H0.
     apply H; eauto.
-Defined.
+Defined.  
 
 Lemma invOrS1 : forall t t1 t2, sub (typ_or t1 t2) t -> sub t1 t /\ sub t2 t.
 Proof.
@@ -300,8 +315,9 @@ Lemma sub_transitivity : forall B A C, sub A B -> sub B C -> sub A C.
 Proof.
   induction B; intros;
   generalize H0 H; clear H0; clear H; generalize A; clear A.
-  - intros; dependent induction H; eauto.
   - intros; dependent induction H0; eauto.
+  - intros; dependent induction H; eauto.
+  - intros; dependent induction H; eauto.
   - induction C; intros; inversion H0; eauto.
     induction A; try (inversion H); eauto.
   - intros. apply invOrS1 in H0. destruct H0.
@@ -317,7 +333,8 @@ Inductive trm : Set :=
   | trm_app   : trm -> trm -> trm
   | trm_nat   : nat -> trm
   | trm_typof : trm -> typ -> trm -> typ -> trm -> trm
-  | trm_anno   : trm -> typ -> trm.
+  | trm_anno  : trm -> typ -> trm
+  | trm_top   : trm.
 
 (** Opening up a term binder occuring in a term *)
 
@@ -331,6 +348,7 @@ Fixpoint open_ee_rec (k : nat) (f : trm) (e : trm) {struct e} : trm :=
   | trm_typof e t1 e1 t2 e2    =>  trm_typof (open_ee_rec k f e) t1 
                                     (open_ee_rec (S k) f e1) t2 (open_ee_rec (S k) f e2)
   | trm_anno e1 t1   => trm_anno (open_ee_rec k f e1) t1
+  | trm_top => trm_top
   end.
 
 Definition open_ee t u := open_ee_rec 0 u t.
@@ -360,7 +378,8 @@ Inductive term : trm -> Prop :=
        term (trm_typof e t1 e1 t2 e2)
   | term_anno : forall e t,
       term e ->
-      term (trm_anno e t).
+      term (trm_anno e t)
+  | term_top : term trm_top.
 
 (** Binding are mapping to term variables. 
  [x ~: T] is a typing assumption *)
@@ -425,7 +444,10 @@ Inductive typing : env -> trm -> flag -> typ -> Prop :=
       (forall x, x \notin L ->
       typing (E & x ~: T2) (e2 open_ee_var x) chk T3 ) ->
       DisjSpec T1 T2 ->
-      typing E (trm_typof e T1 e1 T2 e2) chk T3.
+      typing E (trm_typof e T1 e1 T2 e2) chk T3
+  | typing_top : forall E,
+      okt E ->
+      typing E trm_top inf typ_top.
 
 (** Values *)
 
@@ -434,7 +456,8 @@ Inductive value : trm -> Prop :=
                  term (trm_abs V e1 V1) ->
                  value (trm_abs V e1 V1)
   | value_nat : forall i,
-                 value (trm_nat i).
+                 value (trm_nat i)
+  | value_top : value trm_top.
 
 Definition checkType (v : trm) : typ :=
   match v with
@@ -461,7 +484,10 @@ Inductive typ_red : trm -> typ -> trm -> Prop :=
 | tred_or2 : forall v v' A B,
     value v ->
     typ_red v B v' ->
-    typ_red v (typ_or A B) v'.
+    typ_red v (typ_or A B) v'
+| tred_top : forall v,
+    term v ->
+    typ_red v typ_top trm_top.
 
 (** One-step reduction *)
 
@@ -515,6 +541,7 @@ Fixpoint fv_ee (e : trm) {struct e} : vars :=
   | trm_nat i       => \{}
   | trm_typof e1 T1 e2 T2 e3 => (fv_ee e1) \u (fv_ee e2) \u (fv_ee e3)
   | trm_anno e T    => (fv_ee e)
+  | trm_top         => \{}
   end.
 
 (** Substitution for free term variables in terms. *)
@@ -527,7 +554,8 @@ Fixpoint subst_ee (z : var) (u : trm) (e : trm) {struct e} : trm :=
   | trm_app e1 e2 => trm_app (subst_ee z u e1) (subst_ee z u e2)
   | trm_nat i     => trm_nat i
   | trm_typof e1 T1 e2 T2 e3   => trm_typof (subst_ee z u e1) T1 (subst_ee z u e2) T2 (subst_ee z u e3)
-  | trm_anno e T   => trm_anno (subst_ee z u e) T 
+  | trm_anno e T   => trm_anno (subst_ee z u e) T
+  | trm_top        => trm_top 
   end.
 
 (* ********************************************************************** *)
@@ -790,6 +818,13 @@ Proof.
   right.
   eapply typing_sub.
   eapply typing_nat; eauto. auto.
+  dependent destruction H2.
+  left.
+  eapply typing_sub; eauto.
+  apply typing_top. auto.
+  right.
+  eapply typing_sub; eauto.
+  apply typing_top. auto.
   dependent destruction H.
 Qed.
 
@@ -815,6 +850,8 @@ eapply typing_chk_sub; eauto.
 apply sub_arrow; auto.
 eapply typing_chk_sub; eauto.
 eapply typing_chk_sub; eauto.
+eapply typing_sub; eauto.
+apply typing_top. auto.
 Qed.
 
 Lemma typ_red_sub : forall v v' A B, 
@@ -826,6 +863,8 @@ Lemma typ_red_sub : forall v v' A B,
 Proof.
 intros.
 induction* H2.
+- exists trm_top. apply tred_top.
+  apply value_regular in H. auto. 
 - dependent destruction H1.
 - dependent destruction H1. 
   exists (trm_abs B1 e T2).
@@ -883,6 +922,8 @@ split*.
 destruct~ IHtyp_red.
 exists x.
 split*.
+exists typ_top.
+split*. apply* typing_top.
 Qed.
 
 Lemma typ_red_chk_prev1 : forall E v v' A B,
@@ -908,6 +949,9 @@ split*.
 destruct~ IHtyp_red.
 exists x.
 split*.
+exists typ_top.
+split*.
+apply typing_top. auto.
 Qed.
 
 
@@ -923,6 +967,7 @@ apply typ_arr_at.
 dependent destruction H.
 apply typ_int_at.
 dependent destruction H.
+apply typ_top_at.
 Qed.
 
 Lemma arrow_subsub : forall S T1 T2,
@@ -949,6 +994,7 @@ intros.
 induction* H.
 intros.
 dependent induction C.
+inversion H1.
 inversion H1.
 inversion H1.
 dependent destruction H1.
@@ -1096,6 +1142,7 @@ Lemma sub_transitivity1 : forall Q,
 Proof.
   induction Q; unfold transitivity_on; intros;
   generalize H0 H; clear H0; clear H; generalize S; clear S.
+  - intros; dependent induction H0; eauto.
   - intros; dependent induction H; eauto.
   - intros; induction T; dependent induction H0; eauto.
   - induction T; intros; try (inversion H0); eauto.
@@ -1128,6 +1175,7 @@ Proof.
   apply_ih_bind (H0 x); eauto.
   forwards~ K: (H1 x).
   apply_ih_bind (H2 x); eauto.
+  apply typing_top. auto.
 Qed.
 
 (************************************************************************ *)
@@ -1228,6 +1276,8 @@ inductions TypT; introv; simpl.
     apply subsub_sub in H9.
     eapply typing_chk_sub; eauto.
     apply value_regular in valu. auto.
+- exists typ_top.
+  split*. apply* typing_top.
 Qed.  
 
 
@@ -1435,4 +1485,5 @@ Proof.
       apply* red_typeoft.
       apply typing_regular in Typ'.
       destruct~ Typ'.
+ - left*. 
 Qed.

@@ -789,21 +789,6 @@ Proof.
   dependent destruction H.
 Qed.
 
-Lemma typ_red_disj : forall E v A B, value v -> DisjSpec A B -> typing E v chk (typ_or A B) ->
-       typing E v chk A -> typing E v chk B -> False.
-intros.
-lets H2': H2.
-lets H3': H3. 
-inductions H1.
-inverts* H1. 
-inversion H.
-admit. 
-inversion H. 
-admit. 
-inversion H.
-inversion H.
-Admitted.
-
 
 Lemma typ_red_chk : forall E v v' A B,
                     value v ->
@@ -1015,6 +1000,19 @@ Proof.
   eapply typing_sub; eauto.
 Qed.
 
+
+Lemma typ_red_disj : forall E v A B, value v -> DisjSpec A B -> 
+       (exists C, typing E v inf C /\ sub C (typ_or A B)) ->
+       typing E v chk (typ_or A B) ->
+       typing E v chk A -> typing E v chk B -> False.
+intros.
+destruct H1. 
+destruct H1.
+inductions H3; try inversion H; subst.
+inverts* H3.
+admit.
+
+
 (* Following lemma is incorrect 
 
 Counter Example:
@@ -1146,16 +1144,18 @@ induction Red1; introv Typ Red2.
     rewrite H0. auto.
   + inversion H7; subst; inversion Red1.
   + inversion H7; subst; inversion Red1. 
- - inverts* Red2.
+ - lets Red2': Red2.
+    inverts* Red2.
   + inversion H0; subst; inversion H9.
   + (*need type reduction determinism here*)
     forwards * : typ_red_determinism H1 H10.
     rewrite H2. auto.
-  + dependent destruction Typ.
+  + lets Typ': Typ.
     dependent destruction Typ.
-    lets Typ': Typ.
-    apply typing_regular in Typ'.
-    destruct Typ'.
+    dependent destruction Typ.
+    lets Typ'': Typ.
+    apply typing_regular in Typ''.
+    destruct Typ''.
     lets* chk1 : typ_red_chk1 Typ H1.
     lets* chk2 : typ_red_chk1 Typ H10.
     admit.
