@@ -453,10 +453,12 @@ Inductive typ_red : trm -> typ -> trm -> Prop :=
 | tred_or1 : forall v v' A B,
     value v ->
     typ_red v A v' ->
+    DisjSpec A B ->
     typ_red v (typ_or A B) v'
 | tred_or2 : forall v v' A B,
     value v ->
     typ_red v B v' ->
+    DisjSpec A B ->
     typ_red v (typ_or A B) v'.
 
 (** One-step reduction *)
@@ -854,10 +856,12 @@ induction* H2.
 - destruct~ IHsub.
   exists x.
   apply* tred_or1.
+  admit.
 - destruct~ IHsub.
   exists x.
   apply* tred_or2.
-Qed.
+  admit.
+Admitted.
 
 Lemma typ_red_val_dir : forall E v A dir,
        value v ->
@@ -1115,25 +1119,6 @@ admit.
 admit.
 Admitted.
 
-Definition consistencySpec v1 v2 :=
-  forall A v1' v2', typ_red v1 A v1' -> typ_red v2 A v2' -> v1' = v2'.
-
-
-  Lemma disjoint_val_consistent: forall A B v1 v2,
-  DisjSpec A B -> value v1 -> value v2 -> typing empty v1 inf A -> typing empty v2 inf B -> consistencySpec v1 v2.
-  Proof.
-  intros.
-  unfold consistencySpec.
-  intros.
-  lets H2': H2.
-  eapply typing_sub in H2'; eauto.
-  eapply typ_red_chk1 in H4; eauto.
-  lets H3': H3.
-  eapply typing_sub in H3'; eauto.
-  eapply typ_red_chk1 in H5; eauto.
-  clear H2' H3'.
-Admitted.
-
 Lemma typ_red_determinism1 : forall E v v1 v2 A,
                             value v ->
                             (exists B, typing E v inf B) ->
@@ -1151,10 +1136,23 @@ inductions R1; introv R2.
    inverts* H.
   lets R2': R2.
   inverts* R2.
-   admit.
+  eapply typing_sub in H2; eauto.
+  lets okt1 : typing_regular H2.
+  destruct okt1.
+  eapply typ_red_chk1 with (E:=E) (B:=x) in R1; eauto.
+  eapply typ_red_chk1 with (E:=E) (B:=x) in H6; eauto.
+  lets FH : typ_red_disj H0 H8 R1 H6.
+  inversion FH.
  - inverts* R2.
-   admit.      
-Admitted.
+   destruct H.
+   eapply typing_sub in H; eauto.
+   lets okt1 : typing_regular H.
+   destruct okt1.
+   eapply typ_red_chk1 in R1; eauto.
+   eapply typ_red_chk1 in H6; eauto.
+   lets FH : typ_red_disj H0 H8 H6 R1.
+   inversion FH.      
+Qed.
 
 
 Lemma determinism : forall E e e1 e2 A, typing E e chk A -> 
