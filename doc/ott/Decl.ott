@@ -1,0 +1,876 @@
+
+metavar typvar, a, b, L, X ::=
+
+metavar expvar, x, y, f, g, n, m, c, xs, fix {{ tex \mathsf{fix} }}, len, l ::=
+
+indexvar index, j ::=
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL TYPE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+grammar
+
+% Types
+
+dtyp, A, B, C :: 'dtyp_' ::=
+  | Top            :: :: top {{ tex \top }}
+  | Btm            :: :: btm {{ tex \bot }}
+  | int            ::   :: int
+  | nat            ::   :: nat
+  | natu            ::   :: natu {{ tex \mathsf{Nat}_\unknown }}
+  | float            ::   :: float
+  | bool            ::   :: bool
+  | boolu            ::   :: boolu {{ tex \mathsf{Bool}_\unknown }}
+  | a              ::   :: tvar
+  | A -> B         ::   :: arrow
+  | \/ a . A       ::   :: all
+  | mu a . A       ::   :: mu {{ tex \mu [[a]] [[.]] [[A]] }}
+  | unknown        ::   :: unknown
+  | static         ::   :: static
+  | gradual        ::   :: gradual
+  | List A         ::   :: list
+  | Listu A         ::   :: listu
+  | A [ A2 ~> B ]  :: M :: subst
+  | [ OO ] aA      :: S :: ctx_subst
+  | [ OO ] A       :: S :: ctx_subst2
+  | ( A )          :: S :: parens
+  | r @ ( A )      :: S :: red   {{ tex {\color{red} [[A]] } }}
+  | b @ ( A )      :: S :: blue {{ tex {\color{blue} [[A]] } }}
+  | o @ ( A )      :: S :: orange {{ tex {\color{orange} [[A]] } }}
+  | r @ \/ a . A   :: S :: red_all {{ tex [[\/]] {\color{red} [[a]]} . [[A]] }}
+  | b @ \/ a . A   :: S :: blue_all {{ tex [[\/]] {\color{blue} [[a]]} . [[A]] }}
+  | S ( A )        :: S :: subst2
+  | selBound       :: :: bndSel {{ tex \rceil [[mode]] \lceil }}
+  | selPolyBound A B    :: :: bndPolySel {{ tex [[A]]~\widetilde{[[mode]]}~[[B]] }}
+  | fselBound       :: :: fbndSel {{ tex \rceil [[fmode]] \lceil }}
+  | chooseType A B     :: :: chtyp {{ tex [[A]] \ [[mode]]_? \ [[B]] }}
+  | fchooseType A B    :: :: fchtyp {{ tex [[A]] \ [[fmode]]_? \ [[B]] }}
+  | A mode B          :: :: amodeb {{ tex [[A]] [[mode]] [[B]] }}
+  | A smode B          :: :: asmodeb {{ tex [[A]]\![[smode]]\![[B]] }}
+  | kfs X mode1 A B  :: :: kfs {{ tex \forall[[X]] [[mode1]] [[A]].[[B]] }}
+  | kfs X sub A B  :: :: kfsubt {{ tex \forall[[X]] [[sub]] [[A]].[[B]] }}
+  | kfs X sup A B  :: :: kfsupt {{ tex \forall[[X]] [[sup]] [[A]].[[B]] }}
+  | fs X A  :: :: fs {{ tex \forall[[X]].[[A]] }}
+  | X       :: :: forallx
+  | forall X A B :: :: forallbq {{ tex \forall([[X]] [[mode]] [[A]]).[[B]]  }}
+  | [ X |-> A ] B           :: :: tered
+  | And A B 				:: :: inters {{ tex [[A]] \wedge [[B]] }}
+  | Or A B 					:: :: union {{ tex [[A]] \vee [[B]] }}
+  | botl A                  :: :: botl {{ tex \rfloor [[A]] \lfloor }}
+
+modesel {{ tex \Diamond }} :: 'msel_' ::=                                      
+  | mode                     :: :: mode
+  | fmode                    :: :: fmode
+  | smode                   :: :: smode
+  | mode1 					:: :: mode1
+  | mode2 					:: :: mode2
+
+typmodesel {{ tex \Diamond }} :: 'typmsel_' ::=                                      
+  | <=                     :: :: chk
+  | =>                     :: :: inf
+
+typredsel {{ tex \Diamond }} :: 'typrsel_' ::=
+  | tredtop                   :: :: tredtop                                      
+  | tredint                   :: :: tredint
+  | tredbeta                  :: :: tredbeta
+  | tredor                   :: :: tredorl
+
+% Mono Types
+
+dtyp_mono, t {{ tex \tau }}, s {{ tex \sigma }} :: 'dtyp_mono_' ::=
+  | int       ::   :: int
+  | a         ::   :: tvar
+  | t -> s    ::   :: arrow
+  | static    ::   :: static
+  | gradual   ::   :: gradual
+
+% Castable Mono Types
+
+dtyp_mono_cast, tc {{ tex t }} :: 'dtyp_mono_cast_' ::=
+  | int        :: :: int
+  | a          :: :: tvar
+  | tc1 -> tc2 :: :: arrow
+  | gradual    :: :: gradual
+
+% Castable Types
+
+dtyp_castable, gc  {{ tex \mathbb{C} }}  :: 'dtyp_castable_' ::=
+  | int        :: :: int
+  | a          :: :: tvar
+  | gc1 -> gc2 :: :: arrow
+  | \/ a . gc  :: :: all
+  | unknown    :: :: unknown
+  | gradual    :: :: gradual
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO TYPE
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+% Existential variable
+
+evar {{ tex \widehat{a} }}, evarb {{ tex \widehat{b} }}  :: 'evar_' ::=
+  | sa :: :: evar {{ tex \widehat{a}_{S} }}
+  | ga :: :: gevar {{ tex \widehat{a}_{G} }}
+  | sb :: :: evarb {{ tex \widehat{b}_{S} }}
+  | gb :: :: gevarb {{ tex \widehat{b}_{G} }}
+
+
+% marker
+ma :: 'ma_' ::=
+  | mevar :: :: mevar   {{ tex \blacktriangleright_{ \widehat{a} } }}
+  | mevarb :: :: mevarb   {{ tex \blacktriangleright_{ \widehat{b} } }}
+  | msa :: :: msa  {{ tex \blacktriangleright_{ \widehat{a}_S } }}
+  | msb :: :: msb  {{ tex \blacktriangleright_{ \widehat{b}_S } }}
+
+
+% Types
+
+atyp, aA {{ tex A }}, aB {{ tex B }}, aC {{ tex C }} :: 'atyp_' ::=
+  | int            ::   :: int
+  | a              ::   :: tvar
+  | evar           ::   :: evar
+  | aA -> aB       ::   :: arrow
+  | \/ a . aA      ::   :: all
+  | unknown        ::   :: unknown
+  | static         ::   :: static
+  | gradual        ::   :: gradual
+  | aA [ a ~> at ] :: M :: subst
+  | [ GG ] aA      :: S :: ctx_subst
+  | ( aA )         :: S :: parens
+
+% Static Types
+
+atyp_static, aT {{ tex T }} :: 'atyp_static_' ::=
+  | int        ::   :: int
+  | a          ::   :: tvar
+  | evar       ::   :: evar
+  | aT1 -> aT2 ::   :: arrow
+  | \/ a . aT  ::   :: all
+  | static     ::   :: static
+  | gradual    ::   :: gradual
+  | [ GG ] aA  :: S :: ctx_subst
+
+% Mono Types
+
+atyp_mono, at {{ tex \tau }}, as {{ tex \sigma }} :: 'atyp_mono_' ::=
+  | int       ::   :: int
+  | a         ::   :: tvar
+  | evar      ::   :: evar
+  | at -> as  ::   :: arrow
+  | static    ::   :: static
+  | gradual   ::   :: gradual
+  | [ GG ] aA :: S :: ctx_subst
+
+% Castable Mono Types
+
+atyp_mono_cast, atc {{ tex t }} :: 'atyp_mono_cast_' ::=
+  | int          :: :: int
+  | a            :: :: tvar
+  | evar         :: :: evar
+  | atc1 -> atc2 :: :: arrow
+  | gradual      :: :: gradual
+
+% Castable Types
+
+atyp_castable, agc  {{ tex \mathbb{C} }}  :: 'atyp_castable_' ::=
+  | int          :: :: int
+  | a            :: :: tvar
+  | evar         :: :: evar
+  | agc1 -> agc2 :: :: arrow
+  | \/ a . agc   :: :: all
+  | unknown      :: :: unknown
+  | gradual      :: :: gradual
+
+% Static Castable Types
+atyp_scastable, asc {{ tex \mathbb{S} }} :: 'atyp_scastable_' ::=
+  | int          :: :: int
+  | a            :: :: tvar
+  | evar         :: :: evar
+  | asc1 -> asc2 :: :: arrow
+  | \/ a . asc   :: :: all
+  | gradual      :: :: gradual
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% DECL EXPR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+dexp, e :: 'dtrm_' ::=
+  | 1                ::   :: one
+  | x                ::   :: var
+  | n                ::   :: lit
+  | cons             ::   :: cons
+  | consu             ::   :: consu
+  | nil              ::   :: nilu
+  | nilu              ::   :: nil
+  | zerou            :: :: zero {{ tex \mathsf{zero}_\unknown }}
+  | succu            :: :: succu {{ tex \mathsf{succ}_\unknown }}
+  | trueu            :: :: trueu {{ tex \mathsf{true}_\unknown }}
+  | fold [ A ]       ::   :: fold  {{ tex [[fold]]_{[[A]]} }}
+  | unfold [ A ]       ::   :: unfold  {{ tex [[unfold]]_{[[A]]} }}
+  | \ x . e          ::   :: abs
+  | \ x : A . e      ::   :: absan
+  | /\ X mode A . e   ::   :: tabsan
+  | e1 e2            ::   :: app
+  | e A              ::   :: tapp
+  | let x = e1 in e2 ::   :: let
+  | let x : A = e1 in e2 ::   :: letann
+  | ( e )            :: S :: paren
+  | e : A            :: S :: anno
+  | [ x |-> e ] e'   :: :: esub
+  | [ X |-> B ] e      :: :: tapptabs
+  | typeof e A B e1 e2 :: :: typeof {{ tex typeof \ [[e]] \ as \ \{x:[[A]][[->]][[e1]], x:[[B]][[->]][[e2]]\}  }}
+  | TopT               :: :: topterm {{ tex \top_{e} }}                         
+
+
+v :: 'v_' ::=
+  | \ x : A . e                      :: :: Lam
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO EXPR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+aexp, ae {{ tex e }} :: 'atrm_' ::=
+  | x                  ::   :: var
+  | n                  ::   :: lit
+  | \ x . ae           ::   :: abs
+  | \ x : aA . ae      ::   :: absan
+  | ae1 ae2            ::   :: app
+  | ae : aA            ::   :: anno
+  | let x = ae1 in ae2 ::   :: let
+  | ( ae )             :: S :: paren
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ALGO CONTEXT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+actx, GG {{ tex \Gamma}}, DD {{ tex \Delta }}, TT  {{ tex \Theta }}, OO {{ tex \Omega }}, DL {{ tex \Delta_L }}, DR {{ tex \Delta_R }}, GL {{ tex \Gamma_L }}, GR {{ tex \Gamma_R }}, GM {{ tex \Gamma_M }}, OL {{ tex \Omega_L }} , OR {{ tex \Omega_R }} :: 'actx_' ::=
+  | empty                                          ::   :: empty
+  | GG , x : aA                                    ::   :: cons_var
+  | GG , X mode A                                  ::   :: typ_var_mode
+  | GG , X sub A                                   ::   :: typ_var_mode_fsubt
+  | GG , X sup A                                   ::   :: typ_var_mode_fsupt
+  | GG , X mode1 A 								   :: 	:: typ_var_mode1
+  | GG , X mode2 A 								   :: 	:: typ_var_mode2
+  | GG , X fmode A 								   :: 	:: typ_var_fmode
+  | GG , X                                         ::   :: typ_var
+  | GG , e : A                                     ::   :: term
+  | GG , e => A                                     ::   :: infterm
+  | GG , e <= A                                     ::   :: chkterm
+  | GG , a                                         ::   :: cons_tvar
+  | GG , ma                                        ::   :: cons_mark
+  | GG , evar                                      ::   :: cons_evar
+  | GG , evar = at                                 ::   :: cons_evar_solu
+  | GG [ a ]                                       :: S :: ctx_tvar
+  | GG [ evar ]                                    :: S :: ctx_etvar
+  | GG [ GG1 ]                                     :: S :: ctx_ctx
+  | GG [ evar1 , evar2 ]                           :: S :: ctx_etvar2
+  | GG [ evar1 , evar2 , evar3 ]                   :: S :: ctx_etvar3
+  | GG [ evar = at ]                               :: S :: ctx_etvar_solve
+  | GG [ evar1 , evar2 = at ]                      :: S :: ctx_etvar_solve2
+  | GG [ evar1 , evar2 , evar3 = at ]              :: S :: ctx_etvar_solve3
+  | GG [ evar1 = at1 , evar2 = at2 , evar3 = at3 ] :: S :: ctx_etvar_solve4
+  | GG , a , DD                                    :: S :: middle
+  | GG , x : aA , DD                               :: S :: middle2
+  | GG , evar , DD                                 :: S :: middle3
+  | GG , evar = at , DD                            :: S :: middle4
+  | GG , DD                                        :: S :: ext
+  | ( GG )                                         :: S :: parens
+  | [ aA ] GG                                      :: S :: subst_ctx {{ tex  \mathsf{contaminate}( [[GG]] , [[aA]] ) }}
+  | | GG |                                         :: S :: solve_ctx
+  | evar    :: S :: singleton
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% PBC EXPR
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+pexp, pe {{ tex s }}, rpe {{ tex r }}, CC {{ tex \mathcal{C} }} :: 'ptrm_' ::=
+  | 1              ::   :: one
+  | x              ::   :: var
+  | n              ::   :: lit
+  | \ x : A . pe   ::   :: absann
+  | /\ a . pe      ::   :: tabs
+  | pe1 pe2        ::   :: app
+  | < A `-> B > pe ::   :: cast
+  | ( pe )         :: S :: paren
+  | S ( pe )       :: S :: subst
+
+pvalue, pv {{ tex v }} :: 'pvalue_' ::=
+  | n              ::   :: lit
+  | \ x : A . pe   ::   :: absann
+  | /\ a . pe      ::   :: tabs
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% TERMINALS
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+terminals :: 'terminals_' ::=
+  | ~       :: :: consist {{ tex \sim }}
+  | ->      :: :: arrow   {{ tex \rightarrow }}
+  | int     :: :: int     {{ tex \mathsf{Int} }}
+  | nat     :: :: nat     {{ tex \mathsf{Nat} }}
+  | bool     :: :: bool     {{ tex \mathsf{Bool} }}
+  | float     :: :: float     {{ tex \mathsf{Float} }}
+  | List     ::  :: list  {{ tex \mathsf{List} }}
+  | Listu    ::  :: listu {{ tex \mathsf{List}_\unknown }}
+  | n       :: :: lit     {{ tex \mathsf{n} }}
+  | cons       :: :: cons     {{ tex \mathsf{cons} }}
+  | consu       :: :: consu     {{ tex \mathsf{cons}_\unknown }}
+  | nil       :: :: nil     {{ tex \mathsf{nil} }}
+  | nilu       :: :: nilu     {{ tex \mathsf{nil}_\unknown }}
+  | fold      :: :: fold   {{ tex \mathbf{fold} }}
+  | unfold      :: :: unfold   {{ tex \mathbf{unfold} }}
+  | .       :: :: dot     {{ tex .\, }}
+  | unknown :: :: unknown {{ tex \star }}
+  | empty   :: :: empty   {{ tex \bullet }}
+  | |-      :: :: turnstile {{ tex \vdash }}
+  | ||-     :: :: turnstile2 {{ tex \vdash^\mathit{OL} }}
+  | -|      :: :: dashv {{ tex \dashv }}
+  | ~>      :: :: mapsto    {{ tex \mapsto }}
+  | <~      :: :: conssub   {{ tex \lesssim }}
+  | <~~     :: :: inst   {{ tex \lessapprox }}
+  | \       :: :: lambda    {{ tex \lambda }}
+  | ~~>     :: :: translate {{ tex \rightsquigarrow }}
+  | /\      :: :: tlambda   {{ tex \Lambda }}
+  | \/      :: :: forall   {{ tex \forall }}
+  | `->     :: :: cast      {{ tex \hookrightarrow }}
+  | <       :: :: lbr  {{ tex \langle }}
+  | >       :: :: rbr  {{ tex \rangle }}
+  | static  :: :: sta {{ tex \mathcal{S} }}
+  | gradual :: :: gra {{ tex \mathcal{G} }}
+  | |>      :: :: match {{ tex \triangleright  }}
+  | =>      :: :: inf   {{ tex \Rightarrow }}
+  | <=      :: :: chk   {{ tex \Leftarrow }}
+  | -->     :: :: ext   {{ tex \longrightarrow }}
+  | S       :: :: psubst {{ tex \psubst }}
+  | blame   :: :: blame  {{ tex \mathsf{blame} }}
+  | ==>     :: :: reduce {{ tex \Downarrow }}
+  | mode    :: :: mode {{ tex \Diamond }}
+  | smode   :: :: smode {{ tex \mid\!\Diamond_1\!\mid_{\Diamond_2} }}
+  | sub     :: :: sub {{ tex \textless: }}
+  | sup     :: :: sup {{ tex :\textgreater }}
+  | subsub  :: :: subsub {{ tex \textless\textless: }}
+  | fmode   :: :: fmode {{ tex \overline{\Diamond} }}
+  | fsub     :: :: fsub {{ tex \overline{\textless:} }}
+  | fsup     :: :: fsup {{ tex \overline{:\textgreater} }}
+  | |->      :: :: mapsto1    {{ tex \mapsto }}
+  | stlc     :: :: stlc {{ tex \lambda_{<:} }}
+  | gstlc     :: :: gstlc {{ tex \lambda_{\Diamond} }}
+  | stlciu    :: :: stlciu {{ tex \lambda_{<:}^{\wedge \vee} }}
+  | gstlciu    :: :: gstlciu {{ tex \lambda_{\Diamond}^{\wedge \vee} }}
+  | fsk     :: :: fsk {{ tex F_{k<:} }}
+  | gfsk     :: :: gfsk {{ tex F_{k \Diamond} }}
+  | gfskiu     :: :: gfskiu {{ tex F_{k \Diamond}^{\wedge \vee} }}
+  | fskiu     :: :: fskiu {{ tex F_{k<:}^{\wedge \vee} }}
+  | fs     :: :: fs {{ tex F_{F<:} }}
+  | gf     :: :: gf {{ tex F_{F\Diamond} }}
+  | fsiu     :: :: fsiu {{ tex F_{<:}^{\wedge \vee} }}
+  | gfiu     :: :: gfiu {{ tex F_{\Diamond}^{\wedge \vee} }}
+  | gfp     :: :: gfp {{ tex F_{\Diamond} }}
+  | gfpiu     :: :: gfpiu {{ tex F_{\Diamond}^{\wedge \vee} }}
+  | gffsiu     :: :: gffsiu {{ tex F_{F \Diamond}^{\wedge \vee} }}
+  | mode1 		:: :: mode1 {{ tex \Diamond_1 }}
+  | mode2 		:: :: mode2 {{ tex \Diamond_2 }}
+  | gffs       :: :: gffs {{ tex F_{F \Diamond} }}
+  | chooseType :: :: chooseType {{ tex [[mode]]_? }}
+  | fchooseType :: :: fchooseType {{ tex [[fmode]]_? }}
+  | tredint :: :: tredint {{ tex :: Int }}
+  | tredtop :: :: tredtop {{ tex :: \top }}
+  | tredbeta :: :: tredbeta {{ tex :: {A1 \rightarrow A2} }}
+  | tredor  :: :: tredorl {{ tex :: {A \vee B} }}
+  | *A      :: :: disja {{ tex \star_{i} }}
+  | *S      :: :: disjs {{ tex \star }}
+
+
+formula :: formula_ ::=
+  | judgement             :: :: judgement
+  | a in GG               :: :: bind_tvar2 {{ tex [[a]] \in [[GG]] }}
+  | ( x : aA ) in GG      :: :: bind_var2 {{ tex ( [[x]] : [[aA]] ) \in [[GG]] }}
+  | evar in fv ( aA )     :: :: fv {{ tex [[evar]] \in \textsc{fv} ( [[aA]] ) }}
+  | evar notin fv ( aA )  :: :: nfv {{ tex [[evar]] \notin \textsc{fv} ( [[aA]] ) }}
+  | evar notin fv ( GG )  :: :: dfv {{ tex [[evar]] \notin \textsc{fv} ( [[GG]] ) }}
+  | a notin fv ( GG )     :: :: afv {{ tex [[a]] \notin \textsc{fv} ( [[GG]] ) }}
+  | ma notin fv ( GG )     :: :: mafv {{ tex [[ma]] \notin \textsc{fv} ( [[GG]] ) }}
+  | x notin fv ( GG )     :: :: xfv {{ tex [[x]] \notin \textsc{fv} ( [[GG]] ) }}
+  | x in GG             :: :: xinG {{ tex [[x]] \in [[GG]] }}
+  | e : A in GG         :: :: bind_inG {{ tex [[e]] : [[A]] \in [[GG]] }}
+  | aA = aB               :: :: eq
+  | A1 <: A2 :: :: sub
+  | A1 <~ A2 :: :: csub
+  | || A ||               :: :: sizeA {{ tex \llbracket [[A]] \rrbracket }}
+  | || e ||e              :: :: sizeE {{ tex \llbracket [[e]] \rrbracket_\mathcal{E} }}
+  | || pe ||              :: :: size {{ tex \llbracket [[pe]] \rrbracket }}
+  | || pe ||e             :: :: size_e {{ tex \llbracket [[pe]] \rrbracket_\mathcal{E} }}
+  | || pe ||s             :: :: size_s {{ tex \llbracket [[pe]] \rrbracket_\mathcal{S} }}
+  | || pe ||g             :: :: size_g {{ tex \llbracket [[pe]] \rrbracket_\mathcal{G} }}
+  | e <<= e'   :: :: eless  {{ tex [[e]] \sqsubseteq [[e']] }}
+  | A <<= B   :: :: tless  {{ tex [[A]] \sqsubseteq [[B]] }}
+  | pe <<= pe'   :: :: peless  {{ tex [[pe]] \sqsubseteq [[pe']] }}
+  | aA <~~ evar    :: :: inst
+  | evar <~~ aA    :: :: inst2
+  | \ pe \   ::  :: type_erasure {{ tex \lfloor [[pe]] \rfloor }}
+  | pe ==> pv  ::  :: reduce 
+  | pe ==> blame  ::  :: blame
+  | aA <~ aB :: :: algo
+  | istype v A     :: :: istype {{ tex CheckType([[v]]) [[sub]] [[A]] }}
+  | tred A          :: :: tred {{ tex [[::]] [[A]] }}
+  | e1 tred A     :: :: tredab {{ tex [[e1]] [[::]] [[A]] }}
+  | *S      :: :: disjs {{ tex \star }}
+
+
+
+subrules
+  t <:: A
+  gc <:: A
+  tc <:: t
+  tc <:: t
+  aT <:: aA
+  at <:: aT
+  atc <:: at
+  agc <:: aA
+  asc <:: agc
+  pv <:: pe
+  v <:: e
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WELL FORMEDNESS OF CONTEXT
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+wfc :: '' ::=
+
+defn
+
+GG |- ok ::  :: wfc :: wf_ by
+
+----------------------- :: empty
+empty |- ok
+ 
+
+GG |- ok
+x in GG
+----------------- :: var
+GG, x : A |- ok
+
+
+GG |- ok
+X in GG
+----------------- :: tvar
+GG, X mode A |- ok
+
+
+defn
+X mode A isin GG :: :: Tin :: Tin_ {{ tex [[X]] {[[mode]]} [[A]] \in [[GG]] }} by
+
+---------------- :: 1
+X mode A isin GG,X mode A
+
+X mode A isin GG
+------------------ :: 2
+X mode A isin GG,X' mode A'
+
+
+defn
+X mode1 A isin GG :: :: Tina :: Tina_ {{ tex [[X]] {[[mode1]]} [[A]] \in [[GG]] }} by
+
+---------------- :: 1
+X mode1 A isin GG,X mode1 A
+
+X mode1 A isin GG
+------------------ :: 2
+X mode1 A isin GG,X' mode1 A'
+
+
+defn
+X mode2 A isin GG :: :: Tinb :: Tinb_ {{ tex [[X]] {[[mode2]]} [[A]] \in [[GG]] }} by
+
+---------------- :: 1
+X mode2 A isin GG,X mode2 A
+
+X mode2 A isin GG
+------------------ :: 2
+X mode2 A isin GG,X' mode2 A'
+
+
+defn
+X sub A isin GG :: :: TSin :: TSin_ {{ tex [[X]] {[[sub]]} [[A]] \in [[GG]] }} by
+
+---------------- :: 1
+X sub A isin GG,X sub A
+
+X sub A isin GG
+------------------ :: 2
+X sub A isin GG,X' sub A'
+
+
+defn
+X sup A isin GG :: :: TSpin :: TSpin_ {{ tex [[X]] {[[sup]]} [[A]] \in [[GG]] }} by
+
+---------------- :: 1
+X sup A isin GG,X sup A
+
+X sup A isin GG
+------------------ :: 2
+X sup A isin GG,X' sup A'
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bottom Like
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+BBottomLike :: '' ::=
+
+defn
+
+A ::  :: bottomlike :: bl_ by
+
+-------------------- :: btm
+botl Btm
+
+botl A
+botl B
+-------------------------     :: or
+botl Or A B
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Traditional Subtyping
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+TSubtyping :: '' ::=
+
+defn
+
+A sub B ::  :: subtypingt :: ts_ by
+
+-------------------- :: top
+A sub Top
+
+
+-------------------- :: btm
+Btm sub A
+
+
+-------------------- :: int
+int sub int
+
+B1 sub A1 
+A2 sub B2
+-------------------------     :: arrow
+A1 -> A2 sub B1 -> B2
+
+
+A sub A1
+A sub A2
+-------------------------     :: anda
+A sub And A1 A2
+
+
+A1 sub A
+-------------------------     :: andb
+And A1 A2 sub A 
+
+
+A2 sub A
+-------------------------     :: andc
+And A1 A2 sub A
+
+
+A1 sub A
+A2 sub A
+-------------------------     :: ora
+Or A1 A2 sub A
+
+
+A sub A1
+-------------------------     :: orb
+A sub Or A1 A2 
+
+
+A sub A2
+-------------------------     :: orc
+A sub Or A1 A2
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% subsub relation
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+TSubsub :: '' ::=
+
+defn
+
+A subsub B ::  :: subsubtyp :: tss_ by
+
+-------------------- :: refl
+A subsub A
+
+
+B1 sub A1 
+A2 subsub B2
+-------------------------     :: arrow
+A1 -> A2 subsub B1 -> B2
+
+
+A subsub A1
+-------------------------     :: ora
+A subsub Or A1 A2 
+
+
+A subsub A2
+-------------------------     :: orb
+A subsub Or A1 A2 
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Traditional Subtyping with Paramatric Polymorphism
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+TSubtypingP :: '' ::=
+
+defn
+
+GG |- A sub B ::  :: subtypingtp :: ts_ by
+
+
+X sup A isin GG
+------------ :: ReflTvar
+GG |- X sub X
+
+
+X sub A isin GG
+GG |- A sub B
+------------- :: TVara
+GG |- X sub B
+
+
+X sup A isin GG
+GG |- B sub A 
+------------- :: TVarb
+GG |- B sub X
+
+
+GG, X sub A |- B sub C
+-------------------------------------- :: forallkfs
+GG |- ( kfs X sub A B ) sub ( kfs X sub A C )
+
+
+GG, X sup A |- B sub C
+-------------------------------------- :: forallkfsb
+GG |- ( kfs X sup A B ) sub ( kfs X sup A C )
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Bidirectional Typing
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+
+Typing :: '' ::=
+
+defn
+
+GG |- e typmodesel A ::  :: gtyping :: 't_' by 
+
+
+%GG |- ok
+-------------- :: top
+GG |- TopT => Top
+
+
+%GG |- ok
+x : A in GG
+-------------- :: var
+GG |- x => A
+
+%GG |- ok
+---------------- :: int
+GG |- n => int
+
+GG , x : A1 |- e <= A2
+------------------------------   :: abs
+GG |- \ x . e : A1 -> A2 => A1 -> A2
+
+GG |- e1 => A1 -> A2
+GG |- e2 <= A1
+-------------------- :: app
+GG |- e1 e2 => A2
+
+GG |- e => B
+B sub A
+---------------------- :: sub
+GG |- e <= A
+
+
+GG |- e <= A
+---------------------- :: anno
+GG |- (e:A) => A
+
+
+GG |- e <= Or A B
+GG, x : A |- e1 <= C
+GG, x : B |- e2 <= C
+A *A B
+---------------------- :: typeof
+GG |- typeof e A B e1 e2 <= C
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Reduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+
+Reduction :: '' ::=
+
+defn
+
+e --> e' ::  :: greduction :: 'red_' by 
+
+
+------------------------------------- :: beta
+(\x . e : A -> B) v --> [ x |-> v ] e : B
+
+
+e1 --> e1'
+---------------- :: appl
+e1 e2 --> e1' e2
+
+
+e2 --> e2'
+---------------- :: appr
+v e2 --> v e2'
+
+
+e --> e'
+---------------- :: anno
+e:A --> e':A
+
+
+---------------- :: annov
+v:A --> v
+
+
+e --> e'
+----------------------------------------- :: typeof
+typeof e A B e1 e2 --> typeof e' A B e1 e2
+
+%istype v A
+v tred A
+---------------------------------- :: typeofvl
+typeof v A B e1 e2 --> [ x |-> v ] e1
+
+%istype v B
+v tred B
+------------------------------------ :: typeofvr
+typeof v A B e1 e2 --> [ x |-> v ] e2
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Algorithmic Disjointness
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+ADisjointness :: '' ::=
+
+defn
+
+A *A B ::  :: disjointness :: ad_ by
+
+-------------------- :: btmr
+A *A Btm
+
+-------------------- :: btml
+Btm *A A
+
+
+-------------------- :: intl
+int *A A -> B
+
+
+-------------------- :: intr
+A -> B *A int
+
+
+A *A C
+A *A C
+-------------------------     :: orl
+Or A B *A C
+
+
+A *A C
+A *A C
+-------------------------     :: orr
+C *A Or A B
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Type Reduction
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+defns
+
+TReduction :: '' ::=
+
+defn
+
+e1 typredsel ::  :: treduction :: 'tred_' by
+
+
+---------------- :: top
+v tredtop
+
+
+---------------- :: int
+n tredint
+
+A1 sub B1
+B2 sub A2
+------------------------------------- :: beta
+(\x.e1) : B1 -> B2 tredbeta
+
+
+v tred A
+---------------- :: orl
+v tredor
+
+
+v tred B
+---------------- :: orr
+v tredor
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% WELL FORMEDNESS OF Duotyped CONTEXT Poly
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%defns
+%wft :: '' ::=
+
+%defn
+%GG |- A ::  :: wft :: wft_ by
+ 
+
+%------------ :: top
+%GG |- Top
+
+
+%X mode A isin GG :: tvar
+
+
+%GG |- ok
+%X in GG
+%----------------- :: tvar
+%GG, X mode A |- ok

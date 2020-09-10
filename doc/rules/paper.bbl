@@ -1,0 +1,276 @@
+\begin{thebibliography}{10}
+
+\bibitem{abel2008syntactic}
+Andreas Abel and Dulma Rodriguez.
+\newblock Syntactic metatheory of higher-order subtyping.
+\newblock In {\em International Workshop on Computer Science Logic}, pages
+  446--460. Springer, 2008.
+
+\bibitem{adams2006pure}
+Robin Adams.
+\newblock Pure type systems with judgemental equality.
+\newblock {\em Journal of Functional Programming}, 16(2):219--246, 2006.
+
+\bibitem{amin2012dependent}
+Nada Amin, Adriaan Moors, and Martin Odersky.
+\newblock Dependent object types.
+\newblock In {\em 19th International Workshop on Foundations of Object-Oriented
+  Languages}, number CONF, 2012.
+
+\bibitem{amin2017type}
+Nada Amin and Tiark Rompf.
+\newblock Type soundness proofs with definitional interpreters.
+\newblock In {\em Proceedings of the 44th ACM SIGPLAN Symposium on Principles
+  of Programming Languages}, POPL 2017, 2017.
+
+\bibitem{Andrews86}
+Peter~B. Andrews.
+\newblock {\em An Introduction to Mathematical Logic and Type Theory: To Truth
+  through Proof}.
+\newblock Academic Press, Inc., 1986.
+
+\bibitem{barbanera1995intersection}
+Franco Barbanera, Mariangiola Dezaniciancaglini, and Ugo Deliguoro.
+\newblock Intersection and union types: syntax and semantics.
+\newblock {\em Information and Computation}, 119(2):202--230, 1995.
+
+\bibitem{barendregt1983filter}
+Henk Barendregt, Mario Coppo, and Mariangiola Dezani-Ciancaglini.
+\newblock A filter lambda model and the completeness of type assignment 1.
+\newblock {\em The journal of symbolic logic}, 48(4):931--940, 1983.
+
+\bibitem{barras1997coq}
+Bruno Barras, Samuel Boutin, Cristina Cornes, Judicael Courant, Jean-Christophe
+  Filliatre, Eduardo Gimenez, Hugo Herbelin, Gerard Huet, Cesar Munoz, Chetan
+  Murthy, et~al.
+\newblock The coq proof assistant reference manual: Version 6.1.
+\newblock 1997.
+
+\bibitem{barwise1981generalized}
+Jon Barwise and Robin Cooper.
+\newblock Generalized quantifiers and natural language.
+\newblock In {\em Philosophy, language, and artificial intelligence}, pages
+  241--301. Springer, 1981.
+
+\bibitem{bernardi2014duality}
+Giovanni Bernardi, Ornela Dardha, Simon~J Gay, and Dimitrios Kouzapas.
+\newblock On duality relations for session types.
+\newblock In {\em International Symposium on Trustworthy Global Computing},
+  pages 51--66. Springer, 2014.
+
+\bibitem{bessai2015typing}
+Jan Bessai, Boris D{\"u}dder, Andrej Dudenhefner, Tzu-Chun Chen, and Ugo
+  de'Liguoro.
+\newblock Typing classes and mixins with intersection types.
+\newblock {\em arXiv preprint arXiv:1503.04911}, 2015.
+
+\bibitem{bierman2014understanding}
+Gavin Bierman, Mart{\'\i}n Abadi, and Mads Torgersen.
+\newblock Understanding typescript.
+\newblock In {\em European Conference on Object-Oriented Programming}, pages
+  257--281. Springer, 2014.
+
+\bibitem{binder2019decomposition}
+David Binder, Julian Jabs, Ingo Skupin, and Klaus Ostermann.
+\newblock Decomposition diversity with symmetric data and codata.
+\newblock {\em Proceedings of the ACM on Programming Languages}, 4(POPL):30,
+  2019.
+
+\bibitem{BirddeMoor96:Algebra}
+Richard Bird and Oege de~Moor.
+\newblock {\em The Algebra of Programming}.
+\newblock Prentice-Hall, 1996.
+\newblock URL: \url{http://www.cs.ox.ac.uk/publications/books/algebra/}.
+
+\bibitem{canning1989f}
+Peter Canning, William Cook, Walter Hill, Walter Olthoff, and John~C Mitchell.
+\newblock F-bounded polymorphism for object-oriented programming.
+\newblock In {\em FPCA}, volume~89, pages 273--280, 1989.
+
+\bibitem{cardelli1994extension}
+Luca Cardelli, Simone Martini, John~C Mitchell, and Andre Scedrov.
+\newblock An extension of system f with subtyping.
+\newblock {\em Information and Computation}, 109(1-2):4--56, 1994.
+
+\bibitem{cardelli1985understanding}
+Luca Cardelli and Peter Wegner.
+\newblock On understanding types, data abstraction, and polymorphism.
+\newblock {\em ACM Computing Surveys (CSUR)}, 17(4):471--523, 1985.
+
+\bibitem{chargueraud-11-ln}
+Arthur Chargu{\'e}raud.
+\newblock The locally nameless representation.
+\newblock {\em Journal of Automated Reasoning}, 2011.
+
+\bibitem{chaudhuri2015flow}
+Avik Chaudhuri.
+\newblock Flow: a static type checker for javascript.
+\newblock {\em SPLASH-I In Systems, Programming, Languages and Applications:
+  Software for Humanity}, 2015.
+
+\bibitem{DaFi1992}
+Oliver Danvy and Andrzej Filinski.
+\newblock Representing control: A study of the {CPS} transformation.
+\newblock {\em Mathematical Structures in Computer Science}, 2(4):361--391,
+  December 1992.
+
+\bibitem{dosen1989}
+Kosta Došen.
+\newblock Logical constants as punctuation marks.
+\newblock {\em Notre Dame J. Formal Logic}, 30(3):362--381, 06 1989.
+\newblock \href {http://dx.doi.org/10.1305/ndjfl/1093635154}
+  {\path{doi:10.1305/ndjfl/1093635154}}.
+
+\bibitem{dunfield2014elaborating}
+Joshua Dunfield.
+\newblock Elaborating intersection and union types.
+\newblock {\em Journal of Functional Programming}, 24(2-3):133--165, 2014.
+
+\bibitem{dunfield2019bidirectional}
+Joshua Dunfield and Neel Krishnaswami.
+\newblock Bidirectional typing.
+\newblock {\em arXiv preprint arXiv:1908.05839}, 2019.
+
+\bibitem{dunfield2013complete}
+Joshua Dunfield and Neelakantan~R. Krishnaswami.
+\newblock Complete and easy bidirectional typechecking for higher-rank
+  polymorphism.
+\newblock In {\em ICFP}, 2013.
+
+\bibitem{gentzen:untersuchungen}
+Gerhard Gentzen.
+\newblock Untersuchungen {{\"u}ber} das logische {Schliessen}.
+\newblock {\em Mathematische Zeitschrift}, 39:176--210, 405--431, 1934.
+
+\bibitem{hutchins2010pure}
+DeLesley~S. Hutchins.
+\newblock Pure subtype systems.
+\newblock 2010.
+
+\bibitem{igarashi:2002:variance}
+Atsushi Igarashi and Mirko Viroli.
+\newblock On variance-based subtyping for parametric types.
+\newblock In {\em ecoop}, pages 441--469, Malaga, Spain, June 2002. sv.
+\newblock To appear in {ACM Transactions on Programming Languages and Systems}.
+
+\bibitem{jutting1993typing}
+LSV Jutting.
+\newblock Typing in pure type systems.
+\newblock {\em Information and Computation}, 105(1):30--41, 1993.
+
+\bibitem{king2013ceylon}
+Gavin King.
+\newblock The ceylon language specification, version 1.0, 2013.
+
+\bibitem{MacLane:cwm}
+Saunders~Mac Lane.
+\newblock {\em Categories for the Working Mathematician}.
+\newblock Number~5 in Graduate Texts in Mathematics. Springer, 2 edition, 1998.
+
+\bibitem{mckinna1993pure}
+James McKinna and Robert Pollack.
+\newblock Pure type systems formalized.
+\newblock In {\em International Conference on Typed Lambda Calculi and
+  Applications}, pages 289--305. Springer, 1993.
+
+\bibitem{muehlboeck2018empowering}
+Fabian Muehlboeck and Ross Tate.
+\newblock Empowering union and intersection types with integrated subtyping.
+\newblock {\em Proceedings of the ACM on Programming Languages}, 2(OOPSLA):112,
+  2018.
+
+\bibitem{nanevski2008contextual}
+Aleksandar Nanevski, Frank Pfenning, and Brigitte Pientka.
+\newblock Contextual modal type theory.
+\newblock {\em ACM Transactions on Computational Logic (TOCL)}, 9(3):23, 2008.
+
+\bibitem{odersky2004overview}
+Martin Odersky, Philippe Altherr, Vincent Cremet, Burak Emir, Sebastian Maneth,
+  St{\'e}phane Micheloud, Nikolay Mihaylov, Michel Schinz, Erik Stenman, and
+  Matthias Zenger.
+\newblock An overview of the scala programming language.
+\newblock Technical report, 2004.
+
+\bibitem{ostermann2018dualizing}
+Klaus Ostermann and Julian Jabs.
+\newblock Dualizing generalized algebraic data types by matrix transposition.
+\newblock In {\em European Symposium on Programming}, pages 60--85. Springer,
+  2018.
+
+\bibitem{pierce2002programming}
+Benjamin~C Pierce.
+\newblock Programming with intersection types, union types, and polymorphism.
+\newblock 2002.
+
+\bibitem{local}
+Benjamin~C. Pierce and David~N. Turner.
+\newblock Local type inference.
+\newblock {\em ACM Trans. Program. Lang. Syst.}, 22(1), 2000.
+
+\bibitem{Prawitz1979ProofsAT}
+Dag Prawitz.
+\newblock Proofs and the meaning and completeness of the logical constants.
+\newblock In {\em Essays on Mathematical and Philosophical Logic. Synthese
+  Library (Studies in Epistemology, Logic, Methodology, and Philosophy of
+  Science)}, 1979.
+
+\bibitem{reynolds1988preliminary}
+John~C Reynolds.
+\newblock Preliminary design of the programming language forsythe.
+\newblock 1988.
+
+\bibitem{rompf2016type}
+Tiark Rompf and Nada Amin.
+\newblock Type soundness for dependent object types (dot).
+\newblock In {\em Proceedings of the 2016 ACM SIGPLAN International Conference
+  on Object-Oriented Programming, Systems, Languages, and Applications}, OOPSLA
+  2016, 2016.
+
+\bibitem{severi1994pure}
+Paula Severi and Erik Poll.
+\newblock Pure type systems with definitions.
+\newblock In {\em International Symposium on Logical Foundations of Computer
+  Science}, pages 316--328. Springer, 1994.
+
+\bibitem{simpson1994proof}
+Alex~K Simpson.
+\newblock The proof theory and semantics of intuitionistic modal logic.
+\newblock 1994.
+
+\bibitem{steffen1994higher}
+Martin Steffen and Benjamin Pierce.
+\newblock Higher-order subtyping.
+\newblock 1994.
+
+\bibitem{uustalu2008comonadic}
+Tarmo Uustalu and Varmo Vene.
+\newblock Comonadic notions of computation.
+\newblock {\em Electronic Notes in Theoretical Computer Science},
+  203(5):263--284, 2008.
+
+\bibitem{van1993checking}
+LS~van Benthem~Jutting, James McKinna, and Robert Pollack.
+\newblock Checking algorithms for pure type systems.
+\newblock In {\em International Workshop on Types for Proofs and Programs},
+  pages 19--61. Springer, 1993.
+
+\bibitem{yang2017unifying}
+Yanpeng Yang and Bruno C. d.~S. Oliveira.
+\newblock Unifying typing and subtyping.
+\newblock {\em Proceedings of the ACM on Programming Languages}, 1(OOPSLA):47,
+  2017.
+
+\bibitem{zappa2018julia}
+Francesco Zappa~Nardelli, Julia Belyakova, Artem Pelenitsyn, Benjamin Chung,
+  Jeff Bezanson, and Jan Vitek.
+\newblock Julia subtyping: a rational reconstruction.
+\newblock {\em Proceedings of the ACM on Programming Languages}, 2(OOPSLA):113,
+  2018.
+
+\bibitem{zwanenburg1999pure}
+Jan Zwanenburg.
+\newblock Pure type systems with subtyping.
+\newblock In {\em International Conference on Typed Lambda Calculi and
+  Applications}, pages 381--396. Springer, 1999.
+
+\end{thebibliography}

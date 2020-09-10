@@ -1,0 +1,90 @@
+\section{Rules}
+\label{sec:rules}
+
+%\infer[tred-int]{ n \rightarrow_{Int} n}{ }
+
+%\infer[tred-fun]{ n \rightarrow_{Int} n}{ }
+
+\begin{figure}[t]
+  \begin{small}
+    \centering
+    \begin{tabular}{lrcl} \toprule
+      Types & $[[A]], [[B]]$ & $\Coloneqq$ & $ [[Btm]] \mid [[int]] \mid [[A -> B]] \mid [[Or A B]]  $ \\
+      Terms & $[[e]]$ & $\Coloneqq$ & $ [[x]]  \mid [[n]]  \mid [[\x . e : A -> B]] \mid [[e1 e2]] \mid [[e:A]] \mid typeof \ e \ as \ \{x:[[A]][[->]][[e1]], x:[[B]][[->]][[e2]]\} $ \\
+      Values & v & $\Coloneqq$ & $  [[n]] \mid [[\x : A . e]] $ \\
+      Context & $[[GG]]$ & $\Coloneqq$ & $ [[empty]]  \mid [[GG]] , [[x : A]] $ \\
+      \bottomrule
+    \end{tabular}
+  \end{small}\\
+
+  \bigskip
+
+%    \begin{tabular}{|l|l|}
+%     \hline
+%      $CheckType (v)$  & \\
+%      & $CheckType([[n]]) \ = \ [[int]]$ \\
+%      & $CheckType([[\x . e : A -> B]]) \ = \ [[A -> B]]$ \\
+%       \hline
+%    \end{tabular}
+
+  \bigskip
+
+  \begin{small}
+    \centering
+    \begin{tabular}{lrcl} \toprule
+      DisSpec & $[[A]] * [[B]]$ & $\Coloneqq$ & $ {\forall} C, [[C sub A]] \wedge [[C sub B]] \rightarrow  \rfloor [[C]] \lfloor $ \\
+      \bottomrule
+    \end{tabular}
+  \end{small}
+
+  \bigskip
+
+  \begin{small}
+    \centering
+    \drules[bl]{$ [[botl C ]] $}{Bottom Like}{btm, or}
+  \end{small}
+
+  \begin{small}
+    \centering
+    \drules[ad]{$ [[A *A B ]] $}{Algorithmic Disjointness}{btml, btmr, intl, intr, orl, orr}
+  \end{small}
+
+  \begin{small}
+    \centering
+    \drules[ts]{$ [[A sub B ]] $}{Subtyping}{btm, int, arrow, ora, orb, orc}
+  \end{small}
+
+  \begin{small}
+    \centering
+    \drules[tss]{$ [[A subsub B ]] $}{Subsub}{refl, arrow, ora, orb}
+  \end{small}
+
+ \caption{Disjoint Union Type : Syntax}
+  \label{fig:disunion}
+\end{figure}
+
+\begin{figure}[t] 
+   \begin{small}
+    \centering
+    \drules[t]{$ [[GG |- e => A ]] $}{Bidirectional Typing}{var, int, abs, app, sub, anno, typeof}
+   \end{small}
+
+   \begin{small}
+    \centering
+    \drules[red]{$ [[e --> e' ]] $}{Reduction}{beta, appl, appr, anno, annov, typeof, typeofvl, typeofvr}
+  \end{small}
+
+   \begin{small}
+    \centering
+    \drules[tred]{$ [[v]] [[tred A]] $}{Type Reduction}{int, beta, orl, orr}
+  \end{small}
+
+  \caption{Disjoint Union Type : Semantics}
+  \label{fig:disunion:semantics}
+\end{figure}
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../paper"
+%%% org-ref-default-bibliography: "../paper.bib"
+%%% End:

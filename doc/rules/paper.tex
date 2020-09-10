@@ -1,0 +1,67 @@
+\documentclass[a4paper,UKenglish,cleveref, autoref]{lipics-v2019}
+
+%% Some recommended packages.
+\usepackage{booktabs}   %% For formal tables:
+                        %% http://ctan.org/pkg/booktabs
+\usepackage{subcaption} %% For complex figures with subfigures/subcaptions
+                        %% http://ctan.org/pkg/subcaption
+\usepackage{longtable}
+\usepackage{xspace}
+\usepackage{proof}
+
+%% Bibliography style
+\bibliographystyle{plainurl}% the mandatory bibstyle
+
+\title{Disjoint Union Types}
+
+\nolinenumbers
+
+%\authorrunning{B.\, Oliveira and B.\, Rehman}%TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
+
+
+\author{Bruno C. d. S. Oliveira}{The University of Hong Kong, Hong Kong, China}
+{bruno@cs.hku.hk}{}{}
+
+%\author{Baber Rehman}{The University of Hong Kong, Hong Kong, China}
+%       {brehman@cs.hku.hk}{}{}
+
+\begin{comment}
+\funding{Funded by Hong
+  Kong Research Grant Council projects number 17210617 and 17209519.}
+
+\supplement{https://github.com/baberrehman/coq-duotyping}
+
+\authorrunning{Oliveira et al.}%TODO mandatory. First: Use abbreviated first/middle names. Second (only in severe cases): Use first author plus 'et al.'
+
+\Copyright{Bruno C. d. S. Oliveira}%TODO mandatory, please use full first names. LIPIcs license is "CC-BY";  http://creativecommons.org/licenses/by/3.0/
+
+\ccsdesc[100]{Software and its engineering~Object oriented languages}%TODO mandatory: Please choose ACM 2012 classifications from https://dl.acm.org/ccs/ccs_flat.cfm
+\keywords{DuoTyping, OOP, Duality, Subtyping, Supertyping}%TODO mandatory; please add comma-separated list of keywords
+\acknowledgements{We thank the anonymous reviewers for their helpful comments.}%optional
+\end{comment}
+\input{packages.tex}
+\inputott{ott-rules}
+\input{paper_utility.tex}
+%\input{sections/formal.tex}
+
+\newcommand\mynote[3]{\textcolor{#2}{#1: #3}}
+%\newcommand\mynote[3]{}
+\newcommand\bruno[1]{\mynote{Bruno}{red}{#1}}
+\newcommand\baber[1]{\mynote{Baber}{blue}{#1}}
+
+\begin{document}
+
+\maketitle
+
+
+%% -- Starting Point --
+
+\input{sections/algorithm.mng}
+
+%% Appendix
+
+%\newpage
+%\appendix
+%\input{sections/appendix.mng}
+
+\end{document}
