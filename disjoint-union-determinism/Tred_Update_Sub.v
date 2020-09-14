@@ -1736,8 +1736,7 @@ inductions TypT; introv; simpl.
   inversion H0; subst.
   + forwards * : IHTypT2.
     destruct H1. destruct H1.
-    exists typ_bot. split*.
-    eapply typing_app; eauto.
+    
     admit.
   + exists S2. split*.
   eapply typing_app with (T1:=S1); eauto.
