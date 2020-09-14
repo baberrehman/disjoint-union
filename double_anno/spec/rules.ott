@@ -16,10 +16,10 @@ grammar
     | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
     | Bot                  ::   :: bot
     | A -> B               ::   :: arrow
-    | A \/ B 	           ::   :: union
+    | A \/ B 	             ::   :: union
     | ( A )                :: S :: paren   {{ coq [[A]]] }}
 
-  exp, e, v                :: 'e_' ::=     {{ com expression }}
+  exp, e, v, p                :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
     | i                    ::   :: lit
     | e : A                ::   :: ann
