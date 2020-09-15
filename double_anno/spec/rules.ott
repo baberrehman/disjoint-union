@@ -17,7 +17,7 @@ grammar
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
     | A \/ B 	             ::   :: union
-    | ( A )                :: S :: paren   {{ coq [[A]]] }}
+    | ( A )                :: S :: paren   {{ coq [[A]] }}
 
   exp, e, v, p, u, r       :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
