@@ -19,13 +19,13 @@ grammar
     | A \/ B 	             ::   :: union
     | ( A )                :: S :: paren   {{ coq [[A]]] }}
 
-  exp, e, v, p                :: 'e_' ::=     {{ com expression }}
+  exp, e, v, p, u, r       :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
     | i                    ::   :: lit
     | e : A                ::   :: ann
     | \ x . e              ::   :: abs     (+ bind x in e +)
     | e1 e2                ::   :: app
-    | typeof e as A e1 B e2 ::  :: typeof
+    | typeof e as A e1 B e2 ::  :: typeof {{ tex typeof \ [[e]] \ as \ [[A]] \ [[e1]] \ [[B]] \ [[e2]] }}
     {{ tex typeof \ [[e]] \ as \ \{x:[[A]][[->]][[e1]], x:[[B]][[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]][[e2]]) }}
@@ -82,6 +82,37 @@ formula :: 'formula_' ::=
     {{ coq ~ AtomSetImpl.In [[x]] (dom [[G]]) }}
     {{ tex [[x]] \notin [[G]] }}
 
+
+defns
+PExpr :: '' ::=
+  
+  defn
+  pexpr e ::   :: pexpr :: 'pexpr_'
+  {{ com PExpr }}
+  by
+
+    ------------ :: app
+    pexpr i
+
+    --------------------------- :: abs
+    pexpr (\x.e) : A -> B
+
+
+defns
+RExpr :: '' ::=
+  
+  defn
+  rexpr e ::   :: rexpr :: 'rexpr_'
+  {{ com RExpr }}
+  by
+
+    ------------ :: app
+    rexpr (e1 e2)
+
+    --------------------------- :: typeof
+    rexpr typeof e as A e1 B e2
+
+
 defns
 Value :: '' ::=
   
@@ -90,11 +121,31 @@ Value :: '' ::=
   {{ com Values }}
   by
 
-    -------- :: lit
-    value i
+    pexpr p
+    ------------ :: val
+    value p : A
 
-    --------------------------- :: ann
-    value (\x.e) : A -> B : C
+defns
+UExpr :: '' ::=
+  
+  defn
+  uexpr e ::   :: uexpr :: 'uexpr_'
+  {{ com UEpxr }}
+  by
+
+    rexpr r
+    ------------ :: rexpr
+    uexpr r
+
+
+    pexpr p
+    ------------ :: pexpr
+    uexpr p
+
+
+    uexpr u
+    ------------ :: anno
+    uexpr u : A
 
 
 defns
@@ -248,20 +299,29 @@ Reduction :: '' ::=
 
     value v
     ---------------------------------------------- :: beta
-    (\x.e):A->B v --> (e [x ~> v:A]):B
+    (((\x.e): A -> B)) p --> (e [x ~> p:A]):B
 
 %    ??? C
 %    ---------------------------------------------- :: beta
 %    (\x.e):A->B:C v --> (e [x ~> v:A]):B
+
+   
+   ----------------------- :: vu
+   v (u : A) --> v u
+
+
+   e --> e'
+   ------------------------------------------------- :: typeof
+   typeof e as A e1 B e2 --> typeof e' as A e1 B e2
 
     e1 --> e1'
     ---------------- :: appl
     e1 e2 --> e1' e2
 
     value v
-    e2 --> e2'
+    r --> e'
     ---------------- :: appr
-    v e2 --> v e2'
+    v r --> v e'
 
     not value e:A
     e --> e'
@@ -270,6 +330,15 @@ Reduction :: '' ::=
 
     --------------------- :: ann_ann
     e : A : B --> e : B
+
+
+    r --> e'
+    ----------------------- :: r_ann
+    r : A --> e' : A
+
+
+    ------------------------ :: int
+    i --> i : Int
   
     
     --------------------------------- :: lam_ann
