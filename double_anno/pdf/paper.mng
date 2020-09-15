@@ -51,10 +51,19 @@
 
 \begin{align*}
 &Type &A, B&::= Int ~|~ \ottnt{A}  \rightarrow  \ottnt{B}~ | ~ \bot ~ |~ \ottnt{A}  \vee  \ottnt{B}\\
-&Expr &e &::= x ~|~ n ~|~ e:A ~|~\lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}\\
-&Value &v &::= n ~|~\lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{:}  \ottnt{B}
+&Expr &e &::= x ~|~ n ~|~ e:A ~|~\lambda  \ottmv{x}  \ottsym{.}  \ottnt{e} ~ | ~ e1e2 ~|~  typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}} \\
+&          & p &::= n ~|~ \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B} \\
+&          & r &::= e1e2 ~|~  typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}  \\
+&          & u &::= r ~|~ p ~ |~ u : A \\
+&Value &v &::= p : A \\
+&Context & \Gamma &::= empty~ |~ \Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}
 \end{align*}
 
+\begin{align*}
+&DisjSpec & A * B & ::= \forall C, \ottnt{C}  \textless:  \ottnt{A} \wedge \ottnt{C}  \textless:  \ottnt{B} \rightarrow  \rfloor \ottnt{C} \lfloor
+\end{align*}
+
+\bigskip
 
 \ottdefnsBottomLike
 
