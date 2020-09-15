@@ -173,7 +173,7 @@
 \ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
 \ottpremise{\Gamma  \vdash  \ottnt{p} \,  \Rightarrow  \,  \mathsf{Int} }%
 }{
-\ottkw{findtype} \,  \mathsf{Int} }{%
+\ottkw{findtype} \, \ottnt{p} \,  \mathsf{Int} }{%
 {\ottdrulename{findtype\_int}}{}%
 }}
 
@@ -182,11 +182,11 @@
 \ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
 \ottpremise{\Gamma  \vdash  \ottnt{p} \,  \Rightarrow  \, \ottnt{A}  \rightarrow  \ottnt{B}}%
 }{
-\ottkw{findtype} \, \ottnt{A}  \rightarrow  \ottnt{B}}{%
+\ottkw{findtype} \, \ottnt{p} \, \ottnt{A}  \rightarrow  \ottnt{B}}{%
 {\ottdrulename{findtype\_arrow}}{}%
 }}
 
-\newcommand{\ottdefnfindtype}[1]{\begin{ottdefnblock}[#1]{$\ottkw{findtype} \, \ottnt{A}$}{\ottcom{FindType}}
+\newcommand{\ottdefnfindtype}[1]{\begin{ottdefnblock}[#1]{$\ottkw{findtype} \, \ottnt{e} \, \ottnt{A}$}{\ottcom{FindType}}
 \ottusedrule{\ottdrulefindtypeXXint{}}
 \ottusedrule{\ottdrulefindtypeXXarrow{}}
 \end{ottdefnblock}}

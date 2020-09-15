@@ -27,7 +27,7 @@ grammar
     | e1 e2                ::   :: app
     | typeof e as A e1 B e2 ::  :: typeof {{ tex typeof \ [[e]] \ as \ [[A]] \ [[e1]] \ [[B]] \ [[e2]] }}
     {{ tex typeof \ [[e]] \ as \ \{x:[[A]][[->]][[e1]], x:[[B]][[->]][[e2]]\}  }}
-    | ( e )                :: S :: paren   {{ coq ([[e]]]) }}
+    | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]][[e2]]) }}
 
 substitutions
@@ -48,7 +48,7 @@ grammar
                                            {{ coq list ( atom * typ ) }}
     | []                   ::  :: empty    {{ coq nil }}
                                            {{ tex \cdot }}
-    | G , x : A            ::  :: cons     {{ coq (([[x]]~[[T]])++[[G]]) }}
+    | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
 
   dirflag :: '' ::=                        {{ com typing direction }}
     | =>                   ::  :: infer    {{ tex \Rightarrow }}
@@ -95,7 +95,7 @@ PreValue :: '' ::=
     prevalue i
 
     --------------------------- :: abs
-    prevalue (\x.e) : A -> B
+    prevalue (\x.e):A -> B
 
 
 defns
@@ -147,25 +147,6 @@ UExpr :: '' ::=
     uexpr u
     ------------ :: anno
     uexpr u : A
-
-
-defns
-FindType :: '' ::=
-  
-  defn
-  findtype A ::   :: findtype :: 'findtype_'
-  {{ com FindType }}
-  by
-
-    prevalue p
-    G |- p => Int
-    ------------ :: int
-    findtype Int
-
-    prevalue p
-    G |- p => A -> B
-    ----------------- :: arrow
-    findtype A -> B
 
 
 defns
@@ -307,6 +288,25 @@ Typing :: '' ::=
     A * B
     --------------------------------- :: typeof
     G |- typeof e as A e1 B e2 <= C
+
+
+defns
+FindType :: '' ::=
+  
+  defn
+  findtype p typ ::   :: findtype :: 'findtype_'
+  {{ com FindType }}
+  by
+
+    prevalue p
+    G |- p => Int
+    ------------ :: int
+    findtype p Int
+
+    prevalue p
+    G |- p => A -> B
+    ----------------- :: arrow
+    findtype p A -> B
 
 
 defns
