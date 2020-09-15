@@ -1,0 +1,70 @@
+\documentclass[a4paper]{article}
+
+\usepackage{geometry}
+\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+% Basics
+\usepackage{fixltx2e}
+\usepackage{url}
+\usepackage{fancyvrb}
+\usepackage{mdwlist}  % Miscellaneous list-related commands
+\usepackage{xspace}   % Smart spacing
+\usepackage{supertabular}
+
+% https://www.nesono.com/?q=book/export/html/347
+% Package for inserting TODO statements in nice colorful boxes - so that you
+% won’t forget to ﬁx/remove them. To add a todo statement, use something like
+% \todo{Find better wording here}.
+\usepackage{todonotes}
+
+%% Math
+\usepackage{amsmath}
+\usepackage{amsthm}
+\usepackage{amssymb}
+\usepackage{bm}       % Bold symbols in maths mode
+
+% http://tex.stackexchange.com/questions/114151/how-do-i-reference-in-appendix-a-theorem-given-in-the-body
+\usepackage{thmtools, thm-restate}
+
+%% Theoretical computer science
+\usepackage{stmaryrd}
+\usepackage{mathtools}  % For "::=" ( \Coloneqq )
+
+%% Code listings
+\usepackage{listings}
+
+%% Font
+\usepackage[euler-digits,euler-hat-accent]{eulervm}
+
+
+\usepackage{ottalt}
+
+% Ott includes
+\inputott{ott-rules}
+
+
+\title{Rules Version 1 (Disjoint Union Type)}
+\author{Baber}
+\begin{document}
+
+\maketitle
+
+\begin{align*}
+&Type &A, B&::= Int ~|~ [[A->B]]~ | ~[[Bot]]~ |~ [[A \/ B]]\\
+&Expr &e &::= x ~|~ n ~|~ e:A ~|~[[\x.e]]\\
+&Value &v &::= n ~|~[[\x.e:B]]
+\end{align*}
+
+
+\ottdefnsBottomLike
+
+\ottdefnsDisjointness
+
+\ottdefnsSubtyping
+
+\ottdefnsTyping
+
+\ottdefnsReduction
+
+
+\end{document}
