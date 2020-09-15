@@ -395,9 +395,9 @@
 % defns Reduction
 %% defn step
 \newcommand{\ottdrulestepXXbeta}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{value} \, \ottnt{v}}%
+\ottpremise{\ottkw{pexpr} \, \ottnt{p}}%
 }{
-\ottsym{(}  \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)}  \ottsym{)} \, \ottnt{p}  \longrightarrow  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B}}{%
+\ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottnt{p}  \longrightarrow  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}}}{%
 {\ottdrulename{step\_beta}}{}%
 }}
 
@@ -426,7 +426,7 @@
 
 
 \newcommand{\ottdrulestepXXappr}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{value} \, \ottnt{v}}%
+\ottpremise{\ottkw{rexpr} \, \ottnt{r}}%
 \ottpremise{\ottnt{r}  \longrightarrow  \ottnt{e'}}%
 }{
 \ottnt{v} \, \ottnt{r}  \longrightarrow  \ottnt{v} \, \ottnt{e'}}{%
@@ -444,13 +444,15 @@
 
 
 \newcommand{\ottdrulestepXXannXXann}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{uexpr} \, \ottnt{u}}%
 }{
-\ottnt{e}  \ottsym{:}  \ottnt{A}  \ottsym{:}  \ottnt{B}  \longrightarrow  \ottnt{e}  \ottsym{:}  \ottnt{B}}{%
+\ottnt{u}  \ottsym{:}  \ottnt{A}  \ottsym{:}  \ottnt{B}  \longrightarrow  \ottnt{u}  \ottsym{:}  \ottnt{B}}{%
 {\ottdrulename{step\_ann\_ann}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXrXXann}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{rexpr} \, \ottnt{r}}%
 \ottpremise{\ottnt{r}  \longrightarrow  \ottnt{e'}}%
 }{
 \ottnt{r}  \ottsym{:}  \ottnt{A}  \longrightarrow  \ottnt{e'}  \ottsym{:}  \ottnt{A}}{%

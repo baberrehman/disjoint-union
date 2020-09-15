@@ -94,13 +94,43 @@ end.
 
 (** definitions *)
 
+(* defns PExpr *)
+Inductive pexpr : exp -> Prop :=    (* defn pexpr *)
+ | pexpr_app : forall (i5:i),
+     pexpr (e_lit i5)
+ | pexpr_abs : forall (e:exp) (A B:typ),
+     lc_exp (e_abs e) ->
+     pexpr (e_ann  ( (e_abs e) ])  (t_arrow A B)).
+
+(* defns RExpr *)
+Inductive rexpr : exp -> Prop :=    (* defn rexpr *)
+ | rexpr_app : forall (e1 e2:exp),
+     lc_exp e1 ->
+     lc_exp e2 ->
+     rexpr  ( (e_app e1 e2) ]) 
+ | rexpr_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2:exp),
+     lc_exp e ->
+     lc_exp e1 ->
+     lc_exp e2 ->
+     rexpr (e_typeof e A e1 B e2).
+
 (* defns Value *)
 Inductive value : exp -> Prop :=    (* defn value *)
- | value_lit : forall (i5:i),
-     value (e_lit i5)
- | value_ann : forall (e:exp) (A B C:typ),
-     lc_exp (e_abs e) ->
-     value (e_ann (e_ann  ( (e_abs e) ])  (t_arrow A B)) C).
+ | value_val : forall (p:exp) (A:typ),
+     pexpr p ->
+     value (e_ann p A).
+
+(* defns UExpr *)
+Inductive uexpr : exp -> Prop :=    (* defn uexpr *)
+ | uexpr_rexpr : forall (r:exp),
+     rexpr r ->
+     uexpr r
+ | uexpr_pexpr : forall (p:exp),
+     pexpr p ->
+     uexpr p
+ | uexpr_anno : forall (u:exp) (A:typ),
+     uexpr u ->
+     uexpr (e_ann u A).
 
 (* defns BottomLike *)
 Inductive bottomlike : typ -> Prop :=    (* defn bottomlike *)
@@ -183,18 +213,28 @@ Inductive typing : ctx -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
 
 (* defns Reduction *)
 Inductive step : exp -> exp -> Prop :=    (* defn step *)
- | step_beta : forall (e:exp) (A B:typ) (v:exp),
+ | step_beta : forall (e:exp) (A B:typ) (p v:exp),
      lc_exp (e_abs e) ->
+     lc_exp p ->
      value v ->
-     step (e_app (e_ann  ( (e_abs e) ])  (t_arrow A B)) v) (e_ann  (  (open_exp_wrt_exp  e (e_ann v A) )  ])  B)
+     step (e_app  (  ( (e_ann  ( (e_abs e) ])  (t_arrow A B)) ])  ])  p) (e_ann  (  (open_exp_wrt_exp  e (e_ann p A) )  ])  B)
+ | step_vu : forall (v u:exp) (A:typ),
+     lc_exp v ->
+     lc_exp u ->
+     step (e_app v  ( (e_ann u A) ]) ) (e_app v u)
+ | step_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2 e':exp),
+     lc_exp e1 ->
+     lc_exp e2 ->
+     step e e' ->
+     step (e_typeof e A e1 B e2) (e_typeof e' A e1 B e2)
  | step_appl : forall (e1 e2 e1':exp),
      lc_exp e2 ->
      step e1 e1' ->
      step (e_app e1 e2) (e_app e1' e2)
- | step_appr : forall (v e2 e2':exp),
+ | step_appr : forall (v r e':exp),
      value v ->
-     step e2 e2' ->
-     step (e_app v e2) (e_app v e2')
+     step r e' ->
+     step (e_app v r) (e_app v e')
  | step_anno : forall (e:exp) (A:typ) (e':exp),
       not ( value (e_ann e A) )  ->
      step e e' ->
@@ -202,12 +242,17 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
  | step_ann_ann : forall (e:exp) (A B:typ),
      lc_exp e ->
      step (e_ann (e_ann e A) B) (e_ann e B)
+ | step_r_ann : forall (r:exp) (A:typ) (e':exp),
+     step r e' ->
+     step (e_ann r A) (e_ann e' A)
+ | step_int : forall (i5:i),
+     step (e_lit i5) (e_ann (e_lit i5) t_int)
  | step_lam_ann : forall (e:exp) (A B:typ),
      lc_exp (e_abs e) ->
      step (e_ann  ( (e_abs e) ])  (t_arrow A B)) (e_ann (e_ann  ( (e_abs e) ])  (t_arrow A B)) (t_arrow A B)).
 
 
 (** infrastructure *)
-Hint Constructors value bottomlike disjointness subtyping typing step lc_exp.
+Hint Constructors pexpr rexpr value uexpr bottomlike disjointness subtyping typing step lc_exp.
 
 

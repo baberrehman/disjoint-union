@@ -52,9 +52,9 @@
 \begin{align*}
 &Type &A, B&::= Int ~|~ [[A->B]]~ | ~[[Bot]]~ |~ [[A \/ B]]\\
 &Expr &e &::= x ~|~ n ~|~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[typeof e as A e1 B e2]]\\
-&          & p &::= n ~|~ [[\x.e : A->B]] \\
-&          & r &::= e1e2 ~|~ [[typeof e as A e1 B e2]] \\
-&          & u &::= r ~|~ p ~ |~ u : A \\
+&PExpr & p &::= n ~|~ [[\x.e : A->B]] \\
+&RExpr & r &::= e1e2 ~|~ [[typeof e as A e1 B e2]] \\
+&UExpr & u &::= r ~|~ p ~ |~ u : A \\
 &Value &v &::= p : A \\
 &Context & [[G]] &::= empty~ |~ [[G , x : A]]
 \end{align*}

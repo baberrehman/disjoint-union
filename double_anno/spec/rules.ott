@@ -297,9 +297,11 @@ Reduction :: '' ::=
   {{ com Small-step operational semantics }}
   by
 
-    value v
-    ---------------------------------------------- :: beta
-    (((\x.e): A -> B)) p --> (e [x ~> p:A]):B
+
+    pexpr p
+    --------------------------------- :: beta
+    ((\x.e):A1->B1:A2->B2) p --> (e [x ~> p:A1]):B2
+
 
 %    ??? C
 %    ---------------------------------------------- :: beta
@@ -318,7 +320,7 @@ Reduction :: '' ::=
     ---------------- :: appl
     e1 e2 --> e1' e2
 
-    value v
+    rexpr r
     r --> e'
     ---------------- :: appr
     v r --> v e'
@@ -328,10 +330,12 @@ Reduction :: '' ::=
     ---------------- :: anno
     e:A --> e':A
 
+    uexpr u
     --------------------- :: ann_ann
-    e : A : B --> e : B
+    u : A : B --> u : B
 
 
+    rexpr r
     r --> e'
     ----------------------- :: r_ann
     r : A --> e' : A
