@@ -95,7 +95,7 @@ PreValue :: '' ::=
     prevalue i
 
     --------------------------- :: abs
-    pprevalue (\x.e) : A -> B
+    prevalue (\x.e) : A -> B
 
 
 defns
@@ -121,7 +121,7 @@ Value :: '' ::=
   {{ com Values }}
   by
 
-    pexpr p
+    prevalue p
     ------------ :: val
     value p : A
 
@@ -139,7 +139,7 @@ UExpr :: '' ::=
     uexpr r
 
 
-    pexpr p
+    prevalue p
     ------------ :: pexpr
     uexpr p
 
