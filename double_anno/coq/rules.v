@@ -132,6 +132,14 @@ Inductive uexpr : exp -> Prop :=    (* defn uexpr *)
      uexpr u ->
      uexpr (e_ann u A).
 
+(* defns FindType *)
+Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
+ | findtype_int : forall (i5:i),
+     findtype (e_lit i5) t_int
+ | findtype_arrow : forall (e:exp) (A B:typ),
+     lc_exp (e_abs e) ->
+     findtype  ( (e_ann  ( (e_abs e) )  (t_arrow A B)) )   (t_arrow A B) ] .
+
 (* defns BottomLike *)
 Inductive bottomlike : typ -> Prop :=    (* defn bottomlike *)
  | bl_bot : 
@@ -211,17 +219,6 @@ Inductive typing : ctx -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
      disjointness A B ->
      typing G (e_typeof e A e1 B e2) check C.
 
-(* defns FindType *)
-Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
- | findtype_int : forall (p:exp) (G:ctx),
-     pexpr p ->
-     typing G p infer t_int ->
-     findtype p t_int
- | findtype_arrow : forall (p:exp) (A B:typ) (G:ctx),
-     pexpr p ->
-     typing G p infer (t_arrow A B) ->
-     findtype p (t_arrow A B).
-
 (* defns Reduction *)
 Inductive step : exp -> exp -> Prop :=    (* defn step *)
  | step_beta : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp),
@@ -232,24 +229,20 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      lc_exp v ->
      lc_exp u ->
      step (e_app v  ( (e_ann u A) ) ) (e_app v u)
+ | step_appl : forall (e1 e2 e1':exp),
+     lc_exp e2 ->
+     step e1 e1' ->
+     step (e_app e1 e2) (e_app e1' e2)
  | step_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2 e':exp),
      lc_exp e1 ->
      lc_exp e2 ->
      step e e' ->
      step (e_typeof e A e1 B e2) (e_typeof e' A e1 B e2)
- | step_appl : forall (e1 e2 e1':exp),
-     lc_exp e2 ->
-     step e1 e1' ->
-     step (e_app e1 e2) (e_app e1' e2)
  | step_appr : forall (v r e':exp),
-     lc_exp v ->
+     value v ->
      rexpr r ->
      step r e' ->
      step (e_app v r) (e_app v e')
- | step_anno : forall (e:exp) (A:typ) (e':exp),
-      not ( value (e_ann e A) )  ->
-     step e e' ->
-     step (e_ann e A) (e_ann e' A)
  | step_ann_ann : forall (u:exp) (A B:typ),
      uexpr u ->
      step (e_ann (e_ann u A) B) (e_ann u B)
@@ -262,21 +255,25 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
  | step_lam_ann : forall (e:exp) (A B:typ),
      lc_exp (e_abs e) ->
      step (e_ann  ( (e_abs e) )  (t_arrow A B)) (e_ann (e_ann  ( (e_abs e) )  (t_arrow A B)) (t_arrow A B))
- | step_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var),
+ | step_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var) (C:typ),
      lc_exp e1 ->
      lc_exp e2 ->
      lc_exp e ->
      pexpr p ->
+     findtype p C ->
+     subtyping C A ->
      step (e_typeof p A e1 B e2)  (open_exp_wrt_exp  e (e_ann p A) ) 
- | step_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var),
+ | step_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var) (C:typ),
      lc_exp e1 ->
      lc_exp e2 ->
      lc_exp e ->
      pexpr p ->
+     findtype p C ->
+     subtyping C B ->
      step (e_typeof p A e1 B e2)  (open_exp_wrt_exp  e (e_ann p B) ) .
 
 
 (** infrastructure *)
-Hint Constructors pexpr rexpr value uexpr bottomlike disjointness subtyping typing findtype step lc_exp.
+Hint Constructors pexpr rexpr value uexpr findtype bottomlike disjointness subtyping typing step lc_exp.
 
 
