@@ -84,18 +84,18 @@ formula :: 'formula_' ::=
 
 
 defns
-PExpr :: '' ::=
+PreValue :: '' ::=
   
   defn
-  pexpr e ::   :: pexpr :: 'pexpr_'
-  {{ com PExpr }}
+  prevalue e ::   :: pexpr :: 'pexpr_'
+  {{ com PreValues }}
   by
 
     ------------ :: app
-    pexpr i
+    prevalue i
 
     --------------------------- :: abs
-    pexpr (\x.e) : A -> B
+    prevalue (\x.e) : A -> B
 
 
 defns
@@ -121,9 +121,10 @@ Value :: '' ::=
   {{ com Values }}
   by
 
-    pexpr p
+    prevalue p
     ------------ :: val
     value p : A
+
 
 defns
 UExpr :: '' ::=
@@ -138,7 +139,7 @@ UExpr :: '' ::=
     uexpr r
 
 
-    pexpr p
+    prevalue p
     ------------ :: pexpr
     uexpr p
 
@@ -176,32 +177,32 @@ Disjointness :: '' ::=
 
   by
 
--------------------- :: btmr
-A * Bot
+  -------------------- :: btmr
+  A * Bot
 
--------------------- :: btml
-Bot * A
+  -------------------- :: btml
+  Bot * A
 
+  
+  -------------------- :: intl
+  Int * A -> B
+  
+  
+  -------------------- :: intr
+  A -> B * Int
+  
 
--------------------- :: intl
-Int * A -> B
-
-
--------------------- :: intr
-A -> B * Int
-
-
-A * C
-A * C
--------------------------     :: orl
-A \/ B * C
-
-
-A * C
-A * C
--------------------------     :: orr
-C * A \/ B
-
+  A * C
+  A * C
+  -------------------------     :: orl
+  A \/ B * C
+  
+  
+  A * C
+  A * C
+  -------------------------     :: orr
+  C * A \/ B
+  
 
 defns
 Subtyping :: '' ::=
@@ -212,34 +213,34 @@ A <: B ::  :: subtyping :: s_
   {{ com Subtyping }}
 by
 
--------------------- :: btm
-Bot <: A
-
-
--------------------- :: int
-Int <: Int
-
-
-B1 <: A1 
-A2 <: B2
--------------------------     :: arrow
-A1 -> A2 <: B1 -> B2
-
-
-A1 <: A
-A2 <: A
--------------------------     :: ora
-A1 \/ A2 <: A
-
-
-A <: A1
--------------------------     :: orb
-A <: A1 \/ A2 
-
-
-A <: A2
--------------------------     :: orc
-A <: A1 \/ A2
+  -------------------- :: btm
+  Bot <: A
+  
+  
+  -------------------- :: int
+  Int <: Int
+  
+  
+  B1 <: A1 
+  A2 <: B2
+  -------------------------     :: arrow
+  A1 -> A2 <: B1 -> B2
+  
+  
+  A1 <: A
+  A2 <: A
+  -------------------------     :: ora
+  A1 \/ A2 <: A
+  
+  
+  A <: A1
+  -------------------------     :: orb
+  A <: A1 \/ A2 
+  
+  
+  A <: A2
+  -------------------------     :: orc
+  A <: A1 \/ A2
 
 
 defns
