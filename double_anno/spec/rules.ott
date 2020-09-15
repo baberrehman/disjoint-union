@@ -153,19 +153,15 @@ defns
 FindType :: '' ::=
   
   defn
-  findtype A ::   :: findtype :: 'findtype_'
+  findtype p A ::   :: findtype :: 'findtype_'
   {{ com FindType }}
   by
 
-    prevalue p
-    G |- p => Int
-    ------------ :: int
-    findtype Int
+    ---------------- :: int
+    findtype i Int
 
-    prevalue p
-    G |- p => A -> B
-    ----------------- :: arrow
-    findtype A -> B
+    ------------------------------------ :: arrow
+    findtype ((\x.e) : A -> B) (A -> B)
 
 
 defns
@@ -196,70 +192,62 @@ Disjointness :: '' ::=
 
   by
 
-  -------------------- :: btmr
-  A * Bot
+    -------------------- :: btmr
+    A * Bot
 
-  -------------------- :: btml
-  Bot * A
+    -------------------- :: btml
+    Bot * A
 
+    -------------------- :: intl
+    Int * A -> B
   
-  -------------------- :: intl
-  Int * A -> B
-  
-  
-  -------------------- :: intr
-  A -> B * Int
-  
+    -------------------- :: intr
+    A -> B * Int
 
-  A * C
-  A * C
-  -------------------------     :: orl
-  A \/ B * C
+    A * C
+    A * C
+    -------------------------     :: orl
+    A \/ B * C
   
-  
-  A * C
-  A * C
-  -------------------------     :: orr
-  C * A \/ B
+    A * C
+    A * C
+    -------------------------     :: orr
+    C * A \/ B
   
 
 defns
 Subtyping :: '' ::=
 
-defn
-
-A <: B ::  :: subtyping :: s_
+  defn
+  A <: B ::  :: subtyping :: s_
   {{ com Subtyping }}
-by
+  
+  by
 
-  -------------------- :: btm
-  Bot <: A
+    -------------------- :: btm
+    Bot <: A
   
+    -------------------- :: int
+    Int <: Int
   
-  -------------------- :: int
-  Int <: Int
+    B1 <: A1 
+    A2 <: B2
+    -------------------------     :: arrow
+    A1 -> A2 <: B1 -> B2
   
+    A1 <: A
+    A2 <: A
+    -------------------------     :: ora
+    A1 \/ A2 <: A
   
-  B1 <: A1 
-  A2 <: B2
-  -------------------------     :: arrow
-  A1 -> A2 <: B1 -> B2
-  
-  
-  A1 <: A
-  A2 <: A
-  -------------------------     :: ora
-  A1 \/ A2 <: A
-  
-  
-  A <: A1
-  -------------------------     :: orb
-  A <: A1 \/ A2 
-  
-  
-  A <: A2
-  -------------------------     :: orc
-  A <: A1 \/ A2
+    A <: A1
+    -------------------------     :: orb
+    A <: A1 \/ A2 
+
+    A <: A2
+    -------------------------     :: orc
+    A <: A1 \/ A2
+
 
 
 defns
@@ -322,33 +310,27 @@ Reduction :: '' ::=
     ------------------------------------------------- :: beta
     ((\x.e):A1->B1:A2->B2) p --> (e [x ~> p:A1]):B2
 
-
-%    ??? C
-%    ---------------------------------------------- :: beta
-%    (\x.e):A->B:C v --> (e [x ~> v:A]):B
-
    
-   ----------------------- :: vu
-   v (u : A) --> v u
-
-
-   e --> e'
-   ------------------------------------------------- :: typeof
-   typeof e as A e1 B e2 --> typeof e' as A e1 B e2
+    ----------------------- :: vu
+    v (u : A) --> v u
+    
 
     e1 --> e1'
     ---------------- :: appl
     e1 e2 --> e1' e2
 
+
+    e --> e'
+    ------------------------------------------------- :: typeof
+    typeof e as A e1 B e2 --> typeof e' as A e1 B e2
+
+
+    value v
     rexpr r
     r --> e'
     ---------------- :: appr
     v r --> v e'
 
-    not value e:A
-    e --> e'
-    ---------------- :: anno
-    e:A --> e':A
 
     uexpr u
     --------------------- :: ann_ann
@@ -369,11 +351,15 @@ Reduction :: '' ::=
     (\x.e):A->B --> (\x.e):A->B:A->B
 
 
-   prevalue p
-   ------------------------------------------------- :: typeofl
-   typeof p as A e1 B e2 --> e [x ~> p:A]
+    prevalue p
+    findtype p C
+    C <: A
+    ------------------------------------------------- :: typeofl
+    typeof p as A e1 B e2 --> e [x ~> p:A]
 
 
-   prevalue p
-   ------------------------------------------------- :: typeofr
-   typeof p as A e1 B e2 --> e [x ~> p:B]
+    prevalue p
+    findtype p C
+    C <: B
+    ------------------------------------------------- :: typeofr
+    typeof p as A e1 B e2 --> e [x ~> p:B]
