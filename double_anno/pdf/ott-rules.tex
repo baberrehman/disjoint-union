@@ -67,28 +67,28 @@
 }}
 
 % defnss
-% defns PExpr
+% defns PreValue
 %% defn pexpr
-\newcommand{\ottdrulepexprXXapp}[1]{\ottdrule[#1]{%
+\newcommand{\ottdrulepexprXXint}[1]{\ottdrule[#1]{%
 }{
-\ottkw{pexpr} \, \ottmv{i}}{%
-{\ottdrulename{pexpr\_app}}{}%
+\ottkw{prevalue} \, \ottmv{i}}{%
+{\ottdrulename{pexpr\_int}}{}%
 }}
 
 
 \newcommand{\ottdrulepexprXXabs}[1]{\ottdrule[#1]{%
 }{
-\ottkw{pexpr} \, \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}}{%
+\ottkw{prevalue} \, \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}}{%
 {\ottdrulename{pexpr\_abs}}{}%
 }}
 
-\newcommand{\ottdefnpexpr}[1]{\begin{ottdefnblock}[#1]{$\ottkw{pexpr} \, \ottnt{e}$}{\ottcom{PExpr}}
-\ottusedrule{\ottdrulepexprXXapp{}}
+\newcommand{\ottdefnpexpr}[1]{\begin{ottdefnblock}[#1]{$\ottkw{prevalue} \, \ottnt{e}$}{\ottcom{PreValues}}
+\ottusedrule{\ottdrulepexprXXint{}}
 \ottusedrule{\ottdrulepexprXXabs{}}
 \end{ottdefnblock}}
 
 
-\newcommand{\ottdefnsPExpr}{
+\newcommand{\ottdefnsPreValue}{
 \ottdefnpexpr{}}
 
 % defns RExpr
@@ -118,7 +118,7 @@
 % defns Value
 %% defn value
 \newcommand{\ottdrulevalueXXval}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{pexpr} \, \ottnt{p}}%
+\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
 }{
 \ottkw{value} \, \ottnt{p}  \ottsym{:}  \ottnt{A}}{%
 {\ottdrulename{value\_val}}{}%
@@ -143,7 +143,7 @@
 
 
 \newcommand{\ottdruleuexprXXpexpr}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{pexpr} \, \ottnt{p}}%
+\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
 }{
 \ottkw{uexpr} \, \ottnt{p}}{%
 {\ottdrulename{uexpr\_pexpr}}{}%
@@ -166,6 +166,34 @@
 
 \newcommand{\ottdefnsUExpr}{
 \ottdefnuexpr{}}
+
+% defns FindType
+%% defn findtype
+\newcommand{\ottdrulefindtypeXXint}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+\ottpremise{\Gamma  \vdash  \ottnt{p} \,  \Rightarrow  \,  \mathsf{Int} }%
+}{
+\ottkw{findtype} \,  \mathsf{Int} }{%
+{\ottdrulename{findtype\_int}}{}%
+}}
+
+
+\newcommand{\ottdrulefindtypeXXarrow}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+\ottpremise{\Gamma  \vdash  \ottnt{p} \,  \Rightarrow  \, \ottnt{A}  \rightarrow  \ottnt{B}}%
+}{
+\ottkw{findtype} \, \ottnt{A}  \rightarrow  \ottnt{B}}{%
+{\ottdrulename{findtype\_arrow}}{}%
+}}
+
+\newcommand{\ottdefnfindtype}[1]{\begin{ottdefnblock}[#1]{$\ottkw{findtype} \, \ottnt{A}$}{\ottcom{FindType}}
+\ottusedrule{\ottdrulefindtypeXXint{}}
+\ottusedrule{\ottdrulefindtypeXXarrow{}}
+\end{ottdefnblock}}
+
+
+\newcommand{\ottdefnsFindType}{
+\ottdefnfindtype{}}
 
 % defns BottomLike
 %% defn bottomlike
@@ -395,7 +423,7 @@
 % defns Reduction
 %% defn step
 \newcommand{\ottdrulestepXXbeta}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{pexpr} \, \ottnt{p}}%
+\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
 }{
 \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottnt{p}  \longrightarrow  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}}}{%
 {\ottdrulename{step\_beta}}{}%
@@ -473,6 +501,22 @@
 {\ottdrulename{step\_lam\_ann}}{}%
 }}
 
+
+\newcommand{\ottdrulestepXXtypeofl}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+}{
+ typeof \  \ottnt{p}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]}}{%
+{\ottdrulename{step\_typeofl}}{}%
+}}
+
+
+\newcommand{\ottdrulestepXXtypeofr}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+}{
+ typeof \  \ottnt{p}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]}}{%
+{\ottdrulename{step\_typeofr}}{}%
+}}
+
 \newcommand{\ottdefnstep}[1]{\begin{ottdefnblock}[#1]{$\ottnt{e}  \longrightarrow  \ottnt{e'}$}{\ottcom{Small-step operational semantics}}
 \ottusedrule{\ottdrulestepXXbeta{}}
 \ottusedrule{\ottdrulestepXXvu{}}
@@ -484,6 +528,8 @@
 \ottusedrule{\ottdrulestepXXrXXann{}}
 \ottusedrule{\ottdrulestepXXint{}}
 \ottusedrule{\ottdrulestepXXlamXXann{}}
+\ottusedrule{\ottdrulestepXXtypeofl{}}
+\ottusedrule{\ottdrulestepXXtypeofr{}}
 \end{ottdefnblock}}
 
 
@@ -491,10 +537,11 @@
 \ottdefnstep{}}
 
 \newcommand{\ottdefnss}{
-\ottdefnsPExpr
+\ottdefnsPreValue
 \ottdefnsRExpr
 \ottdefnsValue
 \ottdefnsUExpr
+\ottdefnsFindType
 \ottdefnsBottomLike
 \ottdefnsDisjointness
 \ottdefnsSubtyping

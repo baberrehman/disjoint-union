@@ -91,7 +91,7 @@ PreValue :: '' ::=
   {{ com PreValues }}
   by
 
-    ------------ :: app
+    ------------ :: int
     prevalue i
 
     --------------------------- :: abs
@@ -147,6 +147,25 @@ UExpr :: '' ::=
     uexpr u
     ------------ :: anno
     uexpr u : A
+
+
+defns
+FindType :: '' ::=
+  
+  defn
+  findtype A ::   :: findtype :: 'findtype_'
+  {{ com FindType }}
+  by
+
+    prevalue p
+    G |- p => Int
+    ------------ :: int
+    findtype Int
+
+    prevalue p
+    G |- p => A -> B
+    ----------------- :: arrow
+    findtype A -> B
 
 
 defns
@@ -299,8 +318,8 @@ Reduction :: '' ::=
   by
 
 
-    pexpr p
-    --------------------------------- :: beta
+    prevalue p
+    ------------------------------------------------- :: beta
     ((\x.e):A1->B1:A2->B2) p --> (e [x ~> p:A1]):B2
 
 
@@ -348,3 +367,13 @@ Reduction :: '' ::=
     
     --------------------------------- :: lam_ann
     (\x.e):A->B --> (\x.e):A->B:A->B
+
+
+   prevalue p
+   ------------------------------------------------- :: typeofl
+   typeof p as A e1 B e2 --> e [x ~> p:A]
+
+
+   prevalue p
+   ------------------------------------------------- :: typeofr
+   typeof p as A e1 B e2 --> e [x ~> p:B]
