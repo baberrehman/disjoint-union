@@ -1,4 +1,5 @@
 % key idea: keep the original annotation and the outermost one for lambdas
+% new idea: drop u and r
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% METAVARIABLES
@@ -19,7 +20,7 @@ grammar
     | A \/ B 	             ::   :: union
     | ( A )                :: S :: paren   {{ coq [[A]] }}
 
-  exp, e, v, p, u, r       :: 'e_' ::=     {{ com expression }}
+  exp, e, v, p             :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
     | i                    ::   :: lit
     | e : A                ::   :: ann
@@ -99,21 +100,6 @@ PreValue :: '' ::=
 
 
 defns
-RExpr :: '' ::=
-  
-  defn
-  rexpr e ::   :: rexpr :: 'rexpr_'
-  {{ com RExpr }}
-  by
-
-    ------------ :: app
-    rexpr (e1 e2)
-
-    --------------------------- :: typeof
-    rexpr typeof e as A e1 B e2
-
-
-defns
 Value :: '' ::=
   
   defn
@@ -125,28 +111,6 @@ Value :: '' ::=
     ------------ :: val
     value p : A
 
-
-defns
-UExpr :: '' ::=
-  
-  defn
-  uexpr e ::   :: uexpr :: 'uexpr_'
-  {{ com UEpxr }}
-  by
-
-    rexpr r
-    ------------ :: rexpr
-    uexpr r
-
-
-    prevalue p
-    ------------ :: pexpr
-    uexpr p
-
-
-    uexpr u
-    ------------ :: anno
-    uexpr u : A
 
 
 defns
@@ -316,32 +280,25 @@ Reduction :: '' ::=
 
 
     value v
-    rexpr r
-    r --> e'
+    e --> e'
     ---------------- :: appr
-    v r --> v e'
+    v e --> v e'
 
 
     prevalue p
-    ------------------------------------------------- :: beta
-    ((\x.e):A1->B1:A2->B2) p --> (e [x ~> p:A1]):B2
+    ----------------------------------------------------- :: beta
+    ((\x.e):A1->B1:A2->B2) (p:C) --> (e [x ~> p:A1]):B2
 
 
-    rexpr r
-    r --> e'
+    not value e:A
+    e --> e'
     ----------------------- :: ann
-    r : A --> e' : A
+    e : A --> e' : A
 
 
-    value v
-    uexpr u
-    ----------------------- :: rm_ann
-    v (u : A) --> v u
-
-
-    uexpr u
-    --------------------- :: top_ann
-    u : A : B --> u : B
+    prevalue p
+    --------------------- :: rm_ann
+    p : A : B --> p : B
 
     
     --------------------------------- :: lam_ann

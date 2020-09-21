@@ -22,7 +22,7 @@ Inductive dirflag : Set :=  (*r typing direction *)
  | infer : dirflag
  | check : dirflag.
 
-(** Binding are mapping to term variables. 
+(** Binding are mapping to term variables.
  [x ~: T] is a typing assumption *)
 
  Inductive bind : Set :=
@@ -131,7 +131,7 @@ Inductive rexpr : exp -> Prop :=    (* defn rexpr *)
  | rexpr_app : forall (e1 e2:exp),
      lc_exp e1 ->
      lc_exp e2 ->
-     rexpr  ( (e_app e1 e2) ) 
+     rexpr  ( (e_app e1 e2) )
  | rexpr_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2:exp),
      lc_exp e ->
      lc_exp e1 ->
@@ -166,7 +166,7 @@ Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
 
 (* defns BottomLike *)
 Inductive bottomlike : typ -> Prop :=    (* defn bottomlike *)
- | bl_bot : 
+ | bl_bot :
      bottomlike t_bot
  | bl_or : forall (A B:typ),
      bottomlike A ->
@@ -199,7 +199,7 @@ Reserved Notation "A <: B" (at level 80).
 Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
  | s_btm : forall (A:typ),
      t_bot <: A
- | s_int : 
+ | s_int :
      subtyping t_int t_int
  | s_arrow : forall (A1 A2 B1 B2:typ),
      B1 <: A1 ->
@@ -260,53 +260,50 @@ Inductive typing : env -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
 Reserved Notation "e --> e'" (at level 80).
 Inductive step : exp -> exp -> Prop :=    (* defn step *)
  | step_int : forall i5,
-     (e_lit i5) --> (e_ann (e_lit i5) t_int)
+     step (e_lit i5) (e_ann (e_lit i5) t_int)
  | step_appl : forall (e1 e2 e1':exp),
      lc_exp e2 ->
-     e1 --> e1' ->
-     (e_app e1 e2) --> (e_app e1' e2)
- | step_appr : forall (v r e':exp),
+     step e1 e1' ->
+     step (e_app e1 e2) (e_app e1' e2)
+ | step_appr : forall (v e e':exp),
      value v ->
-     rexpr r ->
-     r --> e' ->
-     (e_app v r) --> (e_app v e')
- | step_beta : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp),
+     step e e' ->
+     step (e_app v e) (e_app v e')
+ | step_beta : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp) (C:typ),
      lc_exp (e_abs e) ->
      pexpr p ->
-     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) )  p) --> (e_ann  (  (open_exp_wrt_exp  e (e_ann p A1) )  )  B2)
- | step_ann : forall (r:exp) (A:typ) (e':exp),
-     rexpr r ->
-     r --> e' ->
-     (e_ann r A) --> (e_ann e' A)
- | step_rm_ann : forall (v u:exp) (A:typ),
-     value v ->
-     uexpr u ->
-     (e_app v  ( (e_ann u A) ) ) --> (e_app v u)
- | step_top_ann : forall (u:exp) (A B:typ),
-     uexpr u ->
-     (e_ann (e_ann u A) B) --> (e_ann u B)
+     step (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) )   ( (e_ann p C) ) ) (e_ann  (  (open_exp_wrt_exp  e (e_ann p A1) )  )  B2)
+ | step_ann : forall (e:exp) (A:typ) (e':exp),
+      not ( value (e_ann e A) )  ->
+     step e e' ->
+     step (e_ann e A) (e_ann e' A)
+ | step_rm_ann : forall (p:exp) (A B:typ),
+     pexpr p ->
+     step (e_ann (e_ann p A) B) (e_ann p B)
  | step_lam_ann : forall (e:exp) (A B:typ),
      lc_exp (e_abs e) ->
-     (e_ann  ( (e_abs e) )  (t_arrow A B)) --> (e_ann (e_ann  ( (e_abs e) )  (t_arrow A B)) (t_arrow A B))
+     step (e_ann  ( (e_abs e) )  (t_arrow A B)) (e_ann (e_ann  ( (e_abs e) )  (t_arrow A B)) (t_arrow A B))
  | step_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2 e':exp),
      lc_exp e1 ->
      lc_exp e2 ->
-     e --> e' ->
-     (e_typeof e A e1 B e2) --> (e_typeof e' A e1 B e2)
+     step e e' ->
+     step (e_typeof e A e1 B e2) (e_typeof e' A e1 B e2)
  | step_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var) (C:typ),
      lc_exp e1 ->
      lc_exp e2 ->
+     lc_exp e ->
      pexpr p ->
      findtype p C ->
-     C <: A ->
-     (e_typeof p A e1 B e2) -->  (open_exp_wrt_exp  e1 (e_ann p A) ) 
+     subtyping C A ->
+     step (e_typeof p A e1 B e2)  (open_exp_wrt_exp  e (e_ann p A) )
  | step_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var) (C:typ),
      lc_exp e1 ->
      lc_exp e2 ->
+     lc_exp e ->
      pexpr p ->
      findtype p C ->
-     C <: B ->
-     (e_typeof p A e1 B e2) -->  (open_exp_wrt_exp  e2 (e_ann p B) )
+     subtyping C B ->
+     step (e_typeof p A e1 B e2)  (open_exp_wrt_exp  e (e_ann p B) )
 where "e --> e'" := (step e e') : env_scope.
 
 (** infrastructure *)

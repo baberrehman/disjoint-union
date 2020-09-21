@@ -17,7 +17,7 @@ Ltac pick_fresh x :=
   let L := gather_vars in (pick_fresh_gen L x).
 
 (** "apply_fresh T as x" is used to apply inductive rule which
-   use an universal quantification over a cofinite set *)    
+   use an universal quantification over a cofinite set *)
 
 Tactic Notation "apply_fresh" constr(T) "as" ident(x) :=
   apply_fresh_base T gather_vars x.
@@ -60,7 +60,7 @@ Lemma open_ee_rec_term : forall u e,
   lc_exp e -> forall k, e = open_exp_wrt_exp_rec k u e.
 Proof.
   induction 1; intros; simpl; f_equal*.
-  unfolds open_exp_wrt_exp. pick_fresh x. 
+  unfolds open_exp_wrt_exp. pick_fresh x.
    apply* (@open_ee_rec_term_core e 0 (e_var_f x)).
   unfolds open_exp_wrt_exp. pick_fresh x.
    apply* (@open_ee_rec_term_core e1 0 (e_var_f x)).
@@ -101,7 +101,7 @@ Qed.
 (** Opening up a body t with a type u is the same as opening
   up the abstraction with a fresh name x and then substituting u for x. *)
 
-Lemma subst_ee_intro : forall x u e, 
+Lemma subst_ee_intro : forall x u e,
   x \notin fv_exp e -> lc_exp u ->
   open_exp_wrt_exp e u = subst_exp u x (e open_ee_var x).
 Proof.
@@ -120,7 +120,7 @@ Proof.
    rewrite* subst_ee_open_ee_var.
  - apply_fresh* lc_e_typeof as y.
    rewrite* subst_ee_open_ee_var.
-   rewrite* subst_ee_open_ee_var. 
+   rewrite* subst_ee_open_ee_var.
 Qed.
 
 Hint Resolve subst_ee_term.
@@ -134,7 +134,7 @@ Hint Resolve subst_ee_term.
 Lemma ok_from_okt : forall E,
   okt E -> ok E.
 Proof.
-  induction 1; auto. 
+  induction 1; auto.
 Qed.
 
 Hint Extern 1 (ok _) => apply ok_from_okt.
@@ -164,7 +164,7 @@ Proof.
   rewrite concat_assoc in *.
   apply okt_push_inv in O.
   destruct O. apply IHF in H.
-  apply okt_typ; autos*.  
+  apply okt_typ; autos*.
 Qed.
 
 (** Automation *)
@@ -188,7 +188,7 @@ Proof.
   specializes H0 x. destructs~ H0.
  - apply lc_e_typeof with (L:=L); intros. destruct~ IHtyping.
    specialize (H1 x H5). destruct~ H1.
-   specialize (H3 x H5). destruct~ H3. 
+   specialize (H3 x H5). destruct~ H3.
 Qed.
 
 (** The value relation is restricted to well-formed objects. *)
@@ -200,15 +200,23 @@ Proof.
   inverts* H.
 Qed.
 
+Lemma prevalue_regular : forall t,
+  pexpr t -> lc_exp t.
+Proof.
+  induction 1; autos*.
+Qed.
+
+Hint Immediate value_regular prevalue_regular : core.
+
 (* ********************************************************************** *)
 (** Weakening (5) *)
 
 
 Lemma typing_weakening : forall E F G e dir T,
-   typing (E & G) e dir T -> 
+   typing (E & G) e dir T ->
    okt (E & F & G) ->
    typing (E & F & G) e dir T.
-Proof. 
+Proof.
   introv Typ. gen F. inductions Typ; introv Ok.
   - apply* typ_lit.
   - apply* typ_var. apply* binds_weaken.
@@ -234,7 +242,7 @@ Lemma typing_through_subst_ee : forall E F x T e u dir U,
    typing (E & F) (subst_exp u x e) dir T.
 Proof.
 introv TypT TypU.
-lets TypT': TypT. 
+lets TypT': TypT.
 inductions TypT; introv; simpl.
  - apply* typ_lit.
  - case_var.
@@ -267,7 +275,7 @@ inductions TypT; introv; simpl.
    rewrite~ concat_assoc.
    rewrite~ concat_assoc.
    rewrite~ <- concat_assoc.
-   apply typing_regular in TypU. destruct~ TypU. 
+   apply typing_regular in TypU. destruct~ TypU.
 + assert (y \notin L) by auto.
    rewrite* subst_ee_open_ee_var.
    lets: H1 y H4.
@@ -277,8 +285,12 @@ inductions TypT; introv; simpl.
    rewrite~ concat_assoc.
    rewrite~ concat_assoc.
    rewrite~ <- concat_assoc.
-   apply typing_regular in TypU. destruct~ TypU. 
+   apply typing_regular in TypU. destruct~ TypU.
 Qed.
+
+Lemma chk_inf : forall G e A,
+    typing G (e_ann e A) check A <-> typing G (e_ann e A) infer A.
+Admitted.
 
 Lemma chk_sub : forall G e A, typing G e check A -> forall B, A <: B -> typing G e check B.
 Proof.
@@ -294,6 +306,8 @@ lets: H x H2.
 inductions H1; try solve [inversion H1].
 clear IHsubtyping1 IHsubtyping2.
 Admitted.
+
+Hint Resolve chk_inf chk_sub : core.
 
 Lemma pexpr_inf_typ : forall G p A, pexpr p ->
 typing G p check A -> exists B, typing G p infer B /\ B <: A.
@@ -323,122 +337,72 @@ Qed.*)
 
 (* ********************************************************************** *)
 (** Preservation Result (20) *)
-                    
+
 
 Lemma preservation : forall E e e' dir T,
-  typing E e dir T -> 
-  e --> e' -> 
+  typing E e dir T ->
+  e --> e' ->
   typing E e' dir T.
 Proof.
   introv Typ. gen e'.
-  lets Typ': Typ.
-  induction Typ; introv Red; try solve [ inversion Red ].
-  - inverts* Red.
-  - inverts* Red.
-   + inverts* Typ. inverts* H.
-    apply typ_ann.
-    eapply chk_sub; eauto.
-  + constructor.
-    eapply typ_sub; eauto. apply sub_refl.
- - inverts* Red.
-  + inverts Typ1.
-    do 3 dependent destruction H5.
-    dependent destruction H5.
-    dependent destruction H0.
-    constructor.
-    pick_fresh x.
-    assert (x \notin L) by auto.
-    lets: H x H0.
-    assert (G & x ~: A1 = G & x ~: A1 & empty).
-    rewrite* concat_empty_r.
-    rewrite H4 in H2.
-    assert (G = G & empty).
-    rewrite* concat_empty_r.
-    rewrite H5.
-    dependent destruction H3.
-   * assert (typing G (e_ann (e_lit i5) A1) infer A1).
-     constructor.
-     eapply chk_sub; eauto.
-     forwards*: typing_through_subst_ee.
-     rewrite* (@subst_ee_intro x).
-     eapply chk_sub; eauto.
-   * assert (typing G (e_ann (e_ann (e_abs e0) (t_arrow A0 B0)) A1) infer A1).
-    constructor.
-    eapply chk_sub; eauto.
-    forwards*: typing_through_subst_ee.
-    rewrite* (@subst_ee_intro x).
-    eapply chk_sub; eauto.
-  + eapply typ_app; eauto.
-    inverts Typ2. inverts H.
-    eapply chk_sub; eauto. 
- - forwards*: IHTyp.
- - inverts* Red.
-  + pick_fresh y.
-    assert (y \notin L) by auto.
-    lets: H y H4.
-    assert (G & y ~: A = G & y ~: A & empty).
-    rewrite* concat_empty_r.
-    rewrite H6 in H5.
-    assert (G = G & empty).
-    rewrite* concat_empty_r.
-    rewrite H7.
-    dependent destruction H13.
-   * assert (typing G (e_lit i5) infer t_int). apply typ_lit.
-    forwards*: typing_regular.
-    forwards*: typing_through_subst_ee .
-    rewrite* (@subst_ee_intro y).
-   * assert (typing G (e_ann (e_abs e) (t_arrow A0 B0)) infer (t_arrow A0 B0)). apply typ_ann.
-    do 3 dependent destruction Typ.
-    dependent destruction Typ.
-    eapply typ_abs; eauto.
-    forwards*: typing_through_subst_ee .
-    rewrite* (@subst_ee_intro y).
-  + pick_fresh y.
-    assert (y \notin L) by auto.
-    lets: H1 y H4.
-    assert (G & y ~: B = G & y ~: B & empty).
-    rewrite* concat_empty_r.
-    rewrite H6 in H5.
-    assert (G = G & empty).
-    rewrite* concat_empty_r.
-    rewrite H7.
-    dependent destruction H13.
-   * assert (typing G (e_lit i5) infer t_int). apply typ_lit.
-    forwards*: typing_regular.
-    forwards*: typing_through_subst_ee.
-    rewrite* (@subst_ee_intro y).
-   * assert (typing G (e_ann (e_abs e) (t_arrow A0 B0)) infer (t_arrow A0 B0)).
-    constructor.
-    do 3 dependent destruction Typ.
-    dependent destruction Typ.
-    eapply typ_abs; eauto.
-    forwards*: typing_through_subst_ee.
-    rewrite* (@subst_ee_intro y).
-Qed.
+  induction Typ; introv Red; try solve [ inverts* Red ].
+  - (* rm anno *)
+    inverts* Red.
+    + (* p *)
+      inverts Typ. inverts* H.
+    + (* lam *)
+      econstructor. applys* chk_inf.
+  - (* app *)
+    inverts* Red.
+    + (* beta *)
+      inverts Typ1.
+      do 3 dependent destruction H5.
+      * (* infer lam *)
+        dependent destruction H5.
+      *
+        dependent destruction H0.
+        constructor.
+        pick_fresh x.
+        assert (x \notin L) by auto.
+        lets: H x H0.
+        assert (G & x ~: A1 = G & x ~: A1 & empty).
+        rewrite* concat_empty_r.
+        rewrite H4 in H2.
+        assert (G = G & empty).
+        rewrite* concat_empty_r.
+        rewrite H5.
+      (* prove p:A1 checks *)
+        inverts Typ2. inverts H6.
+        assert (typing G (e_ann p A1) infer A1) by eauto.
+        forwards*: typing_through_subst_ee.
+        rewrite* (@subst_ee_intro x).
+  - (* typeof *)
+    admit.
+Admitted.
 
 Lemma canonical_form_abs_prevalue : forall t U1 U2,
-  pexpr t -> typing empty t infer (t_arrow U1 U2) -> 
+  pexpr t -> typing empty t infer (t_arrow U1 U2) ->
   exists V, exists e1, exists V1, t = e_ann (e_abs e1) (t_arrow V V1).
 Proof.
-  introv Val Typ. 
+  introv Val Typ.
   gen_eq T: (t_arrow U1 U2). intro st.
-   assert (T <: (t_arrow U1 U2)). 
+   assert (T <: (t_arrow U1 U2)).
 { rewrite st; apply sub_refl. }
   clear st. gen_eq E: (@empty typ).  gen U1 U2.
-  induction Typ; introv EQT EQE; 
+  induction Typ; introv EQT EQE;
    try solve [ inverts* Val | inversion EQT | eauto ].
-    subst. assert (B <: (t_arrow U1 U2)). { 
+    subst. assert (B <: (t_arrow U1 U2)). {
     eapply sub_transitivity. apply H. apply EQT. }
    eapply IHTyp. apply Val. apply H0. reflexivity.
 Qed.
 
 Lemma canonical_form_abs_value : forall t U1 U2,
-  value t -> typing empty t infer (t_arrow U1 U2) -> 
+  value t -> typing empty t infer (t_arrow U1 U2) ->
   exists V, exists e1, exists V1, exists V2, t = (e_ann (e_ann (e_abs e1) (t_arrow V V1)) V2).
 Proof.
-  introv Val Typ. 
+  introv Val Typ.
   gen_eq T: (t_arrow U1 U2). intro st.
-   assert (T <: (t_arrow U1 U2)). 
+   assert (T <: (t_arrow U1 U2)).
 { rewrite st; apply sub_refl. }
   clear st. gen_eq E: (@empty typ).  gen U1 U2.
   induction Typ; introv EQT EQE;
@@ -446,12 +410,12 @@ Proof.
    inverts* Val. inverts* H0.
    inverts* Typ. inverts* H.
    eapply sub_transitivity in EQT; eauto. inversion EQT.
-    subst. assert (B <: (t_arrow U1 U2)). { 
+    subst. assert (B <: (t_arrow U1 U2)). {
     eapply sub_transitivity. apply H. apply EQT. }
    eapply IHTyp. apply Val. apply H0. reflexivity.
 Qed.
 
-Lemma check_or_typ : forall E e A B dir,  
+Lemma check_or_typ : forall E e A B dir,
    value e ->
    A *s B ->
    typing E e check (t_union A B) ->
@@ -463,8 +427,9 @@ Proof.
   inverts* H. inverts* H4.
 Admitted.
 
-Lemma progress : forall e dir T,
-typing empty e dir T -> value e \/ exists e', e --> e'.
+(* need to be strengthened *)
+Lemma progress : forall e T,
+typing empty e infer T -> value e \/ exists e', e --> e'.
 Proof.
 introv Typ. gen_eq E: (@empty typ). lets Typ': Typ.
 inductions Typ; intros EQ; subst.
@@ -483,7 +448,7 @@ inductions Typ; intros EQ; subst.
     (*lets: canonical_form_abs_value e1 A B Val1 Typ1.
     destruct H as [V [e [V1 [V2]]]].
     subst. inverts* Typ1.*)
-    exists (e_ann (open_exp_wrt_exp e (e_ann e2 A1)) B). 
+    exists (e_ann (open_exp_wrt_exp e (e_ann e2 A1)) B).
     eapply step_beta; eauto.
     inductions Val2. inverts* H0. admit. admit.
     exists (e_app e1 e2'). eapply step_appr; eauto. admit.
@@ -543,10 +508,10 @@ Proof.
   induction He1; introv He2.
   - inverts* He2.
   - inverts* He2.
-   + forwards*: IHHe1. rewrite* H0. 
-   + inverts* H2. inverts* H0. inverts* He1. inversion H2. inverts* He1. inversion H4. inverts* H7; inversion H0. 
+   + forwards*: IHHe1. rewrite* H0.
+   + inverts* H2. inverts* H0. inverts* He1. inversion H2. inverts* He1. inversion H4. inverts* H7; inversion H0.
    + inverts* He1. inversion H3. inverts* H6; inversion H0.
-   + inverts* H2. inverts* H0. inverts* He1. inversion H2. inverts* He1. inversion H3. inverts* H6; inversion H0. 
+   + inverts* H2. inverts* H0. inverts* He1. inversion H2. inverts* He1. inversion H3. inverts* H6; inversion H0.
   - inverts* He2.
    + inverts* H. inverts* H5.
      lets: pexpr_rexpr_false p H4 H1; inversion H.
@@ -555,10 +520,10 @@ Proof.
    + forwards*: IHHe1. rewrite* H1.
    + lets: pexpr_rexpr_false r H0 H5. inversion H1.
    + inversion H0.
-  - inverts* He2. 
+  - inverts* He2.
    + inverts* H5. inverts* H4. inverts* H7; inversion H1.
    + inverts* H6; try solve [inversion H0 | inversion H4].
-   + inverts* H0. inverts* H5; inversion H0. 
+   + inverts* H0. inverts* H5; inversion H0.
   - inverts* He2.
    + forwards*: IHHe1. rewrite* H0.
    + inversion H.
@@ -569,14 +534,11 @@ Proof.
      inverts* H1. inversion H6; inversion H.
      inversion H1.
    + inversion H4.
-   + inverts* H5. inverts H0; inversion H1. 
+   + inverts* H5. inverts H0; inversion H1.
  - inverts* He2. inversion H2.
  - inverts* He2. inversion H2.
  - inverts* He2.
   + forwards*: IHHe1 H9. rewrite* H1.
   + admit.
   + admit.
-Admitted.              
-     
-
-     
+Admitted.
