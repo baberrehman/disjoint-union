@@ -418,18 +418,10 @@
 
 % defns Reduction
 %% defn step
-\newcommand{\ottdrulestepXXbeta}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+\newcommand{\ottdrulestepXXint}[1]{\ottdrule[#1]{%
 }{
-\ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottnt{p}  \longrightarrow  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}}}{%
-{\ottdrulename{step\_beta}}{}%
-}}
-
-
-\newcommand{\ottdrulestepXXvu}[1]{\ottdrule[#1]{%
-}{
-\ottnt{v} \, \ottsym{(}  \ottnt{u}  \ottsym{:}  \ottnt{A}  \ottsym{)}  \longrightarrow  \ottnt{v} \, \ottnt{u}}{%
-{\ottdrulename{step\_vu}}{}%
+\ottmv{i}  \longrightarrow  \ottmv{i}  \ottsym{:}   \mathsf{Int} }{%
+{\ottdrulename{step\_int}}{}%
 }}
 
 
@@ -438,14 +430,6 @@
 }{
 \ottnt{e_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}  \longrightarrow  \ottnt{e'_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}}{%
 {\ottdrulename{step\_appl}}{}%
-}}
-
-
-\newcommand{\ottdrulestepXXtypeof}[1]{\ottdrule[#1]{%
-\ottpremise{\ottnt{e}  \longrightarrow  \ottnt{e'}}%
-}{
- typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow   typeof \  \ottnt{e'}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}} }{%
-{\ottdrulename{step\_typeof}}{}%
 }}
 
 
@@ -459,27 +443,37 @@
 }}
 
 
-\newcommand{\ottdrulestepXXannXXann}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{uexpr} \, \ottnt{u}}%
+\newcommand{\ottdrulestepXXbeta}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
 }{
-\ottnt{u}  \ottsym{:}  \ottnt{A}  \ottsym{:}  \ottnt{B}  \longrightarrow  \ottnt{u}  \ottsym{:}  \ottnt{B}}{%
-{\ottdrulename{step\_ann\_ann}}{}%
+\ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottnt{p}  \longrightarrow  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}}}{%
+{\ottdrulename{step\_beta}}{}%
 }}
 
 
-\newcommand{\ottdrulestepXXrXXann}[1]{\ottdrule[#1]{%
+\newcommand{\ottdrulestepXXann}[1]{\ottdrule[#1]{%
 \ottpremise{\ottkw{rexpr} \, \ottnt{r}}%
 \ottpremise{\ottnt{r}  \longrightarrow  \ottnt{e'}}%
 }{
 \ottnt{r}  \ottsym{:}  \ottnt{A}  \longrightarrow  \ottnt{e'}  \ottsym{:}  \ottnt{A}}{%
-{\ottdrulename{step\_r\_ann}}{}%
+{\ottdrulename{step\_ann}}{}%
 }}
 
 
-\newcommand{\ottdrulestepXXint}[1]{\ottdrule[#1]{%
+\newcommand{\ottdrulestepXXrmXXann}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{value} \, \ottnt{v}}%
+\ottpremise{\ottkw{uexpr} \, \ottnt{u}}%
 }{
-\ottmv{i}  \longrightarrow  \ottmv{i}  \ottsym{:}   \mathsf{Int} }{%
-{\ottdrulename{step\_int}}{}%
+\ottnt{v} \, \ottsym{(}  \ottnt{u}  \ottsym{:}  \ottnt{A}  \ottsym{)}  \longrightarrow  \ottnt{v} \, \ottnt{u}}{%
+{\ottdrulename{step\_rm\_ann}}{}%
+}}
+
+
+\newcommand{\ottdrulestepXXtopXXann}[1]{\ottdrule[#1]{%
+\ottpremise{\ottkw{uexpr} \, \ottnt{u}}%
+}{
+\ottnt{u}  \ottsym{:}  \ottnt{A}  \ottsym{:}  \ottnt{B}  \longrightarrow  \ottnt{u}  \ottsym{:}  \ottnt{B}}{%
+{\ottdrulename{step\_top\_ann}}{}%
 }}
 
 
@@ -487,6 +481,14 @@
 }{
 \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \longrightarrow  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}}{%
 {\ottdrulename{step\_lam\_ann}}{}%
+}}
+
+
+\newcommand{\ottdrulestepXXtypeof}[1]{\ottdrule[#1]{%
+\ottpremise{\ottnt{e}  \longrightarrow  \ottnt{e'}}%
+}{
+ typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow   typeof \  \ottnt{e'}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}} }{%
+{\ottdrulename{step\_typeof}}{}%
 }}
 
 
@@ -510,15 +512,15 @@
 }}
 
 \newcommand{\ottdefnstep}[1]{\begin{ottdefnblock}[#1]{$\ottnt{e}  \longrightarrow  \ottnt{e'}$}{\ottcom{Small-step operational semantics}}
-\ottusedrule{\ottdrulestepXXbeta{}}
-\ottusedrule{\ottdrulestepXXvu{}}
-\ottusedrule{\ottdrulestepXXappl{}}
-\ottusedrule{\ottdrulestepXXtypeof{}}
-\ottusedrule{\ottdrulestepXXappr{}}
-\ottusedrule{\ottdrulestepXXannXXann{}}
-\ottusedrule{\ottdrulestepXXrXXann{}}
 \ottusedrule{\ottdrulestepXXint{}}
+\ottusedrule{\ottdrulestepXXappl{}}
+\ottusedrule{\ottdrulestepXXappr{}}
+\ottusedrule{\ottdrulestepXXbeta{}}
+\ottusedrule{\ottdrulestepXXann{}}
+\ottusedrule{\ottdrulestepXXrmXXann{}}
+\ottusedrule{\ottdrulestepXXtopXXann{}}
 \ottusedrule{\ottdrulestepXXlamXXann{}}
+\ottusedrule{\ottdrulestepXXtypeof{}}
 \ottusedrule{\ottdrulestepXXtypeofl{}}
 \ottusedrule{\ottdrulestepXXtypeofr{}}
 \end{ottdefnblock}}
