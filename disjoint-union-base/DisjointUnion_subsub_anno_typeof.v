@@ -1224,7 +1224,7 @@ inductions TypT; introv; simpl.
     apply subsub_sub in H9.
     eapply typing_chk_sub; eauto.
     apply value_regular in valu. auto.
-Qed.  
+Qed.
 
 
 (* ********************************************************************** *)

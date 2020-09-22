@@ -382,7 +382,7 @@ Proof.
     assert (G = G & empty).
     rewrite* concat_empty_r.
     rewrite H7.
-    dependent destruction H13.
+    dependent destruction H12.
    * assert (typing G (e_lit i5) infer t_int). apply typ_lit.
     forwards*: typing_regular.
     forwards*: typing_through_subst_ee .
@@ -402,7 +402,7 @@ Proof.
     assert (G = G & empty).
     rewrite* concat_empty_r.
     rewrite H7.
-    dependent destruction H13.
+    dependent destruction H12.
    * assert (typing G (e_lit i5) infer t_int). apply typ_lit.
     forwards*: typing_regular.
     forwards*: typing_through_subst_ee.
@@ -507,10 +507,25 @@ inductions Typ; intros EQ; subst.
      lets: H y H5.
      eapply step_typeofl; eauto.
      admit. admit. admit.
-     inverts* H6. inverts* H4. admit. admit.
    * admit.
   + admit.
 Admitted.
+
+Lemma progress_inf : forall e T,
+typing empty e infer T -> value e \/ exists e', e --> e'.
+Proof.
+introv Typ. gen_eq E: (@empty typ). lets Typ': Typ.
+inductions Typ; intros EQ; subst.
+ - right*.
+ - apply binds_empty_inv in H0. inversion H0.
+ - admit.
+ - destruct~ IHTyp1.
+   inverts* H. inverts* H0. inverts Typ1. inverts* H1. inverts H. inversion H0.
+   right. inverts Typ1. inverts* H2.
+   inverts H0. exists (e_ann (open_exp_wrt_exp e (e_ann e2 A1)) B).
+   eapply step_beta; eauto. admit.
+Admitted. 
+
 
 Ltac solve_by_inverts_step :=
   auto;
@@ -540,7 +555,7 @@ Lemma determinism : forall e e1 e2,
 e --> e1 -> e --> e2 -> e1 = e2.
 Proof.
   introv He1. gen e2.
-  induction He1; introv He2.
+  inductions He1; introv He2.
   - inverts* He2.
   - inverts* He2.
    + forwards*: IHHe1. rewrite* H0. 
@@ -574,9 +589,18 @@ Proof.
  - inverts* He2. inversion H2.
  - inverts* He2.
   + forwards*: IHHe1 H9. rewrite* H1.
+  + assert (Typ: typing empty (e_typeof e A e1 B e2) check A) by admit.
+   dependent destruction Typ.
+   dependent destruction Typ.
+   pick_fresh y. assert (y \notin L) by auto.
+   forwards*: H1 H4.
+   forwards*: H2 H4.
+   Search binds.
+   forwards*: typing_regular H5.
+   forwards*: typing_regular H6.
+   destruct H11.
+   destruct H12.
+   apply okt_push_inv in H12. destruct H12.
+   eapply binds_middle_eq in H15; eauto. admit.
   + admit.
-  + admit.
-Admitted.              
-     
-
-     
+Admitted.

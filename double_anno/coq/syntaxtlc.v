@@ -294,15 +294,17 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      e --> e' ->
      (e_typeof e A e1 B e2) --> (e_typeof e' A e1 B e2)
  | step_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var) (C:typ),
-     lc_exp e1 ->
-     lc_exp e2 ->
+     (*lc_exp e1 ->
+     lc_exp e2 ->*)
+     lc_exp (e_typeof p A e1 B e2) ->
      pexpr p ->
      findtype p C ->
      C <: A ->
      (e_typeof p A e1 B e2) -->  (open_exp_wrt_exp  e1 (e_ann p A) ) 
  | step_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var) (C:typ),
-     lc_exp e1 ->
-     lc_exp e2 ->
+     (*lc_exp e1 ->
+     lc_exp e2 ->*)
+     lc_exp (e_typeof p A e1 B e2) ->
      pexpr p ->
      findtype p C ->
      C <: B ->
