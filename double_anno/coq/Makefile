@@ -8,7 +8,7 @@ LIBNAME="Top"
 SYNTAX=syntax
 TARGET=rules
 
-FILES     = $(SYNTAX)_ott $(TARGET)_inf
+FILES    = syntaxtlc
 VFILES   = $(foreach i, $(FILES), $(i).v)
 
 .SECONDARY: $(VFILES)
@@ -24,31 +24,11 @@ coq: $(COQMKFILENAME) $(VFILES)
 %.vo: %.v
 	@$(MAKE) -f CoqSrc.mk $*.vo
 
-
-$(SYNTAX)_ott.v: $(OTT_LOC)/rules.ott
-	ott -i $(OTT_LOC)/rules.ott -o $(SYNTAX)_ott.v -coq_lngen true -coq_expand_list_types true
-	@if grep '<<no parses (' $@ >/dev/null 2>&1 && \
-	[ -z "$(DONTSTOP)" ]; then \
-		echo; \
-	echo "***** OTT PARSE ERROR(S) *****"; \
-		grep -n '<<no parses (' $@; \
-		$(RM) $@; \
-		exit 1; \
-	fi >&2
-
-
-$(TARGET)_inf.v: $(OTT_LOC)/rules.ott
-	lngen --coq $(TARGET)_inf.v --coq-ott $(SYNTAX)_ott $(OTT_LOC)/rules.ott
-
-
 $(COQMKFILENAME): Makefile
 	{ echo "-R . $(LIBNAME)" ; ls *.v ; } > _CoqProject && coq_makefile -arg '-w -variable-collision,-meta-collision,-require-in-module' -f _CoqProject -o $(COQMKFILENAME)
 
 
 coqclean:
 	rm -f .*.d *.conf .*.aux *.v-e *.v.d *.vo *.vos *.vok *.glob $(COQMKFILENAME)
-
-ottclean:
-	rm -f $(SYNTAX)_ott.v $(TARGET)_inf.v
 
 clean: coqclean

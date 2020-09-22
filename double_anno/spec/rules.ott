@@ -29,7 +29,7 @@ grammar
     | typeof e as A e1 B e2 ::  :: typeof {{ tex typeof \ [[e]] \ as \ [[A]] \ [[e1]] \ [[B]] \ [[e2]] }}
     {{ tex typeof \ [[e]] \ as \ \{x:[[A]][[->]][[e1]], x:[[B]][[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
-    | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]][[e2]]) }}
+    | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
 
 substitutions
   single exp x   :: subst
@@ -314,11 +314,11 @@ Reduction :: '' ::=
     findtype p C
     C <: A
     ------------------------------------------------- :: typeofl
-    typeof p as A e1 B e2 --> e [x ~> p:A]
+    typeof p as A e1 B e2 --> e1 [x ~> p:A]
 
 
     prevalue p
     findtype p C
     C <: B
     ------------------------------------------------- :: typeofr
-    typeof p as A e1 B e2 --> e [x ~> p:B]
+    typeof p as A e1 B e2 --> e2 [x ~> p:B]

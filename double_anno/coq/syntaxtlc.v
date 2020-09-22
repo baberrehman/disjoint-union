@@ -272,7 +272,7 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
  | step_beta : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp) (C:typ),
      lc_exp (e_abs e) ->
      pexpr p ->
-     step (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) )   ( (e_ann p C) ) ) (e_ann  (  (open_exp_wrt_exp  e (e_ann p A1) )  )  B2)
+     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) ( (e_ann p C) ) ) --> (e_ann  (  (open_exp_wrt_exp  e (e_ann p A1) )  )  B2)
  | step_ann : forall (e:exp) (A:typ) (e':exp),
       not ( value (e_ann e A) )  ->
      step e e' ->
@@ -288,22 +288,20 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      lc_exp e2 ->
      step e e' ->
      step (e_typeof e A e1 B e2) (e_typeof e' A e1 B e2)
- | step_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var) (C:typ),
+ | step_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ) (D:typ),
      lc_exp e1 ->
      lc_exp e2 ->
-     lc_exp e ->
      pexpr p ->
      findtype p C ->
      subtyping C A ->
-     step (e_typeof p A e1 B e2)  (open_exp_wrt_exp  e (e_ann p A) )
- | step_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2 e:exp) (x:var) (C:typ),
+     step (e_typeof (e_ann p D) A e1 B e2)  (open_exp_wrt_exp e1 (e_ann p A) )
+ | step_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ) (D:typ),
      lc_exp e1 ->
      lc_exp e2 ->
-     lc_exp e ->
      pexpr p ->
      findtype p C ->
      subtyping C B ->
-     step (e_typeof p A e1 B e2)  (open_exp_wrt_exp  e (e_ann p B) )
+     step (e_typeof (e_ann p D) A e1 B e2)  (open_exp_wrt_exp  e2 (e_ann p B) )
 where "e --> e'" := (step e e') : env_scope.
 
 (** infrastructure *)
