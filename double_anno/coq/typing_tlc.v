@@ -483,10 +483,8 @@ inductions Typ; intros EQ; subst.
     (*lets: canonical_form_abs_value e1 A B Val1 Typ1.
     destruct H as [V [e [V1 [V2]]]].
     subst. inverts* Typ1.*)
-    exists (e_ann (open_exp_wrt_exp e (e_ann e2 A1)) B). 
-    eapply step_beta; eauto.
-    inductions Val2. inverts* H0. admit. admit.
-    exists (e_app e1 e2'). eapply step_appr; eauto. admit.
+    exists (e_ann (open_exp_wrt_exp e (e_ann e2 A1)) B).
+    inverts* Val2.  admit. admit.
   + exists (e_app e1' e2). apply* step_appl.
     forwards*: typing_regular Typ2.
  - destruct~ IHTyp.
