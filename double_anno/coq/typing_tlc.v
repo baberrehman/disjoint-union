@@ -543,18 +543,6 @@ inductions Typ; intros EQ; subst.
      apply step_typeof; auto. admit. admit.   
 Admitted.
 
-Ltac solve_by_inverts_step :=
-  auto;
-  match goal with
-  | Hstp : (e_ann (e_abs ?e) ?T) --> ?E |- _ =>
-      solve [inverts Hstp]
-  | Hstp : ?e --> ?e',
-    Hv : value ?e |- _ => solve [inverts Hv; inverts Hstp;
-      solve_by_inverts_step]
-  | Hpv : pexpr (e_ann ?e ?T) |- _ => solve [inverts Hpv]
-  | Hpv : pexpr (e_app ?e1 ?e2) |- _ => solve [inverts Hpv]
-  end.
-
 Lemma pexpr_rexpr_false : forall e, rexpr e -> pexpr e -> False.
 Proof.
 intros.
