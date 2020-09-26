@@ -1,5 +1,5 @@
 Require Import TLC.LibLN.
-Require Import syntaxtlc.
+Require Import syntaxtlcabs.
 
 (** Gathering free names already used in the proofs *)
 
@@ -389,6 +389,23 @@ Proof.
         assert (typing G (e_ann p A1) infer A1) by eauto.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro x).
+    + inverts Typ1.
+      dependent destruction H4. dependent destruction H4.
+      dependent destruction H4. dependent destruction H4.
+      constructor.
+      inverts H0.
+      pick_fresh y. assert (y \notin L) by auto.
+      forwards*: H H0.
+      assert (G & y ~: A1 = G & y ~: A1 & empty).
+      rewrite* concat_empty_r.
+      rewrite H3 in H2.
+      assert (G = G & empty). rewrite* concat_empty_r.
+      rewrite H4.
+      inverts Typ2. inverts H6.
+      assert (typing G (e_ann (e_abs x) A1) infer A1). eauto.
+      forwards*: typing_through_subst_ee.
+      rewrite* (@subst_ee_intro y).
+      forwards*: typing_regular H6. 
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
@@ -517,18 +534,19 @@ inductions Typ; intros EQ; subst.
     right. left. exists (e_ann p A). apply* step_rm_ann.
   + destruct* H.
    * destruct H.
-     inverts* Typ. inverts* H0; try solve [inversion H].
-     inverts* H.
-     right. left.
-     exists (e_ann e0 A). apply step_rm_ann.
-     admit.
-     admit.
-     admit.
-     inversion H.
-     inverts* H.
-     admit.
-     admit.
-     admit.
+     dependent destruction Typ. 
+     { dependent destruction Typ.
+       { left*. }
+       { apply binds_empty_inv in H0. inversion H0. }
+       { 
+         inversion H0; subst.
+         admit. admit. admit. 
+       { right. left. exists (e_ann x A). apply* step_ann.
+         unfold not. intros. inversion H1. inversion H3. } 
+     }
+     { inversion H0. }
+     { right. left. exists (e_ann x C). apply* step_ann.
+       unfold not. intros. inversion H3. inversion H5. }
    * destruct H. destruct H. subst.
     right. left.
     lets Typ'': Typ.
@@ -554,8 +572,7 @@ inductions Typ; intros EQ; subst.
      inverts H; try solve [inversion H3 | inversion H2].
      inverts H3.
      right. left.
-     exists (open_exp_wrt_exp e (e_abs x)).
-     admit. }
+     exists* (e_ann (open_exp_wrt_exp e (e_ann (e_abs x) A0)) B). }
   + destruct H. 
     { destruct H.
     right. left. exists (e_app x e2). apply* step_appl.
@@ -625,7 +642,10 @@ Proof.
       inverts* H6.
    + inverts* He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))). eauto.
      unfold not in H3. apply H3 in H0. inversion H0.
-     inverts* H6. 
+     inverts* H6.
+   + inverts* He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))). auto.
+     unfold not in H3. apply H3 in H0. inversion H0.
+     inversion H5. 
   - inverts* He2.
    + inverts* H. inverts* H0. inverts* H4.
      assert (value (e_ann (e_lit i5) A0)). eauto.
@@ -640,7 +660,8 @@ Proof.
      unfold not in H3. apply H3 in H0. inversion H0.
      inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A0 B)) C)) by auto.
      unfold not in H4. apply H4 in H1. inversion H1.
-     inversion H6.    
+     inversion H6.
+   + inverts He1.     
   - inverts* He2.
    + inverts* H5. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
      unfold not in H4. apply H4 in H1. inversion H1.
@@ -651,6 +672,13 @@ Proof.
      inverts* H5. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A0 B)) C)) by auto.
      unfold not in H4. apply H4 in H0. inversion H0.
      inversion H7.
+   + inversion H9.
+  - inverts* He2.
+   + inverts H5.
+     assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
+     unfold not in H4. apply H4 in H1. inversion H1. inversion H7.
+   + subst. inversion H5.
+   + inversion TEMP.    
   - inverts* He2.
    + inverts Typ. inverts H0.
      forwards*: IHHe1. rewrite* H0.

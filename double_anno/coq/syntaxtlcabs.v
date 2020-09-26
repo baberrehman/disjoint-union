@@ -273,6 +273,10 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      lc_exp (e_abs e) ->
      pexpr p ->
      (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) ( (e_ann p C) ) ) --> (e_ann  (  (open_exp_wrt_exp  e (e_ann p A1) )  )  B2)
+ | step_beta_abs : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp) (C:typ) x,
+     lc_exp (e_abs e) ->
+     p = (e_abs x) ->
+     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) ( p ) ) --> (e_ann  (  (open_exp_wrt_exp  e (e_ann p A1) )  )  B2)
  | step_ann : forall (e:exp) (A:typ) (e':exp),
       not ( value (e_ann e A) )  ->
      step e e' ->

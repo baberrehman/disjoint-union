@@ -8,7 +8,7 @@ LIBNAME="Top"
 SYNTAX=syntax
 TARGET=rules
 
-FILES    = syntaxtlc
+FILES    = syntaxtlcabs
 VFILES   = $(foreach i, $(FILES), $(i).v)
 
 .SECONDARY: $(VFILES)
