@@ -43,7 +43,7 @@
 \inputott{ott-rules}
 
 
-\title{Rules Version 1 (Disjoint Union Type)}
+\title{Rules Version 2 (Disjoint Union Type)}
 \author{Baber}
 \begin{document}
 
@@ -54,7 +54,7 @@
 &Expr &e &::= x ~|~ n ~|~ e:A ~|~\lambda  \ottmv{x}  \ottsym{.}  \ottnt{e} ~ | ~ e1e2 ~|~  typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}} \\
 &PExpr & p &::= n ~|~ \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B} \\
 %&RExpr & r &::= e1e2 ~|~  typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}  \\
-%	&UExpr & u &::= r ~|~ p ~ |~ u : A \\
+%&UExpr & u &::= r ~|~ p ~ |~ u : A \\
 &Value &v &::= p : A \\
 &Context & \Gamma &::= empty~ |~ \Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}
 \end{align*}

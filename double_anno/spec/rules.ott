@@ -13,7 +13,7 @@ metavar i ::= {{ coq nat }}
 
 grammar
 
-  typ, A, B, C             :: 't_' ::=     {{ com type }}
+  typ, A, B, C, D          :: 't_' ::=     {{ com type }}
     | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
@@ -314,11 +314,11 @@ Reduction :: '' ::=
     findtype p C
     C <: A
     ------------------------------------------------- :: typeofl
-    typeof p as A e1 B e2 --> e1 [x ~> p:A]
+    typeof p:D as A e1 B e2 --> e1 [x ~> p:A]
 
 
     prevalue p
     findtype p C
     C <: B
     ------------------------------------------------- :: typeofr
-    typeof p as A e1 B e2 --> e2 [x ~> p:B]
+    typeof p:D as A e1 B e2 --> e2 [x ~> p:B]
