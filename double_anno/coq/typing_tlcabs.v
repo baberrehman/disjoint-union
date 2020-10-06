@@ -290,18 +290,36 @@ Qed.
 
 Lemma chk_inf : forall G e A,
     typing G (e_ann e A) check A <-> typing G (e_ann e A) infer A.
-Admitted.
+Proof.
+intros. split. intros.
+inverts H. inverts H0. eauto.
+intros. eapply typ_sub; eauto. apply sub_refl. 
+Qed.
+
+
+Lemma check_or_typ : forall E e A B,
+   pexpr e ->
+   A *s B ->
+   typing E e check (t_union A B) ->
+   typing E e check A \/ typing E e check B.
+Proof.
+  intros.
+  inductions H1; try solve [ inverts* H | inverts* H0 | inverts* H1].
+  inverts* H. inverts* H1. inverts* H2. inverts* H1. inverts* H2.
+Qed.
+
 
 Lemma chk_sub : forall G e A, typing G e check A -> forall B, A <: B -> typing G e check B.
 Proof.
 intros G e A Typ1 B Sub.
 inductions Typ1.
-assert (B <: B0).
-eapply sub_transitivity; eauto.
-clear H Sub.
-eapply typ_sub; eauto.
-admit.
-inverts* Typ1.
+ - assert (B <: B0).
+   eapply sub_transitivity; eauto.
+   clear H Sub.
+   eapply typ_sub; eauto.
+ - assert (typing G (e_abs e) check (t_arrow A B)) by eauto.
+   admit.
+ - inverts* Typ1.
 Admitted.
 
 Hint Resolve chk_inf chk_sub : core.
@@ -319,20 +337,19 @@ dependent destruction H0.
 exists (t_arrow A0 B). constructor. auto. auto.
 Qed.
 
-Lemma expr_inf_typ : forall G e A e',
-typing G e check A -> e --> e' ->
+Lemma expr_inf_typ : forall G e dir A e',
+typing G e dir A -> e --> e' ->
 exists B, typing G e infer B /\ B <: A.
 Proof.
 intros. lets Typ: H.
 inductions H.
+- exists* t_int. 
+- exists* A. split*. apply sub_refl.
+- exists* A. split*. apply sub_refl.
+- exists* B. split*. apply sub_refl.
 - exists* B.
 - inversion H1.
-- pick_fresh y. assert (y \notin L) by auto.
-  forwards*: H0 H6.
-  forwards*: H2 H6.
-  inverts* H5.
-  admit.
-  inverts* H. inverts H15.
+- admit.
 Admitted.
 
 (*Lemma pexpr_inf_typ_ann : forall G p A C, pexpr p ->
@@ -478,17 +495,6 @@ Proof.
    eapply IHTyp. apply Val. apply H0. reflexivity.
 Qed.
 
-Lemma check_or_typ : forall E e A B,
-   pexpr e ->
-   A *s B ->
-   typing E e check (t_union A B) ->
-   typing E e check A \/ typing E e check B.
-Proof.
-  intros.
-  inductions H1; try solve [ inverts* H | inverts* H0 | inverts* H1].
-  inverts* H. inverts* H1. inverts* H2. inverts* H1. inverts* H2.
-Qed.
-
 Lemma check_pexpr_ann : forall E p A C,
    pexpr p ->
    typing E (e_ann p C) check A ->
@@ -520,6 +526,41 @@ Proof.
 Qed.
 
 
+Lemma not_expr : forall e t, ~ value (e_ann e t) -> ~ pexpr e.
+Proof.
+intros.
+unfold not. intros.
+unfold not in H. apply* H.
+Qed.
+
+
+Lemma val_pexpr : forall e, lc_exp e -> ~ value e -> pexpr e \/ ~ pexpr e.
+Proof.
+introv lc. intros.
+inductions e; try solve [right; unfold not; intros; inversion H0].
+left*.
+inductions e; try solve [right; unfold not; intros; inverts H0].
+destruct~ IHe0. inversion lc. subst. auto. unfold not. intros. inversion H0.
+inductions t; try solve [ right; unfold not; intros; inversion H1].
+left. apply pexpr_abs. inversion lc; subst. auto.
+Qed.
+
+
+Lemma value_not_value : forall e, lc_exp e -> (value e) \/ (~ (value e)).
+Proof.
+introv lc.
+intros.
+inductions e;
+try solve [right; unfold not; intros; inversion H].
+destruct~ IHe. inverts* lc.
+- inverts* H. inverts* H0.
+ + right. unfold not. intros. inversion H. subst. inversion H1.
+ + right. unfold not. intros. inverts H0. inversion H2.
+- apply val_pexpr in H.
+  destruct~ H. right. unfold not. intros.
+  inverts* H0. inverts* lc. 
+Qed.
+
 (* need to be strengthened *)
 Lemma progress : forall e dir T,
 typing empty e dir T -> (value e) \/ (exists e', e --> e') \/ 
@@ -532,17 +573,25 @@ inductions Typ; intros EQ; subst.
  - destruct* IHTyp.
   + inverts H.
     right. left. exists (e_ann p A). apply* step_rm_ann.
-  + destruct* H.
+  + destruct H.
    * destruct H.
      dependent destruction Typ. 
-     { dependent destruction Typ.
-       { left*. }
-       { apply binds_empty_inv in H0. inversion H0. }
+     { inverts* Typ.
+       { apply binds_empty_inv in H2. inversion H2. }
        { 
-         inversion H0; subst.
-         admit. admit. admit. 
+         inverts* H0.
+         destruct (value_not_value (e_ann (e_ann e0 B) A)).
+         forwards*: typing_regular Typ'.
+         left*.
+         right. left. exists*.
+         destruct (value_not_value ((e_ann (e_ann (e_ann p A0) B) A))).
+         forwards*: typing_regular Typ'.
+         left*.
+         right. left.  exists*.
+       }
        { right. left. exists (e_ann x A). apply* step_ann.
-         unfold not. intros. inversion H1. inversion H3. } 
+         unfold not. intros. inversion H3. inversion H5. 
+       } 
      }
      { inversion H0. }
      { right. left. exists (e_ann x C). apply* step_ann.
@@ -609,7 +658,7 @@ inductions Typ; intros EQ; subst.
      forwards*: typing_regular Typ'.
    * destruct H4. destruct H4. 
      inverts Typ. inverts H6; try solve [inversion TEMP]. inversion TEMP.
-Admitted.
+Qed.
 
 Lemma pexpr_rexpr_false : forall e, rexpr e -> pexpr e -> False.
 Proof.
@@ -764,7 +813,10 @@ Proof.
       inverts* H6.
    + inverts* He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))). eauto.
      unfold not in H3. apply H3 in H0. inversion H0.
-     inverts* H6. 
+     inverts* H6.
+   + inverts* He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))). eauto.
+     unfold not in H3. apply H3 in H0. inversion H0.
+     inversion H5.  
   - inverts* He2.
    + inverts* H. inverts* H0. inverts* H4.
      assert (value (e_ann (e_lit i5) A0)). eauto.
@@ -782,7 +834,8 @@ Proof.
      unfold not in H3. apply H3 in H0. inversion H0.
      inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A0 B)) C)) by auto.
      unfold not in H4. apply H4 in H1. inversion H1.
-     inversion H6.    
+     inversion H6.
+   + inversion He1.    
   - inverts* He2.
    + inverts* H5. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
      unfold not in H4. apply H4 in H1. inversion H1.
@@ -793,6 +846,13 @@ Proof.
      inverts* H5. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A0 B)) C)) by auto.
      unfold not in H4. apply H4 in H0. inversion H0.
      inversion H7.
+   + inversion H9.
+  - inverts* He2.
+   + inverts H5. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
+     unfold not in H4. apply H4 in H1. inversion H1.
+     inversion H7.
+   + subst. inversion H5.
+   + inversion TEMP.
   - inverts* He2.
    + inverts Typ.
      eapply expr_inf_typ in H7; eauto.

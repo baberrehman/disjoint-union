@@ -32,7 +32,7 @@
 }}
 
 \newcommand{\otttyp}{
-\ottrulehead{\ottnt{typ}  ,\ \ottnt{A}  ,\ \ottnt{B}  ,\ \ottnt{C}}{::=}{\ottcom{type}}\ottprodnewline
+\ottrulehead{\ottnt{typ}  ,\ \ottnt{A}  ,\ \ottnt{B}  ,\ \ottnt{C}  ,\ \ottnt{D}}{::=}{\ottcom{type}}\ottprodnewline
 \ottfirstprodline{|}{ \mathsf{Int} }{}{}{}{}\ottprodnewline
 \ottprodline{|}{ \bot }{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{A}  \rightarrow  \ottnt{B}}{}{}{}{}\ottprodnewline
@@ -71,18 +71,18 @@
 %% defn pexpr
 \newcommand{\ottdrulepexprXXint}[1]{\ottdrule[#1]{%
 }{
-\ottkw{prevalue} \, \ottmv{i}}{%
+  }{%
 {\ottdrulename{pexpr\_int}}{}%
 }}
 
 
 \newcommand{\ottdrulepexprXXabs}[1]{\ottdrule[#1]{%
 }{
-\ottkw{prevalue} \, \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}}{%
+  }{%
 {\ottdrulename{pexpr\_abs}}{}%
 }}
 
-\newcommand{\ottdefnpexpr}[1]{\begin{ottdefnblock}[#1]{$\ottkw{prevalue} \, \ottnt{e}$}{\ottcom{PreValues}}
+\newcommand{\ottdefnpexpr}[1]{\begin{ottdefnblock}[#1]{$  $}{\ottcom{PreValues}}
 \ottusedrule{\ottdrulepexprXXint{}}
 \ottusedrule{\ottdrulepexprXXabs{}}
 \end{ottdefnblock}}
@@ -94,7 +94,7 @@
 % defns Value
 %% defn value
 \newcommand{\ottdrulevalueXXval}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+\ottpremise{  }%
 }{
 \ottkw{value} \, \ottnt{p}  \ottsym{:}  \ottnt{A}}{%
 {\ottdrulename{value\_val}}{}%
@@ -384,10 +384,17 @@
 
 
 \newcommand{\ottdrulestepXXbeta}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+\ottpremise{  }%
 }{
 \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{C}  \ottsym{)}  \longrightarrow  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}}}{%
 {\ottdrulename{step\_beta}}{}%
+}}
+
+
+\newcommand{\ottdrulestepXXabsXXbeta}[1]{\ottdrule[#1]{%
+}{
+\ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{1}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{2}}}}  \ottsym{)}  \longrightarrow  \ottsym{(}  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{2}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}}}{%
+{\ottdrulename{step\_abs\_beta}}{}%
 }}
 
 
@@ -401,7 +408,7 @@
 
 
 \newcommand{\ottdrulestepXXrmXXann}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+\ottpremise{  }%
 }{
 \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{:}  \ottnt{B}  \longrightarrow  \ottnt{p}  \ottsym{:}  \ottnt{B}}{%
 {\ottdrulename{step\_rm\_ann}}{}%
@@ -424,21 +431,21 @@
 
 
 \newcommand{\ottdrulestepXXtypeofl}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+\ottpremise{  }%
 \ottpremise{\ottkw{findtype} \, \ottnt{p} \, \ottnt{C}}%
 \ottpremise{\ottnt{C}  \textless:  \ottnt{A}}%
 }{
- typeof \  \ottnt{p}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]}}{%
+ typeof \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]}}{%
 {\ottdrulename{step\_typeofl}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXtypeofr}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{prevalue} \, \ottnt{p}}%
+\ottpremise{  }%
 \ottpremise{\ottkw{findtype} \, \ottnt{p} \, \ottnt{C}}%
 \ottpremise{\ottnt{C}  \textless:  \ottnt{B}}%
 }{
- typeof \  \ottnt{p}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e_{{\mathrm{2}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]}}{%
+ typeof \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e_{{\mathrm{2}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]}}{%
 {\ottdrulename{step\_typeofr}}{}%
 }}
 
@@ -447,6 +454,7 @@
 \ottusedrule{\ottdrulestepXXappl{}}
 \ottusedrule{\ottdrulestepXXappr{}}
 \ottusedrule{\ottdrulestepXXbeta{}}
+\ottusedrule{\ottdrulestepXXabsXXbeta{}}
 \ottusedrule{\ottdrulestepXXann{}}
 \ottusedrule{\ottdrulestepXXrmXXann{}}
 \ottusedrule{\ottdrulestepXXlamXXann{}}

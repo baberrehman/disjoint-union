@@ -13,7 +13,7 @@ metavar i ::= {{ coq nat }}
 
 grammar
 
-  typ, A, B, C             :: 't_' ::=     {{ com type }}
+  typ, A, B, C, D             :: 't_' ::=     {{ com type }}
     | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
@@ -89,7 +89,7 @@ PreValue :: '' ::=
   
   defn
   prevalue e ::   :: pexpr :: 'pexpr_'
-  {{ com PreValues }}
+  {{ com PreValues }} {{ tex  }}
   by
 
     ------------ :: int
@@ -290,6 +290,12 @@ Reduction :: '' ::=
     ((\x.e):A1->B1:A2->B2) (p:C) --> (e [x ~> p:A1]):B2
 
 
+
+    ----------------------------------------------------- :: abs_beta
+    ((\x.e1):A1->B1:A2->B2) (\x.e2) --> (e1 [x ~> (\x.e2):A1]):B2
+
+
+
     not value e:A
     e --> e'
     ----------------------- :: ann
@@ -314,11 +320,11 @@ Reduction :: '' ::=
     findtype p C
     C <: A
     ------------------------------------------------- :: typeofl
-    typeof p as A e1 B e2 --> e1 [x ~> p:A]
+    typeof (p:D) as A e1 B e2 --> e1 [x ~> p:A]
 
 
     prevalue p
     findtype p C
     C <: B
     ------------------------------------------------- :: typeofr
-    typeof p as A e1 B e2 --> e2 [x ~> p:B]
+    typeof (p:D) as A e1 B e2 --> e2 [x ~> p:B]
