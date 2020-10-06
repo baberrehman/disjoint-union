@@ -13,7 +13,7 @@ metavar i ::= {{ coq nat }}
 
 grammar
 
-  typ, A, B, C, D             :: 't_' ::=     {{ com type }}
+  typ, A, B, C, D          :: 't_' ::=     {{ com type }}
     | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
