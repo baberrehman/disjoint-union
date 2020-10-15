@@ -4,6 +4,7 @@ Require Import TLC.LibLN.
 (** syntax *)
 
 Inductive typ : Set :=  (*r type *)
+ | typ_top : typ
  | t_int : typ
  | t_bot : typ
  | t_arrow : typ -> typ -> typ
@@ -197,6 +198,7 @@ where "A *a B" := (disjointness A B).
 (* defns Subtyping *)
 Reserved Notation "A <: B" (at level 80).
 Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
+ | s_top : forall A, A <: typ_top
  | s_btm : forall (A:typ),
      t_bot <: A
  | s_int :
@@ -331,6 +333,8 @@ inductions A; intro; eauto.
    inversion H.
  - specialize (H t_bot).
    inversion H.
+ - specialize (H t_bot).
+   inversion H.
  - constructor.
    apply IHA1. intros.
    specialize (H C).
@@ -348,6 +352,7 @@ Lemma sub_transitivity : forall B A C, A <: B -> B <: C -> A <: C.
 Proof.
 induction B; intros;
 generalize H0 H; clear H0; clear H; generalize A; clear A.
+- intros; inductions H0; eauto. 
 - intros; inductions H; eauto.
 - intros; inductions H; eauto.
 - induction C; intros; inverts* H0.

@@ -14,6 +14,7 @@ metavar i ::= {{ coq nat }}
 grammar
 
   typ, A, B, C, D          :: 't_' ::=     {{ com type }}
+    | Top                  ::   :: top {{ tex \top }}
     | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
@@ -187,6 +188,9 @@ Subtyping :: '' ::=
   {{ com Subtyping }}
   
   by
+
+    -------------------- :: top
+    A <: Top
 
     -------------------- :: btm
     Bot <: A

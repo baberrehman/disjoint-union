@@ -434,7 +434,7 @@ Proof.
         assert (typing G (e_ann p A1) infer A1).
         assert (B0 <: A1).
         eapply sub_transitivity; eauto.
-        forwards*: pexpr_chk_sub H10.
+        forwards*: pexpr_chk_sub H10 H6.
         lets*: typing_through_subst_ee.
         forwards*: H8 H2.
         rewrite* (@subst_ee_intro x).

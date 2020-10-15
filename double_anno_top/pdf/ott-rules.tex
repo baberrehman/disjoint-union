@@ -33,7 +33,8 @@
 
 \newcommand{\otttyp}{
 \ottrulehead{\ottnt{typ}  ,\ \ottnt{A}  ,\ \ottnt{B}  ,\ \ottnt{C}  ,\ \ottnt{D}}{::=}{\ottcom{type}}\ottprodnewline
-\ottfirstprodline{|}{ \mathsf{Int} }{}{}{}{}\ottprodnewline
+\ottfirstprodline{|}{ \top }{}{}{}{}\ottprodnewline
+\ottprodline{|}{ \mathsf{Int} }{}{}{}{}\ottprodnewline
 \ottprodline{|}{ \bot }{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{A}  \rightarrow  \ottnt{B}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{A}  \vee  \ottnt{B}}{}{}{}{}\ottprodnewline
@@ -220,6 +221,13 @@
 
 % defns Subtyping
 %% defn subtyping
+\newcommand{\ottdrulesXXtop}[1]{\ottdrule[#1]{%
+}{
+\ottnt{A}  \textless:   \top }{%
+{\ottdrulename{s\_top}}{}%
+}}
+
+
 \newcommand{\ottdrulesXXbtm}[1]{\ottdrule[#1]{%
 }{
  \bot   \textless:  \ottnt{A}}{%
@@ -268,6 +276,7 @@
 }}
 
 \newcommand{\ottdefnsubtyping}[1]{\begin{ottdefnblock}[#1]{$\ottnt{A}  \textless:  \ottnt{B}$}{\ottcom{Subtyping}}
+\ottusedrule{\ottdrulesXXtop{}}
 \ottusedrule{\ottdrulesXXbtm{}}
 \ottusedrule{\ottdrulesXXint{}}
 \ottusedrule{\ottdrulesXXarrow{}}
