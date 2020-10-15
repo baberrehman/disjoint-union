@@ -337,7 +337,7 @@ inductions Typ1.
  - inversion Prev.
 Qed.
 
-Lemma chk_sub : forall G e A, typing G e check A -> forall B, A <: B -> typing G e check B.
+(*Lemma chk_sub : forall G e A, typing G e check A -> forall B, A <: B -> typing G e check B.
 Proof.
 intros G e A Typ1 B Sub.
 inductions Typ1.
@@ -348,7 +348,7 @@ inductions Typ1.
  - assert (typing G (e_abs e) check (t_arrow A B)) by eauto.
    admit.
  - inverts* Typ1.
-Admitted.
+Admitted.*)
 
 Hint Resolve chk_inf : core.
 
@@ -365,7 +365,7 @@ inductions Prev.
   exists (t_arrow A0 B). constructor. auto. auto.
 Qed.
 
-Lemma expr_inf_typ : forall G e dir A e',
+(*Lemma expr_inf_typ : forall G e dir A e',
 typing G e dir A -> e --> e' ->
 exists B, typing G e infer B /\ B <: A.
 Proof.
@@ -378,7 +378,7 @@ inductions H.
 - exists* B.
 - inversion H1.
 - inverts Typ. exists* B0. admit.
-Admitted.
+Admitted.*)
 
 (*Lemma pexpr_inf_typ_ann : forall G p A C, pexpr p ->
 typing G p check A -> exists B, typing G p infer B.
@@ -436,9 +436,8 @@ Proof.
         eapply sub_transitivity; eauto.
         forwards*: pexpr_chk_sub H10.
         lets*: typing_through_subst_ee.
-        forwards*: H8.
+        forwards*: H8 H2.
         rewrite* (@subst_ee_intro x).
-        admit.
     + inverts Typ1.
       dependent destruction H4. dependent destruction H4.
       dependent destruction H4. dependent destruction H4.
@@ -452,11 +451,10 @@ Proof.
       assert (G = G & empty). rewrite* concat_empty_r.
       rewrite H4.
       inverts Typ2. inverts H6.
-      assert (typing G (e_abs x) check (t_arrow A0 B0)). eauto.
-      assert (typing G (e_ann (e_abs x) A1) infer A1). admit.
+      assert (typing G ((e_ann (e_ann (e_abs x) (t_arrow A0 B0)) A1)) infer A1). eauto.
       forwards*: typing_through_subst_ee.
-      rewrite* (@subst_ee_intro y). admit.
-      forwards*: typing_regular H6. 
+      rewrite* (@subst_ee_intro y).
+      forwards*: typing_regular H6.
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
@@ -492,7 +490,7 @@ Proof.
         do 4 dependent destruction Typ. auto.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
-Admitted.
+Qed.
 
 Lemma canonical_form_abs_prevalue : forall t U1 U2,
   pexpr t -> typing empty t infer (t_arrow U1 U2) ->
@@ -641,7 +639,7 @@ inductions Typ; intros EQ; subst.
      inverts H; try solve [inversion H3 | inversion H2].
      inverts H3.
      right. left.
-     exists* (e_ann (open_exp_wrt_exp e (e_ann (e_abs x) A0)) B). }
+     exists* (e_ann (e_ann (open_exp_wrt_exp e (e_ann (e_ann (e_abs x) A) A0)) B1) B). }
   + destruct H. 
     { destruct H.
     right. left. exists (e_app x e2). apply* step_appl.
@@ -801,10 +799,11 @@ Proof.
     forwards*: H17. inversion H1.
 Qed.
 
+
 Lemma determinism_dir : forall E e e1 e2 A dir, typing E e dir A -> 
 e --> e1 -> e --> e2 -> e1 = e2.
 Proof.
-  introv Typ He1. gen e2 A.
+  introv Typ He1. gen e2 A dir.
   induction He1; introv Typ He2.
   - inverts* He2.
   - inverts* He2.
@@ -834,9 +833,8 @@ Proof.
      unfold not in H3.
      apply H3 in H0. inversion H0.
      inversion H6.
-   + inverts Typ. eapply expr_inf_typ in H8; eauto.
-     destruct H8 as [S [H0']].
-     forwards*: IHHe1 H0'. rewrite* H1.
+   + inverts Typ.
+     forwards*: IHHe1 H8. rewrite* H0.
      inverts H0. forwards*: IHHe1 H8. rewrite* H0.
    + inverts H4. inverts He1.
      assert (value (e_ann (e_lit i5) C)) by auto.
@@ -864,9 +862,7 @@ Proof.
    + inversion TEMP.
   - inverts* He2.
    + inverts Typ.
-     eapply expr_inf_typ in H7; eauto.
-     destruct H7. destruct H0.
-     forwards*: IHHe1. rewrite* H3.
+     forwards*: IHHe1. rewrite* H0.
      inverts H0.
      forwards*: IHHe1. rewrite* H0.
    + inverts* H3. inverts* He1.
