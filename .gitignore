@@ -5,3 +5,10 @@
 *.pdf
 *.glob
 *.vo
+*.vok
+*.vos
+.CoqSrc.mk.d
+CoqSrc.mk
+CoqSrc.mk.conf
+*.d
+*.mk

@@ -1,4 +1,5 @@
 % key idea: keep the original annotation and the outermost one for lambdas
+% new idea: drop u and r
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% METAVARIABLES
@@ -12,14 +13,14 @@ metavar i ::= {{ coq nat }}
 
 grammar
 
-  typ, A, B, C             :: 't_' ::=     {{ com type }}
+  typ, A, B, C, D          :: 't_' ::=     {{ com type }}
     | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
     | A \/ B 	             ::   :: union
     | ( A )                :: S :: paren   {{ coq [[A]] }}
 
-  exp, e, v, p, u, r       :: 'e_' ::=     {{ com expression }}
+  exp, e, v, p             :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
     | i                    ::   :: lit
     | e : A                ::   :: ann
@@ -28,7 +29,7 @@ grammar
     | typeof e as A e1 B e2 ::  :: typeof {{ tex typeof \ [[e]] \ as \ [[A]] \ [[e1]] \ [[B]] \ [[e2]] }}
     {{ tex typeof \ [[e]] \ as \ \{x:[[A]][[->]][[e1]], x:[[B]][[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
-    | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]][[e2]]) }}
+    | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
 
 substitutions
   single exp x   :: subst
@@ -88,7 +89,7 @@ PreValue :: '' ::=
   
   defn
   prevalue e ::   :: pexpr :: 'pexpr_'
-  {{ com PreValues }}
+  {{ com PreValues }} {{ tex  }}
   by
 
     ------------ :: int
@@ -96,21 +97,6 @@ PreValue :: '' ::=
 
     --------------------------- :: abs
     prevalue (\x.e):A -> B
-
-
-defns
-RExpr :: '' ::=
-  
-  defn
-  rexpr e ::   :: rexpr :: 'rexpr_'
-  {{ com RExpr }}
-  by
-
-    ------------ :: app
-    rexpr (e1 e2)
-
-    --------------------------- :: typeof
-    rexpr typeof e as A e1 B e2
 
 
 defns
@@ -125,28 +111,6 @@ Value :: '' ::=
     ------------ :: val
     value p : A
 
-
-defns
-UExpr :: '' ::=
-  
-  defn
-  uexpr e ::   :: uexpr :: 'uexpr_'
-  {{ com UEpxr }}
-  by
-
-    rexpr r
-    ------------ :: rexpr
-    uexpr r
-
-
-    prevalue p
-    ------------ :: pexpr
-    uexpr p
-
-
-    uexpr u
-    ------------ :: anno
-    uexpr u : A
 
 
 defns
@@ -316,32 +280,31 @@ Reduction :: '' ::=
 
 
     value v
-    rexpr r
-    r --> e'
+    e --> e'
     ---------------- :: appr
-    v r --> v e'
+    v e --> v e'
 
 
     prevalue p
-    ------------------------------------------------- :: beta
-    ((\x.e):A1->B1:A2->B2) p --> (e [x ~> p:A1]):B2
+    ----------------------------------------------------- :: beta
+    ((\x.e):A1->B1:A2->B2) (p:C) --> ((e [x ~> p:A1]):B1):B2
 
 
-    rexpr r
-    r --> e'
+
+    ----------------------------------------------------- :: abs_beta
+    ((\x.e1):A1->B1:A2->B2) (\x.e2) --> ((e1 [x ~> ((\x.e2):A2):A1]):B1):B2
+
+
+
+    not value e:A
+    e --> e'
     ----------------------- :: ann
-    r : A --> e' : A
+    e : A --> e' : A
 
 
-    value v
-    uexpr u
-    ----------------------- :: rm_ann
-    v (u : A) --> v u
-
-
-    uexpr u
-    --------------------- :: top_ann
-    u : A : B --> u : B
+    prevalue p
+    --------------------- :: rm_ann
+    p : A : B --> p : B
 
     
     --------------------------------- :: lam_ann
@@ -357,11 +320,11 @@ Reduction :: '' ::=
     findtype p C
     C <: A
     ------------------------------------------------- :: typeofl
-    typeof p as A e1 B e2 --> e [x ~> p:A]
+    typeof (p:D) as A e1 B e2 --> e1 [x ~> p:A]
 
 
     prevalue p
     findtype p C
     C <: B
     ------------------------------------------------- :: typeofr
-    typeof p as A e1 B e2 --> e [x ~> p:B]
+    typeof (p:D) as A e1 B e2 --> e2 [x ~> p:B]
