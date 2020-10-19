@@ -187,11 +187,11 @@ Inductive disjointness : typ -> typ -> Prop :=    (* defn disjointness *)
      (t_arrow A B) *a t_int
  | ad_orl : forall (A B C:typ),
      A *a C ->
-     A *a C ->
+     B *a C ->
      (t_union A B) *a C
  | ad_orr : forall (C A B:typ),
      A *a C ->
-     A *a C ->
+     B *a C ->
      C *a (t_union A B)
 where "A *a B" := (disjointness A B).
 
@@ -344,8 +344,67 @@ inductions A; intro; eauto.
    apply sub_or in H. destruct~ H.
 Qed.
 
+Require Import Program.Equality.
+
+Lemma Disj_soundness : forall A B, A *a B -> A *s B.
+intros. dependent induction H; unfold DisjSpec; intros; eauto.
+- destruct H. dependent induction H0; eauto.
+  apply sub_or in H. destruct H; eauto.
+- destruct H. dependent induction H; eauto.
+  apply sub_or in H1. destruct H1; eauto.
+- destruct H. induction C; try (dependent destruction H); eauto.
+  + inversion H0.
+  + apply sub_or in H1. destruct H1; eauto. 
+- destruct H. induction C; try (dependent destruction H0); eauto.
+  + inversion H.
+  + apply sub_or in H. destruct H; eauto.  
+- destruct H1. dependent induction H1; eauto.
+  apply sub_or in H2. destruct H2; eauto.
+- destruct H1. dependent induction H2; eauto.
+  apply sub_or in H1. destruct H1; eauto.
+Qed.
+
 Lemma sub_refl : forall A, A <: A.
   induction A; eauto.
+Qed.
+
+Hint Resolve sub_refl.
+
+Lemma BL_disj : forall A, bottomlike A -> forall B, A *a B. 
+  induction 1; intros; eauto.
+Defined.
+
+Lemma Disj_sym : forall A B, A *a B -> B *a A.
+  induction 1; eauto.
+Defined.
+
+Lemma Disj_completeness : forall A B, A *s B -> A *a B.
+induction A; unfold DisjSpec; intros; eauto.
+- specialize (H B). destruct H. split; eauto.
+  constructor.
+  apply ad_orr;
+  apply BL_disj; eauto. 
+- induction B; eauto.
+  + specialize (H t_int).
+    destruct H; eauto.
+    constructor;
+    apply BL_disj; eauto.
+  + specialize (H t_int).
+    forwards*: H. inversion H0.
+  + constructor; apply Disj_sym. 
+    apply IHB1; intros; destruct H0; apply H; eauto.
+    apply IHB2; intros; destruct H0; apply H; eauto.
+- induction B; eauto.
+  + specialize (H (t_arrow A1 A2)).
+    forwards*: H. inversion H0.
+  + specialize (H (t_arrow (t_union A1 B1) t_bot)).
+    forwards*: H. inversion H0.
+  + constructor; apply Disj_sym.
+    apply IHB1; intros; destruct H0; apply H; eauto.
+    apply IHB2; intros; destruct H0; apply H; eauto.
+- constructor.
+  apply IHA1; unfold DisjSpec; intros; destruct H0; apply H; eauto.
+  apply IHA2; unfold DisjSpec; intros; destruct H0; apply H; eauto.
 Qed.
 
 Lemma sub_transitivity : forall B A C, A <: B -> B <: C -> A <: C.
