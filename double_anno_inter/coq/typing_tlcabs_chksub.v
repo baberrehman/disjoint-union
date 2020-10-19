@@ -293,7 +293,7 @@ Lemma chk_inf : forall G e A,
 Proof.
 intros. split. intros.
 inverts H. inverts H0. eauto.
-intros. eapply typ_sub; eauto. apply sub_refl. 
+intros. eapply typ_sub; eauto.
 Qed.
 
 
@@ -408,8 +408,8 @@ Proof.
     inverts* Red.
     + (* p *)
       forwards*: check_pexpr_ann Typ.
-    + (* lam *)
-      econstructor. applys* chk_inf.
+    (*+ (* lam *)
+      econstructor. applys* chk_inf.*)
   - (* app *)
     inverts* Red.
     + (* beta *)
@@ -687,7 +687,7 @@ Proof.
   - inverts* He2.
   - inverts* He2.
    + inverts Typ. inverts H0. eapply typ_sub with (A:=(t_arrow A0 B)) in H7; eauto.
-     forwards*: IHHe1. rewrite* H0. apply sub_refl.
+     forwards*: IHHe1. rewrite* H0.
    + inverts* H2. inverts* H0. 
     * inverts* He1. unfold not in H2. 
       assert (value (e_ann (e_lit i5) A0)). eauto.
@@ -810,7 +810,7 @@ Proof.
    + inverts Typ.
      forwards*: IHHe1. rewrite* H0.
      inverts H0. eapply typ_sub with (A:=(t_arrow A0 B)) in H7; eauto.
-     forwards*: IHHe1. rewrite* H0. apply sub_refl.
+     forwards*: IHHe1. rewrite* H0.
    + inverts* H2. inverts* H0. 
     * inverts* He1. unfold not in H2. 
       assert (value (e_ann (e_lit i5) A0)). eauto.

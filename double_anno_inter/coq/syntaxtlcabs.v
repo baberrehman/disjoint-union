@@ -9,6 +9,7 @@ Inductive typ : Set :=  (*r type *)
  | t_bot : typ
  | t_arrow : typ -> typ -> typ
  | t_union : typ -> typ -> typ.
+(* | t_and : typ -> typ -> typ. *)
 
 Inductive exp : Set :=  (*r expression *)
  | e_var_b  : nat -> exp
@@ -173,6 +174,13 @@ Inductive bottomlike : typ -> Prop :=    (* defn bottomlike *)
      bottomlike A ->
      bottomlike B ->
      bottomlike (t_union A B).
+(* | bl_anda : forall A B,
+     bottomlike A ->
+     bottomlike (t_and A B)
+ | bl_andb : forall A B,
+     bottomlike B ->
+     bottomlike (t_and A B). *)
+
 
 (* defns Disjointness *)
 Reserved Notation "A *a B" (at level 80).
@@ -187,11 +195,11 @@ Inductive disjointness : typ -> typ -> Prop :=    (* defn disjointness *)
      (t_arrow A B) *a t_int
  | ad_orl : forall (A B C:typ),
      A *a C ->
-     A *a C ->
+     B *a C ->
      (t_union A B) *a C
  | ad_orr : forall (C A B:typ),
      A *a C ->
-     A *a C ->
+     B *a C ->
      C *a (t_union A B)
 where "A *a B" := (disjointness A B).
 
@@ -217,6 +225,16 @@ Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
  | s_orc : forall (A A1 A2:typ),
      A <: A2 ->
      A <: (t_union A1 A2)
+(* | s_anda : forall A A1 A2,
+     A <: A1 ->
+     A <: A2 ->
+     A <: (t_and A1 A2)
+ | s_andb : forall A1 A2 A,
+     A1 <: A ->
+     (t_and A1 A2) <: A
+ | s_andc : forall A1 A2 A,
+     A2 <: A ->
+     (t_and A1 A2) <: A     *)
 where "A <: B" := (subtyping A B) : env_scope.
 
 
@@ -321,10 +339,43 @@ Qed.
 
 Lemma sub_or : forall A B C, (t_union A B) <: C -> A <: C /\ B <: C.
 Proof.
-intros; inductions H; try solve [split*];
-specialize (IHsubtyping A B);
+intros; inductions H; try solve [split*].
+specialize (IHsubtyping A B).
 forwards* : IHsubtyping.
+specialize (IHsubtyping A B).
+forwards* : IHsubtyping.
+(*specialize (IHsubtyping1 A B).
+specialize (IHsubtyping2 A B).
+forwards*: IHsubtyping1. *)
 Qed.
+
+(*Lemma sub_and : forall A B C, A <: (t_and B C) -> A <: B /\ A <: C.
+Proof.
+intros; inductions H; try solve [split*].
+specialize (IHsubtyping1 B C).
+specialize (IHsubtyping2 B C).
+forwards*: IHsubtyping1.
+specialize (IHsubtyping B C).
+forwards*: IHsubtyping.
+specialize (IHsubtyping B C).
+forwards*: IHsubtyping.
+Qed.
+
+Lemma sub_and_or : forall A B C, (t_and A B) <: C -> A <: C \/ B <: C.
+Proof.
+intros. inductions H.
+left*.
+specialize (IHsubtyping A B).
+forwards*: IHsubtyping.
+specialize (IHsubtyping A B).
+forwards*: IHsubtyping.
+specialize (IHsubtyping1 A B).
+specialize (IHsubtyping2 A B).
+forwards*: IHsubtyping1.
+forwards*: IHsubtyping2.
+admit.
+left*. right*.
+Admitted.*)
 
 Lemma BL_completeness : forall A, (forall C, A <: C) -> bottomlike A.
 Proof.
@@ -344,8 +395,67 @@ inductions A; intro; eauto.
    apply sub_or in H. destruct~ H.
 Qed.
 
+Require Import Program.Equality.
+
+Lemma Disj_soundness : forall A B, A *a B -> A *s B.
+intros. dependent induction H; unfold DisjSpec; intros; eauto.
+- destruct H. dependent induction H0; eauto.
+  apply sub_or in H. destruct H; eauto.
+- destruct H. dependent induction H; eauto.
+  apply sub_or in H1. destruct H1; eauto.
+- destruct H. induction C; try (dependent destruction H); eauto.
+  + inversion H0.
+  + apply sub_or in H1. destruct H1; eauto. 
+- destruct H. induction C; try (dependent destruction H0); eauto.
+  + inversion H.
+  + apply sub_or in H. destruct H; eauto.  
+- destruct H1. dependent induction H1; eauto.
+  apply sub_or in H2. destruct H2; eauto.
+- destruct H1. dependent induction H2; eauto.
+  apply sub_or in H1. destruct H1; eauto.
+Qed.     
+
 Lemma sub_refl : forall A, A <: A.
   induction A; eauto.
+Qed.
+
+Hint Resolve sub_refl.
+
+Lemma BL_disj : forall A, bottomlike A -> forall B, A *a B. 
+  induction 1; intros; eauto.
+Defined.
+
+Lemma Disj_sym : forall A B, A *a B -> B *a A.
+  induction 1; eauto.
+Defined.
+
+Lemma Disj_completeness : forall A B, A *s B -> A *a B.
+induction A; unfold DisjSpec; intros; eauto.
+- specialize (H B). destruct H. split; eauto.
+  constructor.
+  apply ad_orr;
+  apply BL_disj; eauto. 
+- induction B; eauto.
+  + specialize (H t_int).
+    destruct H; eauto.
+    constructor;
+    apply BL_disj; eauto.
+  + specialize (H t_int).
+    forwards*: H. inversion H0.
+  + constructor; apply Disj_sym. 
+    apply IHB1; intros; destruct H0; apply H; eauto.
+    apply IHB2; intros; destruct H0; apply H; eauto.
+- induction B; eauto.
+  + specialize (H (t_arrow A1 A2)).
+    forwards*: H. inversion H0.
+  + specialize (H (t_arrow (t_union A1 B1) t_bot)).
+    forwards*: H. inversion H0.
+  + constructor; apply Disj_sym.
+    apply IHB1; intros; destruct H0; apply H; eauto.
+    apply IHB2; intros; destruct H0; apply H; eauto.
+- constructor.
+  apply IHA1; unfold DisjSpec; intros; destruct H0; apply H; eauto.
+  apply IHA2; unfold DisjSpec; intros; destruct H0; apply H; eauto.
 Qed.
 
 Lemma sub_transitivity : forall B A C, A <: B -> B <: C -> A <: C.
