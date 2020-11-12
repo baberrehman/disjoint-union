@@ -57,7 +57,8 @@
 \maketitle
 
 \begin{align*}
-&Type &A, B&::=  \top  ~ | ~ \bot ~| Int ~|~ \ottnt{A}  \rightarrow  \ottnt{B}~ |~ \ottnt{A}  \vee  \ottnt{B}\\
+&Type &A, B&::=  \top  ~ | ~ \bot ~|~ Int ~|~ \ottnt{A}  \rightarrow  \ottnt{B}~ |~ \ottnt{A}  \vee  \ottnt{B} ~ |~ \ottnt{A}  \wedge  \ottnt{B}\\
+&Ord &A, B&::=  \top  ~ | ~ \bot ~|~ Int ~|~ \ottnt{A}  \rightarrow  \ottnt{B}~ |~ \ottnt{A}  \vee  \ottnt{B}\\
 &Expr &e &::= x ~|~ n ~|~ e:A ~|~\lambda  \ottmv{x}  \ottsym{.}  \ottnt{e} ~ | ~ e1e2 ~|~  typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}} \\
 &PExpr & p &::= n ~|~ \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B} \\
 %&RExpr & r &::= e1e2 ~|~  typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}  \\
@@ -66,9 +67,37 @@
 &Context & \Gamma &::= empty~ |~ \Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}
 \end{align*}
 
-\begin{align*}
-&DisjSpec & A * B & ::= \forall C, \ottnt{C}  \textless:  \ottnt{A} \wedge \ottnt{C}  \textless:  \ottnt{B} \rightarrow  \rfloor \ottnt{C} \lfloor
-\end{align*}
+%\begin{align*}
+%&Isomorphic & A \sim B & ::= \ottnt{A}  \textless:  \ottnt{B} \wedge \ottnt{B}  \textless:  \ottnt{A}
+%\end{align*}
+
+
+%\begin{align*}
+%&BottomLikeSpec & C & ::= (\forall A ~ B, ~ \ottnt{A}  \wedge  \ottnt{B} \sim C \rightarrow \neg ( \ottnt{A}  \textless:  \ottnt{B} ) \wedge \neg ( \ottnt{B}  \textless:  \ottnt{A} )) \vee (\ottnt{C}  \textless:   \bot )
+%\end{align*}
+
+%\begin{align*}
+%&DisjSpec & A * B & ::= \forall C, \ottnt{C}  \textless:  \ottnt{A} \wedge \ottnt{C}  \textless:  \ottnt{B} \rightarrow  \rfloor \ottnt{C} \lfloor
+%\end{align*}
+
+
+%\begin{table}
+     {\renewcommand{\arraystretch}{1.5}
+     \begin{center}
+     \begin{tabular}{|lcll|}
+       \hline
+      Isomorphic & A $\backsimeq$ B & ::= & $\ottnt{A}  \textless:  \ottnt{B} \wedge \ottnt{B}  \textless:  \ottnt{A}$ \\
+       \hline
+      BottomLikeSpec & C & ::= & $\forall A, ~ Ord ~ A ~ \rightarrow \neg \ottnt{A}  \textless:  \ottnt{C}$ \\
+%      BottomLikeSpec & C & ::= & $(\exists A ~ B, ~ (\ottnt{A}  \wedge  \ottnt{B}) \backsimeq C \rightarrow \neg ( \ottnt{A}  \textless:  \ottnt{B} ) \vee \neg ( \ottnt{B}  \textless:  \ottnt{A} )) \vee (\ottnt{C}  \textless:   \bot )$ \\
+       \hline
+      DisjSpec & A * B & ::= & $\forall C, \ottnt{C}  \textless:  \ottnt{A} \wedge \ottnt{C}  \textless:  \ottnt{B} \rightarrow  \rfloor \ottnt{C} \lfloor$ \\
+       \hline
+     \end{tabular}
+     \end{center} }
+%\end{table}
+
+
 
 \bigskip
 

@@ -255,11 +255,16 @@ generalize H0 H; clear H0; clear H; generalize A; clear A.
   inductions H0; eauto.
 Qed.
 
+
+(*************************)
+(***** Ordinary Types ****)
+(*************************)
+
 Inductive Ord : typ -> Prop :=
 | o_top : Ord typ_top
 | o_int : Ord t_int
 | o_arrow : forall t1 t2, Ord (t_arrow t1 t2)
-| o_union : forall t1 t2, Ord (t_union t1 t2).
+| o_union : forall t1 t2, Ord t1 -> Ord t2 -> Ord (t_union t1 t2).
 
 Hint Constructors Ord.
 
@@ -292,66 +297,11 @@ Definition  Isomorphic A B := A <: B /\ B <: A.
 (*********  Bottom-Like Specs   *********)
 (****************************************)
 
- Definition btmLikeSpec C := (exists A B, 
+ (*Definition btmLikeSpec C := (exists A B, 
  Isomorphic (t_and A B) C -> (not (A <: B) /\ not (B <: A))) \/
-C <: t_bot.
+C <: t_bot.*)
 
-
- Definition btmLikeSpec2 C := (not (forall A B, 
- Isomorphic (t_and A B) C -> ((A <: B) \/ (B <: A)))) \/
-C <: t_bot.
-
-Lemma test : not (btmLikeSpec2 (t_union (t_and t_int (t_arrow t_int t_int))
-  (t_and t_int t_bot))).
-Proof.
-unfold not.
-intros.
-unfold btmLikeSpec2 in H.
-unfold not in H.
-destruct H.
-apply H. intros.
-unfold Isomorphic in *.
-clear H.
-destruct H0.
-apply sub_and in H0.
-destruct H0.
-apply sub_or in H0.
-destruct H0.
-apply sub_or in H1.
-destruct H1.
-clear H2 H3.
-dependent destruction H; eauto.
-apply sub_and in H. destruct H.
-Admitted.
-
-
-
-left.
-unfold not.
-intros.
-specialize (H ())
-Admitted.
-
-
-Lemma test1 : forall A, btmLikeSpec A -> btmLikeSpec2 A.
-Proof.
-intros.
-unfold btmLikeSpec2.
-unfold btmLikeSpec in H.
-destruct H; eauto.
-left.
-unfold not.
-intros.
-destruct H as [A1 [B1]].
-specialize (H0 A1 B1).
-assert ((~ (A1 <: B1) /\ ~ (B1 <: A1)) = ~((A1 <: B1) \/ (B1 <: A1))).
-admit.
-rewrite H1 in H.
-apply H.
-Admitted.
-
-
-(*Definition btmLikeSpec C := forall A, Ord A -> not (A <: C).*)
+Definition btmLikeSpec C := forall A, Ord A -> not (A <: C).
 
 (*Definition btmLikeSpec C := (forall A B,  Isomorphic (t_and A B) C -> 
 btmLikeSpec A \/ btmLikeSpec B \/ (not (A <: B) /\ not (B <: A))) \/ C <: t_bot.*)
@@ -394,36 +344,34 @@ Admitted.
 
 Lemma BL_soundness : forall A, bottomlike A -> btmLikeSpec A.
 Proof.
-intros. inductions H; unfold btmLikeSpec in *; eauto.
-- destruct IHbottomlike1; destruct IHbottomlike2; eauto.
-  + left.
-    destruct H1 as [A1 [B1]]; destruct H2 as [A2 [B2]].
-    exists (t_union A1 B1) (t_union A B). intros.
-    admit.
-  + left.
-    destruct H1 as [A1 [B1]].
-    exists A1 B1. intros.
-    apply H1.
-    unfold Isomorphic. unfold Isomorphic in H3.
-    destruct H3.
-    admit.
-  + admit.
-- destruct IHbottomlike.
-  destruct H0 as [A1 [B1]].
-  left.
-  exists A1 B1. intros.
-  apply H0. inverts H1.
-  unfold Isomorphic. split.
+intros. inductions H; unfold btmLikeSpec in *; eauto; intros.
+- unfold not. intros.
+  inductions H; try solve [inversion H0].
+  apply sub_or in H1.
+  destruct H1. apply* IHOrd1.
+- specialize (IHbottomlike1 A0).
+  specialize (IHbottomlike2 A0).
+  forwards*: IHbottomlike1.
+  forwards*: IHbottomlike2.
+  unfold not. intros.
+  clear IHbottomlike1 IHbottomlike2.
+  admit.
+- specialize (IHbottomlike A0).
+  forwards*: IHbottomlike.
+  unfold not in *. intros.
+  apply H1.
   apply sub_and in H2. destruct H2. auto.
-  admit.
-  right*.
-- destruct IHbottomlike. left.
-  destruct H0 as [A1 [B1]].
-  exists A1 B1. intros.
-  apply H0.
-  admit.
-  right*. 
-Admitted.
+- specialize (IHbottomlike A0).
+  forwards*: IHbottomlike.
+  unfold not in *. intros.
+  apply H1.
+  apply sub_and in H2. destruct H2. auto.
+- unfold not. intros.
+  apply sub_and in H2.
+  destruct H2.
+  dependent induction H1.
+  
+Admitted. 
 
 Lemma top_and_isomorphic : Isomorphic (t_and typ_top typ_top) typ_top.
 Proof.
@@ -453,48 +401,35 @@ Qed.
 Lemma BL_completeness : forall A, btmLikeSpec A -> bottomlike A.
 Proof.
 inductions A; unfold btmLikeSpec; intro; eauto.
- - destruct H.
-   admit. 
-   inversion H.
- - destruct H.
-   admit.
-   inversion H.
- - destruct H.
-   admit.
-   inversion H.
- - destruct H.
-   constructor.
-   apply IHA1. unfold btmLikeSpec.
-   left.
-   destruct H as [A [B]].
-   exists A B. intros.
-   apply H.
-   unfold Isomorphic in *.
-   destruct H0.
-   split*.
-   admit.
-   admit.
-   constructor.
-   apply IHA1. unfold btmLikeSpec.
-   right. inverts* H.
-   apply IHA2. unfold btmLikeSpec.
-   right. inverts* H.
- - destruct H.
-   apply bl_anda. apply IHA1.
-   unfold btmLikeSpec. left.
-   destruct H as [A[B]].
-   exists A B. intros.
-   apply H.
-   unfold Isomorphic in *.
-   destruct H0.
-   split.
-   assert (t_and A1 A2 <: A1) by eauto.
-   apply s_andb. admit.
-   assert (t_and A1 A2 <: A1) by eauto.
-   eapply sub_transitivity; eauto.
-   inverts* H.
-   apply bl_anda. apply IHA1. unfold btmLikeSpec. right*.
-   apply bl_andb. apply IHA2. unfold btmLikeSpec. right*.
+ - specialize (H typ_top).
+   forwards*: H.
+   unfold not in H0.
+   forwards*: H0.
+ - specialize (H t_int).
+   forwards*: H.
+   unfold not in H0.
+   forwards*: H0.
+ - specialize (H (t_arrow A1 A2)).
+   forwards*: H.
+   unfold not in H0.
+   forwards*: H0.
+ - constructor.
+  + apply IHA1. unfold btmLikeSpec.
+   intros.
+   unfold not in *. intros.
+   specialize (H A).
+   assert (A <: (t_union A1 A2)). eauto.
+   apply* H.
+  + apply IHA2. unfold btmLikeSpec.
+   intros.
+   unfold not in *. intros.
+   specialize (H A).
+   assert (A <: (t_union A1 A2)). eauto.
+   apply* H.
+ - apply bl_anda. apply IHA1.
+ unfold btmLikeSpec. intros.
+ specialize (H A).
+ unfold not in *. intros.
 Admitted.
 
 
