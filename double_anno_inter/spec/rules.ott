@@ -19,7 +19,8 @@ grammar
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
     | A \/ B 	             ::   :: union
-    | ( A )                :: S :: paren   {{ coq [[A]] }}
+    | A /\ B 			   ::   :: inter
+    | ( A )                :: S :: paren   {{ coq ([[A]]) }}
 
   exp, e, v, p             :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
@@ -62,6 +63,7 @@ terminals :: 'terminals_' ::=
   | ~>                   ::  :: leadsto    {{ tex \leadsto }}
   | ->                   ::  :: arrow      {{ tex \rightarrow }}
   | \/                   ::  :: or         {{ tex \vee }}
+  | /\                   ::  :: and        {{ tex \wedge }}  
   | |-                   ::  :: turnstile  {{ tex \vdash }}
   | <:                   ::  :: sub        {{ tex \textless: }}
   | in                   ::  :: in         {{ tex \in }}
@@ -147,6 +149,28 @@ BottomLike :: '' ::=
     botLike A \/ B
 
 
+    botLike A
+    -------------------------     :: andl
+    botLike A /\ B
+
+
+    botLike B
+    -------------------------     :: andr
+    botLike A /\ B
+
+
+    not A <: B
+    not B <: A
+    -------------------------     :: andsub
+    botLike A /\ B
+
+
+%    not B <: A
+%    -------------------------     :: andsubb
+%    botLike A /\ B
+
+
+
 defns
 Disjointness :: '' ::=
 
@@ -178,6 +202,23 @@ Disjointness :: '' ::=
     A * C
     -------------------------     :: orr
     C * A \/ B
+
+    A * C
+    -------------------------     :: andla
+    A /\ B * C
+
+    B * C
+    -------------------------     :: andlb
+    A /\ B * C
+
+    A * C
+    -------------------------     :: andra
+    C * A /\ B
+
+    B * C
+    -------------------------     :: andrb
+    C * A /\ B
+
   
 
 defns
@@ -215,6 +256,19 @@ Subtyping :: '' ::=
     A <: A2
     -------------------------     :: orc
     A <: A1 \/ A2
+
+    A <: A1
+    A <: A2
+    -------------------------     :: anda
+    A <: A1 /\ A2
+  
+    A1 <: A
+    -------------------------     :: andb
+    A1 /\ A2 <: A 
+
+    A2 <: A
+    -------------------------     :: andc
+    A1 /\ A2 <: A
 
 
 

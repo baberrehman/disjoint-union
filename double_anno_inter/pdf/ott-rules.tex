@@ -38,6 +38,7 @@
 \ottprodline{|}{ \bot }{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{A}  \rightarrow  \ottnt{B}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{A}  \vee  \ottnt{B}}{}{}{}{}\ottprodnewline
+\ottprodline{|}{\ottnt{A}  \wedge  \ottnt{B}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottsym{(}  \ottnt{A}  \ottsym{)}} {\textsf{S}}{}{}{}}
 
 \newcommand{\ottexp}{
@@ -150,9 +151,37 @@
 {\ottdrulename{bl\_or}}{}%
 }}
 
+
+\newcommand{\ottdruleblXXandl}[1]{\ottdrule[#1]{%
+\ottpremise{ \rfloor  \ottnt{A}  \lfloor }%
+}{
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
+{\ottdrulename{bl\_andl}}{}%
+}}
+
+
+\newcommand{\ottdruleblXXandr}[1]{\ottdrule[#1]{%
+\ottpremise{ \rfloor  \ottnt{B}  \lfloor }%
+}{
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
+{\ottdrulename{bl\_andr}}{}%
+}}
+
+
+\newcommand{\ottdruleblXXandsub}[1]{\ottdrule[#1]{%
+\ottpremise{ \neg  \ottnt{A}  \textless:  \ottnt{B} }%
+\ottpremise{ \neg  \ottnt{B}  \textless:  \ottnt{A} }%
+}{
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
+{\ottdrulename{bl\_andsub}}{}%
+}}
+
 \newcommand{\ottdefnbottomlike}[1]{\begin{ottdefnblock}[#1]{$ \rfloor  \ottnt{A}  \lfloor $}{\ottcom{Bottom-Like Types}}
 \ottusedrule{\ottdruleblXXbot{}}
 \ottusedrule{\ottdruleblXXor{}}
+\ottusedrule{\ottdruleblXXandl{}}
+\ottusedrule{\ottdruleblXXandr{}}
+\ottusedrule{\ottdruleblXXandsub{}}
 \end{ottdefnblock}}
 
 
@@ -206,6 +235,38 @@
 {\ottdrulename{ad\_orr}}{}%
 }}
 
+
+\newcommand{\ottdruleadXXandla}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
+}{
+ \ottnt{A}  \wedge  \ottnt{B}  *_a  \ottnt{C} }{%
+{\ottdrulename{ad\_andla}}{}%
+}}
+
+
+\newcommand{\ottdruleadXXandlb}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{B}  *_a  \ottnt{C} }%
+}{
+ \ottnt{A}  \wedge  \ottnt{B}  *_a  \ottnt{C} }{%
+{\ottdrulename{ad\_andlb}}{}%
+}}
+
+
+\newcommand{\ottdruleadXXandra}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
+}{
+ \ottnt{C}  *_a  \ottnt{A}  \wedge  \ottnt{B} }{%
+{\ottdrulename{ad\_andra}}{}%
+}}
+
+
+\newcommand{\ottdruleadXXandrb}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{B}  *_a  \ottnt{C} }%
+}{
+ \ottnt{C}  *_a  \ottnt{A}  \wedge  \ottnt{B} }{%
+{\ottdrulename{ad\_andrb}}{}%
+}}
+
 \newcommand{\ottdefndisjointness}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  *_a  \ottnt{B} $}{\ottcom{Disjointness}}
 \ottusedrule{\ottdruleadXXbtmr{}}
 \ottusedrule{\ottdruleadXXbtml{}}
@@ -213,6 +274,10 @@
 \ottusedrule{\ottdruleadXXintr{}}
 \ottusedrule{\ottdruleadXXorl{}}
 \ottusedrule{\ottdruleadXXorr{}}
+\ottusedrule{\ottdruleadXXandla{}}
+\ottusedrule{\ottdruleadXXandlb{}}
+\ottusedrule{\ottdruleadXXandra{}}
+\ottusedrule{\ottdruleadXXandrb{}}
 \end{ottdefnblock}}
 
 
@@ -275,6 +340,31 @@
 {\ottdrulename{s\_orc}}{}%
 }}
 
+
+\newcommand{\ottdrulesXXanda}[1]{\ottdrule[#1]{%
+\ottpremise{\ottnt{A}  \textless:  \ottnt{A_{{\mathrm{1}}}}}%
+\ottpremise{\ottnt{A}  \textless:  \ottnt{A_{{\mathrm{2}}}}}%
+}{
+\ottnt{A}  \textless:  \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}}}{%
+{\ottdrulename{s\_anda}}{}%
+}}
+
+
+\newcommand{\ottdrulesXXandb}[1]{\ottdrule[#1]{%
+\ottpremise{\ottnt{A_{{\mathrm{1}}}}  \textless:  \ottnt{A}}%
+}{
+\ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}}  \textless:  \ottnt{A}}{%
+{\ottdrulename{s\_andb}}{}%
+}}
+
+
+\newcommand{\ottdrulesXXandc}[1]{\ottdrule[#1]{%
+\ottpremise{\ottnt{A_{{\mathrm{2}}}}  \textless:  \ottnt{A}}%
+}{
+\ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}}  \textless:  \ottnt{A}}{%
+{\ottdrulename{s\_andc}}{}%
+}}
+
 \newcommand{\ottdefnsubtyping}[1]{\begin{ottdefnblock}[#1]{$\ottnt{A}  \textless:  \ottnt{B}$}{\ottcom{Subtyping}}
 \ottusedrule{\ottdrulesXXtop{}}
 \ottusedrule{\ottdrulesXXbtm{}}
@@ -283,6 +373,9 @@
 \ottusedrule{\ottdrulesXXora{}}
 \ottusedrule{\ottdrulesXXorb{}}
 \ottusedrule{\ottdrulesXXorc{}}
+\ottusedrule{\ottdrulesXXanda{}}
+\ottusedrule{\ottdrulesXXandb{}}
+\ottusedrule{\ottdrulesXXandc{}}
 \end{ottdefnblock}}
 
 
