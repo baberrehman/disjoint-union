@@ -58,7 +58,6 @@
 
 \begin{align*}
 &Type &A, B&::= [[Top]] ~ | ~[[Bot]]~|~ Int ~|~ [[A->B]]~ |~ [[A \/ B]] ~ |~ [[A /\ B]]\\
-&Ord &A, B&::= [[Top]] ~ | ~[[Bot]]~|~ Int ~|~ [[A->B]]~ |~ [[A \/ B]]\\
 &Expr &e &::= x ~|~ n ~|~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[typeof e as A e1 B e2]]\\
 &PExpr & p &::= n ~|~ [[\x.e : A->B]] \\
 %&RExpr & r &::= e1e2 ~|~ [[typeof e as A e1 B e2]] \\
@@ -100,6 +99,8 @@
 
 
 \bigskip
+
+\ottdefnsOrdinary
 
 \ottdefnsBottomLike
 

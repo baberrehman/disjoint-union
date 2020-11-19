@@ -132,6 +132,33 @@ FindType :: '' ::=
 
 
 defns
+Ordinary :: '' ::=
+  defn
+  ordinary A ::  :: ordinary :: 'ord_'
+  {{ tex ord ~ [[A]] }}
+  {{ com Ordinary Types }}
+  by
+
+  ---------------- :: top
+  ordinary Top
+
+
+  ---------------- :: int
+  ordinary Int
+
+
+  ---------------- :: arrow
+  ordinary A -> B
+
+
+  ordinary A
+  ordinary B
+  ---------------- :: union
+  ordinary A \/ B
+
+
+
+defns
 BottomLike :: '' ::=
 
   defn
