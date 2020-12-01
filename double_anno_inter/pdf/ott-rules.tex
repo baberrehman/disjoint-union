@@ -156,20 +156,10 @@
 {\ottdrulename{ord\_arrow}}{}%
 }}
 
-
-\newcommand{\ottdruleordXXunion}[1]{\ottdrule[#1]{%
-\ottpremise{ ord ~  \ottnt{A} }%
-\ottpremise{ ord ~  \ottnt{B} }%
-}{
- ord ~  \ottnt{A}  \vee  \ottnt{B} }{%
-{\ottdrulename{ord\_union}}{}%
-}}
-
 \newcommand{\ottdefnordinary}[1]{\begin{ottdefnblock}[#1]{$ ord ~  \ottnt{A} $}{\ottcom{Ordinary Types}}
 \ottusedrule{\ottdruleordXXtop{}}
 \ottusedrule{\ottdruleordXXint{}}
 \ottusedrule{\ottdruleordXXarrow{}}
-\ottusedrule{\ottdruleordXXunion{}}
 \end{ottdefnblock}}
 
 
@@ -211,8 +201,7 @@
 
 
 \newcommand{\ottdruleblXXandsub}[1]{\ottdrule[#1]{%
-\ottpremise{ \neg  \ottnt{A}  \textless:  \ottnt{B} }%
-\ottpremise{ \neg  \ottnt{B}  \textless:  \ottnt{A} }%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
 }{
  \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
 {\ottdrulename{bl\_andsub}}{}%
@@ -262,7 +251,7 @@
 
 \newcommand{\ottdruleadXXorl}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
-\ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
+\ottpremise{ \ottnt{B}  *_a  \ottnt{C} }%
 }{
  \ottnt{A}  \vee  \ottnt{B}  *_a  \ottnt{C} }{%
 {\ottdrulename{ad\_orl}}{}%
@@ -271,7 +260,7 @@
 
 \newcommand{\ottdruleadXXorr}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
-\ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
+\ottpremise{ \ottnt{B}  *_a  \ottnt{C} }%
 }{
  \ottnt{C}  *_a  \ottnt{A}  \vee  \ottnt{B} }{%
 {\ottdrulename{ad\_orr}}{}%

@@ -90,7 +90,7 @@
       BottomLikeSpec & C & ::= & $\forall A, ~ Ord ~ A ~ \rightarrow \neg \ottnt{A}  \textless:  \ottnt{C}$ \\
 %      BottomLikeSpec & C & ::= & $(\exists A ~ B, ~ (\ottnt{A}  \wedge  \ottnt{B}) \backsimeq C \rightarrow \neg ( \ottnt{A}  \textless:  \ottnt{B} ) \vee \neg ( \ottnt{B}  \textless:  \ottnt{A} )) \vee (\ottnt{C}  \textless:   \bot )$ \\
        \hline
-      DisjSpec & A * B & ::= & $\forall C, \ottnt{C}  \textless:  \ottnt{A} \wedge \ottnt{C}  \textless:  \ottnt{B} \rightarrow  \rfloor \ottnt{C} \lfloor$ \\
+      DisjSpec & A * B & ::= & $\forall C, ~ \ottnt{C}  \textless:  \ottnt{A} \wedge \ottnt{C}  \textless:  \ottnt{B} ~ \rightarrow ~ BottomLikeSpec ~ \ottnt{C}$ \\
        \hline
      \end{tabular}
      \end{center} }

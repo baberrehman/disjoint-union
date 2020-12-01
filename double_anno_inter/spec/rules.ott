@@ -151,10 +151,10 @@ Ordinary :: '' ::=
   ordinary A -> B
 
 
-  ordinary A
-  ordinary B
-  ---------------- :: union
-  ordinary A \/ B
+%  ordinary A
+%  ordinary B
+%  ---------------- :: union
+%  ordinary A \/ B
 
 
 
@@ -186,8 +186,7 @@ BottomLike :: '' ::=
     botLike A /\ B
 
 
-    not A <: B
-    not B <: A
+    A * B
     -------------------------     :: andsub
     botLike A /\ B
 
@@ -221,12 +220,12 @@ Disjointness :: '' ::=
     A -> B * Int
 
     A * C
-    A * C
+    B * C
     -------------------------     :: orl
     A \/ B * C
   
     A * C
-    A * C
+    B * C
     -------------------------     :: orr
     C * A \/ B
 
