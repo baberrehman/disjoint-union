@@ -203,6 +203,12 @@ Inductive disjointness : typ -> typ -> Prop :=    (* defn disjointness *)
      (*A *a C ->*)
      B *a C ->
      C *a (t_and A B)
+ | ad_disjl : forall A B C,
+     A *a B ->
+     (t_and A B) *a C
+ | ad_disjr : forall A B C,
+     A *a B ->
+     C *a (t_and A B)
 
 where "A *a B" := (disjointness A B).
 
@@ -296,8 +302,11 @@ induction B; intros;
 generalize H0 H; clear H0; clear H; generalize A; clear A.
 - intros; inductions H0; eauto. 
 - intros; inductions H; eauto.
-- intros; inductions H; eauto.
-  apply s_disj in H.
+- intros. dependent induction A; intros; eauto.
+  inversion H. inversion H. inversion H.
+  apply sub_or in H. destruct H.
+  apply s_ora; eauto.
+  inverts* H.
   admit.
 - induction C; intros; inverts* H0.
   induction A; inverts* H.
@@ -805,7 +814,5 @@ induction A; unfold DisjSpec; intros; eauto.
   apply IHA1; unfold DisjSpec; intros; destruct H0; apply H; eauto.
   apply IHA2; unfold DisjSpec; intros; destruct H0; apply H; eauto.
 - assert (DisjSpec (t_and A1 A2) B) by auto.
-  apply disj_spec_and_inv in H0. destruct H0.
-  apply ad_andl1. auto.
-  apply ad_andl2. auto.
+  
 Admitted.
