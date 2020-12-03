@@ -422,7 +422,8 @@ Proof.
       assert (typing G (e_ann (e_abs x) A1) infer A1). eauto.
       forwards*: typing_through_subst_ee.
       rewrite* (@subst_ee_intro y).
-      forwards*: typing_regular H6. 
+      forwards*: typing_regular H6.
+      admit. admit. 
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
@@ -458,7 +459,7 @@ Proof.
         do 4 dependent destruction Typ. auto.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
-Qed.
+Admitted.
 
 Lemma canonical_form_abs_prevalue : forall t U1 U2,
   pexpr t -> typing empty t infer (t_arrow U1 U2) ->
@@ -621,7 +622,7 @@ inductions Typ; intros EQ; subst.
      inverts H; try solve [inversion H3 | inversion H2].
      inverts H3.
      right. left.
-     exists* (e_ann (open_exp_wrt_exp e (e_ann (e_abs x) A0)) B). }
+     exists* (e_ann (open_exp_wrt_exp e (e_ann (e_abs x) A0)) B). admit. }
   + destruct H. 
     { destruct H.
     right. left. exists (e_app x e2). apply* step_appl.
@@ -658,7 +659,7 @@ inductions Typ; intros EQ; subst.
      forwards*: typing_regular Typ'.
    * destruct H4. destruct H4. 
      inverts Typ. inverts H6; try solve [inversion TEMP]. inversion TEMP.
-Qed.
+Admitted.
 
 Lemma pexpr_rexpr_false : forall e, rexpr e -> pexpr e -> False.
 Proof.
@@ -920,4 +921,3 @@ Proof.
     unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
     forwards*: H18. inversion H1.
 Qed.
-
