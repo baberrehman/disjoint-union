@@ -157,6 +157,19 @@ Ordinary :: '' ::=
 %  ordinary A \/ B
 
 
+% following definition is just to display A *s B
+% No other use of this definition anywhere else
+defns
+DisjointnessSpec :: '' ::=
+
+  defn
+  A *s B ::  :: disjointnessspec :: ds_
+  {{ tex [[A]] *_s [[B]] }}
+  {{ com DisjointnessSpec }}
+
+  by
+
+
 
 defns
 BottomLike :: '' ::=
@@ -186,7 +199,7 @@ BottomLike :: '' ::=
     botLike A /\ B
 
 
-    A * B
+    A *s B
     -------------------------     :: andsub
     botLike A /\ B
 
@@ -245,7 +258,18 @@ Disjointness :: '' ::=
     -------------------------     :: andrb
     C * A /\ B
 
+
+    A * B
+    -------------------------     :: disjl
+    A /\ B * C
+
+
+    A * B
+    -------------------------     :: disjr
+    C * A /\ B
+
   
+
 
 defns
 Subtyping :: '' ::=

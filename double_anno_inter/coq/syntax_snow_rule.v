@@ -1675,6 +1675,14 @@ God help this poor PhD student! Please!
 
 *)
 
+Lemma test62 : forall A B C, Ord A -> not (A <: B) -> not (A <: (t_and B C)).
+Proof.
+  intros.
+  unfold not in *.
+  intros.
+  apply sub_and in H1. destruct H1.
+  apply H0; auto.
+Qed.
 
 Lemma test6 : forall A1 A2 B, btmLikeSpec (t_and (t_and A1 A2) B) ->
 btmLikeSpec (t_and A1 B) \/ btmLikeSpec (t_and A2 B) \/ btmLikeSpec (t_and A1 A2).
@@ -1685,11 +1693,11 @@ Proof.
 Admitted.
 
 
-Lemma test61 : forall A1 A2 B, (t_and A1 A2) *s B ->
+Lemma test61 : forall B A1 A2, (t_and A1 A2) *s B ->
 A1 *s B \/ A2 *s B \/ A1 *s A2.
 Proof.
   intros.
-  assert (btmLikeSpec (t_and (t_and A1 A2) B)). eauto.
+  assert (btmLikeSpec (t_and(t_and A1 A2) B)). eauto.
   apply test6 in H0.
   destruct H0.
   left.
@@ -1804,7 +1812,7 @@ induction A; unfold DisjSpec; intros; eauto.
   apply IHA1; unfold DisjSpec; intros; destruct H0; apply H; eauto.
   apply IHA2; unfold DisjSpec; intros; destruct H0; apply H; eauto.
 - assert (DisjSpec (t_and A1 A2) B) by auto.
-(*  apply test61 in H0.
+apply test61 in H0.
   destruct H0.
   apply ad_andl1.
   eapply IHA1; eauto.
@@ -1812,8 +1820,8 @@ induction A; unfold DisjSpec; intros; eauto.
   apply ad_andl2.
   eapply IHA2; eauto.
   apply ad_and_disl.
-  eapply IHA1; eauto. *)
-  dependent induction B; eauto.
+  eapply IHA1; eauto.
+(*  dependent induction B; eauto.
  + apply disj_spec_and_top in H0.
   apply ad_and_disl.
   eapply IHA1; auto.
@@ -1829,5 +1837,5 @@ induction A; unfold DisjSpec; intros; eauto.
    apply ad_orr.
    apply Disj_sym. eapply IHB1; eauto.
    apply Disj_sym. eapply IHB2; eauto.
- + admit.
+ + admit.*)
 Admitted.

@@ -12,3 +12,4 @@ CoqSrc.mk
 CoqSrc.mk.conf
 *.d
 *.mk
+*.vio

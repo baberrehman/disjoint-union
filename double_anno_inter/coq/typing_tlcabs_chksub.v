@@ -1,5 +1,5 @@
 Require Import TLC.LibLN.
-Require Import syntaxtlcabs.
+Require Import syntax_snow_rule.
 
 (** Gathering free names already used in the proofs *)
 
@@ -536,11 +536,15 @@ Proof.
   inductions H; try solve [ inverts* H | inverts* H0 | inverts* H2].
   inverts H1. inverts H. inverts H2. inverts H.
   unfold DisjSpec in H0. specialize (H0 t_int).
-  forwards*: H0. inverts H.
+  forwards*: H0.
+  unfold btmLikeSpec in H. unfold not in H.
+  specialize (H t_int). forwards*: H.
   inverts H1. inverts H3. inverts H2. inverts H1.
   unfold DisjSpec in H0.
   specialize (H0 (t_arrow A0 B0)).
-  forwards*: H0. inverts H1.
+  forwards*: H0.
+  unfold btmLikeSpec in H1. unfold not in H1.
+  forwards*: H1.
 Qed.
 
 
@@ -782,7 +786,9 @@ Proof.
     forwards*: check_both_disj_false H1 H5.
     inverts H12.
     unfold DisjSpec in H17. specialize (H17 (t_arrow A1 B0)).
-    forwards*: H17. inversion H1.
+    forwards*: H17.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    forwards*: H1.
  - inverts* He2.
   + inverts H1. inverts H10. assert (value (e_ann (e_lit i5) D)) by auto.
     unfold not in H4. apply H4 in H1. inversion H1.
@@ -793,10 +799,15 @@ Proof.
     forwards*: typing_regular. destruct H3.
     inverts* H1. inverts H12.
     unfold DisjSpec in H17. specialize (H17 t_int).
-    forwards*: H17. inversion H1.
+    forwards*: H17.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 t_int). forwards*: H1.
     inverts H12.
     unfold DisjSpec in H17. specialize (H17 (t_arrow A1 B0)).
-    forwards*: H17. inversion H1.
+    forwards*: H17.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 (t_arrow A1 B0)).
+    forwards*: H1.
 Qed.
 
 
@@ -909,7 +920,10 @@ Proof.
     forwards*: check_both_disj_false H1 H5.
     inverts H12.
     unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
-    forwards*: H18. inversion H1.
+    forwards*: H18.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 (t_arrow A1 B0)).
+    forwards*: H1.
  - inverts* He2.
   + inverts H1. inverts H10. assert (value (e_ann (e_lit i5) D)) by auto.
     unfold not in H4. apply H4 in H1. inversion H1.
@@ -920,8 +934,13 @@ Proof.
     forwards*: typing_regular. destruct H3.
     inverts* H1. inverts H12.
     unfold DisjSpec in H18. specialize (H18 t_int).
-    forwards*: H18. inversion H1.
+    forwards*: H18.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 t_int). forwards*: H1.
     inverts H12.
     unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
-    forwards*: H18. inversion H1.
+    forwards*: H18.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 (t_arrow A1 B0)).
+    forwards*: H1.
 Qed.

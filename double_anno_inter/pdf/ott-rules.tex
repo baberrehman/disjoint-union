@@ -166,6 +166,16 @@
 \newcommand{\ottdefnsOrdinary}{
 \ottdefnordinary{}}
 
+% defns DisjointnessSpec
+%% defn disjointnessspec
+
+\newcommand{\ottdefndisjointnessspec}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  *_s  \ottnt{B} $}{\ottcom{DisjointnessSpec}}
+\end{ottdefnblock}}
+
+
+\newcommand{\ottdefnsDisjointnessSpec}{
+\ottdefndisjointnessspec{}}
+
 % defns BottomLike
 %% defn bottomlike
 \newcommand{\ottdruleblXXbot}[1]{\ottdrule[#1]{%
@@ -201,7 +211,7 @@
 
 
 \newcommand{\ottdruleblXXandsub}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+\ottpremise{ \ottnt{A}  *_s  \ottnt{B} }%
 }{
  \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
 {\ottdrulename{bl\_andsub}}{}%
@@ -298,6 +308,22 @@
 {\ottdrulename{ad\_andrb}}{}%
 }}
 
+
+\newcommand{\ottdruleadXXdisjl}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+}{
+ \ottnt{A}  \wedge  \ottnt{B}  *_a  \ottnt{C} }{%
+{\ottdrulename{ad\_disjl}}{}%
+}}
+
+
+\newcommand{\ottdruleadXXdisjr}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+}{
+ \ottnt{C}  *_a  \ottnt{A}  \wedge  \ottnt{B} }{%
+{\ottdrulename{ad\_disjr}}{}%
+}}
+
 \newcommand{\ottdefndisjointness}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  *_a  \ottnt{B} $}{\ottcom{Disjointness}}
 \ottusedrule{\ottdruleadXXbtmr{}}
 \ottusedrule{\ottdruleadXXbtml{}}
@@ -309,6 +335,8 @@
 \ottusedrule{\ottdruleadXXandlb{}}
 \ottusedrule{\ottdruleadXXandra{}}
 \ottusedrule{\ottdruleadXXandrb{}}
+\ottusedrule{\ottdruleadXXdisjl{}}
+\ottusedrule{\ottdruleadXXdisjr{}}
 \end{ottdefnblock}}
 
 
@@ -605,6 +633,7 @@
 \ottdefnsValue
 \ottdefnsFindType
 \ottdefnsOrdinary
+\ottdefnsDisjointnessSpec
 \ottdefnsBottomLike
 \ottdefnsDisjointness
 \ottdefnsSubtyping

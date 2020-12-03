@@ -8,12 +8,15 @@ LIBNAME="Top"
 SYNTAX=syntax
 TARGET=rules
 
-FILES    = syntaxtlcabs
+FILES    = syntax_snow_rule
 VFILES   = $(foreach i, $(FILES), $(i).v)
 
 .SECONDARY: $(VFILES)
 
 all: coq
+
+myfile:  $(COQMKFILENAME) syntax_snow_rule.v
+	@$(MAKE) -f CoqSrc.mk
 
 quick:  $(COQMKFILENAME) $(VFILES)
 	@$(MAKE) -f CoqSrc.mk quick
@@ -29,6 +32,6 @@ $(COQMKFILENAME): Makefile
 
 
 coqclean:
-	rm -f .*.d *.conf .*.aux *.v-e *.v.d *.vo *.vos *.vok *.glob $(COQMKFILENAME)
+	rm -f .*.d *.conf .*.aux *.v-e *.v.d *.vo *.vos *.vok *.glob *.vio $(COQMKFILENAME)
 
 clean: coqclean
