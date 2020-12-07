@@ -57,7 +57,7 @@
 \ottprodline{|}{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}}{}{}{}{}}
 
 \newcommand{\ottdirflag}{
-\ottrulehead{\ottnt{dirflag}}{::=}{\ottcom{typing direction}}\ottprodnewline
+\ottrulehead{\Leftrightarrow}{::=}{\ottcom{typing direction}}\ottprodnewline
 \ottfirstprodline{|}{ \Rightarrow }{}{}{}{}\ottprodnewline
 \ottprodline{|}{ \Leftarrow }{}{}{}{}}
 
@@ -176,36 +176,46 @@
 \newcommand{\ottdefnsDisjointnessSpec}{
 \ottdefndisjointnessspec{}}
 
+% defns BottomLikeSpec
+%% defn btmlikespec
+
+\newcommand{\ottdefnbtmlikespec}[1]{\begin{ottdefnblock}[#1]{$ \rfloor  \ottnt{A}  \lfloor_s $}{\ottcom{BottomLikeSpec}}
+\end{ottdefnblock}}
+
+
+\newcommand{\ottdefnsBottomLikeSpec}{
+\ottdefnbtmlikespec{}}
+
 % defns BottomLike
 %% defn bottomlike
 \newcommand{\ottdruleblXXbot}[1]{\ottdrule[#1]{%
 }{
- \rfloor   \bot   \lfloor }{%
+ \rfloor   \bot   \lfloor_a }{%
 {\ottdrulename{bl\_bot}}{}%
 }}
 
 
 \newcommand{\ottdruleblXXor}[1]{\ottdrule[#1]{%
-\ottpremise{ \rfloor  \ottnt{A}  \lfloor }%
-\ottpremise{ \rfloor  \ottnt{B}  \lfloor }%
+\ottpremise{ \rfloor  \ottnt{A}  \lfloor_a }%
+\ottpremise{ \rfloor  \ottnt{B}  \lfloor_a }%
 }{
- \rfloor  \ottnt{A}  \vee  \ottnt{B}  \lfloor }{%
+ \rfloor  \ottnt{A}  \vee  \ottnt{B}  \lfloor_a }{%
 {\ottdrulename{bl\_or}}{}%
 }}
 
 
 \newcommand{\ottdruleblXXandl}[1]{\ottdrule[#1]{%
-\ottpremise{ \rfloor  \ottnt{A}  \lfloor }%
+\ottpremise{ \rfloor  \ottnt{A}  \lfloor_a }%
 }{
- \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor_a }{%
 {\ottdrulename{bl\_andl}}{}%
 }}
 
 
 \newcommand{\ottdruleblXXandr}[1]{\ottdrule[#1]{%
-\ottpremise{ \rfloor  \ottnt{B}  \lfloor }%
+\ottpremise{ \rfloor  \ottnt{B}  \lfloor_a }%
 }{
- \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor_a }{%
 {\ottdrulename{bl\_andr}}{}%
 }}
 
@@ -213,11 +223,11 @@
 \newcommand{\ottdruleblXXandsub}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{A}  *_s  \ottnt{B} }%
 }{
- \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor_a }{%
 {\ottdrulename{bl\_andsub}}{}%
 }}
 
-\newcommand{\ottdefnbottomlike}[1]{\begin{ottdefnblock}[#1]{$ \rfloor  \ottnt{A}  \lfloor $}{\ottcom{Bottom-Like Types}}
+\newcommand{\ottdefnbottomlike}[1]{\begin{ottdefnblock}[#1]{$ \rfloor  \ottnt{A}  \lfloor_a $}{\ottcom{Bottom-Like Types}}
 \ottusedrule{\ottdruleblXXbot{}}
 \ottusedrule{\ottdruleblXXor{}}
 \ottusedrule{\ottdruleblXXandl{}}
@@ -309,19 +319,19 @@
 }}
 
 
-\newcommand{\ottdruleadXXdisjl}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+\newcommand{\ottdruleadXXdisXXspecl}[1]{\ottdrule[#1]{%
+\ottpremise{ \rfloor  \ottnt{A}  \lfloor_s }%
 }{
- \ottnt{A}  \wedge  \ottnt{B}  *_a  \ottnt{C} }{%
-{\ottdrulename{ad\_disjl}}{}%
+ \ottnt{A}  *_a  \ottnt{B} }{%
+{\ottdrulename{ad\_dis\_specl}}{}%
 }}
 
 
-\newcommand{\ottdruleadXXdisjr}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+\newcommand{\ottdruleadXXdisXXspecr}[1]{\ottdrule[#1]{%
+\ottpremise{ \rfloor  \ottnt{B}  \lfloor_s }%
 }{
- \ottnt{C}  *_a  \ottnt{A}  \wedge  \ottnt{B} }{%
-{\ottdrulename{ad\_disjr}}{}%
+ \ottnt{A}  *_a  \ottnt{B} }{%
+{\ottdrulename{ad\_dis\_specr}}{}%
 }}
 
 \newcommand{\ottdefndisjointness}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  *_a  \ottnt{B} $}{\ottcom{Disjointness}}
@@ -335,8 +345,8 @@
 \ottusedrule{\ottdruleadXXandlb{}}
 \ottusedrule{\ottdruleadXXandra{}}
 \ottusedrule{\ottdruleadXXandrb{}}
-\ottusedrule{\ottdruleadXXdisjl{}}
-\ottusedrule{\ottdruleadXXdisjr{}}
+\ottusedrule{\ottdruleadXXdisXXspecl{}}
+\ottusedrule{\ottdruleadXXdisXXspecr{}}
 \end{ottdefnblock}}
 
 
@@ -504,7 +514,7 @@
 {\ottdrulename{typ\_typeof}}{}%
 }}
 
-\newcommand{\ottdefntyping}[1]{\begin{ottdefnblock}[#1]{$\Gamma  \vdash  \ottnt{e} \, \ottnt{dirflag} \, \ottnt{A}$}{\ottcom{Typing Rules}}
+\newcommand{\ottdefntyping}[1]{\begin{ottdefnblock}[#1]{$\Gamma  \vdash  \ottnt{e} \, \Leftrightarrow \, \ottnt{A}$}{\ottcom{Typing Rules}}
 \ottusedrule{\ottdruletypXXlit{}}
 \ottusedrule{\ottdruletypXXvar{}}
 \ottusedrule{\ottdruletypXXann{}}
@@ -634,6 +644,7 @@
 \ottdefnsFindType
 \ottdefnsOrdinary
 \ottdefnsDisjointnessSpec
+\ottdefnsBottomLikeSpec
 \ottdefnsBottomLike
 \ottdefnsDisjointness
 \ottdefnsSubtyping

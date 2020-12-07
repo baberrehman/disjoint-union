@@ -53,7 +53,7 @@ grammar
                                            {{ tex \cdot }}
     | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
 
-  dirflag :: '' ::=                        {{ com typing direction }}
+  dirflag {{ tex \Leftrightarrow }} :: '' ::=  {{ com typing direction }}
     | =>                   ::  :: infer    {{ tex \Rightarrow }}
     | <=                   ::  :: check    {{ tex \Leftarrow }}
 
@@ -85,6 +85,7 @@ formula :: 'formula_' ::=
   | x notin dom G            ::   :: notInGx
     {{ coq ~ AtomSetImpl.In [[x]] (dom [[G]]) }}
     {{ tex [[x]] \notin [[G]] }}
+
 
 
 defns
@@ -170,13 +171,26 @@ DisjointnessSpec :: '' ::=
   by
 
 
+% following definition is just to display BottomLikeSpec
+% No other use of this definition anywhere else
+defns
+BottomLikeSpec :: '' ::=
+
+  defn
+  BottomLikeSpec A ::  :: btmlikespec :: bs_
+  {{ tex \rfloor [[A]] \lfloor_s }}
+  {{ com BottomLikeSpec }}
+
+  by
+
+
 
 defns
 BottomLike :: '' ::=
 
   defn
   botLike A ::  :: bottomlike :: 'bl_'
-  {{ tex \rfloor [[A]] \lfloor}}
+  {{ tex \rfloor [[A]] \lfloor_a}}
   {{ com Bottom-Like Types }}
   by
 
@@ -259,14 +273,23 @@ Disjointness :: '' ::=
     C * A /\ B
 
 
-    A * B
-    -------------------------     :: disjl
-    A /\ B * C
+	BottomLikeSpec A
+	----------------------        :: dis_specl
+	A * B
 
 
-    A * B
-    -------------------------     :: disjr
-    C * A /\ B
+	BottomLikeSpec B
+	----------------------        :: dis_specr
+	A * B
+
+%    A * B
+%    -------------------------     :: disjl
+%    A /\ B * C
+
+
+%    A * B
+%    -------------------------     :: disjr
+%    C * A /\ B
 
   
 
