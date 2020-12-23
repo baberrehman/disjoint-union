@@ -482,10 +482,12 @@ Qed.
 (* defns Disjointness *)
 Reserved Notation "A *a B" (at level 80).
 Inductive disjointness : typ -> typ -> Prop :=    (* defn disjointness *)
- | ad_btmr : forall (A:typ),
-      A *a t_bot
- | ad_btml : forall (A:typ),
-     t_bot *a A
+ | ad_btmr : forall A B,
+     btmLikeSpec B ->
+     A *a B
+ | ad_btml : forall A B,
+    btmLikeSpec A ->
+     A *a B
  | ad_intl : forall (A B:typ),
      t_int *a (t_arrow A B)
  | ad_intr : forall (A B:typ),
@@ -514,12 +516,12 @@ Inductive disjointness : typ -> typ -> Prop :=    (* defn disjointness *)
      (*A *a C ->*)
      B *a C ->
      C *a (t_and A B)
- | ad_dis_specl : forall A B,
-     btmLikeSpec A ->
-     A *a B
- | ad_dis_specr : forall A B,
-     btmLikeSpec B ->
-     A *a B
+ | ad_dis_specl : forall A B C,
+     A *a B ->
+     (t_and A B) *a C
+ | ad_dis_specr : forall A B C,
+     A *a B ->
+     C *a (t_and A B)
 
 where "A *a B" := (disjointness A B).
 
@@ -817,34 +819,13 @@ Qed.
 
 Lemma Disj_soundness : forall A B, A *a B -> A *s B.
 intros. dependent induction H; unfold DisjSpec; intros; eauto.
-- destruct H. dependent induction H0; eauto.
-  apply btm_spec.
-  apply sub_or in H. destruct H.
-  forwards*: IHsubtyping1.
-  forwards*: IHsubtyping2.
-  apply* btm_like_spec_union_inv.
-  forwards*: IHsubtyping.
-  assert (t_bot <: A) by auto.
+- destruct H0.
+  unfold btmLikeSpec in *. intros.
+  unfold not in *. intros.
   eapply sub_transitivity in H1; eauto.
-  apply* btm_like_spec_and1_inv.
-  forwards*: IHsubtyping.
-  assert (t_bot <: A) by auto.
-  eapply sub_transitivity in H1; eauto.
-  apply* btm_like_spec_and2_inv.
-- destruct H. dependent induction H; eauto.
-  apply btm_spec.
-  apply sub_or in H1. destruct H1.
-  forwards*: IHsubtyping1.
-  forwards*: IHsubtyping2.
-  apply* btm_like_spec_union_inv.
-  forwards*: IHsubtyping.
-  assert (t_bot <: A) by auto.
-  eapply sub_transitivity in H1; eauto.
-  apply* btm_like_spec_and1_inv.
-  forwards*: IHsubtyping.
-  assert (t_bot <: A) by auto.
-  eapply sub_transitivity in H1; eauto.
-  apply* btm_like_spec_and2_inv.
+- destruct H0.
+  unfold btmLikeSpec in *. unfold not in *.
+  intros. eapply sub_transitivity in H0; eauto.
 - destruct H. induction C; try (dependent destruction H); eauto.
   + inversion H0.
   + apply btm_spec.
@@ -920,15 +901,13 @@ intros. dependent induction H; unfold DisjSpec; intros; eauto.
   unfold DisjSpec in IHdisjointness.
   apply IHdisjointness; auto.
 - destruct H0.
-  unfold btmLikeSpec in *. unfold not in *.
-  intros.
-  assert (A0 <: A). eapply sub_transitivity; eauto.
-  forwards*: H H2.
+  apply sub_and in H0. destruct H0.
+  unfold DisjSpec in IHdisjointness.
+  eapply IHdisjointness; eauto.
 - destruct H0.
-  unfold btmLikeSpec in *. unfold not in *.
-  intros.
-  assert (A0 <: B). eapply sub_transitivity; eauto.
-  forwards*: H H2.
+  apply sub_and in H1. destruct H1.
+  unfold DisjSpec in IHdisjointness.
+  eapply IHdisjointness; eauto.
 Qed.
 
 Lemma BL_disj_spec : forall A, btmLikeSpec A -> forall B, A *s B.
@@ -968,7 +947,8 @@ Lemma BL_disj : forall A, bottomlike A -> forall B, A *a B.
 Proof.
   intros A H1.
   inductions H1; intros; eauto.
-  apply ad_dis_specl. eauto.
+  assert (btmLikeSpec t_bot). apply btm_spec. eauto.
+  apply ad_btml. eauto.
 Qed.
 
 Lemma disj_union_inv : forall A B C, A *a (t_union B C) ->
@@ -976,6 +956,8 @@ Lemma disj_union_inv : forall A B C, A *a (t_union B C) ->
 Proof.
 intros.
 inductions H; eauto.
+apply BL_completeness in H. inverts* H.
+split; apply Disj_sym; apply BL_disj; auto.
 specialize (IHdisjointness1 B C).
 destruct IHdisjointness1; auto.
 specialize (IHdisjointness2 B C).
@@ -985,8 +967,6 @@ specialize (IHdisjointness B C).
 destruct IHdisjointness; auto.
 specialize (IHdisjointness B C).
 destruct IHdisjointness; auto.
-apply BL_completeness in H. inverts* H.
-split; apply Disj_sym; apply BL_disj; auto.
 Qed.
 
 
@@ -1205,9 +1185,8 @@ Proof.
     apply sub_and in H3. destruct H3.
     apply sub_and in H3. destruct H3.
     eapply H1; eauto.
-    right. auto. 
+    right. auto.
 Admitted.
-
 
 
 Lemma disj_spec_int : forall A1 A2, (t_and A1 A2) *s t_int -> A1 *s t_int \/ A2 *s t_int.
@@ -1580,93 +1559,12 @@ Proof.
      unfold not in H.
 Admitted.
 
-Lemma DeMorgan1 : forall A B, not (A \/ B) -> not A /\ not B.
-Proof.
-  unfold not. intros. split.
-  intros. apply H. auto.
-  intros. apply H. auto.
-Qed.
-
-(*Module LetsDoClassicalReasoning.*)
-
-Require Import Coq.Logic.Classical.
-
-Theorem excluded_middle : forall P, P \/ ~P.
-Proof.
-  apply classic.
-Qed.
-
-Lemma DeMorgan2 : forall A B, not (A /\ B) -> not A \/ not B.
-Proof.
-  apply not_and_or.
-Qed.
-
-(*End LetsDoClassicalReasoning.*)
-
-Lemma not_sub_and1 : forall A1 A2 A,
-not (A <: (t_and A1 A2)) -> not((A <: A1) /\ (A <: A2)).
-Proof.
-  intros.
-  unfold not in *. intros.
-  destruct H0.
-  apply H; eauto.
-Qed.
-
-Lemma not_sub_and2 : forall A1 A2, btmLikeSpec (t_and A1 A2) -> forall A, Ord A -> not((A <: A1) /\ (A <: A2)).
-Proof.
-  intros.
-  unfold not in *. intros.
-  unfold btmLikeSpec in H. unfold not in H.
-  destruct H1.
-  eapply H; eauto.
-Qed.
-
-Lemma not_sub_and3 : forall A1 A2 A, not (A <: A1 /\ A <: A2) -> not (A <: A1) \/ not (A <: A2).
-Proof.
-  intros A1 A2 A.
-  apply not_and_or.
-Qed.
-
-Lemma not_sub_and4 : forall A1 A2 A, Ord A -> not (A <: A1 /\ A <: A2) -> not (A <: A1) \/ not (A <: A2).
-Proof.
-  intros A1 A2 A H.
-  apply not_and_or.
-Qed.
-
-(*
-
-From the below lemma:
-
-A1, A2, B: typ
-H: btmLikeSpec (t_and (t_and A1 A2) B)
-H0: forall A : typ, Ord A -> ~ ((A <: t_and A1 A2) /\ A <: B)
----------------------------------------------------------------1/1
-btmLikeSpec (t_and A1 B) \/
-btmLikeSpec (t_and A2 B) \/ btmLikeSpec (t_and A1 A2)
-
-If we destruct H0 using Demorgan's law:
-
-~ ((A <: t_and A1 A2) /\ A <: B) = ~(A <: t_and A1 A2) \/ ~(A <: B)
-
-we can prove our lemma test6
-
-*)
 
 Lemma test6 : forall A1 A2 B, btmLikeSpec (t_and (t_and A1 A2) B) ->
 btmLikeSpec (t_and A1 B) \/ btmLikeSpec (t_and A2 B) \/ btmLikeSpec (t_and A1 A2).
 Proof.
   intros.
-  lets: not_sub_and2 (t_and A1 A2) B H.
-  lets: not_sub_and4 (t_and A1 A2) B.
-  specialize (H1 t_int).
-  apply H1 in H0; auto.
-  destruct H0.
-  right. right. unfold btmLikeSpec. unfold not.
-  intros. unfold not in H0.
-  apply H0.
-  destruct H0.
-  specialize (H1 B).
-  unfold not in H0.
+  inductions H. admit. admit.
 Admitted.
 
 
@@ -1712,6 +1610,11 @@ left. intros.
 apply H0. intros.
 Admitted.
 
+Lemma test14 : forall B, exists A, Ord A -> A <: B.
+intros.
+exists B. intros. auto.
+Qed.
+
 Lemma test15 : forall B, not(btmLikeSpec B) -> forall A, Ord A -> A <: B.
 intros.
 dependent induction H0; eauto.
@@ -1727,28 +1630,26 @@ Admitted.
 
 Lemma test611 : forall B A1 A2, (t_and A1 A2) *s B ->
                                A1 *s B \/ A2 *s B \/ A1 *s A2.
-Proof.
   intros. unfold DisjSpec in *.
-  (*assert (exists C, (C <: A1 /\ C <: B) \/ (C <: A2 /\ C <: B) \/ (C <: A1 /\ C <: B)).*)
-  assert (exists C, (C <: A1 /\ C <: B /\ C <: A2)) by eauto.
+  assert (exists C, (C <: A1 /\ C <: B) \/ (C <: A2 /\ C <: B) \/ (C <: A1 /\ C <: B)).
+  exists t_bot.
+  left.
+  split; eauto.
+  + destruct H0.
     destruct H0.
-    destruct H0.
-    destruct H1.
     right. left.
-    intros. destruct H3.
-    unfold btmLikeSpec. intros. unfold not. intros.
+    intros. destruct H0.
     specialize (H (t_and x C)).
-    assert ((t_and x C) <: (t_and A1 A2)) by eauto.
-    assert (t_and x C <: B) by eauto.
-    unfold not in *.
-    assert ((t_and x C <: t_and A1 A2) /\ (t_and x C <: B)) by auto.
-    lets: H H9.
-    unfold btmLikeSpec in H10. unfold not in *.
-    specialize (H10 A H5). clear H9.
-    apply sub_and in H7. destruct H7.
-    assert ((t_and A x) <: C) by auto.
-    assert ((t_and A x) <: A) by auto.
-    dependent induction H12; eauto.
+    unfold btmLikeSpec. intros.
+    assert ((t_and x C) <: (t_and A1 A2)). admit.
+    assert (t_and x C <: B) by eauto. admit.
+(*    specialize (H H5 H6).
+    unfold btmLikeSpec in H.
+    specialize (H A H4).
+    unfold not; intros.
+    destruct H.
+    apply s_anda; eauto.
+    assert (x <: A2) by admit.*)
 Admitted.
 
 Lemma Disj_completeness : forall A B, A *s B -> A *a B.
@@ -1790,30 +1691,10 @@ induction A; unfold DisjSpec; intros; eauto.
     apply ad_andr2.
     forwards*: IHB2.
     apply Disj_sym in H1. auto.
-- constructor.
+- apply ad_orl.
   apply IHA1; unfold DisjSpec; intros; destruct H0; apply H; eauto.
   apply IHA2; unfold DisjSpec; intros; destruct H0; apply H; eauto.
 - assert (DisjSpec (t_and A1 A2) B) by auto.
-  assert (btmLikeSpec (t_and(t_and A1 A2) B)); eauto.
-  lets: bottomLike_spec_decidable B.
-  destruct H2. admit.
-  lets: bottomLike_spec_decidable (t_and A1 A2).
-  destruct H3. admit.
-  apply BL_completeness in H1.
-  assert (not (bottomlike B)). admit.
-  assert (not (bottomlike (t_and A1 A2))). admit.
-  dependent destruction H1. admit. admit.
-  unfold not in *.
-
-  
-  apply BL_soundness in H1.
-  apply ad_dis_specl.
-  lets: bottomLike_decidable B.
-  destruct H1; destruct H2; destruct H3.
-  admit. admit. admit. admit. admit. admit. admit.
-  assert (btmLikeSpec (t_and (t_and A1 A2) B)) by auto.
-  apply BL_completeness in H4.
-  dependent induction H4. admit. admit.
   apply test61 in H0.
   destruct H0.
   apply ad_andl1.
