@@ -7,6 +7,7 @@ in this approach.
 
 Require Import TLC.LibLN.
 Require Import Program.Equality.
+Require Import LibTactics.
 (*Implicit Types x : var.*)
 (** syntax *)
 
@@ -357,6 +358,9 @@ where "A *a B" := (disjointness A B).
 Hint Constructors disjointness.
 
 Hint Constructors bottomlike.
+
+Scheme bottomlike_disjointness := Minimality for bottomlike Sort Prop
+with disjointness_bottomlike := Minimality for disjointness Sort Prop.
 
 (**********************************)
 (****  Bottom-Like Properties  ****)
@@ -1168,8 +1172,6 @@ Proof.
     eapply H1; eauto.
     right. auto.
 Admitted.
-
-
 
 Lemma disj_spec_int : forall A1 A2, (t_and A1 A2) *s t_int -> A1 *s t_int \/ A2 *s t_int.
 Proof.

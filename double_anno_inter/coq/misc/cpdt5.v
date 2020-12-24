@@ -43,3 +43,4 @@ Fixpoint split (ls : list A) : list A * list A :=
 Print well_founded.
 
 Print Acc.
+
