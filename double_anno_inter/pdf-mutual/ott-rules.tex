@@ -281,10 +281,10 @@
 
 
 \newcommand{\ottdruleadXXorr}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
 \ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
-\ottpremise{ \ottnt{B}  *_a  \ottnt{C} }%
 }{
- \ottnt{C}  *_a  \ottnt{A}  \vee  \ottnt{B} }{%
+ \ottnt{A}  *_a  \ottnt{B}  \vee  \ottnt{C} }{%
 {\ottdrulename{ad\_orr}}{}%
 }}
 
@@ -306,17 +306,17 @@
 
 
 \newcommand{\ottdruleadXXandra}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
 }{
- \ottnt{C}  *_a  \ottnt{A}  \wedge  \ottnt{B} }{%
+ \ottnt{A}  *_a  \ottnt{B}  \wedge  \ottnt{C} }{%
 {\ottdrulename{ad\_andra}}{}%
 }}
 
 
 \newcommand{\ottdruleadXXandrb}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{B}  *_a  \ottnt{C} }%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
 }{
- \ottnt{C}  *_a  \ottnt{A}  \wedge  \ottnt{B} }{%
+ \ottnt{A}  *_a  \ottnt{B}  \wedge  \ottnt{C} }{%
 {\ottdrulename{ad\_andrb}}{}%
 }}
 

@@ -1,5 +1,5 @@
 -R . Top
 LibTactics.v
-syntax_bruno_btmlike1.v
+syntax_snow_btmlike1.v
 syntax_snow_rule.v
 typing_tlcabs_chksub.v

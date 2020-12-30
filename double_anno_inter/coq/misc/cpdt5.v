@@ -1,5 +1,7 @@
 (*
 Library Cpdt.GeneralRec
+
+General Recursion
 *)
 
 Section mergeSort.
@@ -44,3 +46,5 @@ Print well_founded.
 
 Print Acc.
 
+CoInductive stream : Type :=
+| Cons : A -> stream -> stream.

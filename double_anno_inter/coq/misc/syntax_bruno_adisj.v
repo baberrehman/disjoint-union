@@ -1621,13 +1621,15 @@ Proof.
   eapply H; eauto.
 Qed.
 
-Lemma not_sub_and3 : forall A1 A2 A, not (A <: A1 /\ A <: A2) -> not (A <: A1) \/ not (A <: A2).
+Lemma not_sub_and3 : forall A1 A2 A, not (A <: A1 /\ A <: A2) -> 
+not (A <: A1) \/ not (A <: A2).
 Proof.
   intros A1 A2 A.
   apply not_and_or.
 Qed.
 
-Lemma not_sub_and4 : forall A1 A2 A, Ord A -> not (A <: A1 /\ A <: A2) -> not (A <: A1) \/ not (A <: A2).
+Lemma not_sub_and4 : forall A1 A2 A, Ord A -> 
+not (A <: A1 /\ A <: A2) -> not (A <: A1) \/ not (A <: A2).
 Proof.
   intros A1 A2 A H.
   apply not_and_or.
@@ -1658,15 +1660,8 @@ Proof.
   intros.
   lets: not_sub_and2 (t_and A1 A2) B H.
   lets: not_sub_and4 (t_and A1 A2) B.
-  specialize (H1 t_int).
-  apply H1 in H0; auto.
-  destruct H0.
-  right. right. unfold btmLikeSpec. unfold not.
-  intros. unfold not in H0.
-  apply H0.
-  destruct H0.
-  specialize (H1 B).
-  unfold not in H0.
+  assert (forall A, Ord A -> ~ (A <: t_and A1 A2) \/ ~ (A <: B)). eauto.
+  unfold btmLikeSpec.
 Admitted.
 
 
@@ -1794,8 +1789,10 @@ induction A; unfold DisjSpec; intros; eauto.
   apply IHA1; unfold DisjSpec; intros; destruct H0; apply H; eauto.
   apply IHA2; unfold DisjSpec; intros; destruct H0; apply H; eauto.
 - assert (DisjSpec (t_and A1 A2) B) by auto.
-  assert (btmLikeSpec (t_and(t_and A1 A2) B)); eauto.
-  lets: bottomLike_spec_decidable B.
+  assert (btmLikeSpec (t_and(t_and A1 A2) B)); auto.
+  apply test6 in H1.
+
+  (*  lets: bottomLike_spec_decidable B.
   destruct H2. admit.
   lets: bottomLike_spec_decidable (t_and A1 A2).
   destruct H3. admit.
@@ -1805,7 +1802,6 @@ induction A; unfold DisjSpec; intros; eauto.
   dependent destruction H1. admit. admit.
   unfold not in *.
 
-  
   apply BL_soundness in H1.
   apply ad_dis_specl.
   lets: bottomLike_decidable B.
@@ -1821,7 +1817,7 @@ induction A; unfold DisjSpec; intros; eauto.
   destruct H0.
   apply ad_andl2.
   eapply IHA2; auto.
-  apply ad_dis_specl; auto.
+  apply ad_dis_specl; auto.*)
 (*  dependent induction B; eauto.
  + apply disj_spec_and_top in H0.
   apply ad_and_disl.
