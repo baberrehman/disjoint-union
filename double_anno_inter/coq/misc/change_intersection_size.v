@@ -1799,7 +1799,7 @@ Fixpoint size_of_type (A : typ) : nat :=
   | typ_top       => 1
   | t_arrow A1 B1 => 1 + (size_of_type A1) + (size_of_type B1)
   | t_union A1 B1 => 1 + (size_of_type A1) + (size_of_type B1)
-  | t_and A1 B1   => 1 + (size_of_type A1) + (size_of_type B1)
+  | t_and A1 B1   => (size_of_type A1) + (size_of_type B1) -1
   end.
 
 Require Import Omega.
@@ -1842,6 +1842,8 @@ induction A; unfold btmLikeSpec; intro.
   assert (A <: (t_union A1 A2)) by auto.
   apply H0. auto. auto.
  + clear IHA1. clear IHA2. intros.
+  simpl in H.
+  apply IHn. simpl.
   apply bl_andsub.
   assert (btmLikeSpec (t_and A1 A2)) by auto.
   lets: btm_like_spec_and A1 A2 H1.
@@ -2002,7 +2004,7 @@ Abort.*)
    apply IHA2.
    simpl in H. omega. apply H1.
   (* Intersection Case *)
- + (*clear IHA1 IHA2.
+ + clear IHA1 IHA2.
    apply test61 in H0.
    destruct H0.
    apply ad_andl1.
@@ -2015,39 +2017,7 @@ Abort.*)
    apply ad_btml.
    apply disjoint_implies_btm_like.
    apply IHn. simpl in H. omega.
-   apply H0.*)
-
-   induction B.
-   * apply disj_spec_and_top in H0.
-     apply ad_btml.
-     apply disjoint_implies_btm_like.
-     apply IHA1. simpl in H. omega. apply H0.
-   * apply disj_spec_int_extra in H0.
-     destruct H0. apply ad_andl1. apply IHA1. simpl in H. simpl. omega. apply H0.
-     apply ad_andl2. apply IHA2. simpl in H. simpl. omega. apply H0.
-   * apply ad_btmr. apply bl_bot.
-   * clear IHB1 IHB2. apply disj_spec_arrow in H0. destruct H0.
-     apply ad_andl1. apply IHA1. simpl in H. simpl. omega. apply H0.
-     apply ad_andl2. apply IHA2. simpl in H. simpl. omega. apply H0.
-   * clear IHA1 IHA2. apply disj_spec_union1 in H0. destruct H0.
-     apply ad_orr. apply IHB1. simpl in H. simpl. omega. apply H0.
-     apply IHB2. simpl in H. simpl. omega. apply H1.
-   (* Todo: Problamatic Case - To Be Proved *)
-   * apply IHn.
-     simpl in H. simpl. omega.
-   
-   apply disj_btm_spec in H0.
-     apply btm_like_and_disjoint.
-     apply BL_disj.
-     apply BL_completeness with (n:=n).
-     simpl in H. simpl. omega.
-     (*apply btm_like_and_disjoint in H; auto.
-     apply inter1.*)
-     apply btm_like_and_31 in H.
-     destruct H.
-     apply 
-     apply inter1.
-
+   apply H0.
 Qed.
 
 (*   specialize (BL_completeness (S (S n)) (t_and (t_and A1 A2) B)).

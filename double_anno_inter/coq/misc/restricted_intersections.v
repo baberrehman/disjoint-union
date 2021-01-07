@@ -20,6 +20,7 @@ Inductive typ : Set :=  (*r type *)
  | t_union : typ -> typ -> typ
  | t_and : typ -> typ -> typ.
 
+
 Inductive exp : Set :=  (*r expression *)
  | e_var_b  : nat -> exp
  | e_var_f  : var -> exp
@@ -195,7 +196,7 @@ Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
  | s_orb : forall (A A1 A2:typ),
      A <: A1 ->
      A <: (t_union A1 A2)
- | s_orc : forall (A A1 A2:typ),
+ | s_orc : forall A A1 A2,
      A <: A2 ->
      A <: (t_union A1 A2)
  | s_anda : forall A A1 A2,
@@ -1802,10 +1803,27 @@ Fixpoint size_of_type (A : typ) : nat :=
   | t_and A1 B1   => 1 + (size_of_type A1) + (size_of_type B1)
   end.
 
+  Inductive rtype : typ -> Prop :=
+  | r_top : rtype typ_top
+  | r_int : rtype t_int
+  | r_bot : rtype t_bot
+  | r_arrow : forall A B, rtype (t_arrow A B)
+  | r_union : forall A B, rtype (t_union A B).
+ 
+ Inductive wft : typ -> Prop :=
+  | wft_top : wft typ_top
+  | wft_int : wft t_int
+  | wft_bot : wft t_bot
+  | wft_arrow : forall A B, wft (t_arrow A B)
+  | wft_union : forall A B, wft A -> wft B -> wft (t_union A B)
+  | wft_and1   : forall A B, wft A -> wft B -> rtype A -> wft (t_and A B)
+  | wft_and2   : forall A B, wft A -> wft B -> rtype B -> wft (t_and A B).
+ 
+
 Require Import Omega.
 
-Lemma BL_completeness : forall n A, size_of_type A < n -> btmLikeSpec A -> bottomlike A
-with Disj_completeness : forall n A B, (size_of_type A) + (size_of_type B) < n ->   A *s B -> A *a B.
+Lemma BL_completeness : forall n A, size_of_type A < n -> wft A -> btmLikeSpec A -> bottomlike A
+with Disj_completeness : forall n A B, (size_of_type A) + (size_of_type B) < n -> wft A ->   A *s B -> A *a B.
 Proof.
   (* Bottom Like completeness proof *)
 - clear BL_completeness. induction n.
@@ -1814,40 +1832,42 @@ Proof.
 induction A; unfold btmLikeSpec; intro.
  + unfold not.
    intros.
-   specialize (H0 typ_top).
-   forwards: H0; auto.
+   specialize (H1 typ_top).
+   forwards: H1; auto.
    false.
  + unfold not. intros.
-   specialize (H0 t_int).
-   forwards: H0; auto.
+   specialize (H1 t_int).
+   forwards: H1; auto.
    false.
  + intros. apply bl_bot.
  + unfold not. intros.
-   specialize (H0 (t_arrow A1 A2)).
-   forwards: H0; auto.
+   specialize (H1 (t_arrow A1 A2)).
+   forwards: H1; auto.
    false.
  + unfold not. intros. apply bl_or.
   * apply IHA1. simpl in H. omega.
+    inversion H0. subst. auto.
   unfold btmLikeSpec.
   intros.
   unfold not in *. intros.
-  specialize (H0 A).
+  specialize (H1 A).
   assert (A <: (t_union A1 A2)) by auto.
-  apply H0. auto. auto.
+  apply H1. auto. auto.
   * apply IHA2. simpl in H. omega.
+    inversion H0. auto.
   unfold btmLikeSpec.
   intros.
   unfold not in *. intros.
-  specialize (H0 A).
+  specialize (H1 A).
   assert (A <: (t_union A1 A2)) by auto.
-  apply H0. auto. auto.
+  apply H1. auto. auto.
  + clear IHA1. clear IHA2. intros.
   apply bl_andsub.
   assert (btmLikeSpec (t_and A1 A2)) by auto.
-  lets: btm_like_spec_and A1 A2 H1.
+  lets: btm_like_spec_and A1 A2 H2.
   specialize (Disj_completeness n A1 A2).
-  apply Disj_completeness in H2. apply H2.
-  simpl in H. omega.
+  apply Disj_completeness in H3. apply H3.
+  simpl in H. omega. inversion H0; auto.
 
   (*
   Below is an alternate way to prove the
@@ -1929,80 +1949,82 @@ Abort.*)
  induction A; try solve [simpl in H; inversion H].
  induction A; intros.
   (* Top Case *)
- + apply top_disj in H0.
+ + apply top_disj in H1.
    specialize (BL_completeness n B).
    apply ad_btmr.
    apply BL_completeness.
    simpl in H. omega.
-   apply H0. 
+   admit.
+   apply H1. 
    (* Int Case *)
  + induction B.
-  * specialize (H0 t_int).
+  * specialize (H1 t_int).
     assert (t_int <: t_int /\ t_int <: typ_top) by auto.
-    lets: H0 H1.
-    unfold btmLikeSpec in H2. unfold not in H2.
-    specialize (H2 t_int).
+    lets: H1 H2.
+    unfold btmLikeSpec in H3. unfold not in H3.
+    specialize (H3 t_int).
     assert (Ord t_int) by auto.
     assert (t_int <: t_int) by auto.
-    lets: H2 H3 H4. false.
-  * specialize (H0 t_int).
+    lets: H3 H4 H5. false.
+  * specialize (H1 t_int).
     assert (t_int <: t_int /\ t_int <: t_int) by auto.
-    lets: H0 H1.
-    unfold btmLikeSpec in H2. unfold not in H2.
-    specialize (H2 t_int).
+    lets: H1 H2.
+    unfold btmLikeSpec in H3. unfold not in H3.
+    specialize (H3 t_int).
     assert (Ord t_int) by auto.
     assert (t_int <: t_int) by auto.
-    lets: H2 H3 H4. false.
+    lets: H3 H4 H5. false.
   * apply ad_btmr. apply bl_bot.
   * apply ad_intl.
-  * apply disj_spec_union1 in H0. destruct H0.
+  * apply disj_spec_union1 in H1. destruct H1.
     apply ad_orr.
     apply IHB1. simpl. simpl in H. omega.
-    apply H0.
+    apply H1.
     apply IHB2.
     simpl in H. simpl. omega.
-    apply H1.
+    apply H2.
   * (* Intersection and Int case - requires hard helping lemma *)
-    apply Disj_sym_spec in H0.
-    apply disj_spec_int_extra in H0. destruct H0.
+    apply Disj_sym_spec in H1.
+    apply disj_spec_int_extra in H1. destruct H1.
     apply ad_andr1. apply IHB1.
-    simpl in H. simpl. omega. apply Disj_sym_spec. apply H0.
+    simpl in H. simpl. omega. apply Disj_sym_spec. apply H1.
     apply ad_andr2. apply IHB2. 
-    simpl in H. simpl. omega. apply Disj_sym_spec. apply H0.
+    simpl in H. simpl. omega. apply Disj_sym_spec. apply H1.
    (* Bottom Case *)
  + apply ad_btml. apply bl_bot.
     (* Arrow Case *)
  + clear IHA1 IHA2.
    induction B.
-  * specialize (H0 (t_arrow A1 A2)).
+  * specialize (H1 (t_arrow A1 A2)).
     assert (t_arrow A1 A2 <: t_arrow A1 A2 /\ t_arrow A1 A2 <: typ_top) by auto.
-    lets: H0 H1.
-    unfold btmLikeSpec in H2. unfold not in H2.
-    specialize (H2 (t_arrow A1 A2)).
+    lets: H1 H2.
+    unfold btmLikeSpec in H3. unfold not in H3.
+    specialize (H3 (t_arrow A1 A2)).
     assert (Ord (t_arrow A1 A2)) by auto.
     assert ( (t_arrow A1 A2) <: (t_arrow A1 A2)) by auto.
-    lets: H2 H3 H4. false.
+    lets: H3 H4 H5. false.
   * apply ad_intr.
   * apply ad_btmr. apply bl_bot.
-  * apply disj_spec_arrow_false in H0. false.
-  * apply disj_spec_union1 in H0. destruct H0.
+  * apply disj_spec_arrow_false in H1. false.
+  * apply disj_spec_union1 in H1. destruct H1.
     apply ad_orr.
-    apply IHB1. simpl in H. simpl. omega. apply H0.
-    apply IHB2. simpl in H. simpl. omega. apply H1.
-  * apply Disj_sym_spec in H0. apply disj_spec_arrow in H0. destruct H0.
+    apply IHB1. simpl in H. simpl. omega. apply H1.
+    apply IHB2. simpl in H. simpl. omega. apply H2.
+  * apply Disj_sym_spec in H1. apply disj_spec_arrow in H1. destruct H1.
     apply ad_andr1. apply IHB1.
-    simpl in H. simpl. omega. apply Disj_sym_spec. apply H0.
+    simpl in H. simpl. omega. apply Disj_sym_spec. apply H1.
     apply ad_andr2. apply IHB2.
-    simpl in H. simpl. omega. apply Disj_sym_spec. apply H0.
+    simpl in H. simpl. omega. apply Disj_sym_spec. apply H1.
     (* Union Case *)
- + apply disj_spec_union in H0. destruct H0.
+ + apply disj_spec_union in H1. destruct H1.
    apply ad_orl.
    apply IHA1.
-   simpl in H. omega. apply H0.
+   simpl in H. omega. inversion H0. auto. apply H1.
    apply IHA2.
-   simpl in H. omega. apply H1.
+   simpl in H. omega. inversion H0. auto. apply H2.
   (* Intersection Case *)
- + (*clear IHA1 IHA2.
+ + clear IHA1 IHA2.
+   inversion H0; subst. admit.
    apply test61 in H0.
    destruct H0.
    apply ad_andl1.
@@ -2015,39 +2037,7 @@ Abort.*)
    apply ad_btml.
    apply disjoint_implies_btm_like.
    apply IHn. simpl in H. omega.
-   apply H0.*)
-
-   induction B.
-   * apply disj_spec_and_top in H0.
-     apply ad_btml.
-     apply disjoint_implies_btm_like.
-     apply IHA1. simpl in H. omega. apply H0.
-   * apply disj_spec_int_extra in H0.
-     destruct H0. apply ad_andl1. apply IHA1. simpl in H. simpl. omega. apply H0.
-     apply ad_andl2. apply IHA2. simpl in H. simpl. omega. apply H0.
-   * apply ad_btmr. apply bl_bot.
-   * clear IHB1 IHB2. apply disj_spec_arrow in H0. destruct H0.
-     apply ad_andl1. apply IHA1. simpl in H. simpl. omega. apply H0.
-     apply ad_andl2. apply IHA2. simpl in H. simpl. omega. apply H0.
-   * clear IHA1 IHA2. apply disj_spec_union1 in H0. destruct H0.
-     apply ad_orr. apply IHB1. simpl in H. simpl. omega. apply H0.
-     apply IHB2. simpl in H. simpl. omega. apply H1.
-   (* Todo: Problamatic Case - To Be Proved *)
-   * apply IHn.
-     simpl in H. simpl. omega.
-   
-   apply disj_btm_spec in H0.
-     apply btm_like_and_disjoint.
-     apply BL_disj.
-     apply BL_completeness with (n:=n).
-     simpl in H. simpl. omega.
-     (*apply btm_like_and_disjoint in H; auto.
-     apply inter1.*)
-     apply btm_like_and_31 in H.
-     destruct H.
-     apply 
-     apply inter1.
-
+   apply H0.
 Qed.
 
 (*   specialize (BL_completeness (S (S n)) (t_and (t_and A1 A2) B)).
