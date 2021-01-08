@@ -2,4 +2,7 @@
 LibTactics.v
 syntax_snow_btmlike1.v
 syntax_snow_rule.v
+syntax.v
+typing_snow_btmlike.v
 typing_tlcabs_chksub.v
+typing.v
