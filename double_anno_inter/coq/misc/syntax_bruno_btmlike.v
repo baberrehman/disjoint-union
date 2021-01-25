@@ -2033,12 +2033,11 @@ Abort.*)
      apply ad_orr. apply IHB1. simpl in H. simpl. omega. apply H0.
      apply IHB2. simpl in H. simpl. omega. apply H1.
    (* Todo: Problamatic Case - To Be Proved *)
-   * apply IHn.
-     simpl in H. simpl. omega.
-   
+   * (*apply IHn.
+     simpl in H. simpl. omega.*)
    apply disj_btm_spec in H0.
      apply btm_like_and_disjoint.
-     apply BL_disj.
+     (*apply BL_disj.*)
      apply BL_completeness with (n:=n).
      simpl in H. simpl. omega.
      (*apply btm_like_and_disjoint in H; auto.
