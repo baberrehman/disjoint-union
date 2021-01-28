@@ -51,19 +51,19 @@ with ordu : typ -> Prop :=    (* defn ordu *)
 
 (* split and split union*)
 Inductive spl : typ -> typ -> typ -> Prop :=    (* defn spl *)
- | SSp_and : forall (A B:typ),
+ | Spl_and : forall (A B:typ),
      spl (t_and A B) A B
- | SSp_arrow : forall (A B C D:typ),
+ | Spl_arrow : forall (A B C D:typ),
      spl B C D ->
      spl (t_arrow A B) (t_arrow A C) (t_arrow A D)
- | SSp_arrowUnion : forall (A D B C:typ),
+ | Spl_arrowUnion : forall (A D B C:typ),
      ord D ->
      splu A B C ->
      spl (t_arrow A D) (t_arrow B D) (t_arrow C D)
- | SSp_orl : forall (A B A1 A2:typ),
+ | Spl_orl : forall (A B A1 A2:typ),
      spl A A1 A2 ->
      spl (t_or A B) (t_or A1 B) (t_or A2 B)
- | SSp_orr : forall (A B B1 B2:typ),
+ | Spl_orr : forall (A B B1 B2:typ),
      ord A ->
      spl B B1 B2 ->
      spl (t_or A B) (t_or A B1) (t_or A B2)
@@ -81,54 +81,62 @@ with splu : typ -> typ -> typ -> Prop :=    (* defn splu *)
 (* defns Subtyping *)
 Reserved Notation "A <: B" (at level 80).
 Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
- | s_top : forall A, A <: t_top
- | s_btm : forall A, t_bot <: A
- | s_int : t_int <: t_int
- | s_arrow : forall (A1 A2 B1 B2:typ),
+ | S_top : forall A, A <: t_top
+ | S_btm : forall A, t_bot <: A
+ | S_int : t_int <: t_int
+ | S_arrow : forall (A1 A2 B1 B2:typ),
      ord (t_arrow A1 A2) ->
      ord (t_arrow B1 B2) ->
      B1 <: A1 ->
      A2 <: B2 ->
      (t_arrow A1 A2) <: (t_arrow B1 B2)
- | s_or : forall (A A1 A2 B:typ),
+ | S_or : forall (A A1 A2 B:typ),
      splu A A1 A2 ->  
      A1 <: B ->
      A2 <: B ->
      A <: B
- | s_orl : forall (A B B1 B2:typ),
+ | S_orl : forall (A B B1 B2:typ),
      splu B B1 B2 -> 
      A <: B1 ->
      A <: B
- | s_orr : forall (A B B1 B2:typ),
+ | S_orr : forall (A B B1 B2:typ),
      splu B B1 B2 -> 
      A <: B2 ->
      A <: B
- | s_and : forall (A B B1 B2:typ),
+ | S_and : forall (A B B1 B2:typ),
      spl B B1 B2 ->  
      A <: B1 ->
      A <: B2 ->
      A <: B
- | s_andl : forall (A A1 A2 B:typ),
+ | S_andl : forall (A A1 A2 B:typ),
      spl A A1 A2 ->   
      A1 <: B ->
      A <: B
- | s_andr : forall (A A1 A2 B:typ),
+ | S_andr : forall (A A1 A2 B:typ),
      spl A A1 A2 ->   
      A2 <: B ->
      A <: B
+ | S_btmlike : forall A B,
+     A <: t_and t_int (t_arrow t_bot t_top) ->
+     A <: B
 where "A <: B" := (subtyping A B) : env_scope.
 
-Hint Constructors subtyping : core.
+Hint Constructors spl splu subtyping : core.
 
-(**********************************)
-(*****  Subtyping Properties  *****)
-(**********************************)
+Theorem refl : forall A,
+    A <: A.
+Admitted.
 
+Theorem trans : forall A B C,
+    A <: B -> B <: C -> A <: C.
+Admitted.
 
-(*************************)
-(***** Ordinary Types ****)
-(*************************)
+Theorem arrow : forall A B C D,
+    C <: A -> B <: D -> (t_arrow A B) <: (t_arrow C D).
+Admitted.
 
+Hint Resolve refl arrow : core.
+Hint Immediate trans : core.
 
 (****************************************)
 (**********  Disjoint Axioms  ***********)
@@ -139,12 +147,14 @@ Hint Constructors subtyping : core.
 (*********   Bottom-Like Spec   *********)
 (****************************************)
 
+(*
+Definition btmLikeSpec C := C <: (t_and t_int (t_arrow t_bot t_top)). *)
 
-Definition btmLikeSpec C := C <: (t_and t_int (t_arrow t_bot t_top)).
+Definition btmLikeSpec C := C <: t_bot.
 
 
 (****************************************)
-(**********    Dijoint Spec   ***********)
+(***********  Disjoint Spec *************)
 (****************************************)
 
 Definition DisjSpec A B := btmLikeSpec (t_and A B).
@@ -157,77 +167,42 @@ Notation "A *s B" := (DisjSpec A B) (at level 80).
 (****  Bottom-Like Properties  ****)
 (**********************************)
 
-Lemma ord_sub_bot_false : forall A, Ord A -> A <: t_bot -> False.
+Example two_arrows : forall A1 A2 A3,
+    (t_arrow t_int t_int) *s (t_arrow A1 (t_arrow A2 A3)).
 Proof.
-  intros.
-  dependent induction H; inversion H0.
-Qed.
+  intros. repeat unfolds.
+  applys trans (t_arrow t_bot t_bot).
+  applys trans (t_and (t_arrow t_bot t_int) (t_arrow t_bot (t_arrow A2 A3))).
+  applys* S_and.
+  applys trans (t_arrow t_bot (t_and t_int (t_arrow A2 A3))).
+  applys S_and. applys* Spl_arrow.
+  applys* S_andl. 
+  applys* S_andr.
+  applys~ arrow.
+  applys S_btmlike.
+  applys* S_and.
+  (* need  bot -> bot <: bot *)
+Abort.
 
-
-Lemma btm_sub_btmlike : forall A, A <: t_bot -> bottomlike A.
-Proof.
-intros. inductions H; eauto.
-Qed.
-
-Lemma btm_sub_btmlikeSpec : forall A, A <: t_bot -> btmLikeSpec A.
-Proof.
-intros. unfold btmLikeSpec. unfold not. intros.
-eapply sub_transitivity in H; eauto.
-forwards*: ord_sub_bot_false H0.
-Qed.
-
-
-Lemma not_sub_and : forall A1 A2, forall A, Ord A ->
-not (A <: (t_and A1 A2)) -> not((A <: A1) /\ (A <: A2)).
-Proof.
-  intros.
-  unfold not in *. intros.
-  apply H0; destruct~ H1.
-Qed.
 
 (*************************************)
 (*****  Disjointness Properties  *****)
 (*************************************)
 
+
+
+(**********************************)
+(*****  Subtyping Properties  *****)
+(**********************************)
+
+
+(*************************)
+(***** Ordinary Types ****)
+(*************************)
+
 (** infrastructure *)
 
-Lemma btm_like_spec_union_inv : forall A B, btmLikeSpec A -> btmLikeSpec B -> btmLikeSpec (t_or A B).
-Proof.
-  intros.
-  unfold btmLikeSpec in *.
-  intros.
-  induction H1; inverts* H2.
-Qed.
-
-Lemma btm_sub : forall A, t_bot <: A.
-Proof.
-  intros; auto.
-Qed.
-
-Lemma not_sub_and1_inv : forall A A1 A2, Ord A -> not (A <: A1) -> not (A <: (t_and A1 A2)).
-Proof.
-  intros.
-  unfold not in *.
-  intros. inductions H; inverts* H1.
-Qed.
-
-Lemma btm_like_spec_and2_inv : forall A B, btmLikeSpec B -> btmLikeSpec (t_and A B).
-Proof.
-  intros.
-  unfold btmLikeSpec in *.
-  intros. inductions H0; inverts* H1.
-Qed.
-
-Lemma btm_spec : btmLikeSpec t_bot.
-Proof.
-  unfold btmLikeSpec.
-  intros.
-  unfold not.
-  intros.
-  inductions H; inverts* H0.
-Qed.
-
-Lemma ord_sub_union : forall A, Ord A -> forall A1 A2, A <: t_or A1 A2 -> A <: A1 \/ A <: A2.
+Lemma ord_sub_union : forall A, ord A -> forall A1 A2, A <: t_or A1 A2 -> A <: A1 \/ A <: A2.
 Proof.
   intros A H.
   dependent induction H; intros.
@@ -253,7 +228,7 @@ Proof.
   unfolds. intros.
   assert (A0 <: (t_and t_int (t_arrow A1 A2))). {
     applys sub_transitivity H2.
-    applys s_anda. eauto. eauto.
+    applys S_anda. eauto. eauto.
   }
   forwards (HS1&HS2): sub_and H3.
   induction H1; try solve [inverts HS1]; try solve [inverts HS2].
@@ -269,7 +244,7 @@ Proof.
   eapply H; eauto.
   apply sub_and in H1.
   destruct H1.
-  apply s_anda; auto.
+  apply S_anda; auto.
 Qed.
 
 
@@ -392,11 +367,11 @@ Proof.
 
 
 Lemma test6_aux : forall Ta Tb Tc A B C,
-    Ord Ta -> Ord Tb -> Ord Tc
+    ord Ta -> ord Tb -> ord Tc
     -> Ta <: (t_and B C)
     -> Tb <: (t_and A C)
     -> Tc <: (t_and A B)
-             -> exists T, Ord T /\ T <: (t_and (t_and A B) C).
+             -> exists T, ord T /\ T <: (t_and (t_and A B) C).
 Proof.
 Abort.
 
