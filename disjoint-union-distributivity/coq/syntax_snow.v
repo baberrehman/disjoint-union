@@ -194,12 +194,12 @@ Proof.
 Qed.
 
 Lemma BL_and : forall A B,
-    btmLikeSpec_old (t_and A B) -> btmLikeSpec_old A \/ btmLikeSpec_old B \/ exists A' B', A <: A' /\ B <: B' /\ disjoint A' B'.
+    ord A -> ord B -> btmLikeSpec_old (t_and A B) -> btmLikeSpec_old A \/ btmLikeSpec_old B \/ exists A' B', A <: A' /\ B <: B' /\ disjoint A' B'.
 Proof.
-  intros.
-  induction A.
+  introv HOA HOB H.
+  induction HOA.
   - right. left. unfolds in H. unfolds. intros H1 H2 H3. applys* H H2.
-  - induction B.
+  - induction HOB.
     + exfalso. applys* H t_int.
     + exfalso. applys* H t_int.
     + right. left. intros H1 H2 H3. applys* H H1.
@@ -218,7 +218,7 @@ Proof.
         admit.
       * (* similar *) admit.
       * right. right. lets (?&(?&(?&(?&?)))): H2. lets (?&(?&(?&(?&?)))): H3.
-        (*  counter example: Int /\ ( Char \/ String ) is not bottom-like in new spec *)
+        (*  counter example: Int * ( Char \/ String )  *)
       
       
 Lemma BL_new_complete_old : forall A,
