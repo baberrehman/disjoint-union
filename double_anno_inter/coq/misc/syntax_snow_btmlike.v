@@ -381,62 +381,6 @@ Proof.
     eapply H; eauto.
 Qed.
 
-(*
-
-Following two lemmas seem true but can't figure our how to prove
-
-test61 depends upon test6
-
-Did not find any counter example and can't prove the lemma
-
-God help this poor PhD student! Please!
-
-*)
-Theorem deMorgan : forall P Q : Prop,
-  ~(P \/ Q) -> ~P /\ ~Q.
-Proof.
-  unfold not.
-  intros P Q PorQ_imp_false.
-  split.
-  - intros P_holds. apply PorQ_imp_false. left. assumption.
-  - intros Q_holds. apply PorQ_imp_false. right. assumption.
-Qed.
-
-Theorem excluded_middle : forall A, btmLikeSpec A \/ ~btmLikeSpec A.
-Proof.
-  intros.
-  induction A; eauto.
-  - left. applys ord_sub_bot_false.
-  - (* union *) admit.
-  - destruct IHA1.
-    + left*. unfolds. intros.
-      unfolds in H. applys H H0.
-      applys* sub_transitivity H1.
-    + destruct IHA2.
-      * left*. unfolds. intros.
-        unfolds in H0. applys H0 H1.
-        applys* sub_transitivity H2.
-      * right*. unfolds. intros.
-        Abort.
-
-
-Lemma test6_aux : forall Ta Tb Tc A B C,
-    Ord Ta -> Ord Tb -> Ord Tc
-    -> Ta <: (t_and B C)
-    -> Tb <: (t_and A C)
-    -> Tc <: (t_and A B)
-             -> exists T, Ord T /\ T <: (t_and (t_and A B) C).
-Proof.
-Abort.
-
-
-Lemma test6 : forall A1 A2 B, btmLikeSpec (t_and (t_and A1 A2) B) ->
-btmLikeSpec (t_and A1 B) \/ btmLikeSpec (t_and A2 B) \/ btmLikeSpec (t_and A1 A2).
-Proof.
-  intros.
-  unfold btmLikeSpec in *.
-  unfold not in *.
-Abort.
 
 Lemma top_btmlike : forall A, btmLikeSpec (t_and typ_top A) -> btmLikeSpec A.
 Proof.
@@ -606,3 +550,64 @@ Proof.
   -  applys* sub_transitivity IHbottomlike.
   -  applys* sub_transitivity IHbottomlike.
 Qed.
+
+(* new spec is sound to the old spec *)
+Lemma BL_new_sound_old : forall A,
+    btmLikeSpec2_simple A -> btmLikeSpec A.
+Proof.
+  intros. unfolds in H. 
+  unfolds. intros B HOrd HSub.
+  induction HOrd.
+  - assert (HS2: t_and t_int (t_arrow t_bot typ_top) <: t_int) by eauto.
+    forwards* HS3: sub_transitivity H HS2.
+    forwards* HS: sub_transitivity HSub HS3.
+    inverts HS.
+  - assert (HS2: t_and t_int (t_arrow t_bot typ_top) <: t_arrow t_bot typ_top) by eauto.
+    forwards* HS3: sub_transitivity H HS2.
+    forwards* HS: sub_transitivity HSub HS3.
+    inverts HS.
+  - assert (HS2: t_and t_int (t_arrow t_bot typ_top) <: t_int) by eauto.
+    forwards* HS3: sub_transitivity H HS2.
+    forwards* HS: sub_transitivity HSub HS3.
+    inverts HS.
+Qed.
+
+Lemma BL_and : forall A B,
+    btmLikeSpec (t_and A B) -> btmLikeSpec A \/ btmLikeSpec B \/ A <: t_int /\ B <: t_arrow t_bot typ_top \/ B <: t_int /\ A <: t_arrow t_bot typ_top.
+Proof.
+  intros.
+  induction A.
+  - right. left. unfolds in H. unfolds. intros H1 H2 H3.
+    applys H H2. eauto.
+  - induction B.
+    + exfalso. applys* H t_int.
+    + exfalso. applys* H t_int.
+    + right. left. intros H1 H2 H3. applys* H H1. applys* s_anda. applys* sub_transitivity H3.
+    + right. right. left*.
+    + (* union *)
+      unfolds in H.
+      assert (btmLikeSpec (t_and t_int B1)). {
+        intros H1 H2 H3. applys H H2.
+        applys* s_anda; applys* sub_transitivity H3. }
+      assert (btmLikeSpec (t_and t_int B2)). {
+        intros H1 H2 H3. applys H H2.
+        applys* s_anda; applys* sub_transitivity H3. }
+      forwards~ [?|[?|[?|?]]] : IHB1 H0;
+                                               forwards~ [?|[?|[?|?]]] : IHB2 H1.
+      * forwards*: btm_like_spec_union_inv H2 H3.
+      * right. right. left.
+        (*  problem: Int /\ ( Int/\Char \/ Int->Int) is not bottom-like in new spec *)
+      
+      
+Lemma BL_new_complete_old : forall A,
+    btmLikeSpec A -> btmLikeSpec2_simple A.
+Proof.
+  intros. unfolds in H. unfolds.
+  induction A.
+  - exfalso. applys* H typ_top.
+  - exfalso. applys* H t_int.
+  - eauto.
+  - exfalso. applys* H (t_arrow A1 A2).
+  - applys s_ora;
+      [applys IHA1 | applys IHA2]; intros T HT1 HT2; applys* H HT1.
+  -
