@@ -3,6 +3,8 @@ This file contains the updates suggested by Snow.
 Mod of syntax_bruno_btmlike
 Try to eliminate the dependency of disjointness and bottomlike
 A * B ::= bot-like A&B
+
+and try to capture disjointness on functions with the help of distributivity
 *)
 
 Require Import TLC.LibLN.
@@ -78,7 +80,16 @@ with splu : typ -> typ -> typ -> Prop :=    (* defn splu *)
      splu B B1 B2 ->
      splu (t_and A B) (t_and A B1) (t_and A B2).
 
-(* defns Subtyping *)
+(****************************************)
+(**********  Disjoint Axioms  ***********)
+(****************************************)
+Inductive disjoint : typ -> typ -> Prop :=
+| D_intArr : disjoint t_int (t_arrow t_bot t_top).
+
+
+(****************************************)
+(*************  Subtyping ***************)
+(****************************************)
 Reserved Notation "A <: B" (at level 80).
 Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
  | S_top : forall A, A <: t_top
@@ -116,9 +127,10 @@ Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
      spl A A1 A2 ->   
      A2 <: B ->
      A <: B
- | S_btmlike : forall A B,
-     A <: t_and t_int (t_arrow t_bot t_top) ->
-     A <: B
+ | S_disjoint : forall A B1 B2 C,
+     disjoint B1 B2 ->
+     A <: t_and B1 B2 ->
+     A <: C
 where "A <: B" := (subtyping A B) : env_scope.
 
 Hint Constructors spl splu subtyping : core.
@@ -138,9 +150,6 @@ Admitted.
 Hint Resolve refl arrow : core.
 Hint Immediate trans : core.
 
-(****************************************)
-(**********  Disjoint Axioms  ***********)
-(****************************************)
 
 
 (****************************************)
@@ -179,7 +188,7 @@ Proof.
   applys* S_andl. 
   applys* S_andr.
   applys~ arrow.
-  applys S_btmlike.
+  applys S_disjoint. constructor.
   applys* S_and.
   (* need  bot -> bot <: bot *)
 Abort.
