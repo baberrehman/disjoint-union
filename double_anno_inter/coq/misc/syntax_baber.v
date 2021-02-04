@@ -1,13 +1,16 @@
 
-(*
-This is the main syntax file as of January 08, 2021
-typing.v is the main typing file
-*)
 
 (*
-This file contains the updates suggested by Bruno.
-Mutual dependency of algorithmic bottom-like and
-algorithmic disjointness.
+This file contains the updates suggested by Baber.
+Algorithmic bottomlike does not depends upon the algorithmic disjointnes
+in this approach.
+
+Instead there is a rule:
+
+A <: B   B <: A
+-----------------
+bot-like (A & B)
+
 *)
 
 Require Import TLC.LibLN.
@@ -268,6 +271,12 @@ generalize H0 H; clear H0; clear H; generalize A; clear A.
 Defined.
 
 
+(****************************************)
+(*********  Isomorphic Types   **********)
+(****************************************)
+
+Definition Isomorphic A B := A <: B /\ B <: A.
+
 (*************************)
 (***** Ordinary Types ****)
 (*************************)
@@ -319,7 +328,8 @@ Inductive bottomlike : typ -> Prop :=    (* defn bottomlike *)
      bottomlike B ->
      bottomlike (t_and A B)
  | bl_andsub : forall A B,
-     A *a B ->
+     not (A <: B) ->
+     not (B <: A) ->
      bottomlike (t_and A B)
 
 (* defns Disjointness *)
@@ -355,6 +365,9 @@ with disjointness : typ -> typ -> Prop :=    (* defn disjointness *)
      (*A *a C ->*)
      A *a C ->
      A *a (t_and B C)
+ | ad_bl_and : forall A B,
+     bottomlike (t_and A B) ->
+     A *a B
 
 where "A *a B" := (disjointness A B).
 
@@ -386,14 +399,6 @@ Proof.
 intros. unfold btmLikeSpec. unfold not. intros.
 eapply sub_transitivity in H; eauto.
 forwards*: ord_sub_bot_false H0.
-Defined.
-
-
-Lemma btm_like_and : forall A B, bottomlike (t_and A B) ->
-bottomlike A \/ bottomlike B \/ A *a B.
-Proof.
-  intros.
-  dependent induction H; eauto.
 Defined.
 
 Lemma not_sub_and : forall A1 A2, forall A, Ord A ->
@@ -796,12 +801,13 @@ Proof.
   unfold not in *. intros.
   apply H1.
   apply sub_and in H2. destruct H2. auto.
- + unfold not in *.
+ + unfold not.
   intros.
-  apply Disj_soundness in H.
-  lets: ord_sub_disj_spec_false A0 H0 A B H.
-  forwards: H2 H1. auto.
-
+  lets: bl_andsub A B H H0.
+  apply ad_bl_and in H3.
+  apply Disj_soundness in H3.
+  lets: ord_sub_disj_spec_false A0 H1 A B H3.
+  lets: H4 H2. apply H5.
 (* Disj_soundness Soundness Proof *)
 - clear Disj_soundness. intros. dependent induction H; unfold DisjSpec; intros.
  + apply BL_soundness in H.
@@ -883,7 +889,17 @@ Proof.
   destruct H1.
   unfold DisjSpec in IHdisjointness.
   apply IHdisjointness; auto.
-Qed.
+ + unfold btmLikeSpec. unfold not.
+   intros.
+   specialize (BL_soundness (t_and A B)).
+   apply BL_soundness in H.
+   apply btm_like_spec_and in H.
+   lets: ord_sub_disj_spec_false A0 H1 A B H.
+   apply H3.
+   destruct H0. apply s_anda.
+   apply sub_transitivity with (A:=A0) (B:=C) (C:=A). auto. auto.
+   apply sub_transitivity with (A:=A0) (B:=C) (C:=B). auto. auto.
+Admitted.
 
 Lemma BL_disj_spec : forall A, btmLikeSpec A -> forall B, A *s B.
   intros.
@@ -904,8 +920,16 @@ Proof.
   apply H; eauto.
 Defined.
 
+Lemma Bl_sym : forall A B, bottomlike (t_and A B) -> bottomlike (t_and B A).
+Proof.
+  intros.
+  inductions H; auto.
+Defined.
+
 Lemma Disj_sym : forall A B, A *a B -> B *a A.
   induction 1; eauto.
+  apply Bl_sym in H.
+  apply ad_bl_and. auto.
 Defined.
 
 Lemma bl_union_inv : forall A B, bottomlike (t_union A B) -> 
@@ -929,8 +953,8 @@ inductions H; eauto.
   destruct IHdisjointness; auto.
 - specialize (IHdisjointness B C).
   destruct IHdisjointness; auto.
-Defined.
-
+- admit.
+Admitted.
 
 Lemma ord_sub_int_arrow_false : forall A B A1 A2, Ord A -> A <: B -> B <: t_int -> B <: t_arrow A1 A2 -> False.
 Proof.
@@ -1533,13 +1557,6 @@ Proof.
   forwards*: H1.
 Defined.
 
-Lemma btm_like_disj_algo_top : forall A, bottomlike (t_and typ_top A) ->
-typ_top *a A.
-Proof.
-  intros.
-  inverts* H.
-Defined.
-
 Lemma btm_like_disj : forall A, bottomlike A -> forall B, A *a B.
 Proof.
   induction 1; auto.
@@ -1550,22 +1567,15 @@ Proof.
   intros. inductions H.
   apply ad_btml. auto.
   apply ad_btmr. auto.
-  apply H.
+  lets: bl_andsub A B H H0.
+  apply ad_bl_and; auto.
 Defined.
 
 Lemma disjoint_implies_btm_like : forall A B, A *a B -> bottomlike (t_and A B).
 Proof.
-  intros. apply bl_andsub. auto.
-Defined.
-
-Lemma btm_like_and_disjoint1 : forall A B, bottomlike (t_and A B) -> 
-bottomlike A \/ bottomlike B \/ A *a B.
-Proof.
-  intros. inductions H.
-  left. auto.
-  right. left. auto.
-  right. right. apply H.
-Defined.
+  intros. apply bl_andsub.
+  unfold not. intros.
+Admitted.
 
 Lemma disj_spec_arrow_false : forall A1 A2 B1 B2, t_arrow A1 A2 *s t_arrow B1 B2 -> False.
 Proof.
@@ -1624,11 +1634,11 @@ induction A; unfold btmLikeSpec; intro.
   assert (A <: (t_union A1 A2)) by auto.
   apply H0. auto. auto.
  + clear IHA1. clear IHA2. intros.
-  apply bl_andsub.
   assert (btmLikeSpec (t_and A1 A2)) by auto.
   lets: btm_like_spec_and A1 A2 H1.
   specialize (Disj_completeness n A1 A2).
-  apply Disj_completeness in H2. apply H2.
+  apply Disj_completeness in H2.
+  admit.
   simpl in H. omega.
 
   (* Dijointness completeness proof *)
@@ -1711,6 +1721,13 @@ induction A; unfold btmLikeSpec; intro.
    simpl in H. omega. apply H1.
   (* Intersection Case *)
  + clear IHA1 IHA2.
+   specialize (BL_completeness n (t_and (t_and A1 A2) B)).
+   assert (btmLikeSpec (t_and (t_and A1 A2) B)) by auto.
+   apply BL_completeness in H1. apply ad_bl_and. apply H1.
+   simpl in *.
+   omega.
+
+
    apply test61 in H0.
    destruct H0.
    apply ad_andl1.

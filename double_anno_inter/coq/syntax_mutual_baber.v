@@ -5,7 +5,7 @@ typing.v is the main typing file
 *)
 
 (*
-This file contains the updates suggested by Bruno.
+This file contains the updates suggested by Baber.
 Mutual dependency of algorithmic bottom-like and
 algorithmic disjointness.
 *)
@@ -355,6 +355,10 @@ with disjointness : typ -> typ -> Prop :=    (* defn disjointness *)
      (*A *a C ->*)
      A *a C ->
      A *a (t_and B C)
+ | ad_not_sub : forall A1 A2 B1 B2,
+    not (A1 <: A2) ->
+    not (A2 <: A1) ->
+    (t_and A1 A2) *a (t_and B1 B2)
 
 where "A *a B" := (disjointness A B).
 
@@ -883,6 +887,18 @@ Proof.
   destruct H1.
   unfold DisjSpec in IHdisjointness.
   apply IHdisjointness; auto.
+ + lets: ad_not_sub A1 A2 B1 B2.
+   lets: H2 H H0.
+   apply bl_andsub in H3.
+   apply BL_soundness in H3.
+   unfold btmLikeSpec in *.
+   unfold not in *. intros.
+   specialize (H3 A).
+   apply H3; auto.
+   destruct H1.
+   apply s_anda.
+   apply sub_transitivity with (A:=A) (B:=C) (C:=(t_and A1 A2)); auto.
+   apply sub_transitivity with (A:=A) (B:=C) (C:=(t_and B1 B2)); auto.
 Qed.
 
 Lemma BL_disj_spec : forall A, btmLikeSpec A -> forall B, A *s B.

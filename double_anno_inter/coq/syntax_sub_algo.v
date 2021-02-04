@@ -1,13 +1,15 @@
 
 (*
-This is the main syntax file as of January 08, 2021
-typing.v is the main typing file
+Update started on February 04, 2021
 *)
 
 (*
 This file contains the updates suggested by Bruno.
 Mutual dependency of algorithmic bottom-like and
 algorithmic disjointness.
+
+Subtying algorithm added in this version.
+
 *)
 
 Require Import TLC.LibLN.
@@ -280,6 +282,87 @@ Inductive Ord : typ -> Prop :=
 
 Hint Constructors Ord.
 
+Require Import List.
+
+Module ListNotations.
+Notation "[ ]" := nil (format "[ ]") : list_scope.
+Notation "[ x ]" := (cons x nil) : list_scope.
+Notation "[ x ; y ; .. ; z ]" := (cons x (cons y .. (cons z nil) ..)) : list_scope.
+End ListNotations.
+
+Import ListNotations.
+
+Fixpoint typ_eq (A B : typ) : bool :=
+    match A with
+    | typ_top => true
+    | t_int => match B with
+                 | typ_top => true 
+                 | t_int => true
+                 | _ => false
+                 end
+    | t_bot => false
+    | t_arrow A1 B1 => match B with
+                 | typ_top => true
+                 | t_arrow A1 B1 => true
+                 | _ => false
+                 end
+    | t_union A1 B1 => match B with
+                 | typ_top => true
+                 | t_union A2 B2 => (typ_eq A1 A2) && (typ_eq B1 B2)
+                 | _ => false
+                 end
+    | t_and A1 B1 => match B with
+                 | typ_top => true
+                 | t_and A2 B2 => (typ_eq A1 A2) && (typ_eq B1 B2)
+                 | _ => false
+                 end
+    end.
+
+Eval compute in (typ_eq t_int t_int).
+Eval compute in (typ_eq t_int (t_arrow t_int t_int)).
+Eval compute in (typ_eq (t_arrow (t_arrow t_int t_int) t_int) (t_arrow t_int t_int)).
+
+
+
+Fixpoint IsElem (a : typ) (l : list typ) :=
+    match l with
+    | [] => false
+    | h :: tl => if typ_eq a h then true else IsElem a tl
+    end.
+
+Fixpoint FindCommon (l1 l2: list typ) : list typ :=
+    match l1 with
+    | [] => []
+    | h :: tl => match l2 with
+                 | [] => []
+                 | _ => if (IsElem h l2) then [h] ++ FindCommon tl l2 else FindCommon tl l2
+                end
+    end.
+
+Fixpoint FindSubtypes (A: typ) :=
+    match A with
+    | typ_top       => [typ_top]
+    | t_bot         => []
+    | t_int         => [t_int]
+    | t_arrow A1 B1 => [t_arrow typ_top t_bot]
+    | t_union A1 B1 => FindSubtypes A1 ++ FindSubtypes B1
+    | t_and A1 B1   => FindCommon (FindSubtypes A1) (FindSubtypes B1)
+    end.
+
+Eval compute in (FindSubtypes t_int).
+Eval compute in (FindSubtypes (t_and t_int t_bot)).
+Eval compute in (FindSubtypes (t_and t_int typ_top)).
+Eval compute in (FindSubtypes (t_and typ_top t_int)).
+Eval compute in (FindSubtypes (t_and (t_arrow t_int t_int) t_int)).
+Eval compute in (FindSubtypes (t_and(t_and (t_arrow t_int t_int) t_int)typ_top)).
+Eval compute in (FindSubtypes (t_and typ_top(t_and (t_arrow t_int t_int) t_int))).
+Eval compute in (FindSubtypes (t_union (t_and typ_top(t_and (t_arrow t_int t_int) t_int)) (t_and typ_top(t_and (t_arrow t_int t_int) t_int)))).
+Eval compute in (FindSubtypes (t_and (t_union typ_top(t_union (t_arrow t_int t_int) t_int)) (t_union typ_top(t_union (t_arrow t_int t_int) t_int)))).
+Eval compute in (FindSubtypes (t_and typ_top t_bot)).
+Eval compute in (FindSubtypes (t_and (t_arrow t_int t_int) (t_arrow (t_arrow t_int t_int) t_int))).
+Eval compute in (FindSubtypes (t_union t_int t_bot)).
+Eval compute in (FindSubtypes (t_and (t_union t_int (t_arrow t_int t_int)) t_int)).
+
 (****************************************)
 (*********  Bottom-Like Specs   *********)
 (****************************************)
@@ -304,6 +387,7 @@ Notation "A *s B" := (DisjSpec A B) (at level 80).
 (* defns BottomLike *)
 
 Reserved Notation "A *a B" (at level 80).
+
 
 Inductive bottomlike : typ -> Prop :=    (* defn bottomlike *)
  | bl_bot :
@@ -355,6 +439,9 @@ with disjointness : typ -> typ -> Prop :=    (* defn disjointness *)
      (*A *a C ->*)
      A *a C ->
      A *a (t_and B C)
+ | and_disj : forall A B,
+     FindCommon (FindSubtypes A) (FindSubtypes B) = [] ->
+     A *a B
 
 where "A *a B" := (disjointness A B).
 
@@ -771,6 +858,21 @@ Proof.
   apply* H.
 Defined.
 
+Lemma new_disj_complete : forall A B, FindCommon (FindSubtypes A) (FindSubtypes B) = [] ->
+A *s B.
+Proof.
+    intros.
+    unfold DisjSpec. unfold btmLikeSpec. unfold not. intros.
+    induction A.
+    induction B; simpl in H; try solve [inversion H].
+    destruct H0.
+    eapply sub_transitivity in H3; eauto.
+    apply ord_sub_bot_false in H3; auto.
+    admit.
+    admit.
+    induction B.
+    
+
 Lemma BL_soundness : forall A, bottomlike A -> btmLikeSpec A
 with Disj_soundness : forall A B, A *a B -> A *s B.
 Proof.
@@ -883,6 +985,16 @@ Proof.
   destruct H1.
   unfold DisjSpec in IHdisjointness.
   apply IHdisjointness; auto.
+ + apply and_disj in H.
+   unfold btmLikeSpec. unfold not. intros.
+   apply bl_andsub in H.
+   apply BL_soundness in H.
+   unfold btmLikeSpec in H. unfold not in H.
+   apply H with (A0:=A0). apply H1.
+   destruct H0.
+   apply s_anda.
+   apply sub_transitivity with (A:=A0) (B:=C) (C:=A); auto.
+   apply sub_transitivity with (A:=A0) (B:=C) (C:=B); auto.
 Qed.
 
 Lemma BL_disj_spec : forall A, btmLikeSpec A -> forall B, A *s B.
