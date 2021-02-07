@@ -9,7 +9,7 @@ and try to capture disjointness on functions with the help of distributivity
 
 Require Import TLC.LibLN.
 Require Import Program.Equality.
-Require Import LibTactics.
+(*Require Import LibTactics.*)
 (*Implicit Types x : var.*)
 (** syntax *)
 
@@ -128,10 +128,20 @@ Hint Constructors spl splu subtyping : core.
 
 Theorem refl : forall A,
     A <: A.
-Admitted.
+Proof.
+  intros. induction A; eauto.
+  apply S_arrow; auto.
+  apply SO_arrow.
+  apply SO_arrow.
+Qed.
 
 Theorem trans : forall A B C,
     A <: B -> B <: C -> A <: C.
+Proof.
+  intros B.
+  induction B; intros.
+  dependent destruction H0; eauto.
+  inversion H.
 Admitted.
 
 Theorem arrow : forall A B C D,
