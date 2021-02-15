@@ -90,7 +90,7 @@
       BottomLikeSpec & $[[BottomLikeSpec C]]$ & ::= & $\forall A, ~ Ord ~ A ~ \rightarrow \neg [[A <: C]]$ \\
 %      BottomLikeSpec & C & ::= & $(\exists A ~ B, ~ ([[A /\ B]]) \backsimeq C \rightarrow \neg ( [[ A <: B ]] ) \vee \neg ( [[ B <: A ]] )) \vee ([[C <: Bot]])$ \\
        \hline
-      DisjSpec & A $*_s$ ~ B & ::= & $\forall C, ~ [[C <: A]] \wedge [[C <: B]] ~ \rightarrow ~ BottomLikeSpec ~ [[C]]$ \\
+      DisjSpec & A $*_s$ B & ::= & $ ~ BottomLikeSpec ~ [[A /\ B]]$ \\
        \hline
      \end{tabular}
      \end{center} }
@@ -102,7 +102,7 @@
 
 \ottdefnsOrdinary
 
-\ottdefnsBottomLike
+%\ottdefnsBottomLike
 
 \ottdefnsDisjointness
 

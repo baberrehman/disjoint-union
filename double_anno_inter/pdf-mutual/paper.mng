@@ -90,7 +90,7 @@
       BottomLikeSpec & $ \rfloor  \ottnt{C}  \lfloor_s $ & ::= & $\forall A, ~ Ord ~ A ~ \rightarrow \neg \ottnt{A}  \textless:  \ottnt{C}$ \\
 %      BottomLikeSpec & C & ::= & $(\exists A ~ B, ~ (\ottnt{A}  \wedge  \ottnt{B}) \backsimeq C \rightarrow \neg ( \ottnt{A}  \textless:  \ottnt{B} ) \vee \neg ( \ottnt{B}  \textless:  \ottnt{A} )) \vee (\ottnt{C}  \textless:   \bot )$ \\
        \hline
-      DisjSpec & A $*_s$ ~ B & ::= & $\forall C, ~ \ottnt{C}  \textless:  \ottnt{A} \wedge \ottnt{C}  \textless:  \ottnt{B} ~ \rightarrow ~ BottomLikeSpec ~ \ottnt{C}$ \\
+      DisjSpec & A $*_s$ B & ::= & $ ~ BottomLikeSpec ~ \ottnt{A}  \wedge  \ottnt{B}$ \\
        \hline
      \end{tabular}
      \end{center} }
@@ -102,7 +102,7 @@
 
 \ottdefnsOrdinary
 
-\ottdefnsBottomLike
+%\ottdefnsBottomLike
 
 \ottdefnsDisjointness
 

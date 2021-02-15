@@ -134,6 +134,16 @@
 \newcommand{\ottdefnsFindType}{
 \ottdefnfindtype{}}
 
+% defns FindSubTypes
+%% defn findsubtypes
+
+\newcommand{\ottdefnfindsubtypes}[1]{\begin{ottdefnblock}[#1]{$ FindSubTypes ~  \ottnt{A}  = [] $}{\ottcom{FindSubTypes}}
+\end{ottdefnblock}}
+
+
+\newcommand{\ottdefnsFindSubTypes}{
+\ottdefnfindsubtypes{}}
+
 % defns Ordinary
 %% defn ordinary
 \newcommand{\ottdruleordXXtop}[1]{\ottdrule[#1]{%
@@ -241,19 +251,17 @@
 
 % defns Disjointness
 %% defn disjointness
-\newcommand{\ottdruleadXXbtml}[1]{\ottdrule[#1]{%
-\ottpremise{ \rfloor  \ottnt{A}  \lfloor_a }%
+\newcommand{\ottdruleadXXbtmr}[1]{\ottdrule[#1]{%
 }{
- \ottnt{A}  *_a  \ottnt{B} }{%
-{\ottdrulename{ad\_btml}}{}%
+ \ottnt{A}  *_a   \bot  }{%
+{\ottdrulename{ad\_btmr}}{}%
 }}
 
 
-\newcommand{\ottdruleadXXbtmr}[1]{\ottdrule[#1]{%
-\ottpremise{ \rfloor  \ottnt{B}  \lfloor_a }%
+\newcommand{\ottdruleadXXbtml}[1]{\ottdrule[#1]{%
 }{
- \ottnt{A}  *_a  \ottnt{B} }{%
-{\ottdrulename{ad\_btmr}}{}%
+  \bot   *_a  \ottnt{A} }{%
+{\ottdrulename{ad\_btml}}{}%
 }}
 
 
@@ -320,9 +328,25 @@
 {\ottdrulename{ad\_andrb}}{}%
 }}
 
+
+\newcommand{\ottdruleadXXdisjl}[1]{\ottdrule[#1]{%
+\ottpremise{ FindSubTypes ~  \ottsym{(}  \ottnt{A}  \wedge  \ottnt{B}  \ottsym{)}  = [] }%
+}{
+ \ottnt{A}  *_a  \ottnt{B} }{%
+{\ottdrulename{ad\_disjl}}{}%
+}}
+
+
+\newcommand{\ottdruleadXXdisjr}[1]{\ottdrule[#1]{%
+\ottpremise{ FindSubTypes ~  \ottsym{(}  \ottnt{B}  \wedge  \ottnt{A}  \ottsym{)}  = [] }%
+}{
+ \ottnt{A}  *_a  \ottnt{B} }{%
+{\ottdrulename{ad\_disjr}}{}%
+}}
+
 \newcommand{\ottdefndisjointness}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  *_a  \ottnt{B} $}{\ottcom{Disjointness}}
-\ottusedrule{\ottdruleadXXbtml{}}
 \ottusedrule{\ottdruleadXXbtmr{}}
+\ottusedrule{\ottdruleadXXbtml{}}
 \ottusedrule{\ottdruleadXXintl{}}
 \ottusedrule{\ottdruleadXXintr{}}
 \ottusedrule{\ottdruleadXXorl{}}
@@ -331,6 +355,8 @@
 \ottusedrule{\ottdruleadXXandlb{}}
 \ottusedrule{\ottdruleadXXandra{}}
 \ottusedrule{\ottdruleadXXandrb{}}
+\ottusedrule{\ottdruleadXXdisjl{}}
+\ottusedrule{\ottdruleadXXdisjr{}}
 \end{ottdefnblock}}
 
 
@@ -626,6 +652,7 @@
 \ottdefnsPreValue
 \ottdefnsValue
 \ottdefnsFindType
+\ottdefnsFindSubTypes
 \ottdefnsOrdinary
 \ottdefnsDisjointnessSpec
 \ottdefnsBottomLikeSpec

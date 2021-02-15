@@ -133,6 +133,16 @@ FindType :: '' ::=
 
 
 defns
+FindSubTypes :: '' ::=
+  
+  defn
+  findsubtypes A ::   :: findsubtypes :: 'findsubtype_'
+  {{ tex FindSubTypes ~ [[A]] = [] }}
+  {{ com FindSubTypes }}
+  by
+
+
+defns
 Ordinary :: '' ::=
   defn
   ordinary A ::  :: ordinary :: 'ord_'
@@ -229,21 +239,21 @@ Disjointness :: '' ::=
 
   by
 
-%    -------------------- :: btmr
-%    A * Bot
+    -------------------- :: btmr
+    A * Bot
 
-%    -------------------- :: btml
-%    Bot * A
-
-
-	botLike A
-	----------------------        :: btml
-	A * B
+    -------------------- :: btml
+    Bot * A
 
 
-	botLike B
-	----------------------        :: btmr
-	A * B
+%	botLike A
+%	----------------------        :: btml
+%	A * B
+
+
+%	botLike B
+%	----------------------        :: btmr
+%	A * B
 
     -------------------- :: intl
     Int * A -> B
@@ -276,6 +286,15 @@ Disjointness :: '' ::=
     A * C
     -------------------------     :: andrb
     A * B /\ C
+
+    
+    findsubtypes (A /\ B)
+    ------------------------- :: disjl
+    A * B
+
+    findsubtypes (B /\ A)
+    ------------------------- :: disjr
+    A * B
 
 
 %    A * B

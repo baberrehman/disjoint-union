@@ -135,13 +135,61 @@ Proof.
   apply SO_arrow.
 Qed.
 
-Theorem trans : forall A B C,
+Lemma sub_or : forall A B C, (t_or A B) <: C -> A <: C /\ B <: C.
+Proof.
+  intros. inductions H; eauto.
+  admit. admit. admit. admit. admit. admit. admit.
+Admitted.
+
+Lemma sub_and : forall A B C, A <: (t_and B C) -> A <: B /\ A <: C.
+Proof.
+intros; inductions H; try solve [split*].
+specialize (IHsubtyping1 B C).
+specialize (IHsubtyping2 B C).
+forwards*: IHsubtyping1.
+admit.
+admit.
+admit.
+specialize (IHsubtyping B C).
+forwards*: IHsubtyping.
+specialize (IHsubtyping B C).
+forwards*: IHsubtyping.
+Admitted.
+
+Theorem trans : forall B A C,
     A <: B -> B <: C -> A <: C.
 Proof.
-  intros B.
-  induction B; intros.
-  dependent destruction H0; eauto.
-  inversion H.
+intros B A C H. gen C.
+dependent induction H; intros; eauto.
+- dependent induction H; eauto.
+  inversion H. inversion H. inversion H.
+- dependent induction H3; eauto.
+  apply S_arrow; auto. admit.
+  inversion H3. inversion H4. inversion H4.
+- dependent induction H1; eauto.
+  inversion H. inversion H.
+  inversion H; subst; eauto.
+  apply IHsubtyping. admit.
+  apply IHsubtyping1; auto.  
+
+
+Theorem trans : forall B A C,
+    A <: B -> B <: C -> A <: C.
+Proof.
+  inductions B; intros;
+  generalize H0 H; clear H0; clear H; generalize A; clear A.
+  - intros. inductions H0; eauto.
+    inversion H. inversion H. inversion H.
+  - intros. inductions H; eauto.
+    inversion H. inversion H. inversion H.
+  - intros. inductions H; eauto.
+    inversion H. inversion H. inversion H.
+  - admit.
+  - intros. apply sub_or in H0. destruct H0.
+    inductions H; eauto. inverts* H. inverts* H. admit.
+  - intros. apply sub_and in H. destruct H.
+    inductions H0; eauto. inverts* H.
+    eapply IHsubtyping1; eauto.
 Admitted.
 
 Theorem arrow : forall A B C D,
