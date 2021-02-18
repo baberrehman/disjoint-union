@@ -280,6 +280,7 @@ Inductive Ord : typ -> Prop :=
 | o_arrow : forall t1 t2, Ord (t_arrow t1 t2).
 (*| o_union : forall t1 t2, Ord t1 -> Ord t2 -> Ord (t_union t1 t2).*)
 
+Hint Constructors Ord : core.
 
 (****************************************)
 (**********  Dijoint Specs    ***********)
@@ -287,6 +288,12 @@ Inductive Ord : typ -> Prop :=
 
 Definition DisjSpec A B := forall C, Ord C -> not (C <:  (t_and A B)).
 Notation "A *s B" := (DisjSpec A B) (at level 80).
+
+(*
+
+A *s B = not (exists C, Ord C -> C <: A /\ C <: B)
+
+*)
 
 (****************************************)
 (***********  Dijoint Algo   ************)
@@ -412,7 +419,7 @@ Proof.
   forwards*: H H0.
   apply sub_and in H1. destruct H1.
   apply s_anda; auto.
-Defined.    
+Defined.
 
 Lemma Disj_soundness : forall A B, A *a B -> A *s B.
 Proof.
@@ -428,6 +435,51 @@ Proof.
    eapply sub_transitivity in H1; eauto.
    eapply sub_transitivity in H2; eauto.
 Qed.
+
+Definition DisjSpec1 A B := not (exists C, Ord C /\ C <: (t_and A B)).
+Notation "A *s1 B" := (DisjSpec1 A B) (at level 80).
+
+Lemma Disj_soundness1 : forall A B, A *a B -> A *s1 B.
+Proof.
+(* Disj_soundness Soundness Proof *)
+  intros; unfold DisjAlgo in H; unfold not in H.
+  unfold DisjSpec1; unfold not; intros.
+  destruct H0.
+  destruct H0.
+  apply H.
+  induction H0; eauto.
+  assert ((t_and t_int (t_arrow typ_top t_bot)) <: typ_top); auto.
+  eapply sub_transitivity; eauto.
+  assert ((t_and t_int (t_arrow typ_top t_bot)) <: t_arrow t1 t2); auto.
+  eapply sub_transitivity; eauto.
+Defined.
+
+Lemma disj_disj1 : forall A B, A *s B -> A *s1 B.
+Proof.
+  unfold DisjSpec. unfold DisjSpec1. unfold not. intros.
+  destruct H0.
+  specialize (H x).
+  destruct H0.
+  apply H; auto.
+Defined.
+
+Lemma disj1_disj : forall A B, A *s1 B -> A *s B.
+Proof.
+  unfold DisjSpec. unfold DisjSpec1. unfold not. intros.
+  apply H. exists C. split*.
+Defined.
+
+Lemma Disj_completeness1 : forall A B,  A *s B -> A *a B.
+Proof.
+  intros.
+  unfold DisjSpec in H. unfold not in H.
+  unfold DisjAlgo. unfold not. intros.
+  induction A.
+  - induction B; eauto.
+    apply sub_and in H0. destruct H0. inverts* H1.
+    eapply H. intros.
+
+Defined.
 
 Lemma Disj_completeness : forall A B,  A *s B -> A *a B.
 Proof.

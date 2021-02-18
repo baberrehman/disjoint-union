@@ -289,12 +289,6 @@ Hint Constructors Ord : core.
 (**********  Dijoint Specs    ***********)
 (****************************************)
 
-(*
-
-A *s B = not (exists C, Ord C -> C <: A /\ C <: B)
-
-*)
-
 Definition DisjSpec A B := forall C, Ord C -> not (C <:  (t_and A B)).
 Notation "A *s B" := (DisjSpec A B) (at level 80).
 
@@ -320,7 +314,6 @@ Fixpoint FindSubtypes (A: typ) :=
     | t_and A1 B1   => (FindSubtypes A1) `inter` (FindSubtypes B1)
     end.
 
-(*
 Eval compute in (FindSubtypes t_int).
 Eval compute in (FindSubtypes (t_and t_int t_bot)).
 Eval compute in (FindSubtypes (t_and t_int t_top)).
@@ -337,7 +330,6 @@ Eval compute in (FindSubtypes (t_and (t_union t_int (t_arrow t_int t_int)) t_int
 Eval compute in (FindSubtypes (t_union t_int (t_arrow t_int t_int))).
 Eval compute in (FindSubtypes (t_and (t_arrow t_int t_int) t_top)).
 Eval simpl in (FindSubtypes (t_and t_top (t_arrow t_int t_int))).
-*)
 
 Definition DisjAlgo A B := ((FindSubtypes A) `inter` (FindSubtypes B)) = [].
 Notation "A *a B" := (DisjAlgo A B) (at level 80).
@@ -493,6 +485,37 @@ Proof.
     apply IHA1; auto.
 Defined.
 
+Lemma ord_in_findsubtypes : forall A B,
+Ord A -> A <: B -> set_In A (FindSubtypes B).
+Proof.
+  induction 1; intros.
+  - induction B; simpl; auto.
+    inversion H.
+    inverts H.
+    inversion H.
+    apply set_union_intro.
+    inverts* H.
+    apply set_inter_intro.
+    inverts* H. inverts* H.
+  - induction B; simpl; auto.
+    inversion H.
+    inversion H.
+    apply set_union_intro.
+    inverts* H.
+    apply set_inter_intro.
+    inverts* H. inverts* H.
+  - induction B; simpl; auto.
+    admit.
+    inversion H.
+    inversion H.
+    admit.
+    apply set_union_intro.
+    inverts* H.
+    apply set_inter_intro.
+    inverts* H.
+    inverts* H.
+Admitted.
+
 Lemma ord_in_findsubtypes1 : forall A B,
 Ord A -> A <: B -> exists C, C <: A /\ set_In C (FindSubtypes B).
 Proof.
@@ -635,37 +658,6 @@ Proof.
         apply set_inter_intro; auto. }
 Defined.
 
-Lemma ord_in_findsubtypes3 : forall A B,
-Ord A -> A <: B -> set_In A (FindSubtypes B).
-Proof.
-  induction 1; intros.
-  - induction B; simpl; auto.
-    inversion H.
-    inverts H.
-    inversion H.
-    apply set_union_intro.
-    inverts* H.
-    apply set_inter_intro.
-    inverts* H. inverts* H.
-  - induction B; simpl; auto.
-    inversion H.
-    inversion H.
-    apply set_union_intro.
-    inverts* H.
-    apply set_inter_intro.
-    inverts* H. inverts* H.
-  - induction B; simpl; auto.
-    admit.
-    inversion H.
-    inversion H.
-    admit.
-    apply set_union_intro.
-    inverts* H.
-    apply set_inter_intro.
-    inverts* H.
-    inverts* H.
-Admitted.
-
 Lemma ord_sub_and_int_arrow : forall A B C,
 Ord A -> A <: t_and B C ->
 (t_int <: B /\ t_int <: C) \/ (t_arrow t_top t_bot <: B /\ t_arrow t_top t_bot <: C).
@@ -699,7 +691,6 @@ Proof.
   - inversion H.
 Defined.
 
-(*
 Lemma union_findsubtypes_empty_l : forall A,
 ([] `union` (FindSubtypes A)) = FindSubtypes A.
 Proof.
@@ -708,9 +699,7 @@ Proof.
   - simpl. auto.
   - admit.
 Admitted.
-*)
 
-(*
 Lemma union_findsubtypes_empty_elim : forall A B,
 ((FindSubtypes A) `union` (FindSubtypes B)) = [] ->
 (FindSubtypes A = []) /\ (FindSubtypes B = []).
@@ -720,45 +709,25 @@ Proof.
   - split*. rewrite union_findsubtypes_empty_l in H. auto.
   - admit.
 Admitted.
-*)
 
 Lemma ord_sub_findsubtypes_not_empty : forall A B, 
 Ord A -> A <: B ->
 (FindSubtypes B) <> [].
 Proof.
-  unfold not. intros.
-  apply ord_in_findsubtypes2 in H0; auto.
-  destruct H0.
-  - rewrite H1 in H0. inversion H0.
-  - destruct H0 as [x1 [x2]]. destruct H0.
-    rewrite H1 in H2. inversion H2.
-Defined.
-
-(*  
-**************************************************************
-Another approach to prove ord_sub_findsubtypes_not_empty lemma
-**************************************************************
-
   intros A B H. gen B.
   induction B; unfold not; intros H1 H2; 
   try solve [simpl in H2; inversion H2].
   - apply ord_sub_bot_false in H1; auto.
-  - (*apply union_findsubtypes_empty_elim in H2. destruct H2.
+  - apply union_findsubtypes_empty_elim in H2. destruct H2.
     apply ord_sub_union in H1; auto. destruct H1.
     unfold not in IHB1; apply IHB1; auto.
-    unfold not in IHB2; apply IHB2; auto.*)
-    apply ord_in_findsubtypes2 in H1; auto.
-    destruct H1.
-    rewrite H2 in H0. inversion H0.
-    destruct H0 as [x1 [x2]]. destruct H0.
-    rewrite H2 in H1. inversion H1.
+    unfold not in IHB2; apply IHB2; auto.
   - apply ord_in_findsubtypes2 in H1; auto.
     destruct H1.
     rewrite H2 in H0. inversion H0.
     destruct H0 as [x1 [x2]]. destruct H0.
     rewrite H2 in H1. inversion H1.
 Defined.
-*)
 
 Lemma Disj_soundness : forall A B, A *a B -> A *s B.
 Proof.
@@ -768,6 +737,12 @@ unfold DisjAlgo in H.
 unfold DisjSpec. unfold not. intros.
 apply ord_sub_findsubtypes_not_empty in H1; auto.
 Qed.
+
+Lemma union_inter_empty : forall A B C,
+((FindSubtypes A) `inter` (FindSubtypes B)) = [] ->
+((FindSubtypes A) `inter` (FindSubtypes C)) = [] ->
+((FindSubtypes A) `inter` (FindSubtypes (t_union B C))) = [].
+Admitted.
 
 Lemma inter_sym : forall A B,
 ((FindSubtypes A) `inter` (FindSubtypes B)) =
@@ -782,591 +757,7 @@ Lemma int_disj : forall A, t_int *s A ->
 ((t_arrow t_top t_bot) <: A) \/ (FindSubtypes A) = [].
 Admitted.
 
-Definition DisjSpec1 A B := not (exists C, Ord C /\ C <: (t_and A B)).
-Notation "A *s1 B" := (DisjSpec1 A B) (at level 80).
-
-Lemma disj_disj1 : forall A B, A *s B -> A *s1 B.
-Proof.
-  unfold DisjSpec. unfold DisjSpec1. unfold not. intros.
-  destruct H0. destruct H0.
-  specialize (H x).
-  apply H; auto.
-Defined.
-
-Lemma disj1_disj : forall A B, A *s1 B -> A *s B.
-Proof.
-  unfold DisjSpec. unfold DisjSpec1. unfold not. intros.
-  apply H. exists* C.
-Defined.
-
-Lemma exists_inter_empty : exists B C,
-(FindSubtypes B `inter` FindSubtypes C) = [].
-Proof.
-  exists t_int (t_arrow t_top t_bot).
-  simpl. auto.
-Defined.
-
-Lemma decidability: forall A B, Ord A -> 
-(set_In A (FindSubtypes B)) \/ ~(set_In A (FindSubtypes B)) \/
-(exists t1 t2, A = t_arrow t1 t2 /\ set_In (t_arrow t_top t_bot) (FindSubtypes B)).
-Proof.
-  induction A; try solve [intros; inversion H].
-  - intros. induction B; auto.
-   + left. simpl. auto.
-   + right. left. simpl. unfold not. 
-     intros. inverts* H0. inverts* H1.
-   + right. left. simpl. unfold not. 
-     intros. inverts* H0. inverts* H1.
-   + destruct IHB1. 
-     left. simpl. apply set_union_intro1. auto.
-     destruct IHB2. 
-     left. simpl. apply set_union_intro2. auto.
-     destruct H0. destruct H1. 
-     right. left. unfold not in *. intros.
-     simpl in H2. apply set_union_elim in H2.
-     destruct H2. apply H0; auto. apply H1; auto.
-     destruct H1 as [x1 [x2]]. destruct H1. inversion H1.
-     destruct H0 as [x1 [x2]]. destruct H0. inversion H0.
-   + destruct IHB1. destruct IHB2.
-     left. simpl. apply set_inter_intro; auto.
-     destruct H1. 
-     right. left. unfold not in *.
-     intros. simpl in H2. apply H1.
-     apply set_inter_elim2 in H2. auto.
-     destruct H1 as [x1 [x2]]. destruct H1. inversion H1.
-     destruct H0. 
-     right. left. unfold not in *. 
-     intros. simpl in H1. apply H0.
-     apply set_inter_elim1 in H1. auto.
-     destruct H0 as [x1 [x2]]. destruct H0. inversion H0.
-  - intros. induction B; auto.
-   + left. simpl. auto.
-   + left. simpl. auto.
-   + right. left. simpl. unfold not. 
-     intros. inverts* H0. inverts* H1.
-   + destruct IHB1. 
-     left. simpl. apply set_union_intro1. auto.
-     destruct IHB2. 
-     left. simpl. apply set_union_intro2. auto.
-     destruct H0. destruct H1. 
-     right. left. unfold not in *. intros.
-     simpl in H2. apply set_union_elim in H2.
-     destruct H2. apply H0; auto. apply H1; auto.
-     destruct H1 as [x1 [x2]]. destruct H1. inversion H1.
-     destruct H0 as [x1 [x2]]. destruct H0. inversion H0.
-   + destruct IHB1. destruct IHB2.
-     left. simpl. apply set_inter_intro; auto.
-     destruct H1. 
-     right. left. unfold not in *.
-     intros. simpl in H2. apply H1.
-     apply set_inter_elim2 in H2. auto.
-     destruct H1 as [x1 [x2]]. destruct H1. inversion H1.
-     destruct H0. 
-     right. left. unfold not in *. 
-     intros. simpl in H1. apply H0.
-     apply set_inter_elim1 in H1. auto.
-     destruct H0 as [x1 [x2]]. destruct H0. inversion H0.
-  - intros. induction B; auto.
-   + right. right. exists A1 A2. split*.
-     simpl. auto.
-   + right. left. simpl. unfold not. 
-     intros. inverts* H0. inverts* H1.
-   + right. right. simpl. exists A1 A2. split*.
-   + destruct IHB1. 
-     left. simpl. apply set_union_intro1. auto.
-     destruct IHB2. 
-     left. simpl. apply set_union_intro2. auto.
-     destruct H0. destruct H1. 
-     right. left. unfold not in *. intros.
-     simpl in H2. apply set_union_elim in H2.
-     destruct H2. apply H0; auto. apply H1; auto.
-     destruct H1 as [x1 [x2]]. destruct H1.
-     right. right. exists A1 A2. split*.
-     simpl. apply set_union_intro. right*.
-     destruct H0 as [x1 [x2]]. destruct H0.
-     right. right. exists A1 A2. split*.
-     simpl. apply set_union_intro. left*.
-   + destruct IHB1. destruct IHB2.
-     left. simpl. apply set_inter_intro; auto.
-     destruct H1. 
-     right. left. unfold not in *.
-     intros. simpl in H2. apply H1.
-     apply set_inter_elim2 in H2. auto.
-     destruct H1 as [x1 [x2]]. destruct H1.
-     right. right. exists A1 A2. split*.
-     lets H0': H0.
-     apply arrow_in_top_bot in H0'. inverts H0'.
-     simpl. apply set_inter_intro; auto.
-     destruct H0. 
-     right. left. unfold not in *. 
-     intros. simpl in H1. apply H0.
-     apply set_inter_elim1 in H1. auto.
-     destruct H0 as [x1 [x2]]. destruct H0.
-     destruct IHB2.
-     lets H2': H2. apply arrow_in_top_bot in H2'. inverts H2'.
-     left. simpl. apply set_inter_intro; auto.
-     destruct H2.
-     right. left. unfold not in *. intros.
-     apply H2. simpl in H3. apply set_inter_elim2 in H3. auto.
-     destruct H2 as [x3 [x4]]. destruct H2.
-     right. right. exists A1 A2. split*.
-     simpl. apply set_inter_intro; auto.
-Defined.
-
-Lemma not_in_inter_intro1 : forall A B, not (set_In A (FindSubtypes B)) ->
-forall C, not (set_In A (FindSubtypes B `inter` FindSubtypes C)).
-Proof.
-  unfold not in *. intros.
-  apply set_inter_elim1 in H0; apply H; auto.
-Defined.
-
-Lemma not_in_inter_intro2 : forall A C, not (set_In A (FindSubtypes C)) ->
-forall B, not (set_In A (FindSubtypes B `inter` FindSubtypes C)).
-Proof.
-  unfold not in *. intros.
-  apply set_inter_elim2 in H0; apply H; auto.
-Defined.
-
-Lemma not_in_union_elim : forall A B C, 
-not (set_In A (FindSubtypes (t_union B C))) ->
-not (set_In A (FindSubtypes B)) /\ not (set_In A (FindSubtypes C)).
-Proof.
-  unfold not in *. intros.
-  split; intros.
-  apply H. simpl. apply set_union_intro1. auto.
-  apply H. simpl. apply set_union_intro2. auto.
-Defined.
-
-Lemma union_inter_empty : forall A B C,
-((FindSubtypes A) `inter` (FindSubtypes B)) = [] ->
-((FindSubtypes A) `inter` (FindSubtypes C)) = [] ->
-((FindSubtypes A) `inter` (FindSubtypes (t_union B C))) = [].
-Proof.
-  intros.
-  induction A.
-  - induction B.
-    simpl in H. inversion H.
-    simpl in H. inversion H.
-    admit. simpl in H. inversion H.
-Admitted.
-
-Lemma union_inter_empty1 : forall A B C,
-((FindSubtypes A) `inter` (FindSubtypes C)) = [] ->
-((FindSubtypes B) `inter` (FindSubtypes C)) = [] ->
-((FindSubtypes (t_union A B)) `inter` (FindSubtypes C)) = [].
-Proof.
-  intros.
-  induction A.
-  - induction B.
-    simpl in H. inversion H.
-    simpl in H. inversion H.
-    admit. simpl in H. inversion H.
-Admitted.
-
-
-Lemma not_in3 : forall A B C, not (set_In A (FindSubtypes (t_and B C))) ->
-not (set_In A (FindSubtypes B)) \/ not (set_In A (FindSubtypes C)).
-Proof.
-Admitted.
-
-Lemma not_in A B : forall C, not (Ord C /\ set_In C (FindSubtypes (t_and A B))) ->
-(FindSubtypes A `inter` FindSubtypes B) = [].
-Proof.
-  induction A.
-  induction B.
-  unfold not. intros.
-Admitted.
-
-Lemma not_inter_union : forall A1 A2 B1 B2,
-~ set_In A1 (FindSubtypes (t_and A2 (t_union B1 B2))) ->
-~ set_In A1 (FindSubtypes (t_and A2 B1)) /\
-~ set_In A1 (FindSubtypes (t_and A2 B2)).
-Proof.
-  intros.
-  apply not_in3 in H. destruct H.
-  split. unfold not in *.
-  intros.
-  simpl in H0.
-  apply set_inter_elim1 in H0.
-  apply H; auto.
-  unfold not in *. intros.
-  simpl in H0.
-  apply set_inter_elim1 in H0.
-  apply H; auto.
-  apply not_in_union_elim in H.
-  destruct H. split.
-  apply not_in_inter_intro2. auto.
-  apply not_in_inter_intro2. auto.
-Defined.
-
-Lemma not_inter_union1 : forall A1 A2 B1 B2,
-~ set_In A1 (FindSubtypes (t_and (t_union B1 B2) A2)) ->
-~ set_In A1 (FindSubtypes (t_and B1 A2)) /\
-~ set_In A1 (FindSubtypes (t_and B2 A2)).
-Proof.
-  intros.
-  apply not_in3 in H. destruct H.
-  split. unfold not in *.
-  intros.
-  simpl in H0.
-  apply set_inter_elim1 in H0.
-  apply H. simpl. apply set_union_intro1. auto. 
-  unfold not in *. intros.
-  simpl in H0.
-  apply set_inter_elim1 in H0.
-  apply H. simpl. apply set_union_intro2. auto.
-  split.
-  unfold not in *.
-  intros.
-  simpl in H0.
-  apply set_inter_elim2 in H0.
-  apply H; auto.
-  unfold not in *.
-  intros.
-  simpl in H0.
-  apply set_inter_elim2 in H0.
-  apply H; auto.
-Defined.
-
-Lemma lemmasa: forall l : list typ, (l = []) \/ (l <> []).
-Proof.
-  intros. induction l. auto.
-  destruct IHl. right. 
-  unfold not. intros. inversion H0.
-  unfold not in *.
-  right. intros.
-  inversion H0.
-Defined.
-
-Lemma set_union_not_empty : forall A B, 
-FindSubtypes (t_union A B) <> [] ->
-FindSubtypes A <> [] \/ FindSubtypes B <> [].
-Proof.
-  intros.
-  unfold not in *.
-  left. intros.
-  apply H.
-Admitted.
-
-Lemma jsdfhgdf : forall (a : typ) (l : list typ), set_In a (a :: l).
-Proof.
-  intros. simpl. auto.
-Defined.
-
-Lemma asadsad : forall t l A, (t :: l) = FindSubtypes A ->
-set_In t (FindSubtypes A).
-Proof.
-  intros.
-  rewrite <- H.
-  apply jsdfhgdf.
-Defined.
-
-Lemma inter_not_empty_elim : forall A l,
-l = FindSubtypes A ->
-l <> [] ->
-set_In t_top l \/
-set_In t_int l \/ 
-set_In (t_arrow t_top t_bot) l.
-Proof.
-  intros.
-  destruct l.
-  contradiction.
-  lets: jsdfhgdf t l.
-  rewrite H in H1.
-  lets: elem_in_findsubtypes_ord A t. 
-  lets H1': H1.
-  apply H2 in H1.
-  induction H1.
-  left. apply jsdfhgdf.
-  right. left. apply jsdfhgdf.
-  apply arrow_in_top_bot in H1'. inverts H1'.
-  right. right. apply jsdfhgdf.
-Defined.
-
-Definition DisjAlgo1 A B := (FindSubtypes (t_and A B)) = [].
-Notation "A *a1 B" := (DisjAlgo1 A B) (at level 80).
-
-Lemma disja_disja1 : forall A B, DisjAlgo A B -> DisjAlgo1 A B.
-Proof.
-  unfold DisjAlgo.
-  unfold DisjAlgo1.
-  intros. simpl. auto.
-Defined.
-
-Lemma disja1_disja : forall A B, DisjAlgo1 A B -> DisjAlgo A B.
-Proof.
-  unfold DisjAlgo.
-  unfold DisjAlgo1.
-  intros. simpl in H. auto.
-Defined.
-
-(*
-Lemma inter_not_empty_elim1 : forall A B l,
-l = (FindSubtypes A `inter` FindSubtypes B) ->
-l <> [] ->
-set_In t_top l \/
-set_In t_int l \/ 
-set_In (t_arrow t_top t_bot) l.
-Proof.
-  intros.
-  destruct l.
-  contradiction.
-  lets: jsdfhgdf t l.
-  rewrite H in H1.
-  lets: elem_in_findsubtypes_ord A t. 
-  lets H1': H1.
-  apply H2 in H1.
-  induction H1.
-  left. apply jsdfhgdf.
-  right. left. apply jsdfhgdf.
-  apply arrow_in_top_bot in H1'. inverts H1'.
-  right. right. apply jsdfhgdf.
-Admitted.
-*)
-
-Lemma not_in4 : forall A B, not (set_In t_top (FindSubtypes (t_and A B))) /\
-not (set_In t_int (FindSubtypes (t_and A B))) /\
-not (set_In (t_arrow t_top t_bot) (FindSubtypes (t_and A B))) ->
-(FindSubtypes (t_and A B)) = [].
-Proof.
-  intros.
-  lets: lemmasa (FindSubtypes (t_and A B)).
-  destruct H0. 
-  - rewrite H0. auto.
-  - apply inter_not_empty_elim with (A:=(t_and A B)) in H0.
-    destruct H.
-    destruct H0.
-    contradiction.
-    destruct H1.
-    destruct H0.
-    contradiction.
-    contradiction.
-    auto.
-Qed.
-
-Lemma in_top_int_arrow : forall l A,
-l =  (FindSubtypes A) ->
-set_In t_top l ->
-set_In t_int l.
-Proof.
-  intros.
-  destruct A.
-  rewrite H. simpl. auto.
-  rewrite H. simpl. auto.
-  rewrite H in H0. simpl in H0. inversion H0.
-  rewrite H in H0. simpl in H0.
-  destruct H0. inversion H0. inversion H0.
-  admit.
-  admit.
-Admitted.
-
-Lemma not_in5 : forall A B,
-not (set_In t_int (FindSubtypes (t_and A B))) /\
-not (set_In (t_arrow t_top t_bot) (FindSubtypes (t_and A B))) /\
-not (set_In t_top (FindSubtypes (t_and A B))) ->
-(FindSubtypes (t_and A B)) = [].
-Proof.
-  intros.
-  lets: lemmasa (FindSubtypes (t_and A B)).
-  destruct H0. 
-  - rewrite H0. auto.
-  - apply inter_not_empty_elim with (A:=(t_and A B)) in H0.
-    destruct H. destruct H1.
-    destruct H0.
-    contradiction.
-    destruct H0.
-    contradiction.
-    contradiction.
-    auto.
-Defined.
-  
-(*  
-  destruct H.
-  unfold not in *.
-  rewrite H0.
-  destruct H.
-  induction A.
-  - induction B.
-    simpl in H. destruct H. auto.
-    simpl in H. destruct H. auto.
-    simpl. auto.
-    simpl in H0. destruct H0. auto.
-    apply not_inter_union in H.
-    destruct H.
-    apply not_inter_union in H0.
-    destruct H0.
-    apply union_inter_empty.
-    auto. auto.
-    admit.
- - induction B.
-   simpl in H. destruct H. auto.
-   simpl in H. destruct H. auto.
-   simpl. auto.
-   simpl. auto.
-   apply not_inter_union in H.
-   destruct H.
-   apply not_inter_union in H0.
-   destruct H0.
-   apply union_inter_empty.
-   auto. auto.
-   admit.
-- simpl. auto.
-- induction B.
-  simpl in H0. destruct H0. auto.
-  simpl. auto.
-  simpl. auto.
-  simpl in H0. destruct H0. auto.
-  apply not_inter_union in H.
-  destruct H.
-  apply not_inter_union in H0.
-  destruct H0.
-  apply union_inter_empty.
-  admit. admit.
-  admit.
-- apply not_inter_union1 in H.
-  destruct H.
-  apply not_inter_union1 in H0.
-  destruct H0.
-  apply union_inter_empty1.
-  auto. auto.
-- admit.
-Admitted.
-*)
-
-Lemma elem_in_findsubtypes_sub : forall A B,
-(set_In B (FindSubtypes A)) -> B <: A.
-Proof.
-  intros.
-  inductions A.
-  - simpl in H.
-    destruct H. rewrite <- H. auto.
-    destruct H. rewrite <- H. auto.
-    destruct H. rewrite <- H. auto.
-    inversion H.
-  - simpl in H.
-    destruct H. rewrite <- H. auto.
-    inversion H.
-  - simpl in H. inversion H.
-  - simpl in H.
-    destruct H. rewrite <- H. auto.
-    inversion H.
-  - simpl in H.
-    apply set_union_elim in H. destruct H. 
-    apply s_orb. apply IHA1; auto. 
-    apply s_orc. apply IHA2; auto.
-  - simpl in H.
-    apply s_anda.
-    apply set_inter_elim1 in H. 
-    apply IHA1; auto.
-    apply set_inter_elim2 in H. 
-    apply IHA2; auto.
-Defined.
-
-Lemma demorgan1 : forall P Q : Prop, ~ P /\ ~ Q -> ~ (P \/ Q).
-Proof.
-  intros.
-  destruct H.
-  unfold not in *.
-  intros.
-  destruct H1.
-  apply H; auto.
-  apply H0; auto.
-Defined.
-
-Lemma demorgan2 : forall P Q : Prop, ~ (P \/ Q) -> ~ P /\ ~ Q.
-Proof.
-  intros.
-  unfold not in *.
-  split.
-  intros. apply H. auto.
-  intros. apply H. auto.
-Defined.
-
-Lemma demorgan3 : forall P Q R : Prop, ~ (P \/ Q \/ R) -> ~ P /\ ~ Q /\ ~ R.
-Proof.
-  intros.
-  unfold not in *.
-  split.
-  intros. apply H. auto.
-  split.
-  intros. apply H. auto.
-  intros. apply H. auto.
-Defined.
-
-Lemma Disj_completeness2 : forall A B,  A *s B -> A *a1 B.
-Proof.
-  intros.
-  apply disj_disj1 in H.
-  unfold DisjSpec1 in H. unfold not in H.
-  unfold DisjAlgo1.
-  eapply not_in5.
-  apply demorgan3. unfold not. intros.
-  destruct H0.
-  lets H0': H0.
-  apply elem_in_findsubtypes_sub in H0'.
-  lets H0'': H0.
-  apply elem_in_findsubtypes_ord in H0''.
-  apply H. exists t_int. split*.
-  destruct H0.
-  lets H0': H0.
-  apply elem_in_findsubtypes_sub in H0'.
-  lets H0'': H0.
-  apply elem_in_findsubtypes_ord in H0''.
-  apply H. exists (t_arrow t_top t_bot). split*.
-  lets H0': H0.
-  apply elem_in_findsubtypes_sub in H0'.
-  lets H0'': H0.
-  apply elem_in_findsubtypes_ord in H0''.
-  apply H. exists t_top. split*.
-Qed.
-
-Lemma not_in1 : forall A B C, not (set_In A (FindSubtypes (t_and B C))) ->
-not (set_In A (FindSubtypes B)) \/ not (set_In A (FindSubtypes C)).
-Proof.
-  intros. unfold not in *.
-  induction (FindSubtypes B).
-  induction (FindSubtypes C). 
-  simpl. left*. simpl. left*.
-  induction (FindSubtypes C). 
-  right*. eauto.
-  destruct IHl. left. intros.
-  admit. right*.
-Admitted.
-
-Lemma Disj_completeness1 : forall A B,  A *s B -> A *a B.
-Proof.
-  intros.
-  apply disj_disj1 in H.
-  unfold DisjSpec1 in H. unfold not in H.
-  unfold DisjAlgo.
-  eapply not_in. unfold not. intros.
-  apply H.
-  destruct H0.
-  exists*.
-Qed.
-
-
-Lemma Disj_completeness3 : forall A B,  A *s B -> A *a B.
-Proof.
-  induction A.
-  - admit.
-  - admit.
-  - admit.
-  - admit.
-  - intros. admit.
-  - induction B.
-    admit.
-    admit.
-    admit.
-    admit.
-    admit.
-    intros.
-    apply disj_disj1 in H.
-    unfold DisjSpec1 in H. unfold not in H.
-    unfold DisjAlgo.
-
-
-Lemma Disj_completeness2 : forall A B,  A *s B -> A *a B.
+Lemma Disj_completeness : forall A B,  A *s B -> A *a B.
 Proof.
   unfold DisjAlgo. intros.
   inductions A.

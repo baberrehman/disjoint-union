@@ -34,8 +34,9 @@ Inductive ord : typ -> Prop :=    (* defn ord *)
  | SO_or : forall (A B:typ),
      ord A ->
      ord B ->
-     ord (t_or A B)
-with ordu : typ -> Prop :=    (* defn ordu *)
+     ord (t_or A B).
+
+Inductive ordu : typ -> Prop :=    (* defn ordu *)
  | OU_top : 
      ordu t_top
  | OU_bot : 
@@ -59,8 +60,9 @@ Inductive spl : typ -> typ -> typ -> Prop :=    (* defn spl *)
  | Spl_orr : forall (A B B1 B2:typ),
      ord A ->
      spl B B1 B2 ->
-     spl (t_or A B) (t_or A B1) (t_or A B2)
-with splu : typ -> typ -> typ -> Prop :=    (* defn splu *)
+     spl (t_or A B) (t_or A B1) (t_or A B2).
+
+Inductive splu : typ -> typ -> typ -> Prop :=    (* defn splu *)
  | SpU_or : forall (A B:typ),
      splu (t_or A B) A B
  | SpU_andl : forall (A B A1 A2:typ),
@@ -87,8 +89,6 @@ Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
  | S_btm : forall A, t_bot <: A
  | S_int : t_int <: t_int
  | S_arrow : forall (A1 A2 B1 B2:typ),
-     ord (t_arrow A1 A2) ->
-     ord (t_arrow B1 B2) ->
      B1 <: A1 ->
      A2 <: B2 ->
      (t_arrow A1 A2) <: (t_arrow B1 B2)
@@ -129,10 +129,7 @@ Hint Constructors spl splu subtyping : core.
 Theorem refl : forall A,
     A <: A.
 Proof.
-  intros. induction A; eauto.
-  apply S_arrow; auto.
-  apply SO_arrow.
-  apply SO_arrow.
+  intros; induction A; eauto.
 Qed.
 
 Lemma sub_or : forall A B C, (t_or A B) <: C -> A <: C /\ B <: C.
@@ -163,17 +160,18 @@ intros B A C H. gen C.
 dependent induction H; intros; eauto.
 - dependent induction H; eauto.
   inversion H. inversion H. inversion H.
-- dependent induction H3; eauto.
+- dependent induction H1; eauto.
   apply S_arrow; auto. admit.
-  inversion H3. inversion H4. inversion H4.
+  inversion H1. inversion H2. inversion H2.
 - dependent induction H1; eauto.
   inversion H. inversion H.
-  inversion H; subst; eauto.
-  apply IHsubtyping. admit.
-  apply IHsubtyping1; auto.  
+  admit.
+  admit.
+  admit.
+- apply IHsubtyping.
+Admitted.
 
-
-Theorem trans : forall B A C,
+Theorem trans1 : forall B A C,
     A <: B -> B <: C -> A <: C.
 Proof.
   inductions B; intros;
@@ -184,9 +182,24 @@ Proof.
     inversion H. inversion H. inversion H.
   - intros. inductions H; eauto.
     inversion H. inversion H. inversion H.
-  - admit.
+  - induction C; intros. inverts* H0. 
+    inversion H0; subst; try solve[inversion H1]. 
+    apply S_disjoint with (C:=t_bot) in H2; auto.
+    inversion H2; subst; try solve [inversion H3].
+    admit.
+    inverts* H0; try solve [inversion H1].
+    admit.
+    induction A; eauto.
+    inverts* H; try solve [inversion H1].
+    inverts* H; try solve [inversion H1].
+    inverts* H; try solve [inversion H1].
+    inverts* H0; try solve [inversion H].
+    admit. admit. admit. admit. admit.
   - intros. apply sub_or in H0. destruct H0.
-    inductions H; eauto. inverts* H. inverts* H. admit.
+    inductions H; eauto. inverts* H. inverts* H.
+    inverts keep H.
+    apply IHB1; auto.
+    admit. admit.
   - intros. apply sub_and in H. destruct H.
     inductions H0; eauto. inverts* H.
     eapply IHsubtyping1; eauto.
