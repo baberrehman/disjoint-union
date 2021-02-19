@@ -56,7 +56,6 @@ Notation "x ~: T" := (x ~ T)
 
 (** Environment is an associative list of bindings. *)
 
-
  Definition env := LibEnv.env typ.
 
 Inductive okt : env -> Prop :=
@@ -991,3 +990,86 @@ Proof.
   apply elem_in_findsubtypes_ord in H0''.
   apply H. exists t_top. split*.
 Qed.
+
+(* defns Typing *)
+Inductive typing : env -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
+ | typ_lit : forall (G:env) i5,
+      okt  G  ->
+     typing G (e_lit i5) infer t_int
+ | typ_var : forall (G:env) (x:var) (A:typ),
+      okt  G  ->
+      binds  x A G  ->
+     typing G (e_var_f x) infer A
+ | typ_ann : forall (G:env) (e:exp) (A:typ),
+     typing G e check A ->
+     typing G (e_ann e A) infer A
+ | typ_app : forall (G:env) (e1 e2:exp) (B A:typ),
+     typing G e1 infer (t_arrow A B) ->
+     typing G e2 check A ->
+     typing G (e_app e1 e2) infer B
+ | typ_sub : forall (G:env) (e:exp) (A B:typ),
+     typing G e infer B ->
+     subtyping B A ->
+     typing G e check A
+ | typ_abs : forall (L:vars) (G:env) (e:exp) (A B:typ),
+      ( forall x , x \notin  L  -> typing  (G & x ~: A )   ( open_exp_wrt_exp e (e_var_f x) )  check B )  ->
+     typing G (e_abs e) check (t_arrow A B)
+ | typ_typeof : forall (L:vars) (G:env) (e:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (C:typ),
+     typing G e check (t_union A B) ->
+     ( forall x , x \notin  L  -> typing  (G & x ~: A )   ( open_exp_wrt_exp e1 (e_var_f x) )  check C ) ->
+     ( forall x , x \notin  L  -> typing  (G & x ~: B )   ( open_exp_wrt_exp e2 (e_var_f x) )  check C ) ->
+     A *s B ->
+     typing G (e_typeof e A e1 B e2) check C.
+
+Hint Constructors typing.
+
+(* defns Reduction *)
+Reserved Notation "e --> e'" (at level 80).
+Inductive step : exp -> exp -> Prop :=    (* defn step *)
+ | step_int : forall i5,
+     step (e_lit i5) (e_ann (e_lit i5) t_int)
+ | step_appl : forall (e1 e2 e1':exp),
+     lc_exp e2 ->
+     step e1 e1' ->
+     step (e_app e1 e2) (e_app e1' e2)
+ | step_appr : forall (v e e':exp),
+     value v ->
+     step e e' ->
+     step (e_app v e) (e_app v e')
+ | step_beta : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp) (C:typ),
+     lc_exp (e_abs e) ->
+     pexpr p ->
+     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) ( (e_ann p C) ) ) --> (e_ann (e_ann  (  (open_exp_wrt_exp  e (e_ann p A1) )  )  B1) B2)
+ | step_beta_abs : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp) (C:typ) x,
+     lc_exp (e_abs e) ->
+     p = (e_abs x) ->
+     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) ( p ) ) --> (e_ann (e_ann  (  (open_exp_wrt_exp  e (e_ann (e_ann p A2) A1) )  )  B1) B2)
+ | step_ann : forall (e:exp) (A:typ) (e':exp),
+      not ( value (e_ann e A) )  ->
+     step e e' ->
+     step (e_ann e A) (e_ann e' A)
+ | step_rm_ann : forall (p:exp) (A B:typ),
+     pexpr p ->
+     step (e_ann (e_ann p A) B) (e_ann p B)
+ | step_lam_ann : forall (e:exp) (A B:typ),
+     lc_exp (e_abs e) ->
+     step (e_ann  ( (e_abs e) )  (t_arrow A B)) (e_ann (e_ann  ( (e_abs e) )  (t_arrow A B)) (t_arrow A B))
+ | step_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2 e':exp),
+     lc_exp (e_typeof e A e1 B e2) ->
+     step e e' ->
+     step (e_typeof e A e1 B e2) (e_typeof e' A e1 B e2)
+ | step_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ) (D:typ),
+     lc_exp (e_typeof (e_ann p D) A e1 B e2) ->
+     pexpr p ->
+     findtype p C ->
+     subtyping C A ->
+     step (e_typeof (e_ann p D) A e1 B e2)  (open_exp_wrt_exp e1 (e_ann p A) )
+ | step_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ) (D:typ),
+    lc_exp (e_typeof (e_ann p D) A e1 B e2) ->
+     pexpr p ->
+     findtype p C ->
+     subtyping C B ->
+     step (e_typeof (e_ann p D) A e1 B e2)  (open_exp_wrt_exp  e2 (e_ann p B) )
+where "e --> e'" := (step e e') : env_scope.
+
+Hint Constructors step.
