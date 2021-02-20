@@ -402,7 +402,7 @@ Typing :: '' ::=
     G |- e <= A \/ B
     G, x : A |- e1 <= C
     G, x : B |- e2 <= C
-    A * B
+    A *s B
     --------------------------------- :: typeof
     G |- typeof e as A e1 B e2 <= C
 

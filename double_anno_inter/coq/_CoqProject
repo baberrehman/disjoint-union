@@ -2,11 +2,14 @@
 LibTactics.v
 syntax_algo_int_and_arrow.v
 syntax_algo_list1.v
+syntax_algo_list_sub_disj.v
 syntax_snow_btmlike1.v
 syntax_snow_rule.v
 syntax_sub_algo1.v
 syntax_sub_algo.v
 syntax.v
+typing_algo_list1.v
+typing_algo_list_sub_disj.v
 typing_snow_btmlike.v
 typing_tlcabs_chksub.v
 typing.v

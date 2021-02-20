@@ -1,13 +1,13 @@
 Require Import TLC.LibLN.
-Require Import syntax_algo_list1.
+Require Import syntax_algo_list_sub_disj.
 
 (*
-This file is created on February 19, 2021
+This file is created on February 20, 2021
 
-syntax_algo_list1.v is the syntax file for this semantics
+syntax_algo_list_sub_disj.v is the syntax file for this semantics
 
 This file contains type safety and deterministic lemmas
-associated with syntax_algo_list1.v
+associated with syntax_algo_list_sub_disj.v
 
 *)
 
@@ -465,6 +465,7 @@ Proof.
       forwards*: typing_through_subst_ee.
       rewrite* (@subst_ee_intro y).
       forwards*: typing_regular H6.
+      inverts H2.
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
@@ -513,9 +514,10 @@ Proof.
   clear st. gen_eq E: (@empty typ).  gen U1 U2.
   induction Typ; introv EQT EQE;
    try solve [ inverts* Val | inversion EQT | eauto ].
+   inverts EQT. inverts H0.
     subst. assert (B <: (t_arrow U1 U2)). {
     eapply sub_transitivity. apply H. apply EQT. }
-   eapply IHTyp. apply Val. apply H0. reflexivity.
+   eapply IHTyp. apply Val. apply H0. auto.
 Qed.
 
 Lemma canonical_form_abs_value : forall t U1 U2,
@@ -532,6 +534,7 @@ Proof.
    inverts* Val. inverts* H0.
    inverts* Typ. inverts* H.
    eapply sub_transitivity in EQT; eauto. inversion EQT.
+   inverts H.
     subst. assert (B <: (t_arrow U1 U2)). {
     eapply sub_transitivity. apply H. apply EQT. }
    eapply IHTyp. apply Val. apply H0. reflexivity.
@@ -635,6 +638,7 @@ inductions Typ; intros EQ; subst.
   + destruct* IHTyp2.
    * inverts* H.
     inverts* H1. inverts Typ1. inverts H2. inverts H. inversion H1.
+    inverts H.
     inverts Typ1.
     inverts* H0.
    * destruct H0.
@@ -647,6 +651,7 @@ inductions Typ; intros EQ; subst.
      lets H3': H3.
      inverts H0; try solve [inversion H3].
      inverts H; try solve [inversion H3 | inversion H2].
+     inverts H2. inverts H.
      inverts H3.
      right. left.
      exists* (e_ann (e_ann (open_exp_wrt_exp e (e_ann (e_ann (e_abs x) A) A0)) B1) B). }

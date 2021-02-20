@@ -33,6 +33,35 @@
 %% Code listings
 \usepackage{listings}
 
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    %backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
 %% Font
 \usepackage[euler-digits,euler-hat-accent]{eulervm}
 
@@ -86,17 +115,31 @@
      \begin{tabular}{|lcll|}
 %       \hline
 %      Isomorphic & A $\backsimeq$ B & ::= & $[[A <: B]] \wedge [[B <: A]]$ \\
-       \hline
-      BottomLikeSpec & $[[BottomLikeSpec C]]$ & ::= & $\forall A, ~ Ord ~ A ~ \rightarrow \neg [[A <: C]]$ \\
+    %   \hline
+    %  BottomLikeSpec & $[[BottomLikeSpec C]]$ & ::= & $\forall A, ~ Ord ~ A ~ \rightarrow \neg [[A <: C]]$ \\
 %      BottomLikeSpec & C & ::= & $(\exists A ~ B, ~ ([[A /\ B]]) \backsimeq C \rightarrow \neg ( [[ A <: B ]] ) \vee \neg ( [[ B <: A ]] )) \vee ([[C <: Bot]])$ \\
        \hline
-      DisjSpec & A $*_s$ B & ::= & $ ~ BottomLikeSpec ~ [[A /\ B]]$ \\
+      DisjSpec & A $*_s$ B & ::= & ~$\forall C, ~ Ord ~ C ~ \rightarrow \neg [[C <: A /\ B]]$\\
+       \hline
+      DisjAlgo & A $*_a$ B & ::= & ~ $(FindSubtypes ~ A) ~ `inter` ~ (FindSubtypes ~ B) = []$ \\
        \hline
      \end{tabular}
      \end{center} }
 %\end{table}
 
+\bigskip
 
+\begin{lstlisting}[language=Haskell]
+Fixpoint FindSubtypes (A: typ) :=
+    match A with
+    | t_top         => [t_int; t_arrow t_top t_bot; t_top]
+    | t_bot         => []
+    | t_int         => [t_int]
+    | t_arrow A1 B1 => [t_arrow t_top t_bot]
+    | t_union A1 B1 => (FindSubtypes A1) `union` (FindSubtypes B1)
+    | t_and A1 B1   => (FindSubtypes A1) `inter` (FindSubtypes B1)
+    end.
+\end{lstlisting}
 
 \bigskip
 
@@ -104,7 +147,7 @@
 
 %\ottdefnsBottomLike
 
-\ottdefnsDisjointness
+%\ottdefnsDisjointness
 
 \ottdefnsSubtyping
 
