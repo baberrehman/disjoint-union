@@ -358,6 +358,10 @@ Subtyping :: '' ::=
     -------------------------     :: andc
     A1 /\ A2 <: A
 
+    findsubtypes A
+    -------------------------      :: disj
+    A <: B
+
 
 
 defns

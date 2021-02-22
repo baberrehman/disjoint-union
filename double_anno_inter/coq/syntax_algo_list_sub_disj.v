@@ -14,6 +14,8 @@ FindSubtypes B = []
 -------------------
      B <: A
 
+Transitivity Proved
+
 *)
 
 Require Import TLC.LibLN.
@@ -647,16 +649,6 @@ Proof.
   contradiction.
 Defined.
 
-Lemma a8 : forall A1 A2,
-forall B, Ord B -> not(B <: (t_and A1 A2)) ->
-FindSubtypes (t_and A1 A2) = [].
-Proof.
-intros.
-apply not_in5.
-splits.
-unfold not. intros.
-Admitted.
-
 Lemma a10 : forall A,
 FindSubtypes A <> [] -> exists B, set_In B (FindSubtypes A).
 Proof.
@@ -676,20 +668,46 @@ lets: elem_in_findsubtypes_sub A B H2.
 contradiction.
 Defined.
 
+Lemma a12 : forall A x, set_In x (FindSubtypes A) ->
+forall B, A <: B -> set_In x (FindSubtypes B).
+Proof.
+  intros.
+  inductions H0; eauto.
+  - lets H': H.
+    apply elem_in_findsubtypes_ord in H'.
+    simpl. destruct H'. auto. auto.
+    apply arrow_in_top_bot in H.
+    rewrite H. auto.
+  - simpl in H. inversion H.
+  - simpl in H. apply set_union_elim in H.
+    destruct H. 
+    apply IHsubtyping1; auto.
+    apply IHsubtyping2; auto.
+  - simpl. apply set_union_intro1. apply IHsubtyping; auto.
+  - simpl. apply set_union_intro2. apply IHsubtyping; auto.
+  - simpl. apply set_inter_intro.
+    apply IHsubtyping1; auto.
+    apply IHsubtyping2; auto.
+  - simpl in H. apply set_inter_elim1 in H.
+    apply IHsubtyping; auto.
+  - simpl in H. apply set_inter_elim2 in H.
+    apply IHsubtyping; auto.
+  - rewrite H0 in H.
+    inverts H.
+Defined.
+
 Lemma a5 : forall A1 A2 B,
 FindSubtypes (t_and A1 A2) = [] -> 
 B <: (t_and A1 A2) -> FindSubtypes B = [].
 Proof.
     intros.
-    assert (FindSubtypes B = [] \/ FindSubtypes B <> []). admit.
+    lets: list_empty_decide (FindSubtypes B).
     destruct H1. auto.
     lets: a10 B H1.
     destruct H2.
-    assert (not(Ord B)). admit.
-    lets: a11 B H3.
-    assert (Ord x). admit.
-    lets: H4 H5.
-Admitted.
+    lets: a12 B x H2 (t_and A1 A2) H0.
+    rewrite H in H3. inverts H3.
+Defined.
 
 Lemma sub_refl : forall A, A <: A.
   induction A; eauto.

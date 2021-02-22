@@ -444,6 +444,14 @@
 {\ottdrulename{s\_andc}}{}%
 }}
 
+
+\newcommand{\ottdrulesXXdisj}[1]{\ottdrule[#1]{%
+\ottpremise{ FindSubTypes ~  \ottnt{A}  = [] }%
+}{
+\ottnt{A}  \textless:  \ottnt{B}}{%
+{\ottdrulename{s\_disj}}{}%
+}}
+
 \newcommand{\ottdefnsubtyping}[1]{\begin{ottdefnblock}[#1]{$\ottnt{A}  \textless:  \ottnt{B}$}{\ottcom{Subtyping}}
 \ottusedrule{\ottdrulesXXtop{}}
 \ottusedrule{\ottdrulesXXbtm{}}
@@ -455,6 +463,7 @@
 \ottusedrule{\ottdrulesXXanda{}}
 \ottusedrule{\ottdrulesXXandb{}}
 \ottusedrule{\ottdrulesXXandc{}}
+\ottusedrule{\ottdrulesXXdisj{}}
 \end{ottdefnblock}}
 
 
