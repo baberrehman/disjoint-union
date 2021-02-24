@@ -1,0 +1,523 @@
+% key idea: keep the original annotation and the outermost one for lambdas
+% new idea: drop u and r
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% METAVARIABLES
+
+metavar var, x ::= {{ repr-locally-nameless }}
+
+metavar i ::= {{ coq nat }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% GRAMMAR (LNgen portion)
+
+grammar
+
+  typ, A, B, C, D          :: 't_' ::=     {{ com type }}
+    | Top                  ::   :: top {{ tex \top }}
+    | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
+    | Bool                 ::   :: bool     {{ tex \mathsf{Bool}  }}
+    | Str                  ::   :: str     {{ tex \mathsf{Str}  }}        
+    | Bot                  ::   :: bot     {{ tex \bot }}
+    | A -> B               ::   :: arrow
+    | A \/ B 	             ::   :: union
+    | A /\ B 			   ::   :: inter
+    | ( A )                :: S :: paren   {{ coq ([[A]]) }}
+
+  exp, e, v, p             :: 'e_' ::=     {{ com expression }}
+    | x                    ::   :: var
+    | i                    ::   :: lit
+    | b                    ::   :: bexpr
+    | s                    ::   :: strexpr
+    | e : A                ::   :: ann
+    | \ x . e              ::   :: abs     (+ bind x in e +)
+    | e1 e2                ::   :: app
+    | typeof e as A e1 B e2 ::  :: typeof {{ tex typeof \ [[e]] \ as \ [[A]] \ [[e1]] \ [[B]] \ [[e2]] }}
+    {{ tex typeof \ [[e]] \ as \ \{x:[[A]][[->]][[e1]], x:[[B]][[->]][[e2]]\}  }}
+    | ( e )                :: S :: paren   {{ coq ([[e]]) }}
+    | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
+
+substitutions
+  single exp x   :: subst
+
+freevars
+  exp x      :: fv
+
+parsing
+  t_arrow right t_arrow
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% GRAMMAR  (non LNgen portion)
+
+grammar
+
+  ctx, G {{ tex \Gamma }} :: 'ctx_' ::=    {{ com typing context }}
+                                           {{ coq list ( atom * typ ) }}
+    | []                   ::  :: empty    {{ coq nil }}
+                                           {{ tex \cdot }}
+    | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
+
+  dirflag {{ tex \Leftrightarrow }} :: '' ::=  {{ com typing direction }}
+    | =>                   ::  :: infer    {{ tex \Rightarrow }}
+    | <=                   ::  :: check    {{ tex \Leftarrow }}
+
+terminals :: 'terminals_' ::=
+  | \                    ::  :: lambda     {{ tex \lambda }}
+  | -->                  ::  :: red        {{ tex \longrightarrow }}
+  | ~>                   ::  :: leadsto    {{ tex \leadsto }}
+  | ->                   ::  :: arrow      {{ tex \rightarrow }}
+  | \/                   ::  :: or         {{ tex \vee }}
+  | /\                   ::  :: and        {{ tex \wedge }}  
+  | |-                   ::  :: turnstile  {{ tex \vdash }}
+  | <:                   ::  :: sub        {{ tex \textless: }}
+  | in                   ::  :: in         {{ tex \in }}
+  | ;                    ::  :: ctxAnd     {{ tex ; }}
+  | fv                   ::  :: fv         {{ tex \mathsf{fv}\! }}
+
+formula :: 'formula_' ::=
+  | judgement                ::   :: judgement
+  | not formula              :: M :: not
+    {{ tex \neg [[formula]] }}
+    {{ coq not ([[formula]]) }}
+  | uniq G                   ::   :: uniqG
+    {{ coq uniq [[G]] }}
+    {{ tex  }}
+  | x : A in G               ::   :: inG
+    {{ coq binds [[x]][[A]][[G]] }}
+  | x notin fv e             ::   :: fresh
+    {{ coq [[x]] \notin fv[[e]] }}
+  | x notin dom G            ::   :: notInGx
+    {{ coq ~ AtomSetImpl.In [[x]] (dom [[G]]) }}
+    {{ tex [[x]] \notin [[G]] }}
+
+
+
+defns
+PreValue :: '' ::=
+  
+  defn
+  prevalue e ::   :: pexpr :: 'pexpr_'
+  {{ com PreValues }} {{ tex  }}
+  by
+
+    ------------ :: int
+    prevalue i
+
+    ------------ :: bool
+    prevalue b
+
+    ------------ :: str
+    prevalue s
+
+    --------------------------- :: abs
+    prevalue (\x.e):A -> B
+
+
+defns
+Value :: '' ::=
+  
+  defn
+  value e ::   :: value :: 'value_'
+  {{ com Values }}
+  by
+
+    prevalue p
+    ------------ :: val
+    value p : A
+
+
+
+defns
+FindType :: '' ::=
+  
+  defn
+  findtype p A ::   :: findtype :: 'findtype_'
+  {{ com FindType }}
+  by
+
+    ---------------- :: int
+    findtype i Int
+
+    ---------------- :: bool
+    findtype b Bool
+
+    ---------------- :: str
+    findtype s Str
+
+    ------------------------------------ :: arrow
+    findtype ((\x.e) : A -> B) (A -> B)
+
+
+defns
+FindSubTypes :: '' ::=
+  
+  defn
+  findsubtypes A ::   :: findsubtypes :: 'findsubtype_'
+  {{ tex FindSubTypes ~ [[A]] = [] }}
+  {{ com FindSubTypes }}
+  by
+
+
+defns
+Ordinary :: '' ::=
+  defn
+  ordinary A ::  :: ordinary :: 'ord_'
+  {{ tex ord ~ [[A]] }}
+  {{ com Ordinary Types }}
+  by
+
+  ---------------- :: top
+  ordinary Top
+
+
+  ---------------- :: int
+  ordinary Int
+
+  ---------------- :: bool
+  ordinary Bool
+
+  ---------------- :: str
+  ordinary Str
+
+
+  ---------------- :: arrow
+  ordinary A -> B
+
+
+%  ordinary A
+%  ordinary B
+%  ---------------- :: union
+%  ordinary A \/ B
+
+
+% following definition is just to display A *s B
+% No other use of this definition anywhere else
+defns
+DisjointnessSpec :: '' ::=
+
+  defn
+  A *s B ::  :: disjointnessspec :: ds_
+  {{ tex [[A]] *_s [[B]] }}
+  {{ com DisjointnessSpec }}
+
+  by
+
+
+% following definition is just to display BottomLikeSpec
+% No other use of this definition anywhere else
+defns
+BottomLikeSpec :: '' ::=
+
+  defn
+  BottomLikeSpec A ::  :: btmlikespec :: bs_
+  {{ tex \rfloor [[A]] \lfloor_s }}
+  {{ com BottomLikeSpec }}
+
+  by
+
+
+
+defns
+BottomLike :: '' ::=
+
+  defn
+  botLike A ::  :: bottomlike :: 'bl_'
+  {{ tex \rfloor [[A]] \lfloor_a}}
+  {{ com Bottom-Like Types }}
+  by
+
+    -------------------- :: bot
+    botLike Bot
+
+    botLike A
+    botLike B
+    -------------------------     :: or
+    botLike A \/ B
+
+
+    botLike A
+    -------------------------     :: andl
+    botLike A /\ B
+
+
+    botLike B
+    -------------------------     :: andr
+    botLike A /\ B
+
+
+    A * B
+    -------------------------     :: andsub
+    botLike A /\ B
+
+
+
+defns
+Disjointness :: '' ::=
+
+  defn
+  A * B ::  :: disjointness :: ad_
+  {{ tex [[A]] *_a [[B]] }}
+  {{ com Disjointness }}
+
+  by
+
+    -------------------- :: btmr
+    A * Bot
+
+    -------------------- :: btml
+    Bot * A
+
+
+%	botLike A
+%	----------------------        :: btml
+%	A * B
+
+
+%	botLike B
+%	----------------------        :: btmr
+%	A * B
+
+    -------------------- :: intl
+    Int * A -> B
+  
+    -------------------- :: intr
+    A -> B * Int
+
+    A * C
+    B * C
+    -------------------------     :: orl
+    A \/ B * C
+  
+    A * B
+    A * C
+    -------------------------     :: orr
+    A * B \/ C
+
+    A * C
+    -------------------------     :: andla
+    A /\ B * C
+
+    B * C
+    -------------------------     :: andlb
+    A /\ B * C
+
+    A * B
+    -------------------------     :: andra
+    A * B /\ C
+
+    A * C
+    -------------------------     :: andrb
+    A * B /\ C
+
+    
+    findsubtypes (A /\ B)
+    ------------------------- :: disjl
+    A * B
+
+    findsubtypes (B /\ A)
+    ------------------------- :: disjr
+    A * B
+
+
+%    A * B
+%    -------------------------     :: disjl
+%    A /\ B * C
+
+
+%    A * B
+%    -------------------------     :: disjr
+%    C * A /\ B
+
+  
+
+
+defns
+Subtyping :: '' ::=
+
+  defn
+  A <: B ::  :: subtyping :: s_
+  {{ com Subtyping }}
+  {{ tex [[A]] <: [[B]] }}
+  
+  by
+
+    -------------------- :: top
+    A <: Top
+
+    -------------------- :: btm
+    Bot <: A
+  
+    -------------------- :: int
+    Int <: Int
+
+    -------------------- :: bool
+    Bool <: Bool
+
+    -------------------- :: str
+    Str <: Str
+  
+    B1 <: A1 
+    A2 <: B2
+    -------------------------     :: arrow
+    A1 -> A2 <: B1 -> B2
+  
+    A1 <: A
+    A2 <: A
+    -------------------------     :: ora
+    A1 \/ A2 <: A
+  
+    A <: A1
+    -------------------------     :: orb
+    A <: A1 \/ A2 
+
+    A <: A2
+    -------------------------     :: orc
+    A <: A1 \/ A2
+
+    A <: A1
+    A <: A2
+    -------------------------     :: anda
+    A <: A1 /\ A2
+  
+    A1 <: A
+    -------------------------     :: andb
+    A1 /\ A2 <: A 
+
+    A2 <: A
+    -------------------------     :: andc
+    A1 /\ A2 <: A
+
+    findsubtypes A
+    -------------------------      :: disj
+    A <: B
+
+
+
+defns
+Typing :: '' ::=
+
+  defn
+  G |- e dirflag A ::   :: typing :: 'typ_'
+  {{ com Typing Rules }}
+  by
+
+    % inference mode
+
+    uniq G
+    ----------------- :: lit
+    G |- i => Int
+
+    uniq G
+    ----------------- :: bool
+    G |- b => Bool
+
+    uniq G
+    ----------------- :: str
+    G |- s => Str
+
+    uniq G
+    x : A in G
+    -------------- :: var
+    G |- x => A
+
+    G |- e <= A
+    ------------------ :: ann
+    G |- e : A => A
+
+    G |- e1 => A -> B
+    G |- e2 <= A
+    -------------------- :: app
+    G |- e1 e2 => B
+
+    % checking mode
+
+    G |- e => B
+    B <: A
+    -------------- :: sub
+    G |- e <= A
+
+    G, x:A |- e <= B
+    -------------------------- :: abs
+    G |- \x. e <= A -> B
+
+    G |- e <= A \/ B
+    G, x : A |- e1 <= C
+    G, x : B |- e2 <= C
+    A *s B
+    --------------------------------- :: typeof
+    G |- typeof e as A e1 B e2 <= C
+
+
+defns
+Reduction :: '' ::=
+
+  defn
+  e --> e' ::   :: step :: 'step_'
+  {{ com Small-step operational semantics }}
+  by
+
+
+    ------------------------ :: int
+    i --> i : Int
+
+    ------------------------ :: bool
+    b --> b : Bool
+
+    ------------------------ :: str
+    s --> s : Str
+
+
+    e1 --> e1'
+    ---------------- :: appl
+    e1 e2 --> e1' e2
+
+
+    value v
+    e --> e'
+    ---------------- :: appr
+    v e --> v e'
+
+
+    prevalue p
+    ----------------------------------------------------- :: beta
+    ((\x.e):A1->B1:A2->B2) (p:C) --> ((e [x ~> p:A1]):B1):B2
+
+
+
+    ----------------------------------------------------- :: abs_beta
+    ((\x.e1):A1->B1:A2->B2) (\x.e2) --> ((e1 [x ~> ((\x.e2):A2):A1]):B1):B2
+
+
+
+    not value e:A
+    e --> e'
+    ----------------------- :: ann
+    e : A --> e' : A
+
+
+    prevalue p
+    --------------------- :: rm_ann
+    p : A : B --> p : B
+
+    
+    --------------------------------- :: lam_ann
+    (\x.e):A->B --> (\x.e):A->B:A->B
+
+
+    e --> e'
+    ------------------------------------------------- :: typeof
+    typeof e as A e1 B e2 --> typeof e' as A e1 B e2
+
+
+    prevalue p
+    findtype p C
+    C <: A
+    ------------------------------------------------- :: typeofl
+    typeof (p:D) as A e1 B e2 --> e1 [x ~> p:A]
+
+
+    prevalue p
+    findtype p C
+    C <: B
+    ------------------------------------------------- :: typeofr
+    typeof (p:D) as A e1 B e2 --> e2 [x ~> p:B]
