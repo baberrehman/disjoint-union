@@ -8,14 +8,14 @@ LIBNAME="Top"
 SYNTAX=syntax
 TARGET=rules
 
-FILES    = syntax_snow_rule
+FILES    = syntax
 VFILES   = $(foreach i, $(FILES), $(i).v)
 
 .SECONDARY: $(VFILES)
 
 all: coq
 
-myfile:  $(COQMKFILENAME) syntax_snow_rule.v
+myfile:  $(COQMKFILENAME) syntax.v
 	@$(MAKE) -f CoqSrc.mk
 
 quick:  $(COQMKFILENAME) $(VFILES)

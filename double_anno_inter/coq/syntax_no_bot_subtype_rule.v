@@ -21,7 +21,7 @@ Transitivity Proved
 Bool and String primitive type
 
 ******************************************************************
-Redundant subtyping rule from bottom type removed in this version.
+Redundant subtyping rule for bottom type removed in this version.
 ******************************************************************
 
 *)
@@ -293,7 +293,7 @@ Proof.
   intros. simpl. auto.
 Defined.
 
-Lemma a3 : forall (a1 a2 : typ) (l1 l2 : list typ), 
+Lemma elem_append_in_union1 : forall (a1 a2 : typ) (l1 l2 : list typ), 
 set_In a1 (a1 :: l1 `union` a2 :: l2).
 Proof.
   intros.
@@ -301,7 +301,7 @@ Proof.
   apply set_union_intro1. auto.
 Defined.
 
-Lemma a4 : forall (a1 : typ) (l1 : list typ), 
+Lemma elem_append_in_union2 : forall (a1 : typ) (l1 : list typ), 
 set_In a1 ([] `union` a1 :: l1).
 Proof.
   intros.
@@ -323,14 +323,14 @@ Proof.
     rewrite <- H2 in H.
     rewrite H0 in H.
     rewrite <- H1 in H.
-    lets: a4 t l3.
+    lets: elem_append_in_union2 t l3.
     rewrite <- H in H3.
     inverts H3.
     rewrite H0 in H.
     rewrite <- H1 in H.
     destruct (FindSubtypes B).
     simpl in H. inverts H.
-    lets: a3 t t0 l2 l.
+    lets: elem_append_in_union1 t t0 l2 l.
     rewrite <- H in H3.
     inverts H3.
 Defined.
@@ -697,7 +697,7 @@ Proof.
 Defined.
 
 
-Lemma a1 : forall A B,
+Lemma findsubtypes_empty_not_ord : forall A B,
 FindSubtypes A = [] -> B <: A -> not (Ord B).
 Proof.
     intros.
@@ -726,7 +726,7 @@ Proof.
       rewrite H in H2. simpl in H2. inversion H2.
 Defined.
 
-Lemma a6 : forall A1 A2,
+Lemma findsubtypes_empty_no_ord_sub1 : forall A1 A2,
 FindSubtypes (t_and A1 A2) = [] -> 
 not (exists B, Ord B /\ B <: (t_and A1 A2)).
 Proof.
@@ -736,7 +736,7 @@ Proof.
   contradiction.
 Defined.
 
-Lemma a7 : forall A1 A2,
+Lemma findsubtypes_empty_no_ord_sub2 : forall A1 A2,
 FindSubtypes (t_and A1 A2) = [] -> 
 forall B, Ord B -> not(B <: (t_and A1 A2)).
 Proof.
@@ -745,7 +745,7 @@ Proof.
   contradiction.
 Defined.
 
-Lemma a9 : forall A1 A2,
+Lemma no_ord_sub_not_in : forall A1 A2,
 forall B, Ord B -> not(B <: (t_and A1 A2)) ->
 not (set_In B (FindSubtypes (t_and A1 A2))).
 Proof.
@@ -754,7 +754,7 @@ Proof.
   contradiction.
 Defined.
 
-Lemma a10 : forall A,
+Lemma findsubtypes_not_empty : forall A,
 FindSubtypes A <> [] -> exists B, set_In B (FindSubtypes A).
 Proof.
   intros.
@@ -764,7 +764,7 @@ Proof.
   exists t. auto.
 Defined.
 
-Lemma a11 : forall A, not (Ord A) ->
+Lemma not_ord_sub_not_in : forall A, not (Ord A) ->
 forall B, Ord B -> not (B <: A) -> not (set_In B (FindSubtypes A)).
 Proof.
 intros.
@@ -773,7 +773,7 @@ lets: elem_in_findsubtypes_sub A B H2.
 contradiction.
 Defined.
 
-Lemma a12 : forall A x, set_In x (FindSubtypes A) ->
+Lemma set_in_sub : forall A x, set_In x (FindSubtypes A) ->
 forall B, A <: B -> set_In x (FindSubtypes B).
 Proof.
   intros.
@@ -804,16 +804,16 @@ Proof.
     inverts H.
 Defined.
 
-Lemma a5 : forall A1 A2 B,
+Lemma findsubtypes_sub_empty : forall A1 A2 B,
 FindSubtypes (t_and A1 A2) = [] -> 
 B <: (t_and A1 A2) -> FindSubtypes B = [].
 Proof.
     intros.
     lets: list_empty_decide (FindSubtypes B).
     destruct H1. auto.
-    lets: a10 B H1.
+    lets: findsubtypes_not_empty B H1.
     destruct H2.
-    lets: a12 B x H2 (t_and A1 A2) H0.
+    lets: set_in_sub B x H2 (t_and A1 A2) H0.
     rewrite H in H3. inverts H3.
 Defined.
 
@@ -845,7 +845,7 @@ generalize H0 H; clear H0; clear H; generalize A; clear A.
   inductions H0; eauto.
   assert (A <: t_and B1 B2) by auto.
   apply s_disj.
-  apply a5 with (A1:=B1) (A2:=B2). auto. auto.
+  apply findsubtypes_sub_empty with (A1:=B1) (A2:=B2). auto. auto.
 Defined.
 
 (****************************************)

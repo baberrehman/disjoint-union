@@ -276,7 +276,7 @@ Lemma Disj_completeness : forall A B, DisjSpec A B -> Disj A B.
     apply IHA2. unfold DisjSpec. intros.
     destruct H0.
     apply H; eauto.
-Defined.  
+Defined. 
 
 Lemma invOrS1 : forall t t1 t2, sub (typ_or t1 t2) t -> sub t1 t /\ sub t2 t.
 Proof.
@@ -1278,7 +1278,7 @@ inductions TypT; introv; simpl.
     apply value_regular in valu. auto.
 - exists typ_top.
   split*. apply* typing_top.
-Qed.  
+Qed.
 
 
 (* ********************************************************************** *)
