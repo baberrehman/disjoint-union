@@ -357,7 +357,7 @@ intros. dependent induction H; unfold DisjSpec; intros; eauto.
   + apply sub_or in H1. destruct H1; eauto. 
 - destruct H. induction C; try (dependent destruction H0); eauto.
   + inversion H.
-  + apply sub_or in H. destruct H; eauto.  
+  + apply sub_or in H. destruct H; eauto.
 - destruct H1. dependent induction H1; eauto.
   apply sub_or in H2. destruct H2; eauto.
 - destruct H1. dependent induction H2; eauto.
