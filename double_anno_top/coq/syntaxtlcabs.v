@@ -419,3 +419,64 @@ generalize H0 H; clear H0; clear H; generalize A; clear A.
 - intros. apply sub_or in H0. destruct H0.
   inductions H; eauto.
 Qed.
+
+(*
+Equivalance of Disjointness
+*)
+
+(*************************)
+(***** Ordinary Types ****)
+(*************************)
+
+Inductive Ord : typ -> Prop :=
+| o_top : Ord typ_top
+| o_int : Ord t_int
+| o_arrow : forall t1 t2, Ord (t_arrow t1 t2).
+
+Hint Constructors Ord : core.
+
+(****************************************)
+(**********  Dijoint Specs    ***********)
+(****************************************)
+
+(*
+
+A *s B = not (exists C, Ord C -> C <: A /\ C <: B)
+
+*)
+
+Definition DisjSpec1 A B := forall C, Ord C -> not (C <: A /\ C <: B).
+Notation "A *s1 B" := (DisjSpec1 A B) (at level 80).
+
+Lemma disj_disj1 : forall A B, A *s B -> A *s1 B.
+Proof.
+  intros.
+  unfold DisjSpec in H.
+  unfold DisjSpec1. unfold not. intros.
+  specialize (H C).
+  forwards*: H.
+  inductions H2.
+  inversion H0.
+  inversion H0.
+Qed.
+
+Lemma disj1_disj : forall A B, A *s1 B -> A *s B.
+Proof.
+  intros.
+  unfold DisjSpec1 in H.
+  unfold DisjSpec. intros.
+  specialize (H C).
+  inductions C; eauto.
+  assert (Ord typ_top) by auto.
+  forwards*: H.
+  assert (Ord t_int) by auto.
+  forwards*: H.
+  assert (Ord (t_arrow C1 C2)) by auto.
+  forwards*: H.
+  destruct H0.
+  apply sub_or in H0. destruct H0.
+  apply sub_or in H1. destruct H1.
+  constructor.
+  apply IHC1; intros.
+  unfold not. intros.
+Admitted.

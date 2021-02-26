@@ -1,5 +1,6 @@
 *.aux 
 *.log 
+*.out
 *.bbl
 *.blg
 *.pdf
@@ -13,3 +14,6 @@ CoqSrc.mk.conf
 *.d
 *.mk
 *.vio
+*.mng
+*.fls
+*.fdb_latexmk
