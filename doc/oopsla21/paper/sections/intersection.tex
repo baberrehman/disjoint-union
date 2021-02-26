@@ -1,0 +1,37 @@
+\section{Intersection Types}
+\label{sec:intersection}
+
+\baber{Disjoint Union Types with Intersection Types will be discussed in this section.}
+
+\begin{align*}
+&Type &A, B&::= [[Top]] ~ | ~[[Bot]]~|~ Int ~| ~ Bool ~ |~ Str ~| ~ [[A->B]]~ |~ [[A \/ B]] ~ |~ [[A /\ B]]\\
+&Expr &e &::= x ~|~ n ~| ~ b ~ | ~ s ~| ~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[typeof e as A e1 B e2]]\\
+&PExpr & p &::= n ~| ~ b ~ | ~ s ~|~ [[\x.e : A->B]] \\
+&Value &v &::= p : A \\
+&Context & [[G]] &::= empty~ |~ [[G , x : A]]
+\end{align*}
+
+     {\renewcommand{\arraystretch}{1.5}
+     \begin{center}
+     \begin{tabular}{|lcll|}
+       \hline
+      DisjSpec & A $*_s$ B & ::= & ~$\forall C, ~ Ord ~ C ~ \rightarrow \neg [[C <: A /\ B]]$\\
+       \hline
+      DisjAlgo & A $*_a$ B & ::= & ~ $(FindSubtypes ~ A) ~ `inter` ~ (FindSubtypes ~ B) = []$ \\
+       \hline
+     \end{tabular}
+     \end{center} }
+
+\begin{lstlisting}[language=Haskell]
+Fixpoint FindSubtypes (A: typ) :=
+    match A with
+    | t_top         => [t_int; t_bool; t_str; t_arrow t_top t_bot; t_top]
+    | t_bot         => []
+    | t_int         => [t_int]
+    | t_bool        => [t_bool]
+    | t_str         => [t_str]
+    | t_arrow A1 B1 => [t_arrow t_top t_bot]
+    | t_union A1 B1 => (FindSubtypes A1) `union` (FindSubtypes B1)
+    | t_and A1 B1   => (FindSubtypes A1) `inter` (FindSubtypes B1)
+    end.
+\end{lstlisting}

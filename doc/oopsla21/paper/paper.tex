@@ -1,0 +1,114 @@
+\documentclass[UKenglish]{acmart}
+
+%\usepackage{geometry}
+%\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
+
+% Basics
+%\usepackage{fixltx2e}
+%\usepackage{url}
+%\usepackage{fancyvrb}
+%\usepackage{mdwlist}  % Miscellaneous list-related commands
+%\usepackage{xspace}   % Smart spacing
+%\usepackage{supertabular}
+
+
+% https://www.nesono.com/?q=book/export/html/347
+% Package for inserting TODO statements in nice colorful boxes - so that you
+% won’t forget to ﬁx/remove them. To add a todo statement, use something like
+% \todo{Find better wording here}.
+%\usepackage{todonotes}
+
+%% Math
+%\usepackage{amsmath}
+\usepackage{amsthm}
+%\usepackage{amssymb}
+%\usepackage{bm}       % Bold symbols in maths mode
+
+%% Theoretical computer science
+\usepackage{stmaryrd}
+\usepackage{mathtools}  % For "::=" ( \Coloneqq )
+
+%% Code listings
+\usepackage{listings}
+\usepackage{xcolor}
+
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    %backgroundcolor=\color{backcolour},   
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{magenta},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,         
+    breaklines=true,                 
+    captionpos=b,                    
+    keepspaces=true,                 
+    numbers=left,                    
+    numbersep=5pt,                  
+    showspaces=false,                
+    showstringspaces=false,
+    showtabs=false,                  
+    tabsize=2
+}
+\lstset{style=mystyle}
+
+%% Font
+\usepackage[euler-digits,euler-hat-accent]{eulervm}
+
+
+\usepackage{ottalt}
+
+\renewcommand\ottaltinferrule[4]{
+  \inferrule*[right={#1}]
+    {#3}
+    {#4}
+}
+
+\newcommand\mynote[3]{\textcolor{#2}{#1: #3}}
+\newcommand\bruno[1]{\mynote{Bruno}{red}{#1}}
+\newcommand\baber[1]{\mynote{Baber}{blue}{#1}}
+
+% Ott includes
+\inputott{ott-rules}
+
+%% Bibliography style
+\bibliographystyle{plainurl}% the mandatory bibstyle
+
+\title{Disjoint Union Types Meeting Intersection Types}
+
+\author{Neo Morpheus Matrix}
+
+\begin{document}
+
+\begin{abstract}
+Type system plays fundamental role to capture nonsensical program expressions at compile time. This often also refers as removing type erros statically at compile time. Since the type system defines statics of programs. A more robust type system captures more errors at compile time. This gives a guarrantee that certain type errors will not occur at runtime. With advance types such as intersection types and union types, it has become a challenge to define a robust, coherent, and deterministic type system. One often has to compromise on one feature to attain another. This study proposes a novel type system for pattern matching with intersection types and disjoint union types. \baber{few more lines for abstract.}
+\end{abstract}
+
+\maketitle
+
+%\ottdefnsOrdinary
+
+%\ottdefnsBottomLike
+
+%\ottdefnsDisjointness
+
+%\ottdefnsSubtyping
+
+%\ottdefnsTyping
+
+%\ottdefnsReduction
+
+\input{sections/introduction.mng}
+\input{sections/overview.mng}
+\input{sections/union.mng}
+\input{sections/intersection.mng}
+
+\bibliography{paper}
+
+
+\end{document}
