@@ -8,7 +8,7 @@
 %\usepackage{url}
 %\usepackage{fancyvrb}
 %\usepackage{mdwlist}  % Miscellaneous list-related commands
-%\usepackage{xspace}   % Smart spacing
+\usepackage{xspace}   % Smart spacing
 %\usepackage{supertabular}
 
 
@@ -31,6 +31,9 @@
 %% Code listings
 \usepackage{listings}
 \usepackage{xcolor}
+
+%for cref -- celever referencing
+\usepackage{cleveref}
 
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
@@ -73,20 +76,26 @@
 \newcommand\bruno[1]{\mynote{Bruno}{red}{#1}}
 \newcommand\baber[1]{\mynote{Baber}{blue}{#1}}
 
+\newcommand{\name}{\textsf{Disjoint Union Types}\xspace}
+\newcommand{\dut}{\textsf{Disjoint Union Types}\xspace}
+\newcommand{\cal}{$\lambda^{*}_{\vee}$\xspace}
+\newcommand{\typeof}{$typeof$\xspace}
+\newcommand{\Typeof}{$Typeof$\xspace}
+
 % Ott includes
 \inputott{ott-rules}
 
 %% Bibliography style
 \bibliographystyle{plainurl}% the mandatory bibstyle
 
-\title{Disjoint Union Types Meeting Intersection Types}
+\title{Disjoint Union Types With Intersection Types}
 
 \author{Neo Morpheus Matrix}
 
 \begin{document}
 
 \begin{abstract}
-Type system plays fundamental role to capture nonsensical program expressions at compile time. This often also refers as removing type erros statically at compile time. Since the type system defines statics of programs. A more robust type system captures more errors at compile time. This gives a guarrantee that certain type errors will not occur at runtime. With advance types such as intersection types and union types, it has become a challenge to define a robust, coherent, and deterministic type system. One often has to compromise on one feature to attain another. This study proposes a novel type system for pattern matching with intersection types and disjoint union types. \baber{few more lines for abstract.}
+Type system plays fundamental role to capture nonsensical program expressions at compile time. This often also refers as removing type erros statically at compile time. Since the type system defines statics of programs. A more robust type system captures more errors at compile time. This gives a guarrantee that certain type errors will not occur at runtime. With advance types such as intersection types and union types, it has become a challenge to define a robust, coherent, and deterministic type system. One often has to compromise on one feature to attain another. This study proposes a novel type system for pattern matching with disjoint union types and intersection types. \baber{few more lines for abstract.}
 \end{abstract}
 
 \maketitle

@@ -56,6 +56,9 @@ grammar
     | []                   ::  :: empty    {{ coq nil }}
                                            {{ tex \cdot }}
     | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
+    | G , x : A , G1       ::  :: conss
+    | G , G1               ::  :: consss
+
 
   dirflag {{ tex \Leftrightarrow }} :: '' ::=  {{ com typing direction }}
     | =>                   ::  :: infer    {{ tex \Rightarrow }}
@@ -97,7 +100,8 @@ PreValue :: '' ::=
   
   defn
   prevalue e ::   :: pexpr :: 'pexpr_'
-  {{ com PreValues }} {{ tex  }}
+  {{ com PreValues }} 
+  {{ tex  }}
   by
 
     ------------ :: int
@@ -133,6 +137,7 @@ FindType :: '' ::=
   defn
   findtype p A ::   :: findtype :: 'findtype_'
   {{ com FindType }}
+  {{ tex FindType \ \ [[p]] \ \ [[A]] }}
   by
 
     ---------------- :: int
@@ -222,7 +227,7 @@ BottomLike :: '' ::=
 
   defn
   botLike A ::  :: bottomlike :: 'bl_'
-  {{ tex \rfloor [[A]] \lfloor_a}}
+  {{ tex \rfloor [[A]] \lfloor}}
   {{ com Bottom-Like Types }}
   by
 
@@ -288,7 +293,7 @@ Disjointness :: '' ::=
     -------------------------     :: orl
     A \/ B * C
   
-    A * B
+    A * C
     A * C
     -------------------------     :: orr
     A * B \/ C
@@ -344,7 +349,7 @@ Subtyping :: '' ::=
     -------------------- :: top
     A <: Top
 
-    -------------------- :: btm
+    -------------------- :: bot
     Bot <: A
   
     -------------------- :: int
@@ -404,7 +409,7 @@ Typing :: '' ::=
     % inference mode
 
     uniq G
-    ----------------- :: lit
+    ----------------- :: int
     G |- i => Int
 
     uniq G
@@ -454,6 +459,7 @@ Reduction :: '' ::=
   defn
   e --> e' ::   :: step :: 'step_'
   {{ com Small-step operational semantics }}
+  {{ tex [[e]] \longrightarrow [[e']] }}
   by
 
 
@@ -472,19 +478,16 @@ Reduction :: '' ::=
     e1 e2 --> e1' e2
 
 
-    value v
     e --> e'
     ---------------- :: appr
     v e --> v e'
 
 
-    prevalue p
     ----------------------------------------------------- :: beta
     ((\x.e):A1->B1:A2->B2) (p:C) --> ((e [x ~> p:A1]):B1):B2
 
 
-
-    ----------------------------------------------------- :: abs_beta
+    ----------------------------------------------------------------------- :: absbeta
     ((\x.e1):A1->B1:A2->B2) (\x.e2) --> ((e1 [x ~> ((\x.e2):A2):A1]):B1):B2
 
 
@@ -496,11 +499,11 @@ Reduction :: '' ::=
 
 
     prevalue p
-    --------------------- :: rm_ann
+    --------------------- :: rmann
     p : A : B --> p : B
 
     
-    --------------------------------- :: lam_ann
+    --------------------------------- :: lamann
     (\x.e):A->B --> (\x.e):A->B:A->B
 
 

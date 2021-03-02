@@ -3,6 +3,8 @@
 
 \baber{Disjoint Union Types with Intersection Types will be discussed in this section.}
 
+\begin{comment}
+
 \begin{align*}
 &Type &A, B&::= [[Top]] ~ | ~[[Bot]]~|~ Int ~| ~ Bool ~ |~ Str ~| ~ [[A->B]]~ |~ [[A \/ B]] ~ |~ [[A /\ B]]\\
 &Expr &e &::= x ~|~ n ~| ~ b ~ | ~ s ~| ~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[typeof e as A e1 B e2]]\\
@@ -21,6 +23,7 @@
        \hline
      \end{tabular}
      \end{center} }
+\end{comment}
 
 \begin{lstlisting}[language=Haskell]
 Fixpoint FindSubtypes (A: typ) :=

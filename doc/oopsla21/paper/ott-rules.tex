@@ -58,7 +58,9 @@
 \newcommand{\ottctx}{
 \ottrulehead{\ottnt{ctx}  ,\ \Gamma}{::=}{\ottcom{typing context}}\ottprodnewline
 \ottfirstprodline{|}{ \cdot }{}{}{}{}\ottprodnewline
-\ottprodline{|}{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}}{}{}{}{}}
+\ottprodline{|}{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}}{}{}{}{}\ottprodnewline
+\ottprodline{|}{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}  \ottsym{,}  \Gamma_{{\mathrm{1}}}}{}{}{}{}\ottprodnewline
+\ottprodline{|}{\Gamma  \ottsym{,}  \Gamma_{{\mathrm{1}}}}{}{}{}{}}
 
 \newcommand{\ottdirflag}{
 \ottrulehead{\Leftrightarrow}{::=}{\ottcom{typing direction}}\ottprodnewline
@@ -134,32 +136,32 @@
 %% defn findtype
 \newcommand{\ottdrulefindtypeXXint}[1]{\ottdrule[#1]{%
 }{
-\ottkw{findtype} \, \ottmv{i} \,  \mathsf{Int} }{%
+ FindType \ \  \ottmv{i}  \ \   \mathsf{Int}  }{%
 {\ottdrulename{findtype\_int}}{}%
 }}
 
 
 \newcommand{\ottdrulefindtypeXXbool}[1]{\ottdrule[#1]{%
 }{
-\ottkw{findtype} \, \ottkw{b} \,  \mathsf{Bool} }{%
+ FindType \ \  \ottkw{b}  \ \   \mathsf{Bool}  }{%
 {\ottdrulename{findtype\_bool}}{}%
 }}
 
 
 \newcommand{\ottdrulefindtypeXXstr}[1]{\ottdrule[#1]{%
 }{
-\ottkw{findtype} \, \ottkw{s} \,  \mathsf{Str} }{%
+ FindType \ \  \ottkw{s}  \ \   \mathsf{Str}  }{%
 {\ottdrulename{findtype\_str}}{}%
 }}
 
 
 \newcommand{\ottdrulefindtypeXXarrow}[1]{\ottdrule[#1]{%
 }{
-\ottkw{findtype} \, \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)} \, \ottsym{(}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)}}{%
+ FindType \ \  \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)}  \ \  \ottsym{(}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)} }{%
 {\ottdrulename{findtype\_arrow}}{}%
 }}
 
-\newcommand{\ottdefnfindtype}[1]{\begin{ottdefnblock}[#1]{$\ottkw{findtype} \, \ottnt{p} \, \ottnt{A}$}{\ottcom{FindType}}
+\newcommand{\ottdefnfindtype}[1]{\begin{ottdefnblock}[#1]{$ FindType \ \  \ottnt{p}  \ \  \ottnt{A} $}{\ottcom{FindType}}
 \ottusedrule{\ottdrulefindtypeXXint{}}
 \ottusedrule{\ottdrulefindtypeXXbool{}}
 \ottusedrule{\ottdrulefindtypeXXstr{}}
@@ -252,32 +254,32 @@
 %% defn bottomlike
 \newcommand{\ottdruleblXXbot}[1]{\ottdrule[#1]{%
 }{
- \rfloor   \bot   \lfloor_a }{%
+ \rfloor   \bot   \lfloor }{%
 {\ottdrulename{bl\_bot}}{}%
 }}
 
 
 \newcommand{\ottdruleblXXor}[1]{\ottdrule[#1]{%
-\ottpremise{ \rfloor  \ottnt{A}  \lfloor_a }%
-\ottpremise{ \rfloor  \ottnt{B}  \lfloor_a }%
+\ottpremise{ \rfloor  \ottnt{A}  \lfloor }%
+\ottpremise{ \rfloor  \ottnt{B}  \lfloor }%
 }{
- \rfloor  \ottnt{A}  \vee  \ottnt{B}  \lfloor_a }{%
+ \rfloor  \ottnt{A}  \vee  \ottnt{B}  \lfloor }{%
 {\ottdrulename{bl\_or}}{}%
 }}
 
 
 \newcommand{\ottdruleblXXandl}[1]{\ottdrule[#1]{%
-\ottpremise{ \rfloor  \ottnt{A}  \lfloor_a }%
+\ottpremise{ \rfloor  \ottnt{A}  \lfloor }%
 }{
- \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor_a }{%
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
 {\ottdrulename{bl\_andl}}{}%
 }}
 
 
 \newcommand{\ottdruleblXXandr}[1]{\ottdrule[#1]{%
-\ottpremise{ \rfloor  \ottnt{B}  \lfloor_a }%
+\ottpremise{ \rfloor  \ottnt{B}  \lfloor }%
 }{
- \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor_a }{%
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
 {\ottdrulename{bl\_andr}}{}%
 }}
 
@@ -285,11 +287,11 @@
 \newcommand{\ottdruleblXXandsub}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
 }{
- \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor_a }{%
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
 {\ottdrulename{bl\_andsub}}{}%
 }}
 
-\newcommand{\ottdefnbottomlike}[1]{\begin{ottdefnblock}[#1]{$ \rfloor  \ottnt{A}  \lfloor_a $}{\ottcom{Bottom-Like Types}}
+\newcommand{\ottdefnbottomlike}[1]{\begin{ottdefnblock}[#1]{$ \rfloor  \ottnt{A}  \lfloor $}{\ottcom{Bottom-Like Types}}
 \ottusedrule{\ottdruleblXXbot{}}
 \ottusedrule{\ottdruleblXXor{}}
 \ottusedrule{\ottdruleblXXandl{}}
@@ -341,7 +343,7 @@
 
 
 \newcommand{\ottdruleadXXorr}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
 \ottpremise{ \ottnt{A}  *_a  \ottnt{C} }%
 }{
  \ottnt{A}  *_a  \ottnt{B}  \vee  \ottnt{C} }{%
@@ -424,10 +426,10 @@
 }}
 
 
-\newcommand{\ottdrulesXXbtm}[1]{\ottdrule[#1]{%
+\newcommand{\ottdrulesXXbot}[1]{\ottdrule[#1]{%
 }{
   \bot   <:  \ottnt{A} }{%
-{\ottdrulename{s\_btm}}{}%
+{\ottdrulename{s\_bot}}{}%
 }}
 
 
@@ -520,7 +522,7 @@
 
 \newcommand{\ottdefnsubtyping}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  <:  \ottnt{B} $}{\ottcom{Subtyping}}
 \ottusedrule{\ottdrulesXXtop{}}
-\ottusedrule{\ottdrulesXXbtm{}}
+\ottusedrule{\ottdrulesXXbot{}}
 \ottusedrule{\ottdrulesXXint{}}
 \ottusedrule{\ottdrulesXXbool{}}
 \ottusedrule{\ottdrulesXXstr{}}
@@ -540,11 +542,11 @@
 
 % defns Typing
 %% defn typing
-\newcommand{\ottdruletypXXlit}[1]{\ottdrule[#1]{%
+\newcommand{\ottdruletypXXint}[1]{\ottdrule[#1]{%
 \ottpremise{  }%
 }{
 \Gamma  \vdash  \ottmv{i} \,  \Rightarrow  \,  \mathsf{Int} }{%
-{\ottdrulename{typ\_lit}}{}%
+{\ottdrulename{typ\_int}}{}%
 }}
 
 
@@ -618,7 +620,7 @@
 }}
 
 \newcommand{\ottdefntyping}[1]{\begin{ottdefnblock}[#1]{$\Gamma  \vdash  \ottnt{e} \, \Leftrightarrow \, \ottnt{A}$}{\ottcom{Typing Rules}}
-\ottusedrule{\ottdruletypXXlit{}}
+\ottusedrule{\ottdruletypXXint{}}
 \ottusedrule{\ottdruletypXXbool{}}
 \ottusedrule{\ottdruletypXXstr{}}
 \ottusedrule{\ottdruletypXXvar{}}
@@ -637,119 +639,117 @@
 %% defn step
 \newcommand{\ottdrulestepXXint}[1]{\ottdrule[#1]{%
 }{
-\ottmv{i}  \longrightarrow  \ottmv{i}  \ottsym{:}   \mathsf{Int} }{%
+ \ottmv{i}  \longrightarrow  \ottmv{i}  \ottsym{:}   \mathsf{Int}  }{%
 {\ottdrulename{step\_int}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXbool}[1]{\ottdrule[#1]{%
 }{
-\ottkw{b}  \longrightarrow  \ottkw{b}  \ottsym{:}   \mathsf{Bool} }{%
+ \ottkw{b}  \longrightarrow  \ottkw{b}  \ottsym{:}   \mathsf{Bool}  }{%
 {\ottdrulename{step\_bool}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXstr}[1]{\ottdrule[#1]{%
 }{
-\ottkw{s}  \longrightarrow  \ottkw{s}  \ottsym{:}   \mathsf{Str} }{%
+ \ottkw{s}  \longrightarrow  \ottkw{s}  \ottsym{:}   \mathsf{Str}  }{%
 {\ottdrulename{step\_str}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXappl}[1]{\ottdrule[#1]{%
-\ottpremise{\ottnt{e_{{\mathrm{1}}}}  \longrightarrow  \ottnt{e'_{{\mathrm{1}}}}}%
+\ottpremise{ \ottnt{e_{{\mathrm{1}}}}  \longrightarrow  \ottnt{e'_{{\mathrm{1}}}} }%
 }{
-\ottnt{e_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}  \longrightarrow  \ottnt{e'_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}}{%
+ \ottnt{e_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}  \longrightarrow  \ottnt{e'_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}} }{%
 {\ottdrulename{step\_appl}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXappr}[1]{\ottdrule[#1]{%
-\ottpremise{\ottkw{value} \, \ottnt{v}}%
-\ottpremise{\ottnt{e}  \longrightarrow  \ottnt{e'}}%
+\ottpremise{ \ottnt{e}  \longrightarrow  \ottnt{e'} }%
 }{
-\ottnt{v} \, \ottnt{e}  \longrightarrow  \ottnt{v} \, \ottnt{e'}}{%
+ \ottnt{v} \, \ottnt{e}  \longrightarrow  \ottnt{v} \, \ottnt{e'} }{%
 {\ottdrulename{step\_appr}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXbeta}[1]{\ottdrule[#1]{%
-\ottpremise{  }%
 }{
-\ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{C}  \ottsym{)}  \longrightarrow  \ottsym{(}  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{1}}}}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}}}{%
+ \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{C}  \ottsym{)}  \longrightarrow  \ottsym{(}  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{1}}}}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}} }{%
 {\ottdrulename{step\_beta}}{}%
 }}
 
 
-\newcommand{\ottdrulestepXXabsXXbeta}[1]{\ottdrule[#1]{%
+\newcommand{\ottdrulestepXXabsbeta}[1]{\ottdrule[#1]{%
 }{
-\ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{1}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{2}}}}  \ottsym{)}  \longrightarrow  \ottsym{(}  \ottsym{(}  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{2}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{1}}}}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}}}{%
-{\ottdrulename{step\_abs\_beta}}{}%
+ \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{1}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{2}}}}  \ottsym{)}  \longrightarrow  \ottsym{(}  \ottsym{(}  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e_{{\mathrm{2}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{1}}}}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}} }{%
+{\ottdrulename{step\_absbeta}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXann}[1]{\ottdrule[#1]{%
 \ottpremise{ \neg  \ottkw{value} \, \ottnt{e}  \ottsym{:}  \ottnt{A} }%
-\ottpremise{\ottnt{e}  \longrightarrow  \ottnt{e'}}%
+\ottpremise{ \ottnt{e}  \longrightarrow  \ottnt{e'} }%
 }{
-\ottnt{e}  \ottsym{:}  \ottnt{A}  \longrightarrow  \ottnt{e'}  \ottsym{:}  \ottnt{A}}{%
+ \ottnt{e}  \ottsym{:}  \ottnt{A}  \longrightarrow  \ottnt{e'}  \ottsym{:}  \ottnt{A} }{%
 {\ottdrulename{step\_ann}}{}%
 }}
 
 
-\newcommand{\ottdrulestepXXrmXXann}[1]{\ottdrule[#1]{%
+\newcommand{\ottdrulestepXXrmann}[1]{\ottdrule[#1]{%
 \ottpremise{  }%
 }{
-\ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{:}  \ottnt{B}  \longrightarrow  \ottnt{p}  \ottsym{:}  \ottnt{B}}{%
-{\ottdrulename{step\_rm\_ann}}{}%
+ \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{:}  \ottnt{B}  \longrightarrow  \ottnt{p}  \ottsym{:}  \ottnt{B} }{%
+{\ottdrulename{step\_rmann}}{}%
 }}
 
 
-\newcommand{\ottdrulestepXXlamXXann}[1]{\ottdrule[#1]{%
+\newcommand{\ottdrulestepXXlamann}[1]{\ottdrule[#1]{%
 }{
-\ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \longrightarrow  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}}{%
-{\ottdrulename{step\_lam\_ann}}{}%
+ \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \longrightarrow  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B} }{%
+{\ottdrulename{step\_lamann}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXtypeof}[1]{\ottdrule[#1]{%
-\ottpremise{\ottnt{e}  \longrightarrow  \ottnt{e'}}%
+\ottpremise{ \ottnt{e}  \longrightarrow  \ottnt{e'} }%
 }{
- typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow   typeof \  \ottnt{e'}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}} }{%
+  typeof \  \ottnt{e}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow   typeof \  \ottnt{e'}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}  }{%
 {\ottdrulename{step\_typeof}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXtypeofl}[1]{\ottdrule[#1]{%
 \ottpremise{  }%
-\ottpremise{\ottkw{findtype} \, \ottnt{p} \, \ottnt{C}}%
+\ottpremise{ FindType \ \  \ottnt{p}  \ \  \ottnt{C} }%
 \ottpremise{ \ottnt{C}  <:  \ottnt{A} }%
 }{
- typeof \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]}}{%
+  typeof \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]} }{%
 {\ottdrulename{step\_typeofl}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXtypeofr}[1]{\ottdrule[#1]{%
 \ottpremise{  }%
-\ottpremise{\ottkw{findtype} \, \ottnt{p} \, \ottnt{C}}%
+\ottpremise{ FindType \ \  \ottnt{p}  \ \  \ottnt{C} }%
 \ottpremise{ \ottnt{C}  <:  \ottnt{B} }%
 }{
- typeof \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e_{{\mathrm{2}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]}}{%
+  typeof \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ as \  \ottnt{A}  \  \ottnt{e_{{\mathrm{1}}}}  \  \ottnt{B}  \  \ottnt{e_{{\mathrm{2}}}}   \longrightarrow  \ottnt{e_{{\mathrm{2}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]} }{%
 {\ottdrulename{step\_typeofr}}{}%
 }}
 
-\newcommand{\ottdefnstep}[1]{\begin{ottdefnblock}[#1]{$\ottnt{e}  \longrightarrow  \ottnt{e'}$}{\ottcom{Small-step operational semantics}}
+\newcommand{\ottdefnstep}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{e}  \longrightarrow  \ottnt{e'} $}{\ottcom{Small-step operational semantics}}
 \ottusedrule{\ottdrulestepXXint{}}
 \ottusedrule{\ottdrulestepXXbool{}}
 \ottusedrule{\ottdrulestepXXstr{}}
 \ottusedrule{\ottdrulestepXXappl{}}
 \ottusedrule{\ottdrulestepXXappr{}}
 \ottusedrule{\ottdrulestepXXbeta{}}
-\ottusedrule{\ottdrulestepXXabsXXbeta{}}
+\ottusedrule{\ottdrulestepXXabsbeta{}}
 \ottusedrule{\ottdrulestepXXann{}}
-\ottusedrule{\ottdrulestepXXrmXXann{}}
-\ottusedrule{\ottdrulestepXXlamXXann{}}
+\ottusedrule{\ottdrulestepXXrmann{}}
+\ottusedrule{\ottdrulestepXXlamann{}}
 \ottusedrule{\ottdrulestepXXtypeof{}}
 \ottusedrule{\ottdrulestepXXtypeofl{}}
 \ottusedrule{\ottdrulestepXXtypeofr{}}
