@@ -1,40 +1,124 @@
-\section{Intersection Types}
-\label{sec:intersection}
+\section{\cal with Intersection Types}
+\label{sec:inter}
+In this section we add intersection types in \cal to make it more expressive. This section also
+discusses challenges involved in type systems together with intersection and union types.
+Main objective of this section is to give a type safe, coherent, deterministic, sound and complete
+calculus for \cal with intersection types and without merge operator.
 
-\baber{Disjoint Union Types with Intersection Types will be discussed in this section.}
+%%%%%%%%%%%%%%%%%%%%%%%
+%% Syntax and Semantics
+%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Syntax, Subtyping and Semantics}
+\label{sec:inter:system}
+\baber{mainly same as last section. Talk about additional types and expressions. Some emphasis
+on the addition of intersection types.}
+Syntax and semantics for this section follows from \Cref{sec:union} and is shown in \Cref{fig:inter:system}.
 
-\begin{comment}
+\paragraph{Syntax}
+Two additional primitive types are added i.e $[[Bool]]$ for boolean expressions and $[[Str]]$ for strings.
+Significant difference and novelty in this section is because of the addition of intersection types 
+$[[A /\ B]]$. Expressions are extended with boolean expression ($[[b]]$) and string expression ($[[s]]$).
+Similarly, partial expressions are also extended with boolean and string expressions.
+Representation of values stays same as in \Cref{sec:union} except that annotated $[[b]]$ and $[[s]]$
+are also values. Typing conext stays same as in \Cref{sec:union}.
 
-\begin{align*}
-&Type &A, B&::= [[Top]] ~ | ~[[Bot]]~|~ Int ~| ~ Bool ~ |~ Str ~| ~ [[A->B]]~ |~ [[A \/ B]] ~ |~ [[A /\ B]]\\
-&Expr &e &::= x ~|~ n ~| ~ b ~ | ~ s ~| ~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[typeof e as A e1 B e2]]\\
-&PExpr & p &::= n ~| ~ b ~ | ~ s ~|~ [[\x.e : A->B]] \\
-&Value &v &::= p : A \\
-&Context & [[G]] &::= empty~ |~ [[G , x : A]]
-\end{align*}
+\paragraph{Subtyping}
+Additional rules for subtyping are shown in \Cref{fig:inter:system}.
+\Rref{s-bool, s-str} are for primitive $[[Bool]]$ and $[[Str]]$ types respectively.
+\Rref{s-anda, s-andb, s-andc} are for recently added intersection types. \Rref{s-anda} states that
+a type $[[A]]$ is subtype of intersection of two types $[[A1]]$ and $[[A2]]$ only if $[[A]]$ is 
+subtype of both $[[A1]]$ and $[[A2]]$. \Rref{s-andb, s-andc} state that an intersection type 
+$[[A1 /\ A2]]$ is a subtype of some type $[[A]]$ if either of its component types ($[[A1]]$ or $[[A2]]$)
+is subtype of $[[A]]$. \Rref{s-disj} is also a significant addition in subtyping of \cal. It primarily
+makes intersection of disjoint types subtypes of all types. \baber{comparison with Ceylon here.}
+Because two types are disjoint only if they do not share any common primitive subtype.
+This rule also makes \rref{s-bot} redundant and we can safely drop \rref{s-bot}.
+\baber{More discussion on dropping s-bot and lemma at the end of this section.}
 
-     {\renewcommand{\arraystretch}{1.5}
-     \begin{center}
-     \begin{tabular}{|lcll|}
-       \hline
-      DisjSpec & A $*_s$ B & ::= & ~$\forall C, ~ Ord ~ C ~ \rightarrow \neg [[C <: A /\ B]]$\\
-       \hline
-      DisjAlgo & A $*_a$ B & ::= & ~ $(FindSubtypes ~ A) ~ `inter` ~ (FindSubtypes ~ B) = []$ \\
-       \hline
-     \end{tabular}
-     \end{center} }
-\end{comment}
+\paragraph{Typing and Semantics}
+Typing and operational semantics also follow directly from \Cref{sec:union}. Additional typing and
+reduction rules are shown in \Cref{fig:inter:system}.
 
-\begin{lstlisting}[language=Haskell]
-Fixpoint FindSubtypes (A: typ) :=
-    match A with
-    | t_top         => [t_int; t_bool; t_str; t_arrow t_top t_bot; t_top]
-    | t_bot         => []
-    | t_int         => [t_int]
-    | t_bool        => [t_bool]
-    | t_str         => [t_str]
-    | t_arrow A1 B1 => [t_arrow t_top t_bot]
-    | t_union A1 B1 => (FindSubtypes A1) `union` (FindSubtypes B1)
-    | t_and A1 B1   => (FindSubtypes A1) `inter` (FindSubtypes B1)
-    end.
-\end{lstlisting}
+\begin{figure}[t]
+  \begin{small}
+    \centering
+    \begin{tabular}{lrcl} \toprule
+      Types & $[[A]], [[B]]$ & $\Coloneqq$ & $ ... \mid [[Bool]] \mid [[Str]] \mid [[A /\ B]] $ \\
+      Expr & $[[e]]$ & $\Coloneqq$ & $ ... \mid [[b]] \mid [[s]] $\\
+      PExpr & $[[p]]$ & $\Coloneqq$ & $ ... \mid [[b]] \mid [[s]] $\\
+      %Value & $[[v]]$ & $\Coloneqq$ & $[[p:A]]$\\
+      %Context & $[[G]]$ & $\Coloneqq$ & $ empty \mid [[G , x : A]]$ \\
+      \bottomrule
+    \end{tabular}
+  \end{small}
+    \begin{small}
+    \centering
+    \drules[s]{$ [[A <: B ]] $}{Algorithmic Subtyping}{bool, str, anda, andb, andc, disj}
+  \end{small}
+  \begin{small}
+    \centering
+    \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{bool, str}
+  \end{small}
+    \begin{small}
+    \centering
+    \drules[step]{$[[e --> e']]$}{Operational Semantics}{bool, str}
+  \end{small}
+  \begin{small}
+    \centering
+    \drules[findtype]{$[[findtype p A]]$}{FindType}{bool, str}
+  \end{small}
+  \caption{Additional rules for \dut with Intersection Types.}
+  \label{fig:inter:system}
+\end{figure}
+
+%%%%%%%%%%%%%%%%%%%%%%%
+%% Disjointness
+%%%%%%%%%%%%%%%%%%%%%%%
+\subsection{Disjointness}
+\label{sec:inter:disj}
+
+\paragraph{Ordinary Types}
+Declerative disjointness is now defined in terms of ordinary types. Therefore, it is important to understand
+the notion of ordinary types for later sections. \Cref{fig:inter:ord} shows ordinary types.
+
+\paragraph{Declerative Disjointness}
+Declerative disjointness for \cal with intersection types is shown in \Cref{def:inter:disj}.
+
+\begin{definition}
+\label{def:inter:disj}
+  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\rightarrow$ \ $\neg$ \ ($[[C <: A /\ B]]$).
+\end{definition}
+
+\paragraph{Algorithmic Disjointness}
+Algorithmic disjoitness for \cal without intersection types are shown in .... That algorithmic
+disjointness is no longer valid with the addition of intersection types. Therefore, we define a
+new algorithm for disjointness as shown in \Cref{def:inter:ad}.
+\baber{Notation for FindSubtypes.}
+
+\begin{definition}
+\label{def:inter:ad}
+%\texttt{`abc \textasciigrave abc}
+  A $*_a$ B $\Coloneqq$ $FindSubtypes$ A \ {\textasciigrave}\emph{inter}{\textasciigrave} \ $FindSubtypes$ B = [].
+\end{definition}
+
+\begin{figure}[t]
+  \begin{small}
+    \centering
+    \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{top, int, bool, str, arrow}
+  \end{small}
+  \begin{lstlisting}[language=Haskell]
+  Fixpoint FindSubtypes (A: typ) :=
+      match A with
+      | t_top         => [t_int; t_bool; t_str; t_arrow t_top t_bot; t_top]
+      | t_bot         => []
+      | t_int         => [t_int]
+      | t_bool        => [t_bool]
+      | t_str         => [t_str]
+      | t_arrow A1 B1 => [t_arrow t_top t_bot]
+      | t_union A1 B1 => (FindSubtypes A1) `union` (FindSubtypes B1)
+      | t_and A1 B1   => (FindSubtypes A1) `inter` (FindSubtypes B1)
+      end.
+  \end{lstlisting}
+  \caption{Ordinary Types and algorithm to find common Ordinary Subtypes.}
+  \label{fig:inter:ord}
+\end{figure}

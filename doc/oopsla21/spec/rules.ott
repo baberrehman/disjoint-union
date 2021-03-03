@@ -167,7 +167,7 @@ defns
 Ordinary :: '' ::=
   defn
   ordinary A ::  :: ordinary :: 'ord_'
-  {{ tex ord ~ [[A]] }}
+  {{ tex Ord ~ [[A]] }}
   {{ com Ordinary Types }}
   by
 
@@ -226,33 +226,33 @@ defns
 BottomLike :: '' ::=
 
   defn
-  botLike A ::  :: bottomlike :: 'bl_'
+  botlike A ::  :: bottomlike :: 'bl_'
   {{ tex \rfloor [[A]] \lfloor}}
   {{ com Bottom-Like Types }}
   by
 
     -------------------- :: bot
-    botLike Bot
+    botlike Bot
 
-    botLike A
-    botLike B
+    botlike A
+    botlike B
     -------------------------     :: or
-    botLike A \/ B
+    botlike A \/ B
 
 
-    botLike A
+    botlike A
     -------------------------     :: andl
-    botLike A /\ B
+    botlike A /\ B
 
 
-    botLike B
+    botlike B
     -------------------------     :: andr
-    botLike A /\ B
+    botlike A /\ B
 
 
     A * B
     -------------------------     :: andsub
-    botLike A /\ B
+    botlike A /\ B
 
 
 
@@ -273,12 +273,12 @@ Disjointness :: '' ::=
     Bot * A
 
 
-%	botLike A
+%	botlike A
 %	----------------------        :: btml
 %	A * B
 
 
-%	botLike B
+%	botlike B
 %	----------------------        :: btmr
 %	A * B
 

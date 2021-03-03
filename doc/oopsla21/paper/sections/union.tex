@@ -1,4 +1,4 @@
-\section{\dut}
+\section{\dut (\cal)}
 \label{sec:union}
 
 This section discusses a simple version of disjoint union types without intersection types. We propose a type-safe, coherent, sound, complete and deterministic calculus for disjoint union types in this section. Subtyping relation is standard for a system with union types. Calculus discussed in this section and subsequent sections is named as \cal.
@@ -46,7 +46,41 @@ subtype of all types. \Rref{s-int, s-arrow} are standard rules for integers and 
 Functions are contravariant in input types and covariant in output types. \Rref{s-ora, s-orb, s-orc} are
 standard subtyping rules for union types. Union type of two types $A1$ and $A2$ is a subtype of another
 type $A$ if both $A1$ and $A2$ are subtype of $A$, as stated in \rref{s-ora}. \Rref{s-orb, s-orc} state
-that if a type is subtype of part of union type, then it is subtype of whole union type.
+that if a type is subtype of part of union type, then it is subtype of whole union type. Next we show
+subtyping reflexivity and transitivity.
+
+\begin{lemma}[Subtyping Reflexivity]
+\label{lemma:union:refl}
+$\forall$ $[[A]]$, \ $[[A <: A]]$.
+\end{lemma}
+
+\begin{proof}
+  By induction on type A. All cases are trivial to prove.
+\end{proof}
+
+\begin{lemma}[Subtyping Transitivity]
+\label{lemma:union:trans}
+If \ $[[A <: B]]$ \ and \ $[[B <: C]]$ \ then: \ $[[A <: C]]$.
+\end{lemma}
+
+\begin{proof}
+  By induction on type B.
+  \begin{itemize}
+    \item Cases $[[Top]]$, $[[Bot]]$ and $[[Int]]$ are trivial to prove.
+    \item Case $[[A -> B]]$ requires double induction on type $[[C]]$
+          and $[[A]]$.
+    \item Case $[[A \/ B]]$ requires \Cref{lemma:union:sub-or}
+  \end{itemize}
+\end{proof}
+
+\begin{lemma}[Subtyping Union Inversion]
+\label{lemma:union:sub-or}
+  If \ $[[A \/ B <: C]]$ then:
+  \begin{enumerate}
+    \item $[[A <: C]]$ and
+    \item $[[B <: C]]$
+  \end{enumerate}
+\end{lemma}
 
 \begin{figure}[t]
   \begin{small}
@@ -157,26 +191,60 @@ and is shown in lower part of \Cref{fig:union:os}.
 %%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Disjointness}
 \label{sec:union:disj}
+\baber{more details to be added in this section.}
 In this section we discuss in detail the notion of disjointness for union types and case expressions.
 Idea is borrowed from \baber{disjoint intersection types reference.} Two types in \cal are disjoint
-only if they do not share any common subtype. This disjointness is dual to 
+only if the common subtypes are bottom-like. 
+
+\paragraph{Bottom-Like Types}
+It is important to understand the notion of bottom-like types before diving into the details 
+of disjointness. Bottom-like types are shown in \Cref{fig:union:bl}. $[[Bot]]$ is bottom-like 
+type (\rref{bl-bot}) and union of two bottom-like types is also bottom-like (\rref{bl-or}).
+It is trivial to conclude that a union type is bottom-like only if all the primitive types in 
+union are $[[Bot]]$. Bottom-like types hold following properties:
+
+\begin{lemma}[Bottom-Like Soundness]
+\label{lemma:union:bl-soundness}
+  If \ $[[botlike A]]$ \ then: \ $\forall$B, \ $[[A <: B]]$.
+\end{lemma}
+
+\begin{proof}
+  By induction on bottom-like relation.
+  \begin{itemize}
+    \item All cases are trivial to prove.
+  \end{itemize}
+\end{proof}
+
+\begin{lemma}[Bottom-Like Completeness]
+\label{lemma:union:bl-completeness}
+  If \ $\forall$B, \ $[[A <: B]]$ \ then: \ $[[botlike A]]$.
+\end{lemma}
+
+\begin{proof}
+  By induction on type $[[A]]$.
+  \begin{itemize}
+    \item Cases $[[Top]]$, $[[Bot]]$, $[[Int]]$ and $[[A -> B]]$ are trivial to prove.
+    \item Case $[[A \/ B]]$ requires \Cref{lemma:union:sub-or}.
+  \end{itemize}
+\end{proof}
+
+\paragraph{Declarative Disjointness}
+This disjointness is dual to 
 \baber{disjoint intersection types reference.} in which two types are disjoint only if they do not
 share any common supertype or the common supertype is top-like. Since we also have $[[Bot]]$ type
 in \cal, which will always be the common subtype of any two types. So, in \cal two types are
-disjoint only if the common subtype is bottom-like. Bottom-like types are shown in
-\Cref{fig:union:bl}. $[[Bot]]$ is bottom-like type (\rref{bl-bot}) and union of two bottom-like
-types is also bottom-like (\rref{bl-or}). 
+disjoint only if the common subtype is bottom-like.  
 Formal definition for disjoint specifications is given as:
 
 \begin{definition}
 \label{def:union:disj}
-  A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ $\wedge$ $[[C <: B]]$ $\rightarrow$ $[[botLike C]]$
+  A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ $\wedge$ $[[C <: B]]$ $\rightarrow$ $[[botlike C]]$
 \end{definition}
 
 \begin{figure}[t]
   \begin{small}
     \centering
-    \drules[bl]{$[[botLike A]]$}{Bottom-Like Types}{bot, or}
+    \drules[bl]{$[[botlike A]]$}{Bottom-Like Types}{bot, or}
   \end{small}
   \caption{Bottom-Like types for \dut.}
   \label{fig:union:bl}
@@ -198,6 +266,7 @@ $[[A -> B]]$ disjoint types as per \Cref{def:union:disj}.
   \label{fig:union:ad}
 \end{figure}
 
+\paragraph{Algorithmic Disjointness}
 \noindent \Cref{fig:union:ad} shows an algorithmic version of disjointness.
 \Rref{ad-btmr, ad-btml} state that $[[Bot]]$ is disjoint to every type.
 \Rref{ad-intl, intr} state that $[[Int]]$ and $[[A -> B]]$ are disjoint types.
@@ -205,24 +274,46 @@ $[[A -> B]]$ disjoint types as per \Cref{def:union:disj}.
 to union type $[[A \/ B]]$ if $[[C]]$ is disjoint to both $[[A]]$ and $[[B]]$. Next we show
 soundness and completeness for disjointness.
 
-\begin{lemma}[Soundness]
-\label{lemma:union:sound}
+\begin{lemma}[Disjointness Soundness]
+\label{lemma:union:disj-sound}
 $\forall ~ A ~ B, ~[[A * B]] ~ \rightarrow ~ [[A *s B]]$.
 \end{lemma}
 
 \begin{proof}
-By induction on disjointness relation.
-All cases are trivial to prove.
+  By induction on algorithmic disjointness relation.
+  \begin{itemize}
+    \item Cases \rref{ad-btmr, ad-btml, ad-orl, ad-orr} require induction on hypothesis
+          and \Cref{lemma:union:sub-or}.
+    \item Cases \rref{ad-intl, ad-intr} require induction on type and \Cref{lemma:union:sub-or}.
+  \end{itemize}
 \end{proof}
 
-\begin{lemma}[Completeness]
-\label{lemma:union:complete}
+\begin{lemma}[Disjointness Completeness]
+\label{lemma:union:disj-complete}
 $\forall ~ A ~ B, ~[[A *s B]] ~ \rightarrow ~ [[A * B]]$.
 \end{lemma}
 
 \begin{proof}
-By induction on type A.
+  By induction on type A.
+  \begin{itemize}
+    \item Case $[[Top]]$ requires \Cref{lemma:union:bl-disj}.
+    \item Case $[[Bot]]$ is trivial to prove.
+    \item Case $[[Int]]$ requires induction on type B and
+          \Cref{lemma:union:bl-disj,lemma:union:disj-sym}.
+    \item Case $[[A -> B]]$ requires induction on type B and \Cref{lemma:union:disj-sym}.
+    \item Case $[[A \/ B]]$ follows directly from inductive hypothesis.
+  \end{itemize}
 \end{proof}
+
+\begin{lemma}[Bottom-like Types Disjoint]
+\label{lemma:union:bl-disj}
+  If \ $[[botlike A]]$ \ then: \ $[[A * B]]$.
+\end{lemma}
+
+\begin{lemma}[Disjointness Symmetry]
+\label{lemma:union:disj-sym}
+  If \ $[[A * B]]$ \ then: \ $[[B * A]]$.
+\end{lemma}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Type Safety and Determinism
