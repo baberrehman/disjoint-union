@@ -848,6 +848,12 @@ generalize H0 H; clear H0; clear H; generalize A; clear A.
   apply findsubtypes_sub_empty with (A1:=B1) (A2:=B2). auto. auto.
 Defined.
 
+Lemma bot_sub_all : forall A, t_bot <: A.
+Proof.
+  intros.
+  dependent induction A; eauto.
+Qed.
+
 (****************************************)
 (**********  Dijoint Specs    ***********)
 (****************************************)

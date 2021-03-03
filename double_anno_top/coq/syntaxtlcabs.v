@@ -383,7 +383,7 @@ induction A; unfold DisjSpec; intros; eauto.
 - specialize (H B). destruct H. split; eauto.
   constructor.
   apply ad_orr;
-  apply BL_disj; eauto. 
+  apply BL_disj; eauto.
 - induction B; eauto.
   + specialize (H t_int).
     destruct H; eauto.
@@ -465,18 +465,18 @@ Proof.
   intros.
   unfold DisjSpec1 in H.
   unfold DisjSpec. intros.
-  specialize (H C).
   inductions C; eauto.
-  assert (Ord typ_top) by auto.
-  forwards*: H.
-  assert (Ord t_int) by auto.
-  forwards*: H.
-  assert (Ord (t_arrow C1 C2)) by auto.
-  forwards*: H.
-  destruct H0.
-  apply sub_or in H0. destruct H0.
-  apply sub_or in H1. destruct H1.
-  constructor.
-  apply IHC1; intros.
-  unfold not. intros.
-Admitted.
+  - specialize (H typ_top).
+    assert (Ord typ_top) by auto.
+    forwards*: H.
+  - specialize (H t_int).
+    assert (Ord t_int) by auto.
+    forwards*: H.
+  - specialize (H (t_arrow C1 C2)).
+    assert (Ord (t_arrow C1 C2)) by auto.
+    forwards*: H.
+  - destruct H0.
+    apply sub_or in H0. destruct H0.
+    apply sub_or in H1. destruct H1.
+    constructor; auto.
+Qed.
