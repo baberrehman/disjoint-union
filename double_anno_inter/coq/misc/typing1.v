@@ -2,18 +2,8 @@ Require Import TLC.LibLN.
 Require Import syntax.
 
 (*
-This file is created on March 10, 2021
-
-This is the main semantics file for disjoint union types
-with intersection types.
-
-syntax.v is the syntax file for this semantics
-
-This file contains type safety and deterministic lemmas
-associated with syntax.v
-
-Bool and String primitive type
-
+This is the main typing file as of January 08, 2021
+syntax.v is the main syntax file
 *)
 
 (** Gathering free names already used in the proofs *)
@@ -234,8 +224,6 @@ Lemma typing_weakening : forall E F G e dir T,
 Proof.
   introv Typ. gen F. inductions Typ; introv Ok.
   - apply* typ_lit.
-  - apply* typ_bool.
-  - apply* typ_str.
   - apply* typ_var. apply* binds_weaken.
   - apply* typ_ann.
   - apply* typ_app.
@@ -262,8 +250,6 @@ introv TypT TypU.
 lets TypT': TypT.
 inductions TypT; introv; simpl.
  - apply* typ_lit.
- - apply* typ_bool.
- - apply* typ_str.
  - case_var.
   + binds_get H0.
     lets M: (typing_weakening E F empty u infer U).
@@ -324,8 +310,7 @@ Lemma check_or_typ : forall E e A B,
 Proof.
   intros.
   inductions H1; try solve [ inverts* H | inverts* H0 | inverts* H1].
-  inverts H;
-  inverts* H1; inverts* H2.
+  inverts* H. inverts* H1. inverts* H2. inverts* H1. inverts* H2.
 Qed.
 
 Lemma check_pexpr_ann : forall E p A C,
@@ -337,14 +322,6 @@ intros E p A C Prev Typ.
 inductions Prev.
 - inverts Typ. inverts H. inverts H3. inverts H.
   assert (typing E (e_lit i5) infer t_int). eauto.
-  eapply typ_sub; eauto.
-  eapply sub_transitivity; eauto.
-- inverts Typ. inverts H. inverts H3. inverts H.
-  assert (typing E (e_bool b) infer t_bool). eauto.
-  eapply typ_sub; eauto.
-  eapply sub_transitivity; eauto.
-- inverts Typ. inverts H. inverts H3. inverts H.
-  assert (typing E (e_str s) infer t_str). eauto.
   eapply typ_sub; eauto.
   eapply sub_transitivity; eauto.
 - inverts Typ. inverts H0. inverts H4. inverts H0.
@@ -386,12 +363,6 @@ Proof.
 intros G p A Prev Typ.
 inductions Prev.
 - exists t_int. constructor. constructor.
-  apply typing_regular in Typ. destruct~ Typ.
-  dependent destruction Typ. dependent destruction Typ. auto.
-- exists t_bool. constructor. constructor.
-  apply typing_regular in Typ. destruct~ Typ.
-  dependent destruction Typ. dependent destruction Typ. auto.
-- exists t_str. constructor. constructor.
   apply typing_regular in Typ. destruct~ Typ.
   dependent destruction Typ. dependent destruction Typ. auto.
 - dependent destruction Typ.
@@ -489,7 +460,6 @@ Proof.
       forwards*: typing_through_subst_ee.
       rewrite* (@subst_ee_intro y).
       forwards*: typing_regular H6.
-      inverts H2.
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
@@ -501,14 +471,6 @@ Proof.
       rewrite H7.
       dependent destruction H12.
       * assert (typing G (e_lit i5) infer t_int). apply typ_lit.
-        forwards*: typing_regular Typ.
-        forwards*: typing_through_subst_ee.
-        rewrite* (@subst_ee_intro y).
-      * assert (typing G (e_bool b) infer t_bool). apply typ_bool.
-        forwards*: typing_regular Typ.
-        forwards*: typing_through_subst_ee.
-        rewrite* (@subst_ee_intro y).
-      * assert (typing G (e_str s) infer t_str). apply typ_str.
         forwards*: typing_regular Typ.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
@@ -529,14 +491,6 @@ Proof.
         forwards*: typing_regular Typ.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
-      * assert (typing G (e_bool b) infer t_bool). apply typ_bool.
-        forwards*: typing_regular Typ.
-        forwards*: typing_through_subst_ee.
-        rewrite* (@subst_ee_intro y).
-      * assert (typing G (e_str s) infer t_str). apply typ_str.
-        forwards*: typing_regular Typ.
-        forwards*: typing_through_subst_ee.
-        rewrite* (@subst_ee_intro y).
       * assert (typing G (e_ann (e_abs e) (t_arrow A0 B0)) infer (t_arrow A0 B0)). apply typ_ann.
         do 4 dependent destruction Typ. auto.
         forwards*: typing_through_subst_ee.
@@ -554,12 +508,9 @@ Proof.
   clear st. gen_eq E: (@empty typ).  gen U1 U2.
   induction Typ; introv EQT EQE;
    try solve [ inverts* Val | inversion EQT | eauto ].
-  - inverts EQT. inverts H0.
-  - inverts EQT. inverts H0.
-  - inverts EQT. inverts H0.
-  - subst. assert (B <: (t_arrow U1 U2)). {
+    subst. assert (B <: (t_arrow U1 U2)). {
     eapply sub_transitivity. apply H. apply EQT. }
-    eapply IHTyp. apply Val. apply H0. auto.
+   eapply IHTyp. apply Val. apply H0. reflexivity.
 Qed.
 
 Lemma canonical_form_abs_value : forall t U1 U2,
@@ -573,19 +524,12 @@ Proof.
   clear st. gen_eq E: (@empty typ).  gen U1 U2.
   induction Typ; introv EQT EQE;
    try solve [ inverts* Val | inverts* EQT ].
-  - inverts* Val. inverts* H0.
-   + inverts* Typ. inverts* H.
-     eapply sub_transitivity in EQT; eauto. inversion EQT.
-     inverts H.
-   + inverts* Typ. inverts* H.
-     eapply sub_transitivity in EQT; eauto. inversion EQT.
-     inverts H.
-   + inverts* Typ. inverts* H.
-     eapply sub_transitivity in EQT; eauto. inversion EQT.
-     inverts H.
-  - subst. assert (B <: (t_arrow U1 U2)). {
+   inverts* Val. inverts* H0.
+   inverts* Typ. inverts* H.
+   eapply sub_transitivity in EQT; eauto. inversion EQT.
+    subst. assert (B <: (t_arrow U1 U2)). {
     eapply sub_transitivity. apply H. apply EQT. }
-    eapply IHTyp. apply Val. apply H0. reflexivity.
+   eapply IHTyp. apply Val. apply H0. reflexivity.
 Qed.
 
 Lemma check_both_disj_false : forall E e A B,
@@ -595,20 +539,19 @@ Lemma check_both_disj_false : forall E e A B,
 Proof.
   intros.
   inductions H; try solve [ inverts* H | inverts* H0 | inverts* H2].
- - inverts H1. inverts H. inverts H2. inverts H.
-   unfold DisjSpec in H0. specialize (H0 t_int).
-   forwards*: H0.
- - inverts H1. inverts H. inverts H2. inverts H.
-   unfold DisjSpec in H0. specialize (H0 t_bool).
-   forwards*: H0.
- - inverts H1. inverts H. inverts H2. inverts H.
-   unfold DisjSpec in H0. specialize (H0 t_str).
-   forwards*: H0.
- - inverts H1. inverts H3. inverts H2. inverts H1.
-   unfold DisjSpec in H0.
-   specialize (H0 (t_arrow A0 B0)).
-   forwards*: H0.
+  inverts H1. inverts H. inverts H2. inverts H.
+  unfold DisjSpec in H0. specialize (H0 t_int).
+  forwards*: H0.
+  unfold btmLikeSpec in H. unfold not in H.
+  specialize (H t_int). forwards*: H.
+  inverts H1. inverts H3. inverts H2. inverts H1.
+  unfold DisjSpec in H0.
+  specialize (H0 (t_arrow A0 B0)).
+  forwards*: H0.
+  unfold btmLikeSpec in H1. unfold not in H1.
+  forwards*: H1.
 Qed.
+
 
 Lemma not_expr : forall e t, ~ value (e_ann e t) -> ~ pexpr e.
 Proof.
@@ -617,12 +560,11 @@ unfold not. intros.
 unfold not in H. apply* H.
 Qed.
 
+
 Lemma val_pexpr : forall e, lc_exp e -> ~ value e -> pexpr e \/ ~ pexpr e.
 Proof.
 introv lc. intros.
 inductions e; try solve [right; unfold not; intros; inversion H0].
-- left*.
-- left*.
 - left*.
 - inductions e; try solve [right; unfold not; intros; inverts H0].
   destruct~ IHe0. inversion lc. subst. auto. unfold not. intros. inversion H0.
@@ -640,8 +582,6 @@ try solve [right; unfold not; intros; inversion H].
 destruct~ IHe. inverts* lc.
 - inverts* H. inverts* H0.
  + right. unfold not. intros. inversion H. subst. inversion H1.
- + right. unfold not. intros. inversion H. subst. inversion H1.
- + right. unfold not. intros. inversion H. subst. inversion H1.
  + right. unfold not. intros. inverts H0. inversion H2.
 - apply val_pexpr in H.
   destruct~ H. right. unfold not. intros.
@@ -655,8 +595,6 @@ typing empty e dir T -> (value e) \/ (exists e', e --> e') \/
 Proof.
 introv Typ. gen_eq E: (@empty typ). lets Typ': Typ.
 inductions Typ; intros EQ; subst.
- - right*.
- - right*.
  - right*.
  - apply binds_empty_inv in H0. inversion H0.
  - destruct* IHTyp.
@@ -695,9 +633,7 @@ inductions Typ; intros EQ; subst.
  - destruct* IHTyp1.
   + destruct* IHTyp2.
    * inverts* H.
-    inverts* H1. inverts Typ1. inverts H2. inverts H. inversion H1. inverts H.
-    inverts Typ1. inverts H2. inverts H. inversion H1. inverts H.
-    inverts Typ1. inverts H2. inverts H. inversion H1. inverts H.
+    inverts* H1. inverts Typ1. inverts H2. inverts H. inversion H1.
     inverts Typ1.
     inverts* H0.
    * destruct H0.
@@ -710,9 +646,6 @@ inductions Typ; intros EQ; subst.
      lets H3': H3.
      inverts H0; try solve [inversion H3].
      inverts H; try solve [inversion H3 | inversion H2].
-     inverts H2. inverts H.
-     inverts H2. inverts H.
-     inverts H2. inverts H.
      inverts H3.
      right. left.
      exists* (e_ann (e_ann (open_exp_wrt_exp e (e_ann (e_ann (e_abs x) A) A0)) B1) B). }
@@ -762,59 +695,46 @@ Proof.
   induction He1; introv Typ He2.
   - inverts* He2.
   - inverts* He2.
-  - inverts* He2.
-  - inverts* He2.
    + inverts Typ. inverts H0. eapply typ_sub with (A:=(t_arrow A0 B)) in H7; eauto.
      forwards*: IHHe1. rewrite* H0.
    + inverts* H2. inverts* H0. 
-    * inverts* He1. assert (value (e_ann (e_lit i5) A0)) by auto. contradiction.
-    * inverts* He1. assert (value (e_ann (e_bool b) A0)) by auto. contradiction.
-    * inverts* He1. assert (value (e_ann (e_str s) A0)) by auto. contradiction.
-    * inverts* He1.
-      assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B)) A0)) by auto.
-      contradiction.
-      inverts H6.
-   + inverts* He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
-     contradiction.
+    * inverts* He1. unfold not in H2. 
+      assert (value (e_ann (e_lit i5) A0)). eauto.
+      apply H2 in H0. inversion H0.
+    * inverts* He1. unfold not in H3.
+      assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B)) A0)). eauto.
+      apply H3 in H0. inversion H0.
+      inverts* H6.
+   + inverts* He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))). eauto.
+     unfold not in H3. apply H3 in H0. inversion H0.
      inverts* H6.
    + inverts* He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))). auto.
-     contradiction.
+     unfold not in H3. apply H3 in H0. inversion H0.
      inversion H5. 
   - inverts* He2.
-   + inverts* H. inverts* H0. 
-    * inverts* H4. assert (value (e_ann (e_lit i5) A0)) by auto.
-     contradiction.
-    * inverts* H4. assert (value (e_ann(e_bool b) A0)). auto.
-     contradiction.
-    * inverts* H4. assert (value (e_ann (e_str s) A0)) by auto. 
-      contradiction.
-    * inverts* H4. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A1 B)) A0)) by auto.
-      contradiction.
+   + inverts* H. inverts* H0. inverts* H4.
+     assert (value (e_ann (e_lit i5) A0)). eauto.
+     unfold not in H1. apply H1 in H. inversion H.
+     inverts* H4. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A1 B)) A0)) by auto.
+     unfold not in H3.
+     apply H3 in H0. inversion H0.
      inversion H6.
    + inverts Typ. inverts H0. forwards*: IHHe1 H8. rewrite* H0.
-   + inverts H4. 
-    * inverts He1.
+   + inverts H4. inverts He1.
      assert (value (e_ann (e_lit i5) C)) by auto.
      unfold not in H3. apply H3 in H0. inversion H0.
-    * inverts He1. assert (value (e_ann (e_bool b) C)). auto.
-     contradiction.
-    * inverts* He1. assert (value (e_ann (e_str s) C)) by auto. 
-      contradiction.
-    * inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A0 B)) C)) by auto.
-     contradiction.
+     inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A0 B)) C)) by auto.
+     unfold not in H4. apply H4 in H1. inversion H1.
      inversion H6.
    + inverts He1.     
   - inverts* He2.
    + inverts* H5. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
      unfold not in H4. apply H4 in H1. inversion H1.
      inversion H7.
-   + inverts* H0. 
-    * inverts H5.
-      assert (value (e_ann (e_lit i5) C)) by auto. contradiction.
-    * inverts H5. assert (value (e_ann (e_bool b) C)). auto.
-      contradiction.
-    * inverts* H5. assert (value (e_ann (e_str s) C)) by auto. contradiction.
-    * inverts* H5. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A0 B)) C)) by auto.
+   + inverts* H0. inverts* H5.
+     assert (value (e_ann (e_lit i5) C)) by auto.
+     unfold not in H2. apply H2 in H0. inversion H0.
+     inverts* H5. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A0 B)) C)) by auto.
      unfold not in H4. apply H4 in H0. inversion H0.
      inversion H7.
    + inversion H9.
@@ -827,104 +747,71 @@ Proof.
   - inverts* He2.
    + inverts Typ. inverts H0.
      forwards*: IHHe1. rewrite* H0.
-   + inverts* H3. 
-    * inverts He1.
-     assert (value (e_ann (e_lit i5) A1)) by auto. contradiction.
-    * inverts He1.
-     assert (value (e_ann (e_bool b) A1)) by auto. contradiction.
-    * inverts* He1. 
-    assert (value (e_ann (e_str s) A1)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A2 B)) A1)) by auto.
-     contradiction.
+   + inverts* H3. inverts* He1.
+     assert (value (e_ann (e_lit i5) A1)) by auto.
+     unfold not in H2. apply H2 in H0. inversion H0.
+     inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A2 B)) A1)) by auto.
+     unfold not in H3. apply H3 in H1. inversion H1.
      inversion H5.
    + inverts* He1. 
-  - inverts* He2. inverts H. 
-   * inverts H4.
-    assert (value (e_ann (e_lit i5) A)) by auto. contradiction.
-   * inverts H4. assert (value (e_ann (e_bool b) A)) by auto. contradiction.
-   * inverts* H4. assert (value (e_ann (e_str s) A)) by auto. contradiction.
-   * inverts H4. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) A)) by auto.
+  - inverts* He2. inverts H. inverts H4.
+    assert (value (e_ann (e_lit i5) A)) by auto.
+    unfold not in H1. apply H1 in H. inversion H.
+    inverts H4. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) A)) by auto.
     unfold not in H3. apply H3 in H. inversion H.
     inversion H6.
   - inverts* He2. inversion H4.  
   - inverts* He2.
   + inverts Typ. inverts H0.
     forwards*: IHHe1 H5. rewrite* H0.
-  + inverts* H8.
-   * inverts He1. assert (value (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+  + inverts* H8. inverts He1.
+    assert (value (e_ann (e_lit i5) D)) by auto.
+    unfold not in H2.
+    apply H2 in H0. inversion H0.
+    inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
     unfold not in H3. apply H3 in H1. inversion H1.
     inversion H5.
-  + inverts H8. 
-   * inverts He1.
-    assert (value (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts He1.
-    assert (value (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts He1. 
-    assert (value (e_ann (e_str s) D)) by auto. contradiction.     
-   * inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+  + inverts H8. inverts He1.
+    assert (value (e_ann (e_lit i5) D)) by auto.
+    unfold not in H2. apply H2 in H0. inversion H0.
+    inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
     unfold not in H3. apply H3 in H1. inversion H1.
     inversion H5.
  - inverts* He2.
-  + inverts H0. 
-   * inverts H10. assert (value (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_str s) D)) by auto. contradiction.    
-   * inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+  + inverts H0. inverts H10. assert (value (e_ann (e_lit i5) D)) by auto.
+    unfold not in H4. apply H4 in H0. inversion H0.
+    inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
     unfold not in H5. apply H5 in H0. inversion H0.
     inversion H7.
   + inverts Typ. inverts H3.
     forwards*: typing_regular. destruct H3.
-    inverts* H1. 
-   * inverts H12.
+    inverts* H1. inverts H12.
     assert (typing E (e_lit i5) check A); eauto.
     assert (typing E (e_lit i5) check B); eauto.
     forwards*: check_both_disj_false H1 H5.
-    * inverts H12.
-    assert (typing E (e_bool b) check A); eauto.
-    assert (typing E (e_bool b) check B); eauto.
-    forwards*: check_both_disj_false H1 H5.
-    * inverts H12.
-    assert (typing E (e_str s) check A); eauto.
-    assert (typing E (e_str s) check B); eauto.
-    forwards*: check_both_disj_false H1 H5.
-    * inverts H12.
+    inverts H12.
     unfold DisjSpec in H17. specialize (H17 (t_arrow A1 B0)).
     forwards*: H17.
-    unfold not in H1.
+    unfold btmLikeSpec in H1. unfold not in H1.
     forwards*: H1.
  - inverts* He2.
-  + inverts H1. 
-   * inverts H10. assert (value (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+  + inverts H1. inverts H10. assert (value (e_ann (e_lit i5) D)) by auto.
+    unfold not in H4. apply H4 in H1. inversion H1.
+    inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
     unfold not in H5. apply H5 in H1. inversion H1.
     inversion H7.
   + inverts Typ. inverts H3.
     forwards*: typing_regular. destruct H3.
-    inverts* H1. 
-   * inverts H12.
+    inverts* H1. inverts H12.
     unfold DisjSpec in H17. specialize (H17 t_int).
     forwards*: H17.
-    unfold not in H1.
-    forwards*: H1.
-    * inverts H12.
-    unfold DisjSpec in H17. specialize (H17 t_bool).
-    forwards*: H17.
-    unfold not in H1.
-    forwards*: H1.
-    * inverts H12.
-    unfold DisjSpec in H17. specialize (H17 t_str).
-    forwards*: H17.
-    unfold not in H1.
-    forwards*: H1.
-   * inverts H12.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 t_int). forwards*: H1.
+    inverts H12.
     unfold DisjSpec in H17. specialize (H17 (t_arrow A1 B0)).
     forwards*: H17.
-    unfold not in H1.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 (t_arrow A1 B0)).
     forwards*: H1.
 Qed.
 
@@ -935,17 +822,15 @@ Proof.
   introv Typ He1. gen e2 A dir.
   induction He1; introv Typ He2.
   - inverts* He2.
-  - inverts* He2. 
-  - inverts* He2.
   - inverts* He2.
    + inverts Typ.
      forwards*: IHHe1. rewrite* H0.
      inverts H0. eapply typ_sub with (A:=(t_arrow A0 B)) in H7; eauto.
      forwards*: IHHe1. rewrite* H0.
    + inverts* H2. inverts* H0. 
-    * inverts He1. assert (value (e_ann (e_lit i5) A0)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_bool b) A0)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_str s) A0)) by auto. contradiction.
+    * inverts* He1. unfold not in H2. 
+      assert (value (e_ann (e_lit i5) A0)). eauto.
+      apply H2 in H0. inversion H0.
     * inverts* He1. unfold not in H3.
       assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B)) A0)). eauto.
       apply H3 in H0. inversion H0.
@@ -957,37 +842,31 @@ Proof.
      unfold not in H3. apply H3 in H0. inversion H0.
      inversion H5.  
   - inverts* He2.
-   + inverts* H. inverts* H0. 
-    * inverts* H4.
-     assert (value (e_ann (e_lit i5) A0)) by auto. contradiction.
-    * inverts H4. assert (value (e_ann (e_bool b) A0)) by auto. contradiction.
-    * inverts H4. assert (value (e_ann (e_str s) A0)) by auto. contradiction.
-    * inverts* H4. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A1 B)) A0)) by auto.
+   + inverts* H. inverts* H0. inverts* H4.
+     assert (value (e_ann (e_lit i5) A0)). eauto.
+     unfold not in H1. apply H1 in H. inversion H.
+     inverts* H4. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A1 B)) A0)) by auto.
      unfold not in H3.
      apply H3 in H0. inversion H0.
      inversion H6.
    + inverts Typ.
      forwards*: IHHe1 H8. rewrite* H0.
      inverts H0. forwards*: IHHe1 H8. rewrite* H0.
-   + inverts H4. 
-    * inverts He1.
-     assert (value (e_ann (e_lit i5) C)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_bool b) C)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_str s) C)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A0 B)) C)) by auto.
+   + inverts H4. inverts He1.
+     assert (value (e_ann (e_lit i5) C)) by auto.
+     unfold not in H3. apply H3 in H0. inversion H0.
+     inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A0 B)) C)) by auto.
      unfold not in H4. apply H4 in H1. inversion H1.
      inversion H6.
    + inversion He1.    
   - inverts* He2.
    + inverts* H5. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
-     contradiction.
+     unfold not in H4. apply H4 in H1. inversion H1.
      inversion H7.
-   + inverts* H0. 
-    * inverts* H5.
-     assert (value (e_ann (e_lit i5) C)) by auto. contradiction.
-    * inverts H5. assert (value (e_ann (e_bool b) C)) by auto. contradiction.
-    * inverts H5. assert (value (e_ann (e_str s) C)) by auto. contradiction.
-    * inverts* H5. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A0 B)) C)) by auto.
+   + inverts* H0. inverts* H5.
+     assert (value (e_ann (e_lit i5) C)) by auto.
+     unfold not in H2. apply H2 in H0. inversion H0.
+     inverts* H5. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A0 B)) C)) by auto.
      unfold not in H4. apply H4 in H0. inversion H0.
      inversion H7.
    + inversion H9.
@@ -1002,97 +881,71 @@ Proof.
      forwards*: IHHe1. rewrite* H0.
      inverts H0.
      forwards*: IHHe1. rewrite* H0.
-   + inverts* H3. 
-    * inverts* He1.
-     assert (value (e_ann (e_lit i5) A1)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_bool b) A1)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_str s) A1)) by auto. contradiction.
-    * inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A2 B)) A1)) by auto.
+   + inverts* H3. inverts* He1.
+     assert (value (e_ann (e_lit i5) A1)) by auto.
+     unfold not in H2. apply H2 in H0. inversion H0.
+     inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A2 B)) A1)) by auto.
      unfold not in H3. apply H3 in H1. inversion H1.
      inversion H5.
    + inverts* He1. 
-  - inverts* He2. inverts H. 
-   + inverts H4. assert (value (e_ann (e_lit i5) A)) by auto. contradiction.
-   + inverts H4. assert (value (e_ann (e_bool b) A)) by auto. contradiction.
-   + inverts H4. assert (value (e_ann (e_str s) A)) by auto. contradiction.
-   + inverts H4. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) A)) by auto.
+  - inverts* He2. inverts H. inverts H4.
+    assert (value (e_ann (e_lit i5) A)) by auto.
+    unfold not in H1. apply H1 in H. inversion H.
+    inverts H4. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) A)) by auto.
     unfold not in H3. apply H3 in H. inversion H.
     inversion H6.
   - inverts* He2. inversion H4.  
   - inverts* He2.
   + inverts Typ. inverts H0.
     forwards*: IHHe1 H10. rewrite* H0.
-  + inverts* H8. 
-   * inverts He1. assert (value (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+  + inverts* H8. inverts He1.
+    assert (value (e_ann (e_lit i5) D)) by auto.
+    unfold not in H2.
+    apply H2 in H0. inversion H0.
+    inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
     unfold not in H3. apply H3 in H1. inversion H1.
     inversion H5.
-  + inverts H8. 
-   * inverts He1. assert (value (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+  + inverts H8. inverts He1.
+    assert (value (e_ann (e_lit i5) D)) by auto.
+    unfold not in H2. apply H2 in H0. inversion H0.
+    inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
     unfold not in H3. apply H3 in H1. inversion H1.
     inversion H5.
  - inverts* He2.
-  + inverts H0. 
-   * inverts H10. assert (value (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+  + inverts H0. inverts H10. assert (value (e_ann (e_lit i5) D)) by auto.
+    unfold not in H4. apply H4 in H0. inversion H0.
+    inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
     unfold not in H5. apply H5 in H0. inversion H0.
     inversion H7.
   + inverts Typ. inverts H3.
     forwards*: typing_regular. destruct H3.
-    inverts* H1. 
-   * inverts H12.
+    inverts* H1. inverts H12.
     assert (typing E (e_lit i5) check A); eauto.
     assert (typing E (e_lit i5) check B); eauto.
     forwards*: check_both_disj_false H1 H5.
-   * inverts H12.
-    assert (typing E (e_bool b) check A); eauto.
-    assert (typing E (e_bool b) check B); eauto.
-    forwards*: check_both_disj_false H1 H5.
-    * inverts H12.
-    assert (typing E (e_str s) check A); eauto.
-    assert (typing E (e_str s) check B); eauto.
-    forwards*: check_both_disj_false H1 H5.
-   * inverts H12.
+    inverts H12.
     unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
     forwards*: H18.
-    unfold not in H1.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 (t_arrow A1 B0)).
     forwards*: H1.
  - inverts* He2.
-  + inverts H1. 
-   * inverts H10. assert (value (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+  + inverts H1. inverts H10. assert (value (e_ann (e_lit i5) D)) by auto.
+    unfold not in H4. apply H4 in H1. inversion H1.
+    inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
     unfold not in H5. apply H5 in H1. inversion H1.
     inversion H7.
   + inverts Typ. inverts H3.
     forwards*: typing_regular. destruct H3.
-    inverts* H1. 
-   * inverts H12.
+    inverts* H1. inverts H12.
     unfold DisjSpec in H18. specialize (H18 t_int).
     forwards*: H18.
-    unfold not in H1.
-    forwards*: H1.
-    * inverts H12.
-    unfold DisjSpec in H18. specialize (H18 t_bool).
-    forwards*: H18.
-    unfold not in H1.
-    forwards*: H1.
-    * inverts H12.
-    unfold DisjSpec in H18. specialize (H18 t_str).
-    forwards*: H18.
-    unfold not in H1.
-    forwards*: H1.
-   * inverts H12.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 t_int). forwards*: H1.
+    inverts H12.
     unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
     forwards*: H18.
-    unfold not in H1.
+    unfold btmLikeSpec in H1. unfold not in H1.
+    specialize (H1 (t_arrow A1 B0)).
     forwards*: H1.
 Qed.

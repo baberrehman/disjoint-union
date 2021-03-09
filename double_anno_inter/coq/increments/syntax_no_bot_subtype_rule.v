@@ -1362,6 +1362,26 @@ longer way to prove completeness:
   *)
 Qed.
 
+Lemma Disj_completeness3 : forall A B,  A *s B -> A *a B.
+Proof.
+  intros.
+  unfold DisjSpec in H. unfold not in H.
+  unfold DisjAlgo.
+  eapply not_in5.
+  apply demorgan5. unfold not. intros.
+  destruct H0 as [H1 | [H1 | [H1 | [H1 | H1]]]];
+  lets H1': H1;
+  apply elem_in_findsubtypes_sub in H1';
+  lets H1'': H1;
+  apply elem_in_findsubtypes_ord in H1''.
+  eapply H; eauto.
+  eapply H; eauto.
+  eapply H; eauto.
+  eapply H; eauto.
+  eapply H; eauto.
+Qed.
+
+
 (* defns Typing *)
 Inductive typing : env -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
  | typ_lit : forall (G:env) i5,

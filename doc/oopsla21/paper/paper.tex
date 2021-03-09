@@ -42,6 +42,8 @@
 %for cref -- celever referencing
 \usepackage{cleveref}
 
+\usepackage{amsbsy}
+
 \definecolor{codegreen}{rgb}{0,0.6,0}
 \definecolor{codegray}{rgb}{0.5,0.5,0.5}
 \definecolor{codepurple}{rgb}{0.58,0,0.82}
@@ -83,9 +85,9 @@
 \newcommand\bruno[1]{\mynote{Bruno}{red}{#1}}
 \newcommand\baber[1]{\mynote{Baber}{blue}{#1}}
 
-\newcommand{\name}{\textsf{Disjoint Union Types}\xspace}
-\newcommand{\dut}{\textsf{Disjoint Union Types}\xspace}
-\newcommand{\cal}{$\lambda^{*}_{\vee}$\xspace}
+\newcommand{\name}{\textsf{Union Types with Disjoint Case Expression}\xspace}
+%\newcommand{\dut}{\textsf{Disjoint Union Types}\xspace}
+\newcommand{\cal}{$\lambda_{u}$\xspace}
 \newcommand{\typeof}{$typeof$\xspace}
 \newcommand{\Typeof}{$Typeof$\xspace}
 
@@ -95,14 +97,22 @@
 %% Bibliography style
 \bibliographystyle{plainurl}% the mandatory bibstyle
 
-\title{Disjoint Union Types With Intersection Types}
+\title{\name}
 
 \author{Neo Morpheus Matrix}
 
 \begin{document}
 
 \begin{abstract}
-Type system plays fundamental role to capture nonsensical program expressions at compile time. This often also refers as removing type erros statically at compile time. Since the type system defines statics of programs. A more robust type system captures more errors at compile time. This gives a guarrantee that certain type errors will not occur at runtime. With advance types such as intersection types and union types, it has become a challenge to define a robust, coherent, and deterministic type system. One often has to compromise on one feature to attain another. This study proposes a novel type system for pattern matching with disjoint union types and intersection types. \baber{few more lines for abstract.}
+Type system plays fundamental role to capture nonsensical program expressions at compile time in a
+programming language. This often also refers as removing type erros statically at compile time. 
+Since the type system defines statics of programs. A more robust type system captures more errors 
+at compile time. This gives a guarrantee that certain type errors will not occur at runtime.
+With advance types such as intersection types and union types, it has become a challenge to define a 
+robust, type-safe, coherent and deterministic type system. 
+One often has to compromise on one property to attain another. This study proposes a novel calculus
+with all aforementioned properties for union types with disjoint case expression and with 
+intersection types. \baber{few more lines for abstract.}
 \end{abstract}
 
 \maketitle
@@ -123,6 +133,8 @@ Type system plays fundamental role to capture nonsensical program expressions at
 \input{sections/overview.mng}
 \input{sections/union.mng}
 \input{sections/intersection.mng}
+\input{sections/related}
+\input{sections/conclusion}
 
 \bibliography{paper}
 

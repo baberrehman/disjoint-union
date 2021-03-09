@@ -53,8 +53,7 @@ grammar
 
   ctx, G {{ tex \Gamma }} :: 'ctx_' ::=    {{ com typing context }}
                                            {{ coq list ( atom * typ ) }}
-    | []                   ::  :: empty    {{ coq nil }}
-                                           {{ tex \cdot }}
+    | []                   ::  :: empty    {{ coq nil }} {{ tex \cdot }}
     | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
     | G , x : A , G1       ::  :: conss
     | G , G1               ::  :: consss
@@ -157,9 +156,19 @@ defns
 FindSubTypes :: '' ::=
   
   defn
-  findsubtypes A ::   :: findsubtypes :: 'findsubtype_'
-  {{ tex FindSubTypes ~ [[A]] = [] }}
+  findsubtypes A ::   :: fs :: 'fs_'
+  {{ tex |[[A]]| }}
   {{ com FindSubTypes }}
+  by
+
+
+%% FindSubTypesEmpty needed for disj subtyping rule
+defns
+FindSubTypesEmpty :: '' ::=
+  
+  defn
+  findsubtypesempty A ::   :: fse :: 'fse_'
+  {{ tex |[[A]]| = [] }}
   by
 
 
@@ -392,7 +401,7 @@ Subtyping :: '' ::=
     -------------------------     :: andc
     A1 /\ A2 <: A
 
-    findsubtypes A
+    findsubtypesempty A
     -------------------------      :: disj
     A <: B
 

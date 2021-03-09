@@ -1,12 +1,4 @@
 -R . Top
 LibTactics.v
-syntax_algo_list_sub_disj_bool_string.v
-syntax_algo_list_sub_disj_bool.v
-syntax_algo_list_sub_disj.v
-syntax_no_bot_subtype_rule.v
 syntax.v
-typing_algo_list_sub_disj_bool_string.v
-typing_algo_list_sub_disj_bool.v
-typing_algo_list_sub_disj.v
-typing_no_bot_subtype_rule.v
 typing.v

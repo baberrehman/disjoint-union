@@ -5,7 +5,8 @@ MAIN = paper
 
 RULESFILE = ott-rules.tex
 
-AUTOGEN = sections/introduction.mng sections/overview.mng sections/union.mng sections/intersection.mng
+AUTOGEN = sections/introduction.mng sections/overview.mng sections/union.mng sections/intersection.mng sections/related.mng \
+          sections/conclusion.mng
 
 all: $(MAIN).pdf
 

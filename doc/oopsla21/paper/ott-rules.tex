@@ -173,14 +173,24 @@
 \ottdefnfindtype{}}
 
 % defns FindSubTypes
-%% defn findsubtypes
+%% defn fs
 
-\newcommand{\ottdefnfindsubtypes}[1]{\begin{ottdefnblock}[#1]{$ FindSubTypes ~  \ottnt{A}  = [] $}{\ottcom{FindSubTypes}}
+\newcommand{\ottdefnfs}[1]{\begin{ottdefnblock}[#1]{$ | \ottnt{A} | $}{\ottcom{FindSubTypes}}
 \end{ottdefnblock}}
 
 
 \newcommand{\ottdefnsFindSubTypes}{
-\ottdefnfindsubtypes{}}
+\ottdefnfs{}}
+
+% defns FindSubTypesEmpty
+%% defn fse
+
+\newcommand{\ottdefnfse}[1]{\begin{ottdefnblock}[#1]{$ | \ottnt{A} | = [] $}{}
+\end{ottdefnblock}}
+
+
+\newcommand{\ottdefnsFindSubTypesEmpty}{
+\ottdefnfse{}}
 
 % defns Ordinary
 %% defn ordinary
@@ -384,7 +394,7 @@
 
 
 \newcommand{\ottdruleadXXdisjl}[1]{\ottdrule[#1]{%
-\ottpremise{ FindSubTypes ~  \ottsym{(}  \ottnt{A}  \wedge  \ottnt{B}  \ottsym{)}  = [] }%
+\ottpremise{ | \ottsym{(}  \ottnt{A}  \wedge  \ottnt{B}  \ottsym{)} | }%
 }{
  \ottnt{A}  *_a  \ottnt{B} }{%
 {\ottdrulename{ad\_disjl}}{}%
@@ -392,7 +402,7 @@
 
 
 \newcommand{\ottdruleadXXdisjr}[1]{\ottdrule[#1]{%
-\ottpremise{ FindSubTypes ~  \ottsym{(}  \ottnt{B}  \wedge  \ottnt{A}  \ottsym{)}  = [] }%
+\ottpremise{ | \ottsym{(}  \ottnt{B}  \wedge  \ottnt{A}  \ottsym{)} | }%
 }{
  \ottnt{A}  *_a  \ottnt{B} }{%
 {\ottdrulename{ad\_disjr}}{}%
@@ -514,7 +524,7 @@
 
 
 \newcommand{\ottdrulesXXdisj}[1]{\ottdrule[#1]{%
-\ottpremise{ FindSubTypes ~  \ottnt{A}  = [] }%
+\ottpremise{ | \ottnt{A} | = [] }%
 }{
  \ottnt{A}  <:  \ottnt{B} }{%
 {\ottdrulename{s\_disj}}{}%
@@ -764,6 +774,7 @@
 \ottdefnsValue
 \ottdefnsFindType
 \ottdefnsFindSubTypes
+\ottdefnsFindSubTypesEmpty
 \ottdefnsOrdinary
 \ottdefnsDisjointnessSpec
 \ottdefnsBottomLikeSpec
