@@ -1338,31 +1338,6 @@ Proof.
  - exists t_str. split*.
  - exists (t_arrow t_top t_bot). split*.
  - exists t_top. split*.
-(* 
-
-longer way to prove completeness:
-
-- lets H1': H1.
-  apply elem_in_findsubtypes_sub in H1'.
-  lets H1'': H1.
-  apply elem_in_findsubtypes_ord in H1''.
-  apply H. exists t_bool. split*.
-- lets H1': H1.
-  apply elem_in_findsubtypes_sub in H1'.
-  lets H1'': H1.
-  apply elem_in_findsubtypes_ord in H1''.
-  apply H. exists t_bool. split*.
-- lets H1': H1.
-   apply elem_in_findsubtypes_sub in H1'.
-  lets H1'': H1.
-  apply elem_in_findsubtypes_ord in H1''.
-  apply H. exists (t_arrow t_top t_bot). split*.
--  lets H1': H1.
-  apply elem_in_findsubtypes_sub in H1'.
-  lets H1'': H1.
-  apply elem_in_findsubtypes_ord in H1''.
-  apply H. exists t_top. split*.
-  *)
 Qed.
 
 Lemma Disj_completeness3 : forall A B,  A *s B -> A *a B.
