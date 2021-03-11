@@ -1,8 +1,14 @@
-# disjoint-union
+# Union Types with Disjoint Case Expression and Intersection Types
 
-Adding union types with disjoint intersection types to support function overloading
+Objective of this work is to develop a sound, complete, type-safe and deterministic
+calculus for union types with disjoint case expression and intersection types.
 
+## Code Structure
 
-The purpose of weak disjoint intersection types is to support function overloading in disjoint intersection types.
-Disjoint intersection types restrict the merges like ```((Int -> Int) ,, (String -> Int))```. Our goal is to
-allow merging two functions if either input types or the output types are not overlapping.
+Coq folder in each respective direcotry contains coq formalization of the respective system.
+
+| Directory | Description |
+| ----------| ----------- |
+| double_anno | Union Types with disjoint case expression |
+| double_anno_top | Union Types with disjoint case expression and top type |
+| double_anno_inter | Union Types with disjoint case expression, top type and intersection types | 
