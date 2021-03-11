@@ -1,0 +1,32 @@
+\section{Discussion}
+\label{sec:discussion}
+In this section we ...
+
+\subsection{Refactoring Subtyping}
+\label{sec:inter:refactoring}
+
+\Rref{s-disj} is a significant and novel addition in subtyping of \cal 
+with intersection types. It primarily
+makes intersection of disjoint types subtype of all types.
+Because two types are disjoint only if they do not share any common ordinary subtype.
+
+\Rref{s-disj} is an interesting addition in subtyping of \cal with intersection types.
+It says that if $FindSubTypes$ operation returns empty set against some type $[[A]]$, then $[[A]]$
+is subtype of all types. In other words, such type behaves like \emph{bottom-like} type.
+One particularly interesting case of \rref{s-disj} is when $[[A]]$ is an intersection type of two
+disjoint types such as $[[Int /\ A -> B]]$. Since $[[findsubtypes Int /\ A -> B]]$ returns empty set,
+therefor \rref{s-disj} makes $[[Int /\ A -> B]]$ subtype of all types.
+
+\paragraph{Dropping Subtyping Rule S-BOT}
+Another particular interesting case of \rref{s-disj} is that it makes \rref{s-bot} redundant 
+and \rref{s-bot} can safely be dropped without any significant
+impact on metatheory and implementation. It is trivial to prove a lemma which says $[[Bot]]$ type is
+subtype of all types. We drop \rref{s-bot} from the calculus discussed in this section
+and prove \Cref{lemma:inter:bls} to show this property instead. It is because that $[[findsubtypes Bot]]$
+returns empty set \{\} and \rref{s-disj} makes all such types with $[[findsubtypes Bot]]$ = \{\} as
+subtype of all types.
+
+\begin{lemma}[Bottom Type Least Subtype]
+  $[[Bot <: A]]$.
+\label{lemma:inter:bls}
+\end{lemma}

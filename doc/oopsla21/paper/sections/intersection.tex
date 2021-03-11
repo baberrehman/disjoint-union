@@ -26,18 +26,8 @@ Additional rules for subtyping are shown in upper middle part of \Cref{fig:inter
 a type $[[A]]$ is subtype of intersection of two types $[[A1]]$ and $[[A2]]$ only if $[[A]]$ is 
 subtype of both $[[A1]]$ and $[[A2]]$. \Rref{s-andb, s-andc} state that an intersection type 
 $[[A1 /\ A2]]$ is a subtype of some type $[[A]]$ if either of its component types ($[[A1]]$ or $[[A2]]$)
-is subtype of $[[A]]$. \Rref{s-disj} is a significant and novel addition in subtyping of \cal 
-with intersection types. It primarily
-makes intersection of disjoint types subtype of all types.
-Because two types are disjoint only if they do not share any common ordinary subtype.
-This will be discussed in detail in \Cref{sec:inter:disj,sec:inter:refactoring}. Reader may omit
-the technical details of \rref{s-disj} at this point.
-\baber{Discussion with Bruno: I am referring to a section that will come after next section.
-Is it fine to do that here? I think it's fine because we will discuss findsubtypes and disjointness
-in detail in next section. After that we can have some more discussion on subtyping and dropping
-bottom rule. Also we can have comparison with Ceylon in that section.}
+is subtype of $[[A]]$.
 Subtyping relation is relflexive (\cref{lemma:union:refl}) and transitive (\cref{lemma:union:trans}).
-\baber{Should we discuss transitivity lemma? Since we added a new subtyping rule for disjoint types.}
 
 \begin{figure}[t]
   \begin{small}
@@ -50,7 +40,7 @@ Subtyping relation is relflexive (\cref{lemma:union:refl}) and transitive (\cref
   \medskip
     \begin{small}
     \centering
-    \drules[s]{$ [[A <: B ]] $}{Algorithmic Subtyping}{anda, andb, andc, disj}
+    \drules[s]{$ [[A <: B ]] $}{Algorithmic Subtyping}{anda, andb, andc}
   \end{small}
   \medskip
     \begin{small}
@@ -180,28 +170,3 @@ Algorithmic disjointness is sound and complete with respect to declerative disjo
 \end{lemma}
 
 \baber{I think we may want to show the proofs for soundness and completeness for this section?}
-
-\subsection{Refactoring Subtyping}
-\label{sec:inter:refactoring}
-%\paragraph{Dropping Subtyping Rule S-BOT}
-\baber{Should we discuss this in separate section or just a paragraph in last section? Perhaps we can make
-this section more generic and also discuss s-disj with some more examples here with Ceylon comparison.}
-\Rref{s-disj} is an interesting addition in subtyping of \cal with intersection types.
-It says that if $FindSubTypes$ operation returns empty set against some type $[[A]]$, then $[[A]]$
-is subtype of all types. In other words, such type behaves like \emph{bottom-like} type.
-One particularly interesting case of \rref{s-disj} is when $[[A]]$ is an intersection type of two
-disjoint types such as $[[Int /\ A -> B]]$. Since $[[findsubtypes Int /\ A -> B]]$ returns empty set,
-therefor \rref{s-disj} makes $[[Int /\ A -> B]]$ subtype of all types.
-
-Another particular interesting case of \rref{s-disj} is that it makes \rref{s-bot} redundant 
-and \rref{s-bot} can safely be dropped without any significant
-impact on metatheory and implementation. It is trivial to prove a lemma which says $[[Bot]]$ type is
-subtype of all types. We drop \rref{s-bot} from the calculus discussed in this section
-and prove \Cref{lemma:inter:bls} to show this property instead. It is because that $[[findsubtypes Bot]]$
-returns empty set \{\} and \rref{s-disj} makes all such types with $[[findsubtypes Bot]]$ = \{\} as
-subtype of all types.
-
-\begin{lemma}[Bottom Type Least Subtype]
-  $[[Bot <: A]]$.
-\label{lemma:inter:bls}
-\end{lemma}

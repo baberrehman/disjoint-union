@@ -138,7 +138,7 @@ Proof.
    rewrite* subst_ee_open_ee_var.
 Qed.
 
-Hint Resolve subst_ee_term.
+Hint Resolve subst_ee_term : core.
 
 (* ********************************************************************** *)
 (** * Relations between well-formed environment and types well-formed
@@ -152,7 +152,7 @@ Proof.
   induction 1; auto.
 Qed.
 
-Hint Extern 1 (ok _) => apply ok_from_okt.
+Hint Extern 1 (ok _) => apply ok_from_okt : core.
 
 
 (* ********************************************************************** *)
@@ -184,7 +184,7 @@ Qed.
 
 (** Automation *)
 
-Hint Immediate okt_strengthen.
+Hint Immediate okt_strengthen : core.
 
 (* ********************************************************************** *)
 (** ** Regularity of relations *)
@@ -365,19 +365,6 @@ inductions Typ1.
  - inversion Prev.
 Qed.
 
-(*Lemma chk_sub : forall G e A, typing G e check A -> forall B, A <: B -> typing G e check B.
-Proof.
-intros G e A Typ1 B Sub.
-inductions Typ1.
- - assert (B <: B0).
-   eapply sub_transitivity; eauto.
-   clear H Sub.
-   eapply typ_sub; eauto.
- - assert (typing G (e_abs e) check (t_arrow A B)) by eauto.
-   admit.
- - inverts* Typ1.
-Admitted.*)
-
 Hint Resolve chk_inf : core.
 
 Lemma pexpr_inf_typ : forall G p A, pexpr p ->
@@ -398,34 +385,6 @@ inductions Prev.
   dependent destruction Typ.
   exists (t_arrow A0 B). constructor. auto. auto.
 Qed.
-
-(*Lemma expr_inf_typ : forall G e dir A e',
-typing G e dir A -> e --> e' ->
-exists B, typing G e infer B /\ B <: A.
-Proof.
-intros. lets Typ: H.
-inductions H.
-- exists* t_int. 
-- exists* A. split*. apply sub_refl.
-- exists* A. split*. apply sub_refl.
-- exists* B. split*. apply sub_refl.
-- exists* B.
-- inversion H1.
-- inverts Typ. exists* B0. admit.
-Admitted.*)
-
-(*Lemma pexpr_inf_typ_ann : forall G p A C, pexpr p ->
-typing G p check A -> exists B, typing G p infer B.
-Proof.
-intros.
-inductions H.
-exists t_int. constructor.
-apply typing_regular in H0. destruct~ H0.
-dependent destruction H0.
-dependent destruction H0.
-exists (t_arrow A0 B). constructor. auto.
-Qed.*)
-
 
 (* ********************************************************************** *)
 (** Preservation Result (20) *)
@@ -629,7 +588,6 @@ inductions e; try solve [right; unfold not; intros; inversion H0].
   inductions t; try solve [ right; unfold not; intros; inversion H1].
   left. apply pexpr_abs. inversion lc; subst. auto.
 Qed.
-
 
 Lemma value_not_value : forall e, lc_exp e -> (value e) \/ (~ (value e)).
 Proof.
