@@ -1,5 +1,19 @@
-\documentclass[acmsmall,review,anonymous]{acmart}
+\documentclass[acmsmall,review,anonymous]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
 
+\setcopyright{acmcopyright}
+\copyrightyear{2018}
+\acmYear{2018}
+\acmDOI{10.1145/1122445.1122456}
+
+%% These commands are for a PROCEEDINGS abstract or paper.
+\acmConference[Woodstock '18]{Woodstock '18: ACM Symposium on Neural
+  Gaze Detection}{June 03--05, 2018}{Woodstock, NY}
+\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+  June 03--05, 2018, Woodstock, NY}
+\acmPrice{15.00}
+\acmISBN{978-1-4503-XXXX-X/18/06}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\usepackage{geometry}
 %\geometry{left=2.5cm,right=2.5cm,top=2.5cm,bottom=2.5cm}
 
@@ -46,21 +60,21 @@
 \definecolor{backcolour}{rgb}{0.95,0.95,0.92}
 
 \lstdefinestyle{mystyle}{
-    %backgroundcolor=\color{backcolour},   
+    %backgroundcolor=\color{backcolour},
     commentstyle=\color{codegreen},
     keywordstyle=\color{magenta},
     numberstyle=\tiny\color{codegray},
     stringstyle=\color{codepurple},
     basicstyle=\ttfamily\footnotesize,
-    breakatwhitespace=false,         
-    breaklines=true,                 
-    captionpos=b,                    
-    keepspaces=true,                 
-    numbers=left,                    
-    numbersep=5pt,                  
-    showspaces=false,                
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
     showstringspaces=false,
-    showtabs=false,                  
+    showtabs=false,
     tabsize=2
 }
 \lstset{style=mystyle}
@@ -80,8 +94,9 @@
 \newcommand\mynote[3]{\textcolor{#2}{#1: #3}}
 \newcommand\bruno[1]{\mynote{Bruno}{red}{#1}}
 \newcommand\baber[1]{\mynote{Baber}{blue}{#1}}
+\newcommand\snow[1]{\mynote{Snow}{orange!80!black}{#1}}
 
-\newcommand{\name}{\textsf{Union Types with Disjoint Case Expression}\xspace}
+\newcommand{\name}{$\lambda_{u}$\xspace}
 %\newcommand{\dut}{\textsf{Disjoint Union Types}\xspace}
 \newcommand{\cal}{$\lambda_{u}$\xspace}
 \newcommand{\typeof}{$typeof$\xspace}
@@ -93,25 +108,55 @@
 %% Bibliography style
 \bibliographystyle{plainurl}% the mandatory bibstyle
 
-\title{\name}
+\title{Union Types with Disjoint Switches}
 
-\author{Neo Morpheus Matrix}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% \author{Xuejing Huang}
+%% \orcid{0000-0002-8496-491X}
+%% \affiliation{
+%%   \institution{The University of Hong Kong}
+%% }
+%% \email{xjhuang@cs.hku.hk}
+
+\author{Bruno C. d. S. Oliveira}
+%% \authornote{with author1 note}          %% \authornote is optional;
+                                        %% can be repeated if necessary
+%% \orcid{}             %% \orcid is optional
+\affiliation{
+  %% \position{Position1}
+  %% \department{Department1}              %% \department is recommended
+  \institution{The University of Hong Kong}            %% \institution is required
+  %% \streetaddress{Street1 Address1}
+  %% \city{City1}
+  %% \state{State1}
+  %% \postcode{Post-Code1}
+  %% \country{Country1}                    %% \country is recommended
+}
+\email{bruno@cs.hku.hk}          %% \email is recommended
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 \begin{document}
 
 \begin{abstract}
-Type system plays fundamental role to capture nonsensical program expressions at compile time in a
-programming language. This often also refers as removing type erros statically at compile time. 
-Since the type system defines statics of programs. A more robust type system captures more errors 
-at compile time. This gives a guarrantee that certain type errors will not occur at runtime.
-With advance types such as intersection types and union types, it has become a challenge to define a 
-robust, type-safe, coherent and deterministic type system. One often has to compromise on one 
-property to attain another. Union types with pattern matching on types add significant expressive power
-in programming language. Function overloading can simply be expressed in a single function with the
-help of union types and case analysis on types. Intersection types incorporate many interesting and
-advance features that are not easy to implement in classical OOP model.
-This study proposes a novel calculus with all aforementioned properties for pattern matching with union types and intersection types. The calculus proposed in this study is named as \cal.
-Outline idea in \cal is to allow only non-overlapping or disjoint types in case expressions.
+Type system plays fundamental role to capture nonsensical program
+expressions at compile time in a programming language. This often also
+refers as removing type erros statically at compile time.  Since the
+type system defines statics of programs. A more robust type system
+captures more errors at compile time. This gives a guarrantee that
+certain type errors will not occur at runtime.  With advance types
+such as intersection types and union types, it has become a challenge
+to define a robust, type-safe, coherent and deterministic type
+system. One often has to compromise on one property to attain
+another. Union types with pattern matching on types add significant
+expressive power in programming language. Function overloading can
+simply be expressed in a single function with the help of union types
+and case analysis on types. Intersection types incorporate many
+interesting and advance features that are not easy to implement in
+classical OOP model.  This study proposes a novel calculus with all
+aforementioned properties for pattern matching with union types and
+intersection types. The calculus proposed in this study is named as
+\cal.  Outline idea in \cal is to allow only non-overlapping or
+disjoint types in case expressions.
 \end{abstract}
 
 \maketitle
