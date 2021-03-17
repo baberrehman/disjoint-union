@@ -1,3 +1,5 @@
 -R . Top
 LibTactics.v
 syntax_snow.v
+syntax.v
+typing.v

@@ -7,7 +7,7 @@ A * B ::= bot-like A&B
 and try to capture disjointness on functions with the help of distributivity
 *)
 
-Require Import TLC.LibLN.
+(*Require Import TLC.LibLN.
 Require Import Program.Equality.
 (*Require Import LibTactics.*)
 (*Implicit Types x : var.*)
@@ -253,7 +253,7 @@ Proof.
   applys S_disjoint. constructor.
   applys* S_and.
   (* need  bot -> bot <: bot *)
-Abort.
+Abort. *)
 
 
 (*************************************)
