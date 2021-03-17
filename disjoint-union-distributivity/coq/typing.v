@@ -326,25 +326,16 @@ Proof.
   inductions H0.
 Admitted.
 
-Lemma top_sub_int_false : t_top <: t_int -> False.
-Admitted.
-
-Lemma top_sub_bot_false : t_top <: t_bot -> False.
-Admitted.
-
-Lemma top_sub_arrow_false : forall A B, t_top <: (t_arrow A B) -> False.
-Admitted.
-
-Lemma int_sub_bot_false : t_int <: t_bot -> False.
-Admitted.
-
 Lemma int_sub_arrow_false : forall A B, t_int <: (t_arrow A B) -> False.
 Admitted.
 
-Lemma arrow_sub_int_false : forall A B, (t_arrow A B) <: t_int -> False.
-Admitted.
-
-Lemma arrow_sub_bot_false : forall A B, (t_arrow A B) <: t_bot -> False.
+Lemma arrow_sub_arrow : forall A1 A2 B1 B2,
+(t_arrow A1 B1) <: (t_arrow A2 B2) -> A2 <: A1 /\ B1 <: B2.
+Proof.
+  intros.
+  inverts* H.
+  admit.
+  simpl in H0. inverts H0.
 Admitted.
 
 Lemma check_or_typ : forall E e A B,
@@ -434,47 +425,43 @@ Proof.
       * (* infer lam *)
         dependent destruction H5.
       *
-        dependent destruction H0.
-        admit.
-        admit.
+        apply arrow_sub_arrow in H0. destruct H0.
         constructor.
         pick_fresh x.
         assert (x \notin L) by auto.
-        lets: H x H0.
+        lets: H x H4.
         assert (G & x ~: A1 = G & x ~: A1 & empty).
         rewrite* concat_empty_r.
-        rewrite H4 in H2.
+        rewrite H6 in H5.
         assert (G = G & empty).
         rewrite* concat_empty_r.
-        rewrite H5.
+        rewrite H7.
       (* prove p:A1 checks *)
-        inverts Typ2. inverts H6.
+        inverts Typ2. inverts H8.
         assert (typing G (e_ann p A1) infer A1).
         assert (B0 <: A1).
         eapply s_trans; eauto.
-        forwards*: pexpr_chk_sub H10 H6.
+        forwards*: pexpr_chk_sub H12 H8.
         lets*: typing_through_subst_ee.
-        forwards*: H8 H2.
+        forwards*: H10 H5.
         rewrite* (@subst_ee_intro x).
     + inverts Typ1.
       dependent destruction H4. dependent destruction H4.
       dependent destruction H4. dependent destruction H4.
       constructor.
-      inverts H0.
-      admit. admit.
+      apply arrow_sub_arrow in H0. destruct H0.
       pick_fresh y. assert (y \notin L) by auto.
-      forwards*: H H0.
+      forwards*: H H3.
       assert (G & y ~: A1 = G & y ~: A1 & empty).
       rewrite* concat_empty_r.
-      rewrite H3 in H2.
+      rewrite H5 in H4.
       assert (G = G & empty). rewrite* concat_empty_r.
-      rewrite H4.
-      inverts Typ2. inverts H6.
+      rewrite H6.
+      inverts Typ2. inverts H7.
       assert (typing G ((e_ann (e_ann (e_abs x) (t_arrow A0 B0)) A1)) infer A1). eauto.
       forwards*: typing_through_subst_ee.
       rewrite* (@subst_ee_intro y).
-      forwards*: typing_regular H6.
-      inverts H2.
+      forwards*: typing_regular H7.
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
@@ -510,7 +497,7 @@ Proof.
         do 4 dependent destruction Typ. auto.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
-Admitted.
+Qed.
 
 Lemma canonical_form_abs_prevalue : forall t U1 U2,
   pexpr t -> typing empty t infer (t_arrow U1 U2) ->

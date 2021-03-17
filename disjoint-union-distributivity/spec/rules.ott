@@ -16,9 +16,6 @@ grammar
   typ, A, B, C, D          :: 't_' ::=     {{ com type }}
     | Top                  ::   :: top {{ tex \top }}
     | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
-    | Bool                 ::   :: bool     {{ tex \mathsf{Bool}  }}
-    | String               ::   :: str     {{ tex \mathsf{String}  }}
-    | Char                 ::   :: char     {{ tex \mathsf{Char}  }}        
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
     | A \/ B 	             ::   :: union
@@ -28,12 +25,11 @@ grammar
   exp, e, v, p             :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
     | i                    ::   :: lit
-    | b                    ::   :: bexpr
-    | s                    ::   :: strexpr
     | e : A                ::   :: ann
     | \ x . e              ::   :: abs     (+ bind x in e +)
     | e1 e2                ::   :: app
-    | switch e A e1 B e2   ::   :: switch {{ tex switch \ [[e]] \ \{(x:[[A]])[[->]][[e1]], (x:[[B]])[[->]][[e2]]\}  }}
+    | typeof e as A e1 B e2 ::  :: typeof {{ tex typeof \ [[e]] \ as \ [[A]] \ [[e1]] \ [[B]] \ [[e2]] }}
+    {{ tex typeof \ [[e]] \ as \ \{x:[[A]][[->]][[e1]], x:[[B]][[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
 
@@ -53,11 +49,9 @@ grammar
 
   ctx, G {{ tex \Gamma }} :: 'ctx_' ::=    {{ com typing context }}
                                            {{ coq list ( atom * typ ) }}
-    | []                   ::  :: empty    {{ coq nil }} {{ tex \cdot }}
+    | []                   ::  :: empty    {{ coq nil }}
+                                           {{ tex \cdot }}
     | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
-    | G , x : A , G1       ::  :: conss
-    | G , G1               ::  :: consss
-
 
   dirflag {{ tex \Leftrightarrow }} :: '' ::=  {{ com typing direction }}
     | =>                   ::  :: infer    {{ tex \Rightarrow }}
@@ -99,18 +93,11 @@ PreValue :: '' ::=
   
   defn
   prevalue e ::   :: pexpr :: 'pexpr_'
-  {{ com PreValues }} 
-  {{ tex  }}
+  {{ com PreValues }} {{ tex  }}
   by
 
     ------------ :: int
     prevalue i
-
-    ------------ :: bool
-    prevalue b
-
-    ------------ :: str
-    prevalue s
 
     --------------------------- :: abs
     prevalue (\x.e):A -> B
@@ -136,17 +123,10 @@ FindType :: '' ::=
   defn
   findtype p A ::   :: findtype :: 'findtype_'
   {{ com FindType }}
-  {{ tex FindType \ \ [[p]] \ \ [[A]] }}
   by
 
     ---------------- :: int
     findtype i Int
-
-    ---------------- :: bool
-    findtype b Bool
-
-    ---------------- :: str
-    findtype s String
 
     ------------------------------------ :: arrow
     findtype ((\x.e) : A -> B) (A -> B)
@@ -156,19 +136,9 @@ defns
 FindSubTypes :: '' ::=
   
   defn
-  findsubtypes A ::   :: fs :: 'fs_'
-  {{ tex |[[A]]| }}
+  findsubtypes A ::   :: findsubtypes :: 'findsubtype_'
+  {{ tex FindSubTypes ~ [[A]] = [] }}
   {{ com FindSubTypes }}
-  by
-
-
-%% FindSubTypesEmpty needed for disj subtyping rule
-defns
-FindSubTypesEmpty :: '' ::=
-  
-  defn
-  findsubtypesempty A ::   :: fse :: 'fse_'
-  {{ tex |[[A]]| = [] }}
   by
 
 
@@ -176,7 +146,7 @@ defns
 Ordinary :: '' ::=
   defn
   ordinary A ::  :: ordinary :: 'ord_'
-  {{ tex Ord ~ [[A]] }}
+  {{ tex ord ~ [[A]] }}
   {{ com Ordinary Types }}
   by
 
@@ -186,13 +156,6 @@ Ordinary :: '' ::=
 
   ---------------- :: int
   ordinary Int
-
-  ---------------- :: bool
-  ordinary Bool
-
-  ---------------- :: str
-  ordinary String
-
 
   ---------------- :: arrow
   ordinary A -> B
@@ -235,33 +198,33 @@ defns
 BottomLike :: '' ::=
 
   defn
-  botlike A ::  :: bottomlike :: 'bl_'
-  {{ tex \rfloor [[A]] \lfloor}}
+  botLike A ::  :: bottomlike :: 'bl_'
+  {{ tex \rfloor [[A]] \lfloor_a}}
   {{ com Bottom-Like Types }}
   by
 
     -------------------- :: bot
-    botlike Bot
+    botLike Bot
 
-    botlike A
-    botlike B
+    botLike A
+    botLike B
     -------------------------     :: or
-    botlike A \/ B
+    botLike A \/ B
 
 
-    botlike A
+    botLike A
     -------------------------     :: andl
-    botlike A /\ B
+    botLike A /\ B
 
 
-    botlike B
+    botLike B
     -------------------------     :: andr
-    botlike A /\ B
+    botLike A /\ B
 
 
     A * B
     -------------------------     :: andsub
-    botlike A /\ B
+    botLike A /\ B
 
 
 
@@ -282,12 +245,12 @@ Disjointness :: '' ::=
     Bot * A
 
 
-%	botlike A
+%	botLike A
 %	----------------------        :: btml
 %	A * B
 
 
-%	botlike B
+%	botLike B
 %	----------------------        :: btmr
 %	A * B
 
@@ -355,20 +318,22 @@ Subtyping :: '' ::=
   
   by
 
+    -------------------- :: refl
+    A <: A
+
+    A <: B
+    B <: C
+    -------------------- :: trans
+    A <: C
+
     -------------------- :: top
     A <: Top
 
-    -------------------- :: bot
+    -------------------- :: btm
     Bot <: A
   
     -------------------- :: int
     Int <: Int
-
-    -------------------- :: bool
-    Bool <: Bool
-
-    -------------------- :: str
-    String <: String
   
     B1 <: A1 
     A2 <: B2
@@ -380,31 +345,44 @@ Subtyping :: '' ::=
     -------------------------     :: ora
     A1 \/ A2 <: A
   
-    A <: A1
     -------------------------     :: orb
-    A <: A1 \/ A2 
+    A1 <: A1 \/ A2 
 
-    A <: A2
     -------------------------     :: orc
-    A <: A1 \/ A2
+    A2 <: A1 \/ A2
 
     A <: A1
     A <: A2
     -------------------------     :: anda
     A <: A1 /\ A2
   
-    A1 <: A
     -------------------------     :: andb
-    A1 /\ A2 <: A 
+    A1 /\ A2 <: A1 
 
-    A2 <: A
     -------------------------     :: andc
-    A1 /\ A2 <: A
+    A1 /\ A2 <: A2
 
-    findsubtypesempty A
+    findsubtypes A
     -------------------------      :: disj
     A <: B
 
+    ----------------------------------------- :: distarr
+    (A -> B1) /\ (A -> B2) <: A -> (B1 /\ B2)
+
+    ---------------------------------------- :: distarrrev
+    A -> (B1 /\ B2) <: (A -> B1) /\ (A -> B2)
+
+    ----------------------------------------- :: distarru
+    (A1 -> B) /\ (A2 -> B) <: (A1 \/ A2) -> B
+
+    ----------------------------------------- :: distarrurev
+    (A1 \/ A2) -> B <: (A1 -> B) /\ (A2 -> B)
+
+    ----------------------------------------- :: distor
+    (A1 \/ B) /\ (A2 \/ B) <: (A1 /\ A2) \/ B
+
+    ---------------------------------------- :: distand
+    (A1 \/ A2) /\ B <: (A1 /\ B) \/ (A2 /\ B)
 
 
 defns
@@ -418,16 +396,8 @@ Typing :: '' ::=
     % inference mode
 
     uniq G
-    ----------------- :: int
+    ----------------- :: lit
     G |- i => Int
-
-    uniq G
-    ----------------- :: bool
-    G |- b => Bool
-
-    uniq G
-    ----------------- :: str
-    G |- s => String
 
     uniq G
     x : A in G
@@ -458,8 +428,8 @@ Typing :: '' ::=
     G, x : A |- e1 <= C
     G, x : B |- e2 <= C
     A *s B
-    --------------------------------- :: switch
-    G |- switch e A e1 B e2 <= C
+    --------------------------------- :: typeof
+    G |- typeof e as A e1 B e2 <= C
 
 
 defns
@@ -468,35 +438,30 @@ Reduction :: '' ::=
   defn
   e --> e' ::   :: step :: 'step_'
   {{ com Small-step operational semantics }}
-  {{ tex [[e]] \longrightarrow [[e']] }}
   by
 
 
     ------------------------ :: int
     i --> i : Int
 
-    ------------------------ :: bool
-    b --> b : Bool
-
-    ------------------------ :: str
-    s --> s : String
-
-
     e1 --> e1'
     ---------------- :: appl
     e1 e2 --> e1' e2
 
 
+    value v
     e --> e'
     ---------------- :: appr
     v e --> v e'
 
 
+    prevalue p
     ----------------------------------------------------- :: beta
     ((\x.e):A1->B1:A2->B2) (p:C) --> ((e [x ~> p:A1]):B1):B2
 
 
-    ----------------------------------------------------------------------- :: absbeta
+
+    ----------------------------------------------------- :: abs_beta
     ((\x.e1):A1->B1:A2->B2) (\x.e2) --> ((e1 [x ~> ((\x.e2):A2):A1]):B1):B2
 
 
@@ -508,28 +473,28 @@ Reduction :: '' ::=
 
 
     prevalue p
-    --------------------- :: rmann
+    --------------------- :: rm_ann
     p : A : B --> p : B
 
     
-    --------------------------------- :: lamann
+    --------------------------------- :: lam_ann
     (\x.e):A->B --> (\x.e):A->B:A->B
 
 
     e --> e'
-    ------------------------------------------------- :: switch
-    switch e A e1 B e2 --> switch e' A e1 B e2
+    ------------------------------------------------- :: typeof
+    typeof e as A e1 B e2 --> typeof e' as A e1 B e2
 
 
     prevalue p
     findtype p C
     C <: A
-    ------------------------------------------------- :: switchl
-    switch (p:D) A e1 B e2 --> e1 [x ~> p:A]
+    ------------------------------------------------- :: typeofl
+    typeof (p:D) as A e1 B e2 --> e1 [x ~> p:A]
 
 
     prevalue p
     findtype p C
     C <: B
-    ------------------------------------------------- :: switchr
-    switch (p:D) A e1 B e2 --> e2 [x ~> p:B]
+    ------------------------------------------------- :: typeofr
+    typeof (p:D) as A e1 B e2 --> e2 [x ~> p:B]

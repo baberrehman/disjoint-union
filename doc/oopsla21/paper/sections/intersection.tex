@@ -40,7 +40,7 @@ Subtyping relation is relflexive (\cref{lemma:union:refl}) and transitive (\cref
   \medskip
     \begin{small}
     \centering
-    \drules[s]{$ [[A <: B ]] $}{Algorithmic Subtyping \snow{extension?} }{anda, andb, andc}
+    \drules[s]{$ [[A <: B ]] $}{Algorithmic Subtyping \snow{extension?}\baber{I added "Additional" word in the caption. Does that seems fine or should we add extension/additional here?} }{anda, andb, andc}
   \end{small}
   \medskip
     \begin{small}
@@ -62,7 +62,7 @@ Subtyping relation is relflexive (\cref{lemma:union:refl}) and transitive (\cref
       \bottomrule
     \end{tabular}
   %\end{small}
-  \caption{Types, Subtyping, Ordinary Types and FindSubtypes function for \cal with Intersection Types.}
+  \caption{Additional Types, Subtyping, Ordinary Types and FindSubtypes function for \cal with Intersection Types.}
   \label{fig:inter:system}
 \end{figure}
 
@@ -160,13 +160,14 @@ is naturally very close to \Cref{def:inter:disj}. We illustrate \Cref{def:inter:
 Algorithmic disjointness is sound and complete with respect to declerative disjointness.
 
 \begin{lemma}[Disjointness Soundness]
-  If \ $[[A * B]]$ \ then: \ $[[A *s B]]$.
+  If \ $[[A * B]]$ \ then \ $[[A *s B]]$.
 \label{lemma:inter:disj-sound}
 \end{lemma}
-\snow{I thinkthe colon after ``then'' is redundant}
+\snow{I thinkthe colon after ``then'' is redundant.}
+\baber{Sure, I removed colon after then in all lemmas.}
 
 \begin{lemma}[Disjointness Completeness]
-  If \ $[[A *s B]]$ \ then: \ $[[A * B]]$.
+  If \ $[[A *s B]]$ \ then \ $[[A * B]]$.
 \label{lemma:inter:disj-complete}
 \end{lemma}
 

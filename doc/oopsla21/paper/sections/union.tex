@@ -3,7 +3,7 @@
 
 \snow{Pls fix ``and without intersection types''. Besides don't use commands for
   text because it leads to incorrect capitalization. You can use ``emph'' instead
-  of capitalizing.}
+  of capitalizing.} \baber{I guess Bruno already fixed that.}
 This section introduces the union calculus \name. The distinctive feature
 of the \name calculus is a type-based switch expression with disjoint
 cases, which can be used to eliminate values with union types.
@@ -27,14 +27,15 @@ sound and deterministic.
   Pls fix the notation.}
 \bruno{Lets change ``typeof e as'' to ``switch e'', and Snow is right:
 you need the variables, brackets eytc. in the syntax.}
+\baber{Done, updated typeof to $[[switch e A e1 B e2]]$.}
 \Cref{fig:union:syntax} shows the syntax for \cal. Metavariables
-$[[A]]$ and $[[B]]$ range over types.  Types include top ($[[Top]]$),
+$[[A]]$, $[[B]]$ and $[[C]]$ range over types.  Types include top ($[[Top]]$),
 bottom ($[[Bot]]$), function ($[[A -> B]]$) and union ($[[A \/ B]]$)
 types. Metavariable $[[e]]$ ranges over program
 expressions. Expressions include variables ($[[x]]$), natural numbers
 ($[[i]]$), type annotations ($[[e:A]]$), lambda abstractions
-($[[\x.e]]$), applications ($[[e1 e2]]$) and a novel typeof ($[[typeof
-    e as A e1 B e2]]$) expression. \Typeof expression is like a case
+($[[\x.e]]$), applications ($[[e1 e2]]$) and a novel switch ($[[switch
+    e A e1 B e2]]$) expression. \emph{Switch} expression is a case
 expression and evaluates a specific branch by matching the
 type.
 %Details of \typeof expression will further be discussed in typing
@@ -59,19 +60,21 @@ For readers familiar with calculi with gradual types~\cite{}, the two annotation
 can be also be understood as the \emph{source type} and \emph{target type}
 of an upcast: i.e. if the value is well-typed we have that $[[A -> B]] <: [[C]]$.
 
-Finally, a context ($[[G]]$) can
+A context ($[[G]]$) can
 either be empty or contains type bindings of variables and associated
-types.
+types. Finally, a typing mode ($[[dirflag]]$) can either be check ($[[<=]]$)
+or inference ($[[=>]]$).
 
 \begin{figure}[t]
   \begin{small}
     \centering
     \begin{tabular}{lrcl} \toprule
-      Types & $[[A]], [[B]]$ & $\Coloneqq$ & $ [[Top]] \mid [[Bot]] \mid [[Int]] \mid [[A -> B]] \mid [[A \/ B]] $ \\
-      Expr & $[[e]]$ & $\Coloneqq$ & $[[x]] \mid [[i]] \mid [[e:A]] \mid [[\x.e]] \mid [[e1 e2]] \mid [[typeof e as A e1 B e2]]$\\
+      Types & $[[A]], [[B]]$, $[[C]]$ & $\Coloneqq$ & $ [[Top]] \mid [[Bot]] \mid [[Int]] \mid [[A -> B]] \mid [[A \/ B]] $ \\
+      Expr & $[[e]]$ & $\Coloneqq$ & $[[x]] \mid [[i]] \mid [[e:A]] \mid [[\x.e]] \mid [[e1 e2]] \mid [[switch e A e1 B e2]]$\\
       PValue & $[[p]]$ & $\Coloneqq$ & $[[i]] \mid [[\x.e : A -> B]] $\\
       Value & $[[v]]$ & $\Coloneqq$ & $[[p:A]]$\\
       Context & $[[G]]$ & $\Coloneqq$ & $ \cdot \mid [[G , x : A]]$ \\
+      Mode & $[[dirflag]]$ & $\Coloneqq$ & $[[<=]] \ \mid \ [[=>]]$ \\
       \bottomrule
     \end{tabular}
   \end{small}
@@ -80,10 +83,10 @@ types.
     \drules[s]{$ [[A <: B ]] $}{Algorithmic Subtyping}{top, bot, int, arrow, ora, orb, orc}
   \end{small}
   \caption{Syntax and Algorithmic Subtyping for \cal. \snow{We need to add C as
-      a metavariable for types here because it is used later} }
+      a metavariable for types here because it is used later.} \baber{Done.} }
   \label{fig:union:syntax}
 \end{figure}
-\bruno{Add the syntax for the bi-directional modes in the Figure.}
+\bruno{Add the syntax for the bi-directional modes in the Figure.} \baber{Done.}
 
 %%%%%%%%%%%%%%%%%%%%%
 %% Subtyping
@@ -285,7 +288,7 @@ with respect to \Cref{def:union:disj}, and disjointness is a symmetric
 relation. The following lemmas summarize key properties of disjointness.
 
 \begin{lemma}[Disjointness Soundness]
-  If \ $[[A * B]]$ \ then: \ $[[A *s B]]$.
+  If \ $[[A * B]]$ \ then \ $[[A *s B]]$.
 \label{lemma:union:disj-sound}
 \end{lemma}
 
@@ -330,12 +333,12 @@ relation. The following lemmas summarize key properties of disjointness.
 \end{comment}
 
 \begin{lemma}[Bottom-Like Disjoint]
-  If \ $[[botlike A]]$ \ then: \ $[[A * B]]$.
+  If \ $[[botlike A]]$ \ then \ $[[A * B]]$.
 \label{lemma:union:bl-disjoint}
 \end{lemma}
 
 \begin{lemma}[Disjointness Symmetry]
-  If \ $[[A * B]]$ \ then: \ $[[B * A]]$.
+  If \ $[[A * B]]$ \ then \ $[[B * A]]$.
 \label{lemma:union:disj-sym}
 \end{lemma}
 
@@ -350,13 +353,14 @@ relation. The following lemmas summarize key properties of disjointness.
   \end{small}
   \begin{small}
     \centering
-    \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{int, var, ann, app, sub, abs, typeof}
+    \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{int, var, ann, app, sub, abs, switch}
   \end{small}
   \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.}
   \label{fig:union:disj-typ}
 \end{figure}
 \bruno{The syntax of typeof needs to be fixed, otherwise the variable ``x'' in the
 typing rule appears from nowhere!}
+\baber{Done, updated typeof to $[[switch e A e1 B e2]]$.}
 
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -400,8 +404,8 @@ output type $[[B]]$ in an extended context with parameter $[[x]]$ of
 input type $[[A]]$.
 
 The most interesting and novel typing rule is for
-\typeof expressions. Four conditions are necessary for typing
-\typeof expressions.
+\emph{switch} expressions. Four conditions are necessary for typing
+\emph{switch} expressions.
 %The remaining conditions are standard for a calculus with
 %union types and case expression and have been studied in various
 %calculi (\baber{reference to calculi}).
@@ -417,7 +421,7 @@ types. Overlapping types for the
 branches of case expressions can lead to non-deterministic 
 results, and are therefore forbidden.
 Since all the branches check against $[[C]]$, the whole
-\typeof expression checks against $[[C]]$.
+\emph{switch} expression checks against $[[C]]$.
 
 \begin{comment}
 \begin{figure}[t]
@@ -445,7 +449,7 @@ value. Operational semantics follow call-by-value evaluation strategy.
 We empahsize the use of another interesting and novel technique which
 is type directed operational semantics \baber{reference here}. Types
 are preserved by type annotations during substitution in
-beta-reduction and \typeof cases.
+beta-reduction and \emph{switch} cases.
 
 \Rref{step-int} annotates integer expressions and makes them values. \Rref{step-appl} reduces left expression
 of an application unless it becomes a value. \Rref{step-appr} works only if left expression of an
@@ -463,18 +467,18 @@ It follows same as \rref{step-beta} except that both of the input types are kept
 substitution i.e $[[\x.e:A2:A1]]$. \Rref{step-ann} reduces an annotated expression only if it is not a value
 and $[[e]]$ reduces to some $[[e']]$. \Rref{step-rmann} drops inner annotation. \Rref{step-lamann} adds one
 more type annotation with lambda expressions having single type annotation to make them values.
-\Rref{step-typeof, step-typeofl, step-typeofr} deal with the reduction of \typeof expressions.
+\Rref{step-switch, step-switchl, step-switchr} deal with the reduction of \emph{switch} expressions.
 
-\Rref{step-typeof} reduces the case expression $[[e]]$ unless it becomes a value of the form $[[p:D]]$.
-\Rref{step-typeofl} evaluates left branch of the \typeof expression if type of $[[e]]$ is subtype
+\Rref{step-switch} reduces the case expression $[[e]]$ unless it becomes a value of the form $[[p:D]]$.
+\Rref{step-switchl} evaluates left branch of the \emph{switch} expression if type of $[[e]]$ is subtype
 of type of left branch.
-\Rref{step-typeofr} evaluates right branch of the \typeof expression if type of $[[e]]$ is subtype
+\Rref{step-switchr} evaluates right branch of the \emph{switch} expression if type of $[[e]]$ is subtype
 of type of right branch.
-Subtyping condition in \rref{step-typeofl, step-typeofr} is interesting and important to consider.
+Subtyping condition in \rref{step-switchl, step-switchr} is interesting and important to consider.
 It gives a freedom of various subtypes of $[[A]]$ and $[[B]]$ for corresponding branch instead of only
 type $[[A]]$ and type $[[B]]$.
-It is important to note that types of left and right branches of \typeof expression cannot overlap
-because of disjoitness contraint in typing. Programs with overlapping types in branches of \typeof
+It is important to note that types of left and right branches of \emph{switch} expression cannot overlap
+because of disjoitness contraint in typing. Programs with overlapping types in branches of \emph{switch}
 expression will not type check in \cal.
 A natural property of \cal is if type $[[A]]$ and type $[[B]]$ are two
 disjoint types, then subtypes of $[[A]]$ are also disjoint to subtypes of $[[B]]$.
@@ -488,7 +492,7 @@ FindType returns $[[A -> B]]$ against the partial expression $[[\x.e : A->B]]$ (
 \begin{figure}[t]
   \begin{small}
     \centering
-    \drules[step]{$[[e --> e']]$}{Operational Semantics}{int, appl, appr, beta, absbeta, ann, rmann, lamann, typeof, typeofl, typeofr}
+    \drules[step]{$[[e --> e']]$}{Operational Semantics}{int, appl, appr, beta, absbeta, ann, rmann, lamann, switch, switchl, switchr}
   \end{small}
   \begin{small}
     \centering
@@ -520,7 +524,7 @@ Determinism ensures that a program will always produce the same unique result.
 
 \begin{lemma}[Type Preservation]
 \label{lemma:union:preservation}
-  If \ $[[G |- e dirflag A]]$ and $[[e --> e']]$ then: $[[G |- e' dirflag A]]$.
+  If \ $[[G |- e dirflag A]]$ and $[[e --> e']]$ then $[[G |- e' dirflag A]]$.
 \end{lemma}
 
 \begin{comment}
@@ -556,7 +560,7 @@ Determinism ensures that a program will always produce the same unique result.
 
 \begin{lemma}[Progress]
 \label{lemma:union:progress}
-If \ $[[ [] |- e dirflag A]]$ then:
+If \ $[[ [] |- e dirflag A]]$ then
  \begin{enumerate}
   \item either $[[e]]$ is a value.
   \item or $[[e]]$ can take a step to $[[e']]$.
@@ -605,7 +609,7 @@ If \ $[[G |- p <= A]]$ \ then:
   \begin{enumerate}
   \item and \ $[[e --> e1]]$
   \item and \ $[[e --> e2]]$ \\
-  then: $[[e1]]$ = $[[e2]]$.
+  then $[[e1]]$ = $[[e2]]$.
   \end{enumerate}
 \end{lemma}
 
@@ -651,10 +655,8 @@ A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
 \end{lemma}
 
 \begin{figure}
-    \begin{small}
     \centering
     \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{top, int, arrow}
-  \end{small}
   \medskip
   \begin{definition}
     \centering
@@ -663,6 +665,6 @@ A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
   \end{definition}
   \caption{Updated disjointness and ordinary types for \cal.
     \snow{I think there is no need to make figure small
-    unless we are going to exceed the page limit.} }
+    unless we are going to exceed the page limit.} \baber{Sure, I fixed that.}}
   \label{fig:union:ord}
 \end{figure}
