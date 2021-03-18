@@ -53,7 +53,7 @@
 \ottprodline{|}{\ottnt{e}  \ottsym{:}  \ottnt{A}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}}{}{\textsf{bind}\; \ottmv{x}\; \textsf{in}\; \ottnt{e}}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{e_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}}{}{}{}{}\ottprodnewline
-\ottprodline{|}{ switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (x: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \} }{}{}{}{}\ottprodnewline
+\ottprodline{|}{ switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \} }{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottsym{(}  \ottnt{e}  \ottsym{)}} {\textsf{S}}{}{}{}}
 
 \newcommand{\ottctx}{
@@ -626,7 +626,7 @@
 \ottpremise{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{B}  \vdash  \ottnt{e_{{\mathrm{2}}}} \,  \Leftarrow  \, \ottnt{C}}%
 \ottpremise{ \ottnt{A}  *_s  \ottnt{B} }%
 }{
-\Gamma  \vdash   switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (x: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}  \,  \Leftarrow  \, \ottnt{C}}{%
+\Gamma  \vdash   switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}  \,  \Leftarrow  \, \ottnt{C}}{%
 {\ottdrulename{typ\_switch}}{}%
 }}
 
@@ -726,7 +726,7 @@
 \newcommand{\ottdrulestepXXswitch}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{e}  \longrightarrow  \ottnt{e'} }%
 }{
-  switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (x: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow   switch \  \ottnt{e'}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (x: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}  }{%
+  switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow   switch \  \ottnt{e'}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}  }{%
 {\ottdrulename{step\_switch}}{}%
 }}
 
@@ -736,7 +736,7 @@
 \ottpremise{ FindType \ \  \ottnt{p}  \ \  \ottnt{C} }%
 \ottpremise{ \ottnt{C}  <:  \ottnt{A} }%
 }{
-  switch \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (x: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]} }{%
+  switch \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]} }{%
 {\ottdrulename{step\_switchl}}{}%
 }}
 
@@ -746,7 +746,7 @@
 \ottpremise{ FindType \ \  \ottnt{p}  \ \  \ottnt{C} }%
 \ottpremise{ \ottnt{C}  <:  \ottnt{B} }%
 }{
-  switch \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (x: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow  \ottnt{e_{{\mathrm{2}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]} }{%
+  switch \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow  \ottnt{e_{{\mathrm{2}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]} }{%
 {\ottdrulename{step\_switchr}}{}%
 }}
 

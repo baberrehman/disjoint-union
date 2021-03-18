@@ -33,7 +33,7 @@ grammar
     | e : A                ::   :: ann
     | \ x . e              ::   :: abs     (+ bind x in e +)
     | e1 e2                ::   :: app
-    | switch e A e1 B e2   ::   :: switch {{ tex switch \ [[e]] \ \{(x:[[A]])[[->]][[e1]], (x:[[B]])[[->]][[e2]]\}  }}
+    | switch e A e1 B e2   ::   :: switch {{ tex switch \ [[e]] \ \{(x:[[A]])[[->]][[e1]], (y:[[B]])[[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
 
