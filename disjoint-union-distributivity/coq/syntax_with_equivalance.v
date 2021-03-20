@@ -26,16 +26,17 @@ Require Import Coq.Lists.ListSet.
 From Coq Require Export Lists.List.
 Export ListNotations.
 Require Import Coq.Strings.String.
+Require Import equivalance.
 
 (** syntax *)
 
-Inductive typ : Set :=  (*r type *)
+(*Inductive typ : Set :=  (*r type *)
  | t_top : typ
  | t_int : typ
  | t_bot : typ
  | t_arrow : typ -> typ -> typ
  | t_union : typ -> typ -> typ
- | t_and : typ -> typ -> typ.
+ | t_and : typ -> typ -> typ.*)
 
 Inductive exp : Set :=  (*r expression *)
  | e_var_b  : nat -> exp
@@ -187,57 +188,15 @@ Fixpoint FindSubtypes (A: typ) :=
     | t_and A1 B1   => (FindSubtypes A1) `inter` (FindSubtypes B1)
     end.
 
-(* defns Subtyping *)
-Reserved Notation "A <: B" (at level 80).
-Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
- | s_refl : forall A, 
-     A <: A
- | s_trans : forall A B C,
-     A <: B ->
-     B <: C ->
-     A <: C 
- | s_top : forall A, A <: t_top
- | s_arrow : forall (A1 A2 B1 B2:typ),
-     B1 <: A1 ->
-     A2 <: B2 ->
-     (t_arrow A1 A2) <: (t_arrow B1 B2)
- | s_ora : forall (A1 A2 A:typ),
-     A1 <: A ->
-     A2 <: A ->
-     (t_union A1 A2) <: A
- | s_orb : forall (A1 A2:typ),
-     A1 <: (t_union A1 A2)
- | s_orc : forall (A1 A2:typ),
-     A2 <: (t_union A1 A2)
- | s_anda : forall A A1 A2,
-     A <: A1 ->
-     A <: A2 ->
-     A <: (t_and A1 A2)
- | s_andb : forall A1 A2,
-     (t_and A1 A2) <: A1
- | s_andc : forall A1 A2,
-     (t_and A1 A2) <: A2
- | s_disj : forall A B,
-     FindSubtypes A = [] ->
-     A <: B
- | s_distarr : forall A B1 B2,
-     t_and (t_arrow A B1) (t_arrow A B2) <: (t_arrow A (t_and B1 B2))
- | s_distarrrev : forall A B1 B2,
-     t_arrow A (t_and B1 B2) <: t_and (t_arrow A B1) (t_arrow A B2)
- | s_distarru : forall A1 A2 B,
-     t_and (t_arrow A1 B) (t_arrow A2 B) <: t_arrow (t_union A1 A2) B
- | s_distarrurev : forall A1 A2 B,
-     t_arrow (t_union A1 A2) B <: t_and (t_arrow A1 B) (t_arrow A2 B)
- | s_distor : forall A1 A2 B,
-     t_and (t_union A1 B) (t_union A2 B) <: t_union (t_and A1 A2) B
- | s_distand : forall A1 A2 B,
-     t_and (t_union A1 A2) B <: t_union (t_and A1 B) (t_and A2 B)
-where "A <: B" := (subtyping A B) : env_scope.
+(* 
+defns Subtyping from equivalance
+*)
+Notation "A <: B" := (declarative_subtyping A B) (at level 80).
 
 Hint Constructors pexpr value findtype lc_exp ok okt : core.
-Hint Resolve s_refl s_top s_arrow s_ora : core.
-Hint Resolve s_orb s_orc s_anda s_andb s_andc s_disj : core.
-Hint Resolve s_distarr s_distarrrev s_distarru s_distarrurev s_distor s_distand : core.
+Hint Resolve DS_refl DS_top DS_bot DS_arrow DS_or : core.
+Hint Resolve DS_orl DS_orl DS_and DS_andl DS_andr : core.
+Hint Resolve DS_distArr DS_distArrRev DS_distArrU DS_distArrURev DS_distOr DS_distAnd : core.
 
 (*************************)
 (***** Ordinary Types ****)
@@ -333,25 +292,28 @@ Defined.*)
 Lemma sub_and : forall A B C, A <: (t_and B C) -> A <: B /\ A <: C.
 Proof.
 intros; dependent induction H; try solve [split*].
-specialize (IHsubtyping2 B C). destruct IHsubtyping2; auto.
-split; eapply s_trans; eauto.
-specialize (IHsubtyping1 B C).
-specialize (IHsubtyping2 B C).
-forwards*: IHsubtyping1.
+specialize (IHdeclarative_subtyping2 B C). destruct IHdeclarative_subtyping2; auto.
+split; eapply DS_trans; eauto.
 split.
-assert (t_and (t_and B C) A2 <: (t_and B C)); auto.
+assert (t_and (t_and B C) B0 <: (t_and B C)); auto.
 assert ((t_and B C) <: B); auto.
-eapply s_trans; eauto.
-assert (t_and (t_and B C) A2 <: (t_and B C)); auto.
+eapply DS_trans; eauto.
+assert (t_and (t_and B C) B0 <: (t_and B C)); auto.
 assert ((t_and B C) <: C); auto.
-eapply s_trans; eauto.
+eapply DS_trans; eauto.
 split.
-assert (t_and A1 (t_and B C) <: (t_and B C)); auto.
+assert (t_and A (t_and B C) <: (t_and B C)); auto.
 assert ((t_and B C) <: B); auto.
-eapply s_trans; eauto.
-assert (t_and A1 (t_and B C) <: (t_and B C)); auto.
+eapply DS_trans; eauto.
+assert (t_and A (t_and B C) <: (t_and B C)); auto.
 assert ((t_and B C) <: C); auto.
-eapply s_trans; eauto.
+eapply DS_trans; eauto.
+specialize (IHdeclarative_subtyping1 B C).
+specialize (IHdeclarative_subtyping2 B C).
+forwards*: IHdeclarative_subtyping1.
+split. apply DS_arrow; auto.
+apply DS_arrow; auto.
+apply DS_orr.
 Qed.
 
 Lemma arrow_in_top_bot : forall A B C, 
@@ -378,34 +340,81 @@ Admitted Properties
 Trivially proveable in equivalent algorithmic formulization
 *)
 
+Lemma ord_eq : forall A, Ord A -> ordu A.
+Proof.
+ induction A; intros; eauto.
+ inversion H. inversion H.
+Defined.
+
 Lemma ord_sub_or_unique : forall A B C, Ord A ->
 A <: (t_union B C) -> A <: B \/ A <: C.
 Proof.
   intros.
-  inductions H.
-  inductions H0.
+  apply dsub2asub in H0.
 Admitted.
 
 Lemma top_sub_int_false : t_top <: t_int -> False.
-Admitted.
+Proof.
+  intros. apply dsub2asub in H.
+  inverts* H; try solve
+  [inversion H0; inversion H1; inversion H2; inversion H3].
+Defined.
 
 Lemma top_sub_bot_false : t_top <: t_bot -> False.
-Admitted.
+Proof.
+  intros. apply dsub2asub in H.
+  inverts* H; 
+  try solve [inversion H0; inversion H1; inversion H2; inversion H3].
+Defined.
 
 Lemma top_sub_arrow_false : forall A B, t_top <: (t_arrow A B) -> False.
-Admitted.
+Proof.
+  intros. apply dsub2asub in H.
+  inductions H. inverts H.
+  forwards*: IHalgorithmic_sub1.
+  forwards*: IHalgorithmic_sub1.
+  inverts H0. inverts H0. inverts H1. inverts H2. inverts H2.
+Defined.
 
 Lemma int_sub_bot_false : t_int <: t_bot -> False.
-Admitted.
+Proof.
+  intros. apply dsub2asub in H.
+  inverts H;
+  try solve [inversion H0; inversion H1; inversion H2; inversion H3].
+Defined.
 
 Lemma int_sub_arrow_false : forall A B, t_int <: (t_arrow A B) -> False.
-Admitted.
+Proof.
+  intros. apply dsub2asub in H.
+  inductions H.
+  inverts H.
+  forwards*: IHalgorithmic_sub1.
+  forwards*: IHalgorithmic_sub1.
+  inverts H0. inverts H0. inverts H1. inverts H2. inverts H2.
+Defined.
 
 Lemma arrow_sub_int_false : forall A B, (t_arrow A B) <: t_int -> False.
-Admitted.
+Proof.
+  intros. apply dsub2asub in H.
+  inductions H.
+  inverts H. inverts H0.
+  forwards*: IHalgorithmic_sub.
+  forwards*: IHalgorithmic_sub.
+  inverts H0.
+  forwards*: IHalgorithmic_sub.
+  forwards*: IHalgorithmic_sub.
+  inverts H1. inverts H2. inverts H2.
+Defined.
 
 Lemma arrow_sub_bot_false : forall A B, (t_arrow A B) <: t_bot -> False.
-Admitted.
+Proof.
+  intros. apply dsub2asub in H.
+  inductions H.
+  inverts H.
+  inverts H0; forwards*: IHalgorithmic_sub.
+  inverts H0; forwards*: IHalgorithmic_sub.
+  inverts H1. inverts H2. inverts H2.
+Defined.
 
 Lemma ord_in_findsubtypes : forall A B,
 Ord A -> A <: B -> set_In A (FindSubtypes B) \/ 
@@ -451,8 +460,8 @@ Proof.
     * destruct H1 as [x1 [x2]]. destruct H1. inversion H1.
     (*arrow case*)
   - induction B; simpl; auto.
-   + right. exists* t1 t2.
    + apply arrow_sub_int_false in H. inversion H.
+   + right. exists* t1 t2. 
    + apply arrow_sub_bot_false in H. inversion H.
    + right. exists* t1 t2.
    + apply ord_sub_or_unique in H; auto.
@@ -515,10 +524,10 @@ Proof.
   inductions A.
   - simpl in H.
     destruct H. rewrite <- H. auto.
-    destruct H. rewrite <- H. auto.
-    destruct H. rewrite <- H. auto.
     inversion H.
   - simpl in H.
+    destruct H. rewrite <- H. auto.
+    destruct H. rewrite <- H. auto.
     destruct H. rewrite <- H. auto.
     inversion H.
   - simpl in H. inversion H.
@@ -589,11 +598,11 @@ Proof.
   intros.
   inductions A.
   - simpl in H.
-    destruct H as [H | [H | [H | H] ] ]; 
-    try solve [rewrite <- H; auto].
+    destruct H. rewrite <- H. auto.
     inversion H.
   - simpl in H.
-    destruct H. rewrite <- H. auto.
+    destruct H as [H | [H | [H | H] ] ]; 
+    try solve [rewrite <- H; auto].
     inversion H.
   - simpl in H. inversion H.
   - simpl in H.
@@ -602,11 +611,12 @@ Proof.
   - simpl in H.
     apply set_union_elim in H. destruct H.
     forwards*: IHA1.
-    eapply s_trans; auto.
+    eapply DS_trans; auto.
     forwards*: IHA2.
-    eapply s_trans; auto.
+    eapply DS_trans; auto.
+    apply DS_orr.
   - simpl in H.
-    apply s_anda.
+    apply DS_and.
     apply set_inter_elim1 in H. 
     apply IHA1; auto.
     apply set_inter_elim2 in H. 
@@ -653,6 +663,7 @@ forall B, A <: B -> set_In x (FindSubtypes B).
 Proof.
   intros.
   inductions H0; eauto.
+  (*case top*)
   - lets H': H.
     apply elem_in_findsubtypes_ord in H'.
     simpl. destruct H'.
@@ -660,27 +671,25 @@ Proof.
     left. auto.
     apply arrow_in_top_bot in H.
     rewrite H. auto.
-  - simpl in H. apply set_union_elim in H.
-    destruct H. 
-    apply IHsubtyping1; auto.
-    apply IHsubtyping2; auto.
-  - simpl. apply set_union_intro1. auto.
-  - simpl. apply set_union_intro2. auto.
-  - simpl. apply set_inter_intro.
-    apply IHsubtyping1; auto.
-    apply IHsubtyping2; auto.
+  - (*case bot*)
+    simpl in H. inversion H. 
+  - simpl. apply set_inter_intro; auto.
   - simpl in H. apply set_inter_elim1 in H. auto.
   - simpl in H. apply set_inter_elim2 in H. auto.
-  - rewrite H0 in H. inverts H.
-  - simpl in *.
-    apply set_inter_elim in H. destruct H.
-    apply set_union_elim in H.
-    apply set_union_elim in H0.
+  - simpl in H. apply set_union_elim in H.
+    destruct H. 
+    apply IHdeclarative_subtyping1; auto.
+    apply IHdeclarative_subtyping2; auto.
+  - simpl. apply set_union_intro1. auto.
+  - simpl. apply set_union_intro2. auto.
+  - simpl in *. apply set_inter_elim in H.
+    destruct H.
     apply set_union_intro.
-    destruct H. destruct H0.
+    apply set_union_elim in H. destruct H.
+    apply set_union_elim in H0. destruct H0.
     left. apply set_inter_intro; auto.
-    right. auto.
-    right. auto.
+    right*.
+    right*.
   - simpl in *.
     apply set_inter_elim in H. destruct H.
     apply set_union_elim in H.
@@ -770,7 +779,7 @@ Inductive typing : env -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
      typing G (e_app e1 e2) infer B
  | typ_sub : forall (G:env) (e:exp) (A B:typ),
      typing G e infer B ->
-     subtyping B A ->
+     B <: A ->
      typing G e check A
  | typ_abs : forall (L:vars) (G:env) (e:exp) (A B:typ),
       ( forall x , x \notin  L  -> typing  (G & x ~: A )   ( open_exp_wrt_exp e (e_var_f x) )  check B )  ->
@@ -823,13 +832,13 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      lc_exp (e_typeof (e_ann p D) A e1 B e2) ->
      pexpr p ->
      findtype p C ->
-     subtyping C A ->
+     C <: A ->
      step (e_typeof (e_ann p D) A e1 B e2)  (open_exp_wrt_exp e1 (e_ann p A) )
  | step_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ) (D:typ),
     lc_exp (e_typeof (e_ann p D) A e1 B e2) ->
      pexpr p ->
      findtype p C ->
-     subtyping C B ->
+     C <: B ->
      step (e_typeof (e_ann p D) A e1 B e2)  (open_exp_wrt_exp  e2 (e_ann p B) )
 where "e --> e'" := (step e e') : env_scope.
 

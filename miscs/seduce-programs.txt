@@ -1,0 +1,128 @@
+let f4 (Int -> Int; ['0'--'9'+] -> Int)
+| Int -> 45
+| x & Int -> x + 4
+| x -> int_of x
+;;
+f4 4
+
+let f5 (Int | String -> Int)
+| _ -> 10
+| x & Int -> x + 5
+| x & ['0'--'9'+] -> int_of x
+| _ -> 5
+;;
+f5 4
+
+val f4 : [ '0'--'9'+ ] -> Int & Int -> Int = <fun>
+- : Int = 8
+At chars 184-190:
+| _ -> 5
+Warning: This branch is not used
+At chars 153-180:
+| x & ['0'--'9'+] -> int_of x
+Warning: This branch is not used
+At chars 133-149:
+| x & Int -> x + 5
+Warning: This branch is not used
+val f5 : ([ Char* ] | Int) -> Int = <fun>
+- : Int = 10
+
+Ok.
+
+
+let f6 (Int | String -> Int | String)
+| x & Int -> x + 6
+| x & String -> x
+| x & ['0'--'9'+] -> int_of x
+
+;;
+f6 "123"
+
+
+let f4 (Any -> String)
+| x -> match x with
+       | String -> "String"
+       | Int | String -> "Int | String"
+       | Int -> "Int"
+       | Any -> "any"
+
+;;
+f4 `false
+
+At chars 124-136:
+       | Int -> "Int"
+Warning: This branch is not used
+val f4 : Any -> String = <fun>
+- : String = "any"
+
+Ok.
+
+
+let f4 (Any -> String)
+| x -> match x with
+       | "" -> "empty"
+       | String -> "String"
+       | Int | String -> "Int | String"
+       | Int -> "Int"
+       | Any -> "any"
+
+;;
+f4 ""
+
+
+let f4 (Any -> String)
+| x -> match x with
+       | Float -> "float"
+       | "" -> "empty"
+       | String -> "String"
+       | Int | String -> "Int | String"
+       | Int -> "Int"
+       | Any -> "any"
+
+;;
+f4 `nil
+
+At chars 175-187:
+       | Int -> "Int"
+Warning: This branch is not used
+val f4 : Any -> String = <fun>
+- : String = "empty"
+
+Ok.
+
+
+
+let f4 (Any -> String)
+| x -> match x with
+       | "" -> "empty string first"
+       | nil -> "nil"
+       | Any -> "any"
+       | "" -> "empty"
+       | String -> "String"
+       | Int | String -> "Int | String"
+       | Int -> "Int"
+
+;;
+let test = `nil in
+f4 test
+
+- : String = "empty string first"
+
+
+
+let f4 (Any -> String)
+| x -> match x with
+       | "" -> "empty string first"
+       | [] -> "[]"
+       | nil -> "nil"
+       | Any -> "any"
+       | "" -> "empty"
+       | String -> "String"
+       | Int | String -> "Int | String"
+       | Int -> "Int"
+
+;;
+let test : [] = `nil in
+f4 test
+
+- : String = "empty string first"

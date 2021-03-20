@@ -1,6 +1,9 @@
 -R . Top
+equivalance.v
 LibTactics.v
 subtyping.v
 syntax_snow.v
 syntax.v
+syntax_with_equivalance.v
 typing.v
+typing_with_equivalance.v

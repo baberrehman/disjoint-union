@@ -1,15 +1,13 @@
-(*Require Import Metalib.Metatheory.*)
 Require Import LibTactics.
 Require Import Omega.
-
 
 Inductive typ : Set :=  (*r types *)
  | t_int : typ (*r int *)
  | t_top : typ (*r top type *)
  | t_bot : typ (*r bottom type *)
- | t_arrow (A:typ) (B:typ) (*r function types *)
- | t_and (A:typ) (B:typ) (*r intersection *)
- | t_or (A:typ) (B:typ) (*r union *).
+ | t_arrow : typ -> typ -> typ (*r function types *)
+ | t_union : typ -> typ -> typ (*r intersection *)
+ | t_and : typ -> typ -> typ. (*r intersection *)
 
 (* defns DSub *)
 Inductive declarative_subtyping : typ -> typ -> Prop :=    (* defn declarative_subtyping *)
@@ -38,23 +36,23 @@ Inductive declarative_subtyping : typ -> typ -> Prop :=    (* defn declarative_s
  | DS_or : forall (A B C:typ),
      declarative_subtyping A C ->
      declarative_subtyping B C ->
-     declarative_subtyping (t_or A B) C
+     declarative_subtyping (t_union A B) C
  | DS_orl : forall (A B:typ),
-     declarative_subtyping A (t_or A B)
+     declarative_subtyping A (t_union A B)
  | DS_orr : forall (B A:typ),
-     declarative_subtyping B (t_or A B)
+     declarative_subtyping B (t_union A B)
  | DS_distArr : forall (A B1 B2:typ),
      declarative_subtyping (t_and  (t_arrow A B1)   (t_arrow A B2) ) (t_arrow A (t_and B1 B2))
  | DS_distArrRev : forall (A B1 B2:typ),
      declarative_subtyping (t_arrow A (t_and B1 B2)) (t_and  (t_arrow A B1)   (t_arrow A B2) )
  | DS_distArrU : forall (A1 B A2:typ),
-     declarative_subtyping (t_and  (t_arrow A1 B)   (t_arrow A2 B) ) (t_arrow (t_or A1 A2) B)
+     declarative_subtyping (t_and  (t_arrow A1 B)   (t_arrow A2 B) ) (t_arrow (t_union A1 A2) B)
  | DS_distArrURev : forall (A1 A2 B:typ),
-     declarative_subtyping (t_arrow (t_or A1 A2) B) (t_and  (t_arrow A1 B)   (t_arrow A2 B) )
+     declarative_subtyping (t_arrow (t_union A1 A2) B) (t_and  (t_arrow A1 B)   (t_arrow A2 B) )
  | DS_distOr : forall (A1 B A2:typ),
-     declarative_subtyping (t_and  (t_or A1 B)   (t_or A2 B) ) (t_or  (t_and A1 A2)  B)
+     declarative_subtyping (t_and  (t_union A1 B)   (t_union A2 B) ) (t_union  (t_and A1 A2)  B)
  | DS_distAnd : forall (A1 A2 B:typ),
-     declarative_subtyping (t_and  (t_or A1 A2)  B) (t_or  (t_and A1 B)   (t_and A2 B) ).
+     declarative_subtyping (t_and  (t_union A1 A2)  B) (t_union  (t_and A1 B)   (t_and A2 B) ).
 (** definitions *)
 
 (* defns Ordinary *)
@@ -85,7 +83,7 @@ Inductive ordi : typ -> Prop :=    (* defn ordi *)
  | OI_or : forall (A B:typ),
      ordi A ->
      ordi B ->
-     ordi (t_or A B).
+     ordi (t_union A B).
 (** definitions *)
 
 (* defns Split *)
@@ -101,14 +99,14 @@ Inductive spli : typ -> typ -> typ -> Prop :=    (* defn spli *)
      spli (t_arrow A D) (t_arrow B D) (t_arrow C D)
  | SpI_orl : forall (A B A1 A2:typ),
      spli A A1 A2 ->
-     spli (t_or A B) (t_or A1 B) (t_or A2 B)
+     spli (t_union A B) (t_union A1 B) (t_union A2 B)
  | SpI_orr : forall (A B B1 B2:typ),
      ordi A ->
      spli B B1 B2 ->
-     spli (t_or A B) (t_or A B1) (t_or A B2)
+     spli (t_union A B) (t_union A B1) (t_union A B2)
 with splu : typ -> typ -> typ -> Prop :=    (* defn splu *)
  | SpU_or : forall (A B:typ),
-     splu (t_or A B) A B
+     splu (t_union A B) A B
  | SpU_andl : forall (A B A1 A2:typ),
      splu A A1 A2 ->
      splu (t_and A B) (t_and A1 B) (t_and A2 B)
@@ -177,7 +175,7 @@ Fixpoint size_typ (A1 : typ) {struct A1} : nat :=
     | t_bot => 1
     | t_arrow A2 B1 => 1 + (size_typ A2) + (size_typ B1)
     | t_and A2 B1 => 1 + (size_typ A2) + (size_typ B1)
-    | t_or A2 B1 => 1 + (size_typ A2) + (size_typ B1)
+    | t_union A2 B1 => 1 + (size_typ A2) + (size_typ B1)
   end.
 
 Lemma size_typ_min :
@@ -227,7 +225,7 @@ Qed.
 Ltac solve_false := try intro; try solve [false; eauto 3 with FalseHd].
 
 Lemma and_or_mismatch: forall A B C D,
-    t_and A B = t_or C D -> False.
+    t_and A B = t_union C D -> False.
 Proof.
   intros.
   inverts H.
@@ -241,7 +239,7 @@ Proof.
 Qed.
 
 Lemma ordu_or_false : forall A B,
-    ordu (t_or A B) -> False.
+    ordu (t_union A B) -> False.
 Proof.
   intros.
   inverts H.
@@ -543,8 +541,8 @@ Proof with (s_auto_unify; try eassumption; s_eomg2; eauto 4 with AllHd).
   - inverts Hsub; solve_false; s_auto_unify; auto with *.
     + (* double split A *)
       inverts Hspl; inverts H0...
-      * forwards* (?&?): IH (t_or A0 A2) A0 A2 B...
-      * forwards* (?&?): IH (t_or A1 B1) A1 B1 B...
+      * forwards* (?&?): IH (t_union A0 A2) A0 A2 B...
+      * forwards* (?&?): IH (t_union A1 B1) A1 B1 B...
       * forwards* (?&?): IH H2 B...
     + (* double split A *)
       inverts Hspl; inverts H0...
@@ -599,13 +597,13 @@ Ltac s_auto_inv :=
   repeat try match goal with
          | [ H1: algorithmic_sub ?A ?B, H2: splu ?A _ _ |- _ ] =>
            try (forwards~ (?&?): s_rule_or_inv H1 H2; clear H1)
-         | [ H1: algorithmic_sub (t_or _ _) ?B |- _ ] =>
+         | [ H1: algorithmic_sub (t_union _ _) ?B |- _ ] =>
            try (forwards~ (?&?): s_rule_or_inv H1; clear H1)
          end;
   repeat try match goal with
          | [ Hord: ordu ?A, H1: algorithmic_sub ?A ?B, H2: splu ?B _ _ |- _ ] =>
            try (forwards~ [?|?]: s_rule_orlr_inv H1 Hord H2; clear H1)
-         | [ Hord: ordi ?A, H1: algorithmic_sub ?A (t_or _ _) |- _ ] =>
+         | [ Hord: ordi ?A, H1: algorithmic_sub ?A (t_union _ _) |- _ ] =>
            try (forwards~ [?|?]: s_rule_orlr_inv H1 Hord; clear H1)
              end.
 
@@ -792,7 +790,7 @@ Proof with (eauto 3 with AllHd).
 Qed.
 
 Lemma s_sub_distArrU: forall A B C,
-    algorithmic_sub (t_and (t_arrow A C) (t_arrow B C)) (t_arrow (t_or A B) C).
+    algorithmic_sub (t_and (t_arrow A C) (t_arrow B C)) (t_arrow (t_union A B) C).
 Proof with (s_auto_unify; try eassumption).
   introv.
   indTypSize (size_typ C).
@@ -881,7 +879,7 @@ Proof.
 Qed.
 
 Lemma dsub_symm_or: forall A B,
-    declarative_subtyping (t_or A B) (t_or B A).
+    declarative_subtyping (t_union A B) (t_union B A).
 Proof.
   introv.
   applys DS_or; eauto with *.
@@ -890,7 +888,7 @@ Qed.
 Hint Resolve dsub_symm_and dsub_symm_or : AllHd.
 
 Lemma dsub_or: forall A B C,
-    splu A B C -> declarative_subtyping A (t_or B C).
+    splu A B C -> declarative_subtyping A (t_union B C).
 Proof with (eauto 3 with AllHb).
   introv H.
   induction H; try intuition; eauto 3 with AllHb.
@@ -898,7 +896,7 @@ Proof with (eauto 3 with AllHb).
     2: { applys DS_distAnd. }
     eauto 3 with AllHb.
   - applys DS_trans. applys dsub_symm_and.
-    applys DS_trans (t_or (t_and B1 A) (t_and B2 A)).
+    applys DS_trans (t_union (t_and B1 A) (t_and B2 A)).
     1: { applys DS_trans.
         2: { applys DS_distAnd. }
         eauto 3 with AllHb. }
@@ -917,13 +915,13 @@ Proof with (eauto 3 with AllHb).
     1: { applys DS_distOr. }
     eauto 3 with AllHb.
   - applys DS_trans. 2: { applys dsub_symm_or. }
-    applys DS_trans (t_and (t_or B1 A) (t_or B2 A)).
+    applys DS_trans (t_and (t_union B1 A) (t_union B2 A)).
     2: { applys DS_trans.
          applys DS_distOr.
         eauto 3 with AllHb. }
     applys DS_and.
-    applys DS_trans (t_or A B1)...
-    applys DS_trans (t_or A B2)...
+    applys DS_trans (t_union A B1)...
+    applys DS_trans (t_union A B2)...
 Qed.
 
 Hint Resolve dsub_and dsub_or : AllHd.
@@ -957,13 +955,12 @@ Proof with (simpl in *; try eassumption; eauto 3 with *).
     + (* andr *)
       forwards (?&?): dsub_spl H0. applys DS_trans IHalgorithmic_sub...
     +  (* or *)
-      applys DS_trans (t_or A1 A2)...
+      applys DS_trans (t_union A1 A2)...
     + (* orl *)
       forwards (?&?): dsub_splu H2. applys DS_trans IHalgorithmic_sub...
     + (* orr *)
       forwards (?&?): dsub_splu H2. applys DS_trans IHalgorithmic_sub...
 Qed.
-
 
 Lemma int_sub_bot_false :
   algorithmic_sub t_int t_bot -> False.
