@@ -1,4 +1,60 @@
 \section{Overview}
 \label{sec:overview}
 
+\bruno{I'm sketching a possible structure, but it can be changed ofcourse.}
+
+\subsection{Union Types}
+
+Brief intro to union types and one or 2 simple examples that show that we
+can automatically lift values into union type without the need of some
+tag/constructor. Something like:
+
+\begin{verbatim}
+... x : String | Int = 1 ...
+\end{verbatim}
+
+\subsection{Eliminating Union Types}
+
+Motivate the need for having a construct that can eliminate union types,
+perhaps trying to use an example where the String above would be a kind
+of exception, and the Int would be regular computation. Alternatively
+find an existing example from the literature. 
+
+Discussing existing approaches for eliminating union types;
+point out that elimination constructs based on types (our focus) vs
+elimination constructs based on tags (which are used in algebraic
+datatypes or polymorphic variants (like in OCaml)).
+The focus should be on type-based approaches.
+
+Try to identify some limitations/problems. For instance how to deal
+with ambiguity (just use order? restrict the construct somehow ...).
+
+\subsection{Eliminating Union Types in Ceylon}
+
+Introduce the Ceylon approach with examples; introduce the idea of
+disjointness informally; contrast with existing constructs.
+Try to motivate the adapotion of disjointness (this should be discussed
+in the Ceylon documentation to some extent).
+
+Here it is important to give representative examples (look at documentation
+and/or other online resources), including examples
+that demonstrate how Ceylon uses union types to model overloaded functions. 
+
+\subsection{Our work}
+
+Introduce our work, setting the goal to study the construct formally.
+Connect with the work on disjoint intersection types, which also
+employs a notion of disjointness, but for intersection. Explain that
+what is needed is a dual notion of disjointness.
+
+Introduce the first calculus, and explain that it is directly inspired
+by a dual notion of discjointness.
+
+Introduce the second calculus and identify a technical challenge with
+disjointness: the addition of intersection types breaks the previous
+notion of disjointness. Introduce the novel way to find disjoint types. 
+
+Summarize/mention key results: type-safety; soundness/completeness of
+disjointness; determinism. 
+
 \baber{This section will give an overview.}
