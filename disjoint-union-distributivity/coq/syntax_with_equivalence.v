@@ -1,6 +1,6 @@
 
 (*
-Update started on March 14, 2021
+Update started on March 19, 2021
 *)
 
 (*
@@ -13,10 +13,7 @@ FindSubtypes B = []
 
 Declarative subtyping
 
-
-******************************************************************
-Redundant subtyping rule for bottom type removed in this version.
-******************************************************************
+Subtyping used from equivalence.v
 
 *)
 
@@ -26,7 +23,7 @@ Require Import Coq.Lists.ListSet.
 From Coq Require Export Lists.List.
 Export ListNotations.
 Require Import Coq.Strings.String.
-Require Import equivalance.
+Require Import equivalence.
 
 (** syntax *)
 
@@ -336,7 +333,7 @@ Proof.
 Defined.
 
 (*
-Admitted Properties
+Properties
 Trivially proveable in equivalent algorithmic formulization
 *)
 
@@ -350,8 +347,15 @@ Lemma ord_sub_or_unique : forall A B C, Ord A ->
 A <: (t_union B C) -> A <: B \/ A <: C.
 Proof.
   intros.
+  apply ord_eq in H.
   apply dsub2asub in H0.
-Admitted.
+  assert (splu (t_union B C) B C) by auto.
+  lets: s_rule_orlr_inv A (t_union B C) B C H0.
+  lets: H2 H H1.
+  destruct H3.
+  apply dsub2asub in H3; auto.
+  apply dsub2asub in H3; auto.
+Qed.
 
 Lemma top_sub_int_false : t_top <: t_int -> False.
 Proof.

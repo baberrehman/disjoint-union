@@ -1,19 +1,15 @@
 Require Import TLC.LibLN.
-Require Import equivalance.
-Require Import syntax_with_equivalance.
+Require Import equivalence.
+Require Import syntax_with_equivalence.
 
 (*
-This file is created on March 14, 2021
+This file is created on March 19, 2021
 
 This is the main semantics file for disjoint union types
 with intersection types and declerative subtyping.
 
-syntax.v is the syntax file for this semantics
-
 This file contains type safety and deterministic lemmas
-associated with syntax.v
-
-Bool and String primitive type
+associated with syntax_with_equivalence.v
 
 declarative subtyping with distributivity rules.
 
@@ -313,28 +309,6 @@ intros. split. intros.
 inverts H. inverts H0. eauto.
 intros. eapply typ_sub; eauto.
 Qed.
-
-(*
-Admitted Properties
-Trivially proveable in equivalent algorithmic formulization
-*)
-
-(*Lemma ord_sub_or_unique : forall A B C, Ord A ->
-A <: (t_union B C) -> A <: B \/ A <: C.
-Proof.
-  intros.
-  inductions H.
-  inductions H0.
-Admitted.*)
-
-(*Lemma int_sub_arrow_false : forall A B, t_int <: (t_arrow A B) -> False.
-Admitted.*)
-
-(*Lemma arrow_sub_arrow : forall A1 A2 B1 B2,
-(t_arrow A1 B1) <: (t_arrow A2 B2) -> A2 <: A1 /\ B1 <: B2.
-Proof.
-  intros.
-Admitted.*)
 
 Lemma check_or_typ : forall E e A B,
    pexpr e ->

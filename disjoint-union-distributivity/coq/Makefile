@@ -5,7 +5,7 @@ COQMKFILENAME=CoqSrc.mk
 
 LIBNAME="Top"
 
-FILES    = syntax
+FILES    = equivalence
 VFILES   = $(foreach i, $(FILES), $(i).v)
 
 .SECONDARY: $(VFILES)
