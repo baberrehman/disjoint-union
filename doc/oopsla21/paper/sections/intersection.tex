@@ -53,8 +53,8 @@ Subtyping relation is relflexive (\cref{lemma:union:refl}) and transitive (\cref
     \centering
     \begin{tabular}{llcl}
       \toprule
-      $FindSubtypes$ |A| &  & & \\
-     & $[[findsubtypes Top]]$ & = & \{$ [[Int]], [[Top -> Bot]], [[Top]] $\}  \\
+      Lowest Ordinary Subtypes (LOS) |A| &  & & \\
+     & $[[findsubtypes Top]]$ & = & \{$ [[Int]], [[Top -> Bot]]$\}  \\
      & $[[findsubtypes Bot]]$ & = & \{\}  \\
      & $[[findsubtypes Int]]$ & = & \{$ [[Int]] $\}  \\
      & $[[findsubtypes A -> B]]$ & = & \{$ [[Top -> Bot]] $\}  \\
@@ -63,7 +63,7 @@ Subtyping relation is relflexive (\cref{lemma:union:refl}) and transitive (\cref
       \bottomrule
     \end{tabular}
   %\end{small}
-  \caption{Additional Types, Subtyping, Ordinary Types and FindSubtypes function for \cal with Intersection Types.}
+  \caption{Additional Types, Subtyping, Ordinary Types and Lowest Ordinary Subtypes function for \cal with Intersection Types.}
   \label{fig:inter:system}
 \end{figure}
 
@@ -104,8 +104,8 @@ The reason we did not write intersection in \Cref{def:union:disj1} is because we
 intersection types in \cal discussed in \Cref{sec:union}. Updated disjointness specifications are
 now represented as $[[A *s B]]$ and not $[[A]]$ $*_{s1}$ $[[B]]$.
 
-\paragraph{FindSubTypes ($[[findsubtypes A]]$)}
-$FindSubTypes$ ($[[findsubtypes A]]$) is a function which returns a list of ordinary subtypes
+\paragraph{Lowest Ordinary Subtypes ($[[findsubtypes A]]$)}
+Lowest Ordinary Subtypes ($[[findsubtypes A]]$) is a function which returns a list of ordinary subtypes
 of the given input type. It is shown at the endmost part of \Cref{fig:inter:system}.
 Ordinary subtypes of $[[Top]]$ are $[[Int]]$, $[[Top -> Bot]]$ and $[[Top]]$ itself.
 No ordinary type is subtype of $[[Bot]]$ type. Ordinary subtype of $[[Int]]$ is $[[Int]]$ itself.

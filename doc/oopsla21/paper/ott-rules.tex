@@ -551,6 +551,166 @@
 \newcommand{\ottdefnsSubtyping}{
 \ottdefnsubtyping{}}
 
+% defns DSubtyping
+%% defn dsubtyping
+\newcommand{\ottdruledsXXrefl}[1]{\ottdrule[#1]{%
+}{
+ \ottnt{A}  \ \underline{\textless} \  \ottnt{A} }{%
+{\ottdrulename{ds\_refl}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXtrans}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  \ \underline{\textless} \  \ottnt{B} }%
+\ottpremise{ \ottnt{B}  \ \underline{\textless} \  \ottnt{C} }%
+}{
+ \ottnt{A}  \ \underline{\textless} \  \ottnt{C} }{%
+{\ottdrulename{ds\_trans}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXtop}[1]{\ottdrule[#1]{%
+}{
+ \ottnt{A}  \ \underline{\textless} \   \top  }{%
+{\ottdrulename{ds\_top}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXbtm}[1]{\ottdrule[#1]{%
+}{
+  \bot   \ \underline{\textless} \  \ottnt{A} }{%
+{\ottdrulename{ds\_btm}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXint}[1]{\ottdrule[#1]{%
+}{
+  \mathsf{Int}   \ \underline{\textless} \   \mathsf{Int}  }{%
+{\ottdrulename{ds\_int}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXarrow}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{B_{{\mathrm{1}}}}  \ \underline{\textless} \  \ottnt{A_{{\mathrm{1}}}} }%
+\ottpremise{ \ottnt{A_{{\mathrm{2}}}}  \ \underline{\textless} \  \ottnt{B_{{\mathrm{2}}}} }%
+}{
+ \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{A_{{\mathrm{2}}}}  \ \underline{\textless} \  \ottnt{B_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}} }{%
+{\ottdrulename{ds\_arrow}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXora}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A_{{\mathrm{1}}}}  \ \underline{\textless} \  \ottnt{A} }%
+\ottpremise{ \ottnt{A_{{\mathrm{2}}}}  \ \underline{\textless} \  \ottnt{A} }%
+}{
+ \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}}  \ \underline{\textless} \  \ottnt{A} }{%
+{\ottdrulename{ds\_ora}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXorb}[1]{\ottdrule[#1]{%
+}{
+ \ottnt{A_{{\mathrm{1}}}}  \ \underline{\textless} \  \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}} }{%
+{\ottdrulename{ds\_orb}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXorc}[1]{\ottdrule[#1]{%
+}{
+ \ottnt{A_{{\mathrm{2}}}}  \ \underline{\textless} \  \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}} }{%
+{\ottdrulename{ds\_orc}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXanda}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  \ \underline{\textless} \  \ottnt{A_{{\mathrm{1}}}} }%
+\ottpremise{ \ottnt{A}  \ \underline{\textless} \  \ottnt{A_{{\mathrm{2}}}} }%
+}{
+ \ottnt{A}  \ \underline{\textless} \  \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}} }{%
+{\ottdrulename{ds\_anda}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXandb}[1]{\ottdrule[#1]{%
+}{
+ \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}}  \ \underline{\textless} \  \ottnt{A_{{\mathrm{1}}}} }{%
+{\ottdrulename{ds\_andb}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXandc}[1]{\ottdrule[#1]{%
+}{
+ \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}}  \ \underline{\textless} \  \ottnt{A_{{\mathrm{2}}}} }{%
+{\ottdrulename{ds\_andc}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXdistarr}[1]{\ottdrule[#1]{%
+}{
+ \ottsym{(}  \ottnt{A}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{)}  \wedge  \ottsym{(}  \ottnt{A}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)}  \ \underline{\textless} \  \ottnt{A}  \rightarrow  \ottsym{(}  \ottnt{B_{{\mathrm{1}}}}  \wedge  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} }{%
+{\ottdrulename{ds\_distarr}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXdistarrrev}[1]{\ottdrule[#1]{%
+}{
+ \ottnt{A}  \rightarrow  \ottsym{(}  \ottnt{B_{{\mathrm{1}}}}  \wedge  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)}  \ \underline{\textless} \  \ottsym{(}  \ottnt{A}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{)}  \wedge  \ottsym{(}  \ottnt{A}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} }{%
+{\ottdrulename{ds\_distarrrev}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXdistarru}[1]{\ottdrule[#1]{%
+}{
+ \ottsym{(}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B}  \ottsym{)}  \wedge  \ottsym{(}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B}  \ottsym{)}  \ \underline{\textless} \  \ottsym{(}  \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}}  \ottsym{)}  \rightarrow  \ottnt{B} }{%
+{\ottdrulename{ds\_distarru}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXdistarrurev}[1]{\ottdrule[#1]{%
+}{
+ \ottsym{(}  \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}}  \ottsym{)}  \rightarrow  \ottnt{B}  \ \underline{\textless} \  \ottsym{(}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B}  \ottsym{)}  \wedge  \ottsym{(}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B}  \ottsym{)} }{%
+{\ottdrulename{ds\_distarrurev}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXdistor}[1]{\ottdrule[#1]{%
+}{
+ \ottsym{(}  \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{B}  \ottsym{)}  \wedge  \ottsym{(}  \ottnt{A_{{\mathrm{2}}}}  \vee  \ottnt{B}  \ottsym{)}  \ \underline{\textless} \  \ottsym{(}  \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}}  \ottsym{)}  \vee  \ottnt{B} }{%
+{\ottdrulename{ds\_distor}}{}%
+}}
+
+
+\newcommand{\ottdruledsXXdistand}[1]{\ottdrule[#1]{%
+}{
+ \ottsym{(}  \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}}  \ottsym{)}  \wedge  \ottnt{B}  \ \underline{\textless} \  \ottsym{(}  \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{B}  \ottsym{)}  \vee  \ottsym{(}  \ottnt{A_{{\mathrm{2}}}}  \wedge  \ottnt{B}  \ottsym{)} }{%
+{\ottdrulename{ds\_distand}}{}%
+}}
+
+\newcommand{\ottdefndsubtyping}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  \ \underline{\textless} \  \ottnt{B} $}{\ottcom{Declarative Subtyping}}
+\ottusedrule{\ottdruledsXXrefl{}}
+\ottusedrule{\ottdruledsXXtrans{}}
+\ottusedrule{\ottdruledsXXtop{}}
+\ottusedrule{\ottdruledsXXbtm{}}
+\ottusedrule{\ottdruledsXXint{}}
+\ottusedrule{\ottdruledsXXarrow{}}
+\ottusedrule{\ottdruledsXXora{}}
+\ottusedrule{\ottdruledsXXorb{}}
+\ottusedrule{\ottdruledsXXorc{}}
+\ottusedrule{\ottdruledsXXanda{}}
+\ottusedrule{\ottdruledsXXandb{}}
+\ottusedrule{\ottdruledsXXandc{}}
+\ottusedrule{\ottdruledsXXdistarr{}}
+\ottusedrule{\ottdruledsXXdistarrrev{}}
+\ottusedrule{\ottdruledsXXdistarru{}}
+\ottusedrule{\ottdruledsXXdistarrurev{}}
+\ottusedrule{\ottdruledsXXdistor{}}
+\ottusedrule{\ottdruledsXXdistand{}}
+\end{ottdefnblock}}
+
+
+\newcommand{\ottdefnsDSubtyping}{
+\ottdefndsubtyping{}}
+
 % defns Typing
 %% defn typing
 \newcommand{\ottdruletypXXint}[1]{\ottdrule[#1]{%
@@ -782,6 +942,7 @@
 \ottdefnsBottomLike
 \ottdefnsDisjointness
 \ottdefnsSubtyping
+\ottdefnsDSubtyping
 \ottdefnsTyping
 \ottdefnsReduction
 }

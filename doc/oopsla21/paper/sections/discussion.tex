@@ -1,17 +1,33 @@
 \section{Discussion}
 \label{sec:discussion}
 In this section we ...
+\baber{and then there would be some discussion section, 
+where we would discuss the variant with the more general rule for bottom subtyping (with findtypes), 
+and maybe some other things, like function disjointness and distributivity.
+we would connect this discussion (the new bottom rule) with Ceylon and the disjointness rule that they use there}
+
+\baber{I think that we can avoid mentioning the algorithmic system.
+For the paper we are essentially not be mentioning those lemmas, or maybe just 
+have a few quick sentences about this (since they are auxiliary lemmas anyway, 
+and their proofs are not a contribution of this paper: such credit goes to @snow.
+ok, so, yes, in Section 5 you’ll present the declarative subtyping rules.}
 
 \subsection{Refactoring Subtyping}
 \label{sec:inter:refactoring}
 
-\Rref{s-disj} is a significant and novel addition in subtyping of \cal 
-with intersection types. It primarily
-makes intersection of disjoint types subtype of all types.
-Because two types are disjoint only if they do not share any common ordinary subtype.
+One property of Ceylon programming language ~\cite{} is that all \emph{bottom-like} types are 
+subtype of $[[Bot]]$ type.
+This property also holds in \cal presented in \Cref{sec:union}. But this property does not
+hold in \cal with intersection types presented in \Cref{sec:inter} because we updated
+disjointness definition. We add following novel subtyping rule in subtyping of
+\Cref{sec:inter} to have this property in \cal with intersection types:
 
-\Rref{s-disj} is an interesting addition in subtyping of \cal with intersection types.
-It says that if $FindSubTypes$ operation returns empty set against some type $[[A]]$, then $[[A]]$
+\begin{center}
+\drule[]{s-disj}
+\end{center}
+
+\noindent \Rref{s-disj} is an interesting addition in subtyping of \cal with intersection types.
+It says that if Lowest Ordinary Subtypes operation returns empty set against some type $[[A]]$, then $[[A]]$
 is subtype of all types. In other words, such type behaves like \emph{bottom-like} type.
 One particularly interesting case of \rref{s-disj} is when $[[A]]$ is an intersection type of two
 disjoint types such as $[[Int /\ A -> B]]$. Since $[[findsubtypes Int /\ A -> B]]$ returns empty set,
@@ -21,12 +37,19 @@ therefor \rref{s-disj} makes $[[Int /\ A -> B]]$ subtype of all types.
 Another particular interesting case of \rref{s-disj} is that it makes \rref{s-bot} redundant 
 and \rref{s-bot} can safely be dropped without any significant
 impact on metatheory and implementation. It is trivial to prove a lemma which says $[[Bot]]$ type is
-subtype of all types. We drop \rref{s-bot} from the calculus discussed in this section
-and prove \Cref{lemma:inter:bls} to show this property instead. It is because that $[[findsubtypes Bot]]$
-returns empty set \{\} and \rref{s-disj} makes all such types with $[[findsubtypes Bot]]$ = \{\} as
+subtype of all types. We drop \rref{s-bot} from the calculus discussed in \Cref{sec:inter}
+and prove \Cref{lemma:discussion:bls} to show this property instead. It is because that $[[findsubtypes Bot]]$
+returns empty set (\{\}) and \rref{s-disj} makes all such types with $[[findsubtypes A]]$ = \{\} as
 subtype of all types.
 
 \begin{lemma}[Bottom Type Least Subtype]
   $[[Bot <: A]]$.
-\label{lemma:inter:bls}
+\label{lemma:discussion:bls}
 \end{lemma}
+
+\begin{figure}[t]
+  %\centering
+  \drules[ds]{$ [[A <<: B ]] $}{Declarative Subtyping}{refl, trans, top, btm, int, arrow, ora, orb, orc, anda, andb, andc, distarr, distarrrev, distarru, distarrurev, distor, distand}
+  \caption{Declarative Subtyping}
+  \label{fig:discussion:subtyping}
+\end{figure}
