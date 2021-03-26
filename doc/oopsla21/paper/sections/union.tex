@@ -448,8 +448,8 @@ For functions the static type is not enough and we also need the dynamic type
 (which is the original type of the lambda).
 For example, if we have:
 $e = [[\x.x:Int->Int:(Int->Int)\/(Bool->Bool)]]$, then the static type of $e$ is
-$(Int->Int)\/(Bool->Bool)$ and the, more precise, dynamic type is
-$Int->Int$. If we use the following switch expression:
+$[[(Int->Int)\/(Bool->Bool)]]$ and the, more precise, dynamic type is
+$[[Int->Int]]$. If we use the following switch expression:
 
 \bruno{example here with a switch}
 
@@ -543,19 +543,19 @@ into Dynamic Type.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Type Safety and Determinism}
 \label{sec:union:safety}
-\cal is type safe and deterministic. In this section we discuss the
-proofs of type safety and determinism for \cal. Type safety is usually considered as composition
-of type preservation and progress lemma. Type preservation (\Cref{lemma:union:preservation})
-states that types are preserved during
-reduction. Progress (\Cref{lemma:union:progress}) states well typed programs never get stuck.
-A well typed expression $[[e]]$ is
-either a value or it can take step to some $[[e']]$. Type of $[[e']]$ is preserved following the
-type preservation property. Therefore, preservation and progress together ensure type safety.
-We add one more choice in the conslusion of prorgress lemma to handle non-annotated lambda expressions
-($[[\x.e]]$).
-Determinism (\Cref{lemma:union:determinism}) is also a critical property for a calculus.
-Non-deterministic calculi lead to incoherent programs.
-Determinism ensures that a program will always produce the same unique result.
+\cal is type sound and deterministic. In this section we discuss the
+proofs of type safety and determinism for \cal. Type soundness is usually
+considered as composition of type preservation and progress
+lemma. Type preservation (\Cref{lemma:union:preservation}) states that
+types are preserved during reduction. Progress
+(\Cref{lemma:union:progress}) states that well typed programs never get
+stuck.  A well typed expression $[[e]]$ is either a value or it can
+take step to some other expression $[[e']]$. Therefore, preservation and progress
+together ensure type safety.  We add one more choice in the conclusion
+of progress lemma to handle non-annotated lambda expressions
+($[[\x.e]]$). This last condition is necessary because the type system
+employs bi-directional type checking and unannotated lambdas (which are not values)
+can be well-typed in the checking mode.
 
 \begin{lemma}[Type Preservation]
 \label{lemma:union:preservation}
@@ -638,14 +638,16 @@ If \ $[[G |- p <= A]]$ \ then:
 \end{lemma}
 \end{comment}
 
+Determinism (\Cref{lemma:union:determinism}) is also a
+critical property for our calculus. Determinism ensures that a program will always
+produce the same unique result.
+Determinism guarantees that switch expressions are not order-sensitive:
+because the calculus is deterministic this implies that \rref{Step-Switchl,Step-Switchr}
+can never be apply for the same well-typed expression. 
+
 \begin{lemma}[Determinism]
 \label{lemma:union:determinism}
-  If \ $[[G |- e dirflag A]]$
-  \begin{enumerate}
-  \item and \ $[[e --> e1]]$
-  \item and \ $[[e --> e2]]$ \\
-  then $[[e1]]$ = $[[e2]]$.
-  \end{enumerate}
+  If \ $[[G |- e dirflag A]]$ and \ $[[e --> e1]]$ and \ $[[e --> e2]]$ then $[[e1]]$ = $[[e2]]$.
 \end{lemma}
 
 \begin{comment}
@@ -664,26 +666,28 @@ If \ $[[A *s B]]$ \ and \ $[[G |- p <= A]]$ \ and \ $[[G |- p <= B]]$ \ then \ F
 \end{comment}
 
 \baber{Again, should we show the property that a term cannot be checked against two disjoint types?}
-
+\bruno{I think you can and connect that to the last point in the text above, perhaps.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Discussion on Disjointness
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-\subsection{Discussion on Disjointness}
+\subsection{An Alternative Specification for Disjointness}
 \label{sec:union:discussion}
-Interaction of intersection and union types is a well-known problem in programming languages.
-In this section we discuss limited expressive power of our current disjoint specifications
-(\cref{def:union:disj}) and propose a robust and scalable definition for disjointness.
-\Cref{def:union:disj} works fine in simple calculus as of now. But it adds complexities as soon as we add
-intersection types to make the system more expressive.
+The current definition of disjointness (\cref{def:union:disj}) is inspired
+by work on disjoint intersection types~\cite{}. This definition works well
+for the calculus presented in this section. However it is not the only
+possible formulation of disjointness.
+An equivalent formulation of disjointness is shown in Figure~\ref{fig:union:ord}.
+This definition relies on the notion of \emph{ordinary types}, which are essentially
+those types that are primitive, such as integers and functions.
+\bruno{Drop the Ord Top from the figure}.
+The new disjointness definition (\Cref{def:union:disj1}) states that two
+types are disjoint if they do not have common ordinary subtypes.
 
-\paragraph{Updated Disjointness}
-An updated and robust declerative disjointness is shown in \Cref{fig:union:ord} as \Cref{def:union:disj1}.
-It is important to establish the fact that \Cref{def:union:disj1} works as expected.
-We prove equivalence of \Cref{def:union:disj} and \Cref{def:union:disj1} to establish this fact.
-Examples illustrated in \Cref{sec:union:disj} also work fine with the updated disjointness definition.
-\Cref{def:union:disj1} will be discussed in detail in \Cref{sec:inter} along with corresponding
-algorithmic version.
+It is important to establish the fact that definition
+\Cref{def:union:disj1} is indeed equivalent to our current
+definition. We prove equivalence of \Cref{def:union:disj} and
+\Cref{def:union:disj1} to establish this fact.
 
 \begin{lemma}[Disjointness Equivalence]
 A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
@@ -703,3 +707,6 @@ A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
     unless we are going to exceed the page limit.} \baber{Sure, I fixed that.}}
   \label{fig:union:ord}
 \end{figure}
+
+Definition \Cref{def:union:disj1} will play an important role in the
+calculus presented in Section~\ref{sec:inter}. 
