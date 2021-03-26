@@ -18,7 +18,7 @@ tag/constructor. Something like:
 Motivate the need for having a construct that can eliminate union types,
 perhaps trying to use an example where the String above would be a kind
 of exception, and the Int would be regular computation. Alternatively
-find an existing example from the literature. 
+find an existing example from the literature.
 
 Discussing existing approaches for eliminating union types;
 point out that elimination constructs based on types (our focus) vs
@@ -38,9 +38,16 @@ in the Ceylon documentation to some extent).
 
 Here it is important to give representative examples (look at documentation
 and/or other online resources), including examples
-that demonstrate how Ceylon uses union types to model overloaded functions. 
+that demonstrate how Ceylon uses union types to model overloaded functions.
 
 \subsection{Our work}
+
+\snow{Some concerns: does the addition of intersection types and distributivity
+  really increase the expressiveness of the system?
+  Currently the only interesting intersection type has the form of (A->B) \& (C->D),
+  like (int->bool)\&(bool->int).
+  But there is no way to construct a term of such type.
+  The closest thing is $\lambda$ x.x, which has (int->int)\&(bool->bool).}
 
 Introduce our work, setting the goal to study the construct formally.
 Connect with the work on disjoint intersection types, which also
@@ -52,9 +59,9 @@ by a dual notion of discjointness.
 
 Introduce the second calculus and identify a technical challenge with
 disjointness: the addition of intersection types breaks the previous
-notion of disjointness. Introduce the novel way to find disjoint types. 
+notion of disjointness. Introduce the novel way to find disjoint types.
 
 Summarize/mention key results: type-safety; soundness/completeness of
-disjointness; determinism. 
+disjointness; determinism.
 
 \baber{This section will give an overview.}

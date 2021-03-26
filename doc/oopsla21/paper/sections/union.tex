@@ -244,8 +244,8 @@ We illustrate this definition with a few simple examples:
 
 \begin{enumerate}
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ \\
-        $[[Int]]$ and $[[Int -> Bool]]$ are disjoint types. All common subtypes of $[[Int]]$ and $[[A -> B]]$ are bottom-like types, 
-        including $[[Bot]]$ and union of $[[Bot]]$ types. 
+        $[[Int]]$ and $[[Int -> Bool]]$ are disjoint types. All common subtypes of $[[Int]]$ and $[[A -> B]]$ are bottom-like types,
+        including $[[Bot]]$ and union of $[[Bot]]$ types.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Bot]]:}$ \\
     $[[Int]]$ and $[[Bot]]$ are disjoint types, since again all common subtypes are bottom-like. In general, the type $[[Bot]]$ (or any other bottom-like type)
     is disjoint to any other type.
@@ -255,7 +255,7 @@ We illustrate this definition with a few simple examples:
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
         $[[Int]]$ and $[[Top]]$ are not disjoint types because they share a common
     subtype $[[Int]]$ which is not \emph{bottom-like}. In general no type
-    is disjoint to $[[Top]]$. 
+    is disjoint to $[[Top]]$.
   \item $\boldsymbol{A = [[Int -> Bool]], \ B = \ [[String -> Char]]:}$
     The types $[[Int -> Bool]]$ and $[[String -> Char]]$ are not disjoint,
     since they share we can find non-bottom-like types that are subtypes
@@ -358,7 +358,8 @@ relation. The following lemmas summarize key properties of disjointness.
     \centering
     \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{int, var, ann, app, sub, abs, switch}
   \end{small}
-  \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.}
+  \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.
+    \snow{the var name in the third premise os TYP-SWITCH needs to be fixed} }
   \label{fig:union:disj-typ}
 \end{figure}
 \bruno{The syntax of typeof needs to be fixed, otherwise the variable ``x'' in the
@@ -420,8 +421,8 @@ $[[C]]$. An important point in these two conditions is that variable
 $[[x]]$ is of type $[[A]]$ in first branch and of type $[[B]]$ in
 second branch in the extended context.  From the last condition
 $[[A *s B]]$, we guarantee that $[[A]]$ and $[[B]]$ are disjoint
-types. Overlapping types for the 
-branches of case expressions can lead to non-deterministic 
+types. Overlapping types for the
+branches of case expressions can lead to non-deterministic
 results, and are therefore forbidden.
 Since all the branches check against $[[C]]$, the whole
 \emph{switch} expression checks against $[[C]]$.
