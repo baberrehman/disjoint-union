@@ -17,3 +17,4 @@ CoqSrc.mk.conf
 *.mng
 *.fls
 *.fdb_latexmk
+**/auto
