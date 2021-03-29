@@ -151,20 +151,20 @@ Here it is important to give representative examples (look at documentation
 and/or other online resources), including examples
 that demonstrate how Ceylon uses union types to model overloaded functions.
 
-\snow{
+\begin{verbatim}
   Known problem in Ceylon:
-    (Int|String) & (Int|Char) & (Char|String) is not treated as a bottom-like type
+    (Int | String) & (Int | Char) & (Char | String) is not treated as a bottom-like type
 
   Potential reason:
     It defines bottom-like as:
-      Bottom-like A&B ::= A * B
+      Bottom-like A\& B ::= A * B
       And it doesn't recognize intersection of unions and union of intersection,
       which is the oopsla18 paper claims to have.
 
   Possible consequences:
   - [harmless] we can write a case branch for such type.
   - The definition of disjointness might be not so presice
-}
+
 
 \begin{verbatim}
 
