@@ -50,12 +50,33 @@ subtype of all types.
 \subsection{Subtyping Distributivity}
 \label{sec:inter:dist}
 
-\baber{Ceylon has distributivity ...., distributivity is more flexible than subtyping in section 4 ....
-some examples with and without distributivity ....}
+In this section we add distributive subtyping in \cal.
+Ceylon \cite{} comes with enriched distributive subtyping relation \cite{}.
+Distributive subtyping is more expressive and accomodates more programs than what we discussed in
+\Cref{sec:inter}. Distributivity is trivial to add in \cal presented in \Cref{sec:union} and
+our calculus preserves soundness, completeness, type-safety and determinism with
+distributivity. 
+
+\baber{perhaps an example to show expressiveness of DS.}
+
+\Cref{fig:discussion:ds} shows declarative version of distributive subtyping for \cal with intersection types.
+This subtyping relation is not syntax directed. It has axioms for subtyping reflexivity (\rref{ds-refl}) and
+subtyping transitivity (\rref{ds-trans}). \Rref{ds-top, ds-btm, ds-int, ds-arrow, ds-ora} have been
+discussed in \Cref{sec:union}. \Rref{ds-anda} has been discussed in \Cref{sec:inter}.
+\Rref{ds-orb, ds-orc} state that sub-part of a union type is a subtype of whole union type.
+\Rref{ds-andb, ds-andc} state that intersection type $[[A1 /\ A2]]$ is a subtype of both $[[A1]]$
+and $[[A2]]$ separately.
+
+\Rref{ds-distarr, ds-distarrrev}  distribute function types over intersection types.
+They state that $[[(A -> B1) /\ (A -> B2)]]$ and $[[A -> (B1 /\ B2)]]$ are equivalent types.
+\Rref{ds-distarru, ds-distarrurev} state that $[[(A1 -> B) /\ (A2 -> B)]]$ and $[[(A1 \/ A2) -> B]]$
+are equivalent types.
+\Rref{ds-distor, ds-distand} distribute intersection types over union types and vice versa.
+
 
 \begin{figure}[t]
   %\centering
   \drules[ds]{$ [[A <<: B ]] $}{Declarative Subtyping}{refl, trans, top, btm, int, arrow, ora, orb, orc, anda, andb, andc, distarr, distarrrev, distarru, distarrurev, distor, distand}
   \caption{Declarative Subtyping}
-  \label{fig:discussion:subtyping}
+  \label{fig:discussion:ds}
 \end{figure}
