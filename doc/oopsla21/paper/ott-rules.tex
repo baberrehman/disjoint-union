@@ -27,7 +27,7 @@
 \newcommand{\ottafterlastrule}{\\}
 \newcommand{\ottmetavars}{
 \ottmetavartabular{
- $ \ottmv{var} ,\, \ottmv{x} $ &  \\
+ $ \ottmv{var} ,\, \ottmv{x} ,\, \ottmv{y} $ &  \\
  $ \ottmv{i} $ &  \\
 }}
 
@@ -54,12 +54,14 @@
 \ottprodline{|}{\lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}}{}{\textsf{bind}\; \ottmv{x}\; \textsf{in}\; \ottnt{e}}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{e_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{ switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \} }{}{}{}{}\ottprodnewline
-\ottprodline{|}{\ottsym{(}  \ottnt{e}  \ottsym{)}} {\textsf{S}}{}{}{}}
+\ottprodline{|}{\ottsym{(}  \ottnt{e}  \ottsym{)}} {\textsf{S}}{}{}{}\ottprodnewline
+\ottprodline{|}{\ottsym{1}}{}{}{}{}}
 
 \newcommand{\ottctx}{
 \ottrulehead{\ottnt{ctx}  ,\ \Gamma}{::=}{\ottcom{typing context}}\ottprodnewline
 \ottfirstprodline{|}{ \cdot }{}{}{}{}\ottprodnewline
 \ottprodline{|}{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}}{}{}{}{}\ottprodnewline
+\ottprodline{|}{\Gamma  \ottsym{,}  \ottmv{y}  \ottsym{:}  \ottnt{A}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}  \ottsym{,}  \Gamma_{{\mathrm{1}}}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\Gamma  \ottsym{,}  \Gamma_{{\mathrm{1}}}}{}{}{}{}}
 
@@ -783,7 +785,7 @@
 \newcommand{\ottdruletypXXswitch}[1]{\ottdrule[#1]{%
 \ottpremise{\Gamma  \vdash  \ottnt{e} \,  \Leftarrow  \, \ottnt{A}  \vee  \ottnt{B}}%
 \ottpremise{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{A}  \vdash  \ottnt{e_{{\mathrm{1}}}} \,  \Leftarrow  \, \ottnt{C}}%
-\ottpremise{\Gamma  \ottsym{,}  \ottmv{x}  \ottsym{:}  \ottnt{B}  \vdash  \ottnt{e_{{\mathrm{2}}}} \,  \Leftarrow  \, \ottnt{C}}%
+\ottpremise{\Gamma  \ottsym{,}  \ottmv{y}  \ottsym{:}  \ottnt{B}  \vdash  \ottnt{e_{{\mathrm{2}}}} \,  \Leftarrow  \, \ottnt{C}}%
 \ottpremise{ \ottnt{A}  *_s  \ottnt{B} }%
 }{
 \Gamma  \vdash   switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}  \,  \Leftarrow  \, \ottnt{C}}{%

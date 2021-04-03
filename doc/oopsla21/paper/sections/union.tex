@@ -8,7 +8,7 @@ cases, which can be used to eliminate values with union types.
 %switch expression is inspired by a similar construct in the Ceylon programming
 %language.
 We adapt the notion of disjointness from previous work on
-\emph{disjoint intersection types}~\cite{} to \name, and show that \name is type
+\emph{disjoint intersection types}~\cite{oliveira2016disjoint} to \name, and show that \name is type
 sound and deterministic.
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -347,7 +347,7 @@ relation. The following lemmas summarize key properties of disjointness.
     \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{int, var, ann, app, sub, abs, switch}
   \end{small}
   \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.
-    \snow{the var name in the third premise os TYP-SWITCH needs to be fixed} }
+    \snow{the var name in the third premise os TYP-SWITCH needs to be fixed} \baber{Done.} }
   \label{fig:union:disj-typ}
 \end{figure}
 \bruno{The syntax of typeof needs to be fixed, otherwise the variable ``x'' in the
@@ -439,10 +439,10 @@ with different type annotations can reduce in different ways.
 \paragraph{The role of type annotations}
 Before going
 into the details of operational semantics, it is important to recall
-the definition of partial values and values. An integer expression $[[i]]$ or a
+the definition of pre-values and values. An integer expression $[[i]]$ or a
 lambda expression $[[\x.e]]$ are not values unless annotated. This is
-because we the orginal static type is tracked by the operational semantics.
-Therefore we can end up in a value such as $[[1 : Int]]$ or $[[1 : Top]]$,
+because that the orginal static type is tracked by the operational semantics.
+Therefore, we can end up in a value such as $[[1 : Int]]$ or $[[1 : Top]]$,
 and those two values can behave differently in some contexts.
 \bruno{Give an example here}
 For functions the static type is not enough and we also need the dynamic type
@@ -675,13 +675,13 @@ If \ $[[A *s B]]$ \ and \ $[[G |- p <= A]]$ \ and \ $[[G |- p <= B]]$ \ then \ F
 \subsection{An Alternative Specification for Disjointness}
 \label{sec:union:discussion}
 The current definition of disjointness (\cref{def:union:disj}) is inspired
-by work on disjoint intersection types~\cite{}. This definition works well
+by work on disjoint intersection types~\cite{oliveira2016disjoint}. This definition works well
 for the calculus presented in this section. However it is not the only
 possible formulation of disjointness.
 An equivalent formulation of disjointness is shown in Figure~\ref{fig:union:ord}.
 This definition relies on the notion of \emph{ordinary types}, which are essentially
 those types that are primitive, such as integers and functions.
-\bruno{Drop the Ord Top from the figure}.
+\bruno{Drop the Ord Top from the figure}. \baber{Done.}
 The new disjointness definition (\Cref{def:union:disj1}) states that two
 types are disjoint if they do not have common ordinary subtypes.
 
@@ -696,7 +696,7 @@ A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
 
 \begin{figure}
     \centering
-    \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{top, int, arrow}
+    \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
   \medskip
   \begin{definition}
     \centering

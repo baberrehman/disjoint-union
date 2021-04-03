@@ -4,7 +4,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% METAVARIABLES
 
-metavar var, x ::= {{ repr-locally-nameless }}
+metavar var, x, y ::= {{ repr-locally-nameless }}
 
 metavar i ::= {{ coq nat }}
 
@@ -36,6 +36,7 @@ grammar
     | switch e A e1 B e2   ::   :: switch {{ tex switch \ [[e]] \ \{(x:[[A]])[[->]][[e1]], (y:[[B]])[[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
+    | 1                    ::   :: lit1
 
 substitutions
   single exp x   :: subst
@@ -55,6 +56,7 @@ grammar
                                            {{ coq list ( atom * typ ) }}
     | []                   ::  :: empty    {{ coq nil }} {{ tex \cdot }}
     | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
+    | G , y : A            ::  :: consy    {{ coq (([[y]]~[[A]])++[[G]]) }}
     | G , x : A , G1       ::  :: conss
     | G , G1               ::  :: consss
 
@@ -529,7 +531,7 @@ Typing :: '' ::=
 
     G |- e <= A \/ B
     G, x : A |- e1 <= C
-    G, x : B |- e2 <= C
+    G, y : B |- e2 <= C
     A *s B
     --------------------------------- :: switch
     G |- switch e A e1 B e2 <= C
