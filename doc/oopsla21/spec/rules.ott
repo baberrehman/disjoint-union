@@ -157,7 +157,7 @@ FindSubTypes :: '' ::=
   
   defn
   findsubtypes A ::   :: fs :: 'fs_'
-  {{ tex |[[A]]| }}
+  {{ tex \rfloor[[A]]\lfloor }}
   {{ com FindSubTypes }}
   by
 

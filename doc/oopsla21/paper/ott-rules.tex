@@ -176,7 +176,7 @@
 % defns FindSubTypes
 %% defn fs
 
-\newcommand{\ottdefnfs}[1]{\begin{ottdefnblock}[#1]{$ | \ottnt{A} | $}{\ottcom{FindSubTypes}}
+\newcommand{\ottdefnfs}[1]{\begin{ottdefnblock}[#1]{$ \rfloor \ottnt{A} \lfloor $}{\ottcom{FindSubTypes}}
 \end{ottdefnblock}}
 
 
@@ -395,7 +395,7 @@
 
 
 \newcommand{\ottdruleadXXdisjl}[1]{\ottdrule[#1]{%
-\ottpremise{ | \ottsym{(}  \ottnt{A}  \wedge  \ottnt{B}  \ottsym{)} | }%
+\ottpremise{ \rfloor \ottsym{(}  \ottnt{A}  \wedge  \ottnt{B}  \ottsym{)} \lfloor }%
 }{
  \ottnt{A}  *_a  \ottnt{B} }{%
 {\ottdrulename{ad\_disjl}}{}%
@@ -403,7 +403,7 @@
 
 
 \newcommand{\ottdruleadXXdisjr}[1]{\ottdrule[#1]{%
-\ottpremise{ | \ottsym{(}  \ottnt{B}  \wedge  \ottnt{A}  \ottsym{)} | }%
+\ottpremise{ \rfloor \ottsym{(}  \ottnt{B}  \wedge  \ottnt{A}  \ottsym{)} \lfloor }%
 }{
  \ottnt{A}  *_a  \ottnt{B} }{%
 {\ottdrulename{ad\_disjr}}{}%
