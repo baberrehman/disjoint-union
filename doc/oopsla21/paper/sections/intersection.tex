@@ -231,8 +231,8 @@ formulation of disjointness we employ the novel notion of
 lowest ordinary subtypes ($[[findsubtypes A]]$), which we denote as LOS.
 LOS are defined as a function which
 returns a list of ordinary subtypes of the given input type.  Ordinary
-subtypes of $[[Top]]$ are $[[Int]]$, $[[Top -> Bot]]$ and $[[Top]]$
-itself. No ordinary type is subtype of $[[Bot]]$ type. Ordinary
+subtypes of $[[Top]]$ are $[[Int]]$ and $[[Top -> Bot]]$.
+No ordinary type is subtype of $[[Bot]]$ type. Ordinary
 subtype of $[[Int]]$ is $[[Int]]$ itself. The function case is
 interesting. Since no two functions are disjoint in the calculus
 proposed in this paper.\bruno{We should make sure that disjointness of functions
@@ -292,9 +292,9 @@ We illustrate \Cref{def:inter:ad} with a few examples:
         is always disjoint to all types.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
         $[[findsubtypes Int]]$ returns \{$[[Int]]$\} and $[[findsubtypes Top]]$ returns
-        \{$[[Int]]$, $[[Top -> Bot]]$, $[[Top]]$\}.
-        Set intersection of \{$[[Int]]$\} and \{$[[Int]]$, $[[Top -> Bot]]$, $[[Top]]$\} is
-        empty set \{$[[Int]]$\}. Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
+        \{$[[Int]]$, $[[Top -> Bot]]$\}.
+        Set intersection of \{$[[Int]]$\} and \{$[[Int]]$, $[[Top -> Bot]]$\} is
+        set \{$[[Int]]$\}. Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
 \end{enumerate}
 
 \paragraph{Soundness and Completeness}
@@ -321,7 +321,7 @@ Ceylon also provides a notion of disjoint types in type-based case analysis. In 
 we compare the disjointness provided by Ceylon with our disjointness definition.
 To start with a very simple Ceylon example:
 
-\begin{lstlisting}[language=Java]
+\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth,language=Java,caption=Ceylon disjointness code example]
 //speak function will not type check
 void speak(Person | Student val) {
   switch (val)
@@ -332,18 +332,21 @@ void speak(Person | Student val) {
 
 \noindent The function \emph{speak} will not type check in Ceylon. Because \emph{Person} and
 \emph{Student} are not disjoint types. \emph{Person} and \emph{Student} both have a common
-subtype which is \emph{Student}. \cal will also reject such programs. Ceylon does not provides
+subtype which is \emph{Student}. \cal will also reject such programs.
+Difference between the disjointness in Ceylon and \cal is that
+Ceylon does not provide
 a formal disjointness definition, whereas \cal provides a formal definition for
-disjointness. Disjoint types in Ceylon are decided as:
+disjointness. Next, we compare a few textual descriptive points of disjointness in Ceylon with
+the disjointness definition in \cal. Following points are copied from Ceylon
+documentation \cite{}. Two types X and Y are disjoint if either of the following holds:
 
 \begin{enumerate}
   \item{X is a subtype of a type A and Y is a subtype of a type B, where A and B are distinct cases of an enumerated type}
   \item{X and Y are both classes and X is not a subclass of Y and Y is not a subclass of X}
-  \item{X is the class Null and Y is an interface}
-  \item{X is an anonymous class or an instantiation of a final class and Y is an instantiation of a class of interface, and X does not inherit Y}
-  \item{X is an anonymous class or a final class with no type parameters and Y is a type in which no type parameter reference occurs, and X is not a suptype of Y}
-  \item{X is a type parameter and Y and the intersection of the upper bounds of X are disjoint}
-  \item{X is a union type A|B and both Y and A are disjoint and Y and B are disjoint}
+  \item{X is a union type $[[A \/ B]]$ and both Y and A are disjoint and Y and B are disjoint}
   \item{X is an enumerated type with cases A1|A2|... and for every case Ai of X, Y and Ai are disjoint}
   \item{X is an intersection type $[[A/\B]]$ and either Y and A are disjoint or Y and B are disjoint, or}
 \end{enumerate}
+
+\noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
+Formal definitions are easy to reason about than textual descriptions.
