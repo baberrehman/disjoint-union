@@ -476,15 +476,17 @@ $[[x]]$ with value $[[p:A1]]$. Note that the annotation of the partial value
 $[[p]]$ changes to $[[A1]]$ from $[[C]]$ during substitution.
 This is to keep the most specific type in the annotation. A substituted
 expression is also annotated with both of the output types from
-annotated lambda expression. \baber{More details.}
+annotated lambda expression.
 
 \Rref{step-absbeta} deals with a special case, that occurs when the
 argument of a function is a non-annotatted lambda expression.
 With bi-directional type-checking an expression such as:
-\bruno{example here}
+($[[\f.f 1:(Int -> Int -> Int) : (Int -> Int -> Int)]]$)($[[\x.x]]$)
+\bruno{example here.} \baber{Done.}
 is well-typed, since bi-directional type-checking propagates
 type information to the arguments. Thus, the dynamic semantics
 needs to deal with such programs.
+We emphasize the fact that $[[\x.e]]$ is not a value in \cal.
 The rule follows the same approach as
 \rref{step-beta} except that both of the input types are kept with
 $[[\x.e]]$ during substitution i.e $[[\x.e:A2:A1]]$. \Rref{step-ann}
@@ -505,7 +507,7 @@ of type of the right branch. The subtyping condition in \rref{step-switchl,
 freedom of various subtypes of $[[A]]$ and $[[B]]$ for a corresponding
 branch instead of only type $[[A]]$ and type $[[B]]$. It is important
 to note that types of left and right branches of a \emph{switch}
-expression cannot overlap because of disjoitness constraint in
+expression cannot overlap because of the disjointness constraint in
 typing. Programs with overlapping types in branches of \emph{switch}
 expression will not type check in \cal.
 \bruno{The following sentence is out-of-place. It should appear earlier
@@ -528,16 +530,28 @@ Otherwise, for functions, the function annotation $[[A -> B]]$ is returned
     \centering
     \drules[step]{$[[e --> e']]$}{Operational Semantics}{int, appl, appr, beta, absbeta, ann, rmann, lamann, switch, switchl, switchr}
   \end{small}
-  \begin{small}
+%  \begin{small}
+%    \centering
+%    \drules[findtype]{$[[findtype p A]]$}{FindType}{int, arrow}
+%  \end{small}
+  \bigskip
+  %\begin{small}
     \centering
-    \drules[findtype]{$[[findtype p A]]$}{FindType}{int, arrow}
-  \end{small}
-  \caption{Operational semantics for \cal and FindType.}
+    \begin{tabular}{llcl}
+      \toprule
+      $DynamicType$ |$[[p]]$| &  & & \\
+     & |$[[i]]$| & = & $[[Int]]$ \\
+     & |$[[\x.e: A -> B]]$| & = & $[[A -> B]]$ \\
+      \bottomrule
+    \end{tabular}
+  \caption{Operational semantics for \cal and DynamicType relation.}
   \label{fig:union:os}
 \end{figure}
 \bruno{Use a notation similar to LOS for FindType. Maybe for LOS you can use
   $\lfloor A \rfloor$ and for FindType you can use $|A|$. Also, rename FindType
-into Dynamic Type.}
+into Dynamic Type.} 
+\baber{Done. I changed the representation to function from inductive relation.
+It looks more readable.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Type Safety and Determinism

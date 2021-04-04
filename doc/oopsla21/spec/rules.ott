@@ -4,7 +4,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% METAVARIABLES
 
-metavar var, x, y ::= {{ repr-locally-nameless }}
+metavar var, x, y, f ::= {{ repr-locally-nameless }}
 
 metavar i ::= {{ coq nat }}
 
@@ -27,11 +27,13 @@ grammar
 
   exp, e, v, p             :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
+    | f                    ::   :: varf
     | i                    ::   :: lit
     | b                    ::   :: bexpr
     | s                    ::   :: strexpr
     | e : A                ::   :: ann
     | \ x . e              ::   :: abs     (+ bind x in e +)
+    | \ f . e              ::   :: absf     (+ bind f in e +)
     | e1 e2                ::   :: app
     | switch e A e1 B e2   ::   :: switch {{ tex switch \ [[e]] \ \{(x:[[A]])[[->]][[e1]], (y:[[B]])[[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
@@ -137,8 +139,8 @@ FindType :: '' ::=
   
   defn
   findtype p A ::   :: findtype :: 'findtype_'
-  {{ com FindType }}
-  {{ tex FindType \ \ [[p]] \ \ [[A]] }}
+  {{ com DynamicType }}
+  {{ tex DynamicType \ \ [[p]] \ \ [[A]] }}
   by
 
     ---------------- :: int

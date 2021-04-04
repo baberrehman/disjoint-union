@@ -27,7 +27,7 @@
 \newcommand{\ottafterlastrule}{\\}
 \newcommand{\ottmetavars}{
 \ottmetavartabular{
- $ \ottmv{var} ,\, \ottmv{x} ,\, \ottmv{y} $ &  \\
+ $ \ottmv{var} ,\, \ottmv{x} ,\, \ottmv{y} ,\, \ottmv{f} $ &  \\
  $ \ottmv{i} $ &  \\
 }}
 
@@ -47,11 +47,13 @@
 \newcommand{\ottexp}{
 \ottrulehead{\ottnt{exp}  ,\ \ottnt{e}  ,\ \ottnt{v}  ,\ \ottnt{p}}{::=}{\ottcom{expression}}\ottprodnewline
 \ottfirstprodline{|}{\ottmv{x}}{}{}{}{}\ottprodnewline
+\ottprodline{|}{\ottmv{f}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottmv{i}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottkw{b}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottkw{s}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{e}  \ottsym{:}  \ottnt{A}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}}{}{\textsf{bind}\; \ottmv{x}\; \textsf{in}\; \ottnt{e}}{}{}\ottprodnewline
+\ottprodline{|}{\lambda  \ottmv{f}  \ottsym{.}  \ottnt{e}}{}{\textsf{bind}\; \ottmv{f}\; \textsf{in}\; \ottnt{e}}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{e_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{ switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \} }{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottsym{(}  \ottnt{e}  \ottsym{)}} {\textsf{S}}{}{}{}\ottprodnewline
@@ -139,32 +141,32 @@
 %% defn findtype
 \newcommand{\ottdrulefindtypeXXint}[1]{\ottdrule[#1]{%
 }{
- FindType \ \  \ottmv{i}  \ \   \mathsf{Int}  }{%
+ DynamicType \ \  \ottmv{i}  \ \   \mathsf{Int}  }{%
 {\ottdrulename{findtype\_int}}{}%
 }}
 
 
 \newcommand{\ottdrulefindtypeXXbool}[1]{\ottdrule[#1]{%
 }{
- FindType \ \  \ottkw{b}  \ \   \mathsf{Bool}  }{%
+ DynamicType \ \  \ottkw{b}  \ \   \mathsf{Bool}  }{%
 {\ottdrulename{findtype\_bool}}{}%
 }}
 
 
 \newcommand{\ottdrulefindtypeXXstr}[1]{\ottdrule[#1]{%
 }{
- FindType \ \  \ottkw{s}  \ \   \mathsf{String}  }{%
+ DynamicType \ \  \ottkw{s}  \ \   \mathsf{String}  }{%
 {\ottdrulename{findtype\_str}}{}%
 }}
 
 
 \newcommand{\ottdrulefindtypeXXarrow}[1]{\ottdrule[#1]{%
 }{
- FindType \ \  \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)}  \ \  \ottsym{(}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)} }{%
+ DynamicType \ \  \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)}  \ \  \ottsym{(}  \ottnt{A}  \rightarrow  \ottnt{B}  \ottsym{)} }{%
 {\ottdrulename{findtype\_arrow}}{}%
 }}
 
-\newcommand{\ottdefnfindtype}[1]{\begin{ottdefnblock}[#1]{$ FindType \ \  \ottnt{p}  \ \  \ottnt{A} $}{\ottcom{FindType}}
+\newcommand{\ottdefnfindtype}[1]{\begin{ottdefnblock}[#1]{$ DynamicType \ \  \ottnt{p}  \ \  \ottnt{A} $}{\ottcom{DynamicType}}
 \ottusedrule{\ottdrulefindtypeXXint{}}
 \ottusedrule{\ottdrulefindtypeXXbool{}}
 \ottusedrule{\ottdrulefindtypeXXstr{}}
@@ -895,7 +897,7 @@
 
 \newcommand{\ottdrulestepXXswitchl}[1]{\ottdrule[#1]{%
 \ottpremise{  }%
-\ottpremise{ FindType \ \  \ottnt{p}  \ \  \ottnt{C} }%
+\ottpremise{ DynamicType \ \  \ottnt{p}  \ \  \ottnt{C} }%
 \ottpremise{ \ottnt{C}  <:  \ottnt{A} }%
 }{
   switch \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]} }{%
@@ -905,7 +907,7 @@
 
 \newcommand{\ottdrulestepXXswitchr}[1]{\ottdrule[#1]{%
 \ottpremise{  }%
-\ottpremise{ FindType \ \  \ottnt{p}  \ \  \ottnt{C} }%
+\ottpremise{ DynamicType \ \  \ottnt{p}  \ \  \ottnt{C} }%
 \ottpremise{ \ottnt{C}  <:  \ottnt{B} }%
 }{
   switch \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow  \ottnt{e_{{\mathrm{2}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]} }{%
