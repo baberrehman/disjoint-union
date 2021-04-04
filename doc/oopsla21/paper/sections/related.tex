@@ -7,9 +7,7 @@
 	\item{Disjointness and Disjoint Intersection Types}
 \end{itemize}
 
-\noindent We develop a union calculus (\cal) for type-based union elimination. 
-We also add intersection types in
-\cal. The calculus is proved to be sound, complete, type-safe and deterministic. Set-theoratic unions have
+\noindent Set-theoratic unions have
 sound theory and extensively studied in mathematics. Set-theoratic unions correspond to union types
 or disjoint union types in programming languages. Disjoint union types are also called sum types or variants.
 Constructors are explicitly labeled in disjoint union types and expressions are manipulated using
@@ -27,14 +25,37 @@ union types. However, their union elimination is same as last two and follow unr
 elimination.
 
 \citet{freeman1991refinement} studied union types in setting of refinement types for ML.
-\baber{xduce, xduce and dunfield work.} Recently, \citet{muehlboeck2018empowering} gave a general framework of a calculi with intersection and 
-union types. They illustrated the significane of their framework using Ceylon programming language.
+\citet{hosoya2003xduce} studied union types in XDuce programming language. XDuce offers a novel feature
+of so-called regular expression types. Pattern matching can be on expressions and types in XDuce.
+Expressions are considered as spacial cases of types. Although XDuce offers type-based switch
+construct, but it lacks disjointness and output of the program changes by changing the order of
+cases in switch expression. CDuce \cite{benzaken2003cduce} is an extension of XDuce. CDuce has
+improved pattern matching but it also does not have disjoitness constraint and follows firt-match policy. 
+\citet{fallside2001xml} studied union types in markup language but with a restriction of
+disjoint top-level labels which is different from our work because we propose disjointness on types.
 
-\cite{} initially studied intersection types in programming languages literature.
-Forsythe \cite{} implemented intersection types. Intersection types have been studied for
-multi-field records \cite{}. \baber{dunfield work.}
-Disjoint intersection types were studied by \citet{oliveira2016disjoint} to give a coherent
+
+\citet{dunfield2014elaborating} also studied intersection and union types. Her approach is to use source
+language and target language. Our work is different from her work because she used unrestricted union
+elimination in source language and sum types with explicit injectors in target language.
+She mapped union types in source language to sum types in target language.
+\citet{castagna2017gradual} studied set-theoratic (untagged) union types in gradual typing setting.
+They gives a dynamic type-based cast for union elimination. But they do not have disjointness constraint
+on case branches and they check the type only for first case branch.
+Recently, \citet{muehlboeck2018empowering} gave a general framework of a calculi with intersection and 
+union types. They illustrated the significane of their framework using Ceylon programming language. 
+
+Occurance typing or flow typing \citet{tobin2008design} specialize or refine the type of variable in different
+case branches. Occurance typing is limmited to have variables in switch expression, whereas \cal
+can have any arbitrary expression in switch expression. Also, occurance typing comes with an
+unrestricted typing construct for case expression. \citet{castagna2019revisiting} recently studied
+occurance typing for set-theoratic types and allowed to have generic expressions in switch expression.
+
+\citet{pottinger1980type} and \citet{coppo1981functional} initially studied intersection types in 
+programming languages literature. Forsythe \cite{reynolds1988preliminary} is the first 
+real programming language to implement intersection types. But it did not implement union types.
+Intersection types have been studied for
+multi-field records \cite{}.
+Disjoint intersection types were first studied by \citet{oliveira2016disjoint} to give a coherent
 and deterministic caluclus for intersection types with merge operator. \cal discussed in \Cref{sec:union}
 is dual to $\lambda_{i}$ by \citet{oliveira2016disjoint}.
-
-\baber{occurance typing, flow typing}
