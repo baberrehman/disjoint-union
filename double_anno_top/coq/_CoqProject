@@ -1,3 +1,5 @@
 -R . Top
-syntaxtlcabs.v
-typing_tlcabs_chksub.v
+syntax.v
+syntax_wvalue.v
+typing.v
+typing_wvalue.v

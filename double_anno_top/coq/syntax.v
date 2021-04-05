@@ -308,7 +308,7 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
 where "e --> e'" := (step e e') : env_scope.
 
 (** infrastructure *)
-Hint Constructors pexpr rexpr value uexpr findtype bottomlike disjointness subtyping typing step lc_exp ok okt.
+Hint Constructors pexpr rexpr value uexpr findtype bottomlike disjointness subtyping typing step lc_exp ok okt : core.
 
 (**********************************)
 (*****  Subtyping Properties  *****)
@@ -368,7 +368,7 @@ Lemma sub_refl : forall A, A <: A.
   induction A; eauto.
 Qed.
 
-Hint Resolve sub_refl.
+Hint Resolve sub_refl : core.
 
 Lemma BL_disj : forall A, bottomlike A -> forall B, A *a B. 
   induction 1; intros; eauto.
