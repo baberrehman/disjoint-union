@@ -3,6 +3,18 @@ Require Import TLC.LibLN.
 (*Implicit Types x : var.*)
 (** syntax *)
 
+(*
+
+Update start on April 04, 2021.
+
+This file contains additional expression category
+i.e wexpr.
+
+It unifies beta-reduction rules and gives a
+standard progress lemma.
+
+*)
+
 Inductive typ : Set :=  (*r type *)
  | typ_top : typ
  | t_int : typ

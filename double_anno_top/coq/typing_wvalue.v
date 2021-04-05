@@ -1,6 +1,14 @@
 Require Import TLC.LibLN.
 Require Import syntax_wvalue.
 
+(*
+
+Update start on April 04, 2021.
+
+This is typing file for syntax_wvalue.
+
+*)
+
 
 (* defns dropanno *)
 Inductive dropanno : exp -> exp -> Prop :=    (* defn findtype *)
