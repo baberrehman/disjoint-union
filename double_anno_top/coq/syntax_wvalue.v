@@ -138,14 +138,14 @@ Inductive pexpr : exp -> Prop :=    (* defn pexpr *)
      lc_exp (e_abs e) ->
      pexpr (e_ann  ( (e_abs e) )  (t_arrow A B)).
 
-(* defns Value *)
-Inductive wexpr : exp -> Prop :=    (* defn value *)
+(* defns wexpr *)
+Inductive wexpr : exp -> Prop :=    (* defn wexpr *)
  | wexpr_pexpr : forall (p:exp) (A:typ),
      pexpr p ->
      wexpr (e_ann p A).
 
-(* defns UExpr *)
-Inductive value : exp -> Prop :=    (* defn uexpr *)
+(* defns value *)
+Inductive value : exp -> Prop :=    (* defn value *)
  | val_wexpr : forall (e:exp),
      wexpr e ->
      value e

@@ -1,5 +1,7 @@
 -R . Top
 syntax_no_top_findsubtypes.v
 syntax.v
+syntax_wvalue.v
 typing_no_top_findsubtypes.v
 typing.v
+typing_wvalue.v
