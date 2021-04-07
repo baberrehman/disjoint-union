@@ -348,9 +348,10 @@ Algorithmic disjointness is sound and complete with respect to declarative disjo
 \label{sec:inter:ceylon}
 Ceylon also provides a notion of disjoint types in type-based case analysis. In this section
 we compare the disjointness provided by Ceylon with our disjointness definition.
-To start with a very simple Ceylon example:
+\Cref{inter:list:ceylon} shows a simple Ceylon disjointness example.
 
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth,caption=Ceylon disjointness code example]
+\begin{figure}[t]
+\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
 // Student <: Person
 // speak function will not type check
 void speak(Person | Student val) {
@@ -359,8 +360,12 @@ void speak(Person | Student val) {
   case (is Student) {print("student speaks");} 
 }
 \end{lstlisting}
+\caption{Ceylon disjointness code example.}
+\label{inter:list:ceylon}
+\end{figure}
 
-\noindent The function \emph{speak} will not type check in Ceylon. Because \emph{Person} and
+\noindent The function \emph{speak} in \Cref{inter:list:ceylon} 
+will not type check in Ceylon. Because \emph{Person} and
 \emph{Student} are not disjoint types. \emph{Person} and \emph{Student} both have a common
 subtype which is \emph{Student}. \cal will also reject such programs.
 A significant difference between the disjointness in Ceylon and \cal is that

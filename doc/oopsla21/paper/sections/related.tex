@@ -43,7 +43,8 @@ She mapped union types in source language to sum types in target language.
 They gives a dynamic type-based cast for union elimination. But they do not have disjointness constraint
 on case branches and they check the type only for first case branch.
 Recently, \citet{muehlboeck2018empowering} gave a general framework of a calculi with intersection and 
-union types. They illustrated the significane of their framework using Ceylon programming language. 
+union types. They illustrated the significane of their framework using Ceylon programming language.
+They also studied disjointness in type-based case expressions.
 
 Occurance typing or flow typing \citet{tobin2008design} specialize or refine the type of variable in different
 case branches. Occurance typing is limmited to have variables in switch expression, whereas \cal
@@ -59,3 +60,14 @@ multi-field records \cite{}.
 Disjoint intersection types were first studied by \citet{oliveira2016disjoint} to give a coherent
 and deterministic caluclus for intersection types with merge operator. \cal discussed in \Cref{sec:union}
 is dual to $\lambda_{i}$ by \citet{oliveira2016disjoint}.
+
+Union types also provide a kind of function overloading or ad-hoc polymorphism using the
+switch and type-based case analysis. Programmer may define the argument type to be
+union type of certain types. By type-based case analysis programmer may choose to execute
+diffent code for each specific type of input.
+Intersection types have also been studied for function overloading. For example a function with type
+$[[Int -> Int /\ Bool -> Bool]]$ can take input values either of type $[[Int]]$ or $[[Bool]]$.
+It returns either $[[Int]]$ or $[[Bool]]$ depending upon the input type.
+Function overloading has been studied in detail in the literature by 
+\cite{castagna1995calculus}, \cite{cardelli1985understanding}, \cite{stuckey2005theory} among others.
+\citet{wadler1989make} studied type classes for the overloading of arithmetic operators.
