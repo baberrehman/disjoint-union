@@ -1,4 +1,73 @@
 \section{Related Work}
 \label{sec:related}
 
-\baber{This section is for related work.}
+\begin{itemize}
+	\item {Union Types    (discussing work on union types and elimination constructs for union types) <-- Need to coordinate with Ningning/Snow so that there’s not much overlap there. If the Overview discusses some of these in detail, the RW does not need to have much text in it.}
+	\item {Overloading (more general work on overloading, including type classes, approaches to overloading based on intersection types, etc…)}
+	\item{Disjointness and Disjoint Intersection Types}
+\end{itemize}
+
+\noindent Set-theoratic unions have
+sound theory and extensively studied in mathematics. Set-theoratic unions correspond to union types
+or disjoint union types in programming languages. Disjoint union types are also called sum types or variants.
+Constructors are explicitly labeled in disjoint union types and expressions are manipulated using
+corresponding labels. Few other interesting calculi (and this paper) do not use labels and provide type-based
+union elimination. Developing a sound and deterministic union elimination construct
+for type-based union elimination have been a challenge in research community.
+
+Union types were first studied in the setting of programming languages by 
+\citet{macqueen1984ideal}. Later on, union types have been studied in
+the literature in various contexts. \citep{pierce1991programming} studied union types with intersection
+types and polymorphism. But he did not define dynamic semantics for his calculus. Union elimination is same
+in \citep{macqueen1984ideal} and \citep{pierce1991programming} and is not deterministic.
+\citet{barbanera1995intersection} proposed two approaches for subject reduction in a calculus with
+union types. However, their union elimination is same as last two and follow unrestricted union
+elimination.
+
+\citet{freeman1991refinement} studied union types in setting of refinement types for ML.
+\citet{hosoya2003xduce} studied union types in XDuce programming language. XDuce offers a novel feature
+of so-called regular expression types. Pattern matching can be on expressions and types in XDuce.
+Expressions are considered as spacial cases of types. Although XDuce offers type-based switch
+construct, but it lacks disjointness and output of the program changes by changing the order of
+cases in switch expression. CDuce \cite{benzaken2003cduce} is an extension of XDuce. CDuce has
+improved pattern matching but it also does not have disjoitness constraint and follows firt-match policy. 
+\citet{fallside2001xml} studied union types in markup language but with a restriction of
+disjoint top-level labels which is different from our work because we propose disjointness on types.
+
+
+\citet{dunfield2014elaborating} also studied intersection and union types. Her approach is to use source
+language and target language. Our work is different from her work because she used unrestricted union
+elimination in source language and sum types with explicit injectors in target language.
+She mapped union types in source language to sum types in target language.
+\citet{castagna2017gradual} studied set-theoratic (untagged) union types in gradual typing setting.
+They gives a dynamic type-based cast for union elimination. But they do not have disjointness constraint
+on case branches and they check the type only for first case branch.
+Recently, \citet{muehlboeck2018empowering} gave a general framework of a calculi with intersection and 
+union types. They illustrated the significane of their framework using Ceylon programming language.
+They also studied disjointness in type-based case expressions.
+
+Occurance typing or flow typing \citet{tobin2008design} specialize or refine the type of variable in different
+case branches. Occurance typing is limmited to have variables in switch expression, whereas \cal
+can have any arbitrary expression in switch expression. Also, occurance typing comes with an
+unrestricted typing construct for case expression. \citet{castagna2019revisiting} recently studied
+occurance typing for set-theoratic types and allowed to have generic expressions in switch expression.
+
+\citet{pottinger1980type} and \citet{coppo1981functional} initially studied intersection types in 
+programming languages literature. Forsythe \cite{reynolds1988preliminary} is the first 
+real programming language to implement intersection types. But it did not implement union types.
+Intersection types have been studied for
+multi-field records \cite{}.
+Disjoint intersection types were first studied by \citet{oliveira2016disjoint} to give a coherent
+and deterministic caluclus for intersection types with merge operator. \cal discussed in \Cref{sec:union}
+is dual to $\lambda_{i}$ by \citet{oliveira2016disjoint}.
+
+Union types also provide a kind of function overloading or ad-hoc polymorphism using the
+switch and type-based case analysis. Programmer may define the argument type to be
+union type of certain types. By type-based case analysis programmer may choose to execute
+diffent code for each specific type of input.
+Intersection types have also been studied for function overloading. For example a function with type
+$[[Int -> Int /\ Bool -> Bool]]$ can take input values either of type $[[Int]]$ or $[[Bool]]$.
+It returns either $[[Int]]$ or $[[Bool]]$ depending upon the input type.
+Function overloading has been studied in detail in the literature by 
+\cite{castagna1995calculus}, \cite{cardelli1985understanding}, \cite{stuckey2005theory} among others.
+\citet{wadler1989make} studied type classes for the overloading of arithmetic operators.

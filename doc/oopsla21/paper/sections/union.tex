@@ -8,7 +8,7 @@ cases, which can be used to eliminate values with union types.
 %switch expression is inspired by a similar construct in the Ceylon programming
 %language.
 We adapt the notion of disjointness from previous work on
-\emph{disjoint intersection types}~\cite{} to \name, and show that \name is type
+\emph{disjoint intersection types}~\cite{oliveira2016disjoint} to \name, and show that \name is type
 sound and deterministic.
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -29,19 +29,27 @@ type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
 
-\paragraph{Values and pre-values.} In \name all the values have
-a type annotation. The type annotation represents the dynamic type
+\paragraph{Values, pre-values and annotated values} In \name all the values have
+a type annotation except of non-annotated lambda expression ($[[\x.e]]$).
+The type annotation represents the dynamic type
 that the value has at runtime, and
 it is helpful for the type-directed dynamic semantics.
-We divide the representation for values into two parts: pre-values and
-values.
+We divide the representation for values into three parts: pre-values,
+annotated values and values.
 Metavariable $[[p]]$ ranges over pre-values. Pre-values
 consist of natural numbers $[[i]]$
-and annotated lambda expressions $[[\x.e : A -> B]]$. Values are
-annotated pre-values. Metavariable $[[v]]$ ranges over
-values. It is important to note that $[[i]]$ is not a value in this
+and annotated lambda expressions $[[\x.e : A -> B]]$.
+Metavariable $[[w]]$ ranges over annotated values. 
+Annotated values are pre-values with an additional type annotation i.e. $[[p:A]]$.
+Metavariable $[[v]]$ ranges over
+values. It consists of annotated values $[[w]]$ and non-annotated 
+lambda expressions $[[\x.e]]$.
+It is important to note that $[[i]]$ is not a value in this
 calculus, instead $[[i:Int]]$ or $[[i:Top]]$ are values.
-In addition, lambdas have two annotations. That is $[[\x.e : A -> B : C]]$ is a value.
+Values which are non-annotated lambda expressions ($[[\x.e]]$) are special case
+and cannot appear at left side in function applications.
+In addition, lambdas have two annotations in annotated values $[[w]]$.
+That is $[[\x.e : A -> B : C]]$ is a value and can appear at left side in function application.
 As already mentioned, $C$ is the dynamic type of the value
 at runtime, whereas $[[A -> B]]$ is the original \emph{static type} of the lambda.
 For readers familiar with calculi with gradual types~\cite{}, the two annotations
@@ -60,7 +68,8 @@ or inference ($[[=>]]$).
       Types & $[[A]], [[B]]$, $[[C]]$ & $\Coloneqq$ & $ [[Top]] \mid [[Bot]] \mid [[Int]] \mid [[A -> B]] \mid [[A \/ B]] $ \\
       Expr & $[[e]]$ & $\Coloneqq$ & $[[x]] \mid [[i]] \mid [[e:A]] \mid [[\x.e]] \mid [[e1 e2]] \mid [[switch e A e1 B e2]]$\\
       PValue & $[[p]]$ & $\Coloneqq$ & $[[i]] \mid [[\x.e : A -> B]] $\\
-      Value & $[[v]]$ & $\Coloneqq$ & $[[p:A]]$\\
+      AValue & $[[w]]$ & $\Coloneqq$ & $[[p:A]]$\\
+      Value & $[[v]]$ & $\Coloneqq$ & $[[w]] \mid [[\x.e]] $\\
       Context & $[[G]]$ & $\Coloneqq$ & $ \cdot \mid [[G , x : A]]$ \\
       Mode & $[[dirflag]]$ & $\Coloneqq$ & $[[<=]] \ \mid \ [[=>]]$ \\
       \bottomrule
@@ -347,7 +356,7 @@ relation. The following lemmas summarize key properties of disjointness.
     \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{int, var, ann, app, sub, abs, switch}
   \end{small}
   \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.
-    \snow{the var name in the third premise os TYP-SWITCH needs to be fixed} }
+    \snow{the var name in the third premise os TYP-SWITCH needs to be fixed} \baber{Done.} }
   \label{fig:union:disj-typ}
 \end{figure}
 \bruno{The syntax of typeof needs to be fixed, otherwise the variable ``x'' in the
@@ -439,10 +448,15 @@ with different type annotations can reduce in different ways.
 \paragraph{The role of type annotations}
 Before going
 into the details of operational semantics, it is important to recall
-the definition of partial values and values. An integer expression $[[i]]$ or a
-lambda expression $[[\x.e]]$ are not values unless annotated. This is
-because we the orginal static type is tracked by the operational semantics.
-Therefore we can end up in a value such as $[[1 : Int]]$ or $[[1 : Top]]$,
+the definition of pre-values, annotated values and values.
+An integer expression $[[i]]$ is not a value unless annotated.
+Non-annotated lambda expressions ($[[\x.e]]$) are values but cannot appear at left
+side in function applications.
+Only annotated values $[[w]]$ can appear at left side in function applications.
+Annotated values consist of annotated pre-values. That is, it consist of
+$[[i:A]]$ and $[[\x.e:(A1->B1):(A2->B2)]]$. This is
+because that the orginal static type is tracked by the operational semantics.
+Therefore, we can end up in a value such as $[[1 : Int]]$ or $[[1 : Top]]$,
 and those two values can behave differently in some contexts.
 \bruno{Give an example here}
 For functions the static type is not enough and we also need the dynamic type
@@ -464,27 +478,61 @@ beta-reduction and \emph{switch} cases.
 The operational semantics follows a call-by-value evaluation strategy.
 \Rref{step-int} annotates integer expressions and makes them
 values. \Rref{step-appl} reduces left expression of an application
-unless it becomes a value. \Rref{step-appr} works only if left
-expression of an application is already reduced to
-value. \Rref{step-appr} then reduces right expression of application
+unless it becomes an annotated value. \Rref{step-appr} works only if left
+expression of an application is already reduced to annotated
+value ($[[w]]$). We emphasize here again that non-annotated lamda expressions
+($[[\x.e]]$) cannot appear at left side in applications.
+Only annotated values can appear at left side in applications.
+Therefore, we have a condition of annotated value ($[[w]]$) at left
+side of applications instead of value $[[v]]$.
+\Rref{step-appr} then reduces right expression of application
 to a value.
 
 \Rref{step-beta} is the beta-reduction. It applies a dually
 annotated lambda value $[[\x.e : A1 -> B1 : A2 -> B2]]$ to input
-value $[[p:C]]$. Substitution replaces free occurences of variable
-$[[x]]$ with value $[[p:A1]]$. Note that the annotation of the partial value
-$[[p]]$ changes to $[[A1]]$ from $[[C]]$ during substitution.
+value $[[v]]$. Substitution replaces free occurences of variable
+$[[x]]$ with $[[e1:A2:A1]]$.
+Drop Static Type ($\rceil[[v]]\lceil$) drops the static type
+from annotated values $[[p:A]]$ and returns $[[p]]$.
+It does not change non-annotated values $[[\x.e]]$ and returns 
+them as it is. Resultant expression $[[e1]]$ of ($\rceil[[v]]\lceil$)
+is either a pre-value $[[p]]$ or $[[\x.e]]$.
+Therefore, there are two cases to be considered in beta-reduction
+during substitution. One for pre-values and other for $[[\x.e]]$.
+
+For the first case, note that the annotation of the pre-value
+$[[p]]$ changes to $[[p:A2:A1]]$ from $[[p:A]]$ during substitution.
+$\rceil[[v]]\lceil$ drops $[[A]]$ from $[[p:A]]$ and returns $[[p]]$ 
+as $[[e1]]$. Substitution then
+substitutes free occurences of variable $[[x]]$ with $[[e1:A2:A1]]$.
 This is to keep the most specific type in the annotation. A substituted
 expression is also annotated with both of the output types from
-annotated lambda expression. \baber{More details.}
-
-\Rref{step-absbeta} deals with a special case, that occurs when the
+annotated lambda expression.
+For the second case, that occurs when the
 argument of a function is a non-annotatted lambda expression.
 With bi-directional type-checking an expression such as:
-\bruno{example here}
+($[[\f.f 1:(Int -> Int -> Int) : (Int -> Int -> Int)]]$)($[[\x.x]]$)
+\bruno{example here.} \baber{Done.}
+is well-typed, since bi-directional type-checking propagates
+type information to the arguments. Thus, the dynamic semantics
+needs to deal with such programs. Substitution for second case goes
+as for first case. Except that $\rceil[[v]]\lceil$ returns $[[\x.e]]$ as it is.
+\Rref{step-ann}
+reduces an annotated expression only if it is not an annotated value and $[[e]]$
+reduces to some $[[e']]$. \Rref{step-rmann} drops inner
+annotations. \Rref{step-lamann} adds one more type annotation with
+lambda expressions having single type annotation to make them values.
+
+\begin{comment}
+\Rref{step-beta} deals with a special case, that occurs when the
+argument of a function is a non-annotatted lambda expression.
+With bi-directional type-checking an expression such as:
+($[[\f.f 1:(Int -> Int -> Int) : (Int -> Int -> Int)]]$)($[[\x.x]]$)
+\bruno{example here.} \baber{Done.}
 is well-typed, since bi-directional type-checking propagates
 type information to the arguments. Thus, the dynamic semantics
 needs to deal with such programs.
+We emphasize the fact that $[[\x.e]]$ is not a value in \cal.
 The rule follows the same approach as
 \rref{step-beta} except that both of the input types are kept with
 $[[\x.e]]$ during substitution i.e $[[\x.e:A2:A1]]$. \Rref{step-ann}
@@ -492,6 +540,7 @@ reduces an annotated expression only if it is not a value and $[[e]]$
 reduces to some $[[e']]$. \Rref{step-rmann} drops inner
 annotations. \Rref{step-lamann} adds one more type annotation with
 lambda expressions having single type annotation to make them values.
+\end{comment}
 
 \Rref{step-switch, step-switchl, step-switchr} deal with the reduction
 of \emph{switch} expressions.
@@ -505,7 +554,7 @@ of type of the right branch. The subtyping condition in \rref{step-switchl,
 freedom of various subtypes of $[[A]]$ and $[[B]]$ for a corresponding
 branch instead of only type $[[A]]$ and type $[[B]]$. It is important
 to note that types of left and right branches of a \emph{switch}
-expression cannot overlap because of disjoitness constraint in
+expression cannot overlap because of the disjointness constraint in
 typing. Programs with overlapping types in branches of \emph{switch}
 expression will not type check in \cal.
 \bruno{The following sentence is out-of-place. It should appear earlier
@@ -515,8 +564,7 @@ A natural property of \cal is
 if type $[[A]]$ and type $[[B]]$ are two disjoint types, then subtypes
 of $[[A]]$ are also disjoint to subtypes of $[[B]]$.
 
-
-\paragraph{Dynamic Type} The dynamic semantics employs a simple
+\paragraph{Dynamic Type} \baber{text for dropstatictype.} The dynamic semantics employs a simple
 function that retrieves the dynamic type of a partial value. The definition
 is shown in the lower part of \Cref{fig:union:os}.
 $[[Int]]$ is returned when $[[p]]$ is an integer $[[i]]$ (\rref{findtype-int}).
@@ -526,18 +574,42 @@ Otherwise, for functions, the function annotation $[[A -> B]]$ is returned
 \begin{figure}[t]
   \begin{small}
     \centering
-    \drules[step]{$[[e --> e']]$}{Operational Semantics}{int, appl, appr, beta, absbeta, ann, rmann, lamann, switch, switchl, switchr}
+    \drules[step]{$[[e --> e']]$}{Operational Semantics}{int, appl, appr, beta, ann, rmann, lamann, switch, switchl, switchr}
   \end{small}
-  \begin{small}
-    \centering
-    \drules[findtype]{$[[findtype p A]]$}{FindType}{int, arrow}
-  \end{small}
-  \caption{Operational semantics for \cal and FindType.}
+%  \begin{small}
+%    \centering
+%    \drules[findtype]{$[[findtype p A]]$}{FindType}{int, arrow}
+%  \end{small}
+  \bigskip
+  %\begin{small}
+  \begin{center}
+  {\renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|llcl|}
+      \hline
+      Drop Static Type $\rceil$$[[v]]$$\lceil$ &  & & \\
+     & $\rceil$$[[p:A]]$$\lceil$ & = & $[[p]]$ \\
+     & $\rceil$$[[\x.e]]$$\lceil$ & = & $[[\x.e]]$ \\
+      \hline
+    \end{tabular} } \\
+  \bigskip
+  %\begin{small}
+  {\renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|llcl|}
+      \hline
+      Dynamic Type $\rfloor$$[[p]]$$\lfloor$ &  & & \\
+     & $\rfloor$$[[i]]$$\lfloor$ & = & $[[Int]]$ \\
+     & $\rfloor$$[[\x.e: A -> B]]$$\lfloor$ & = & $[[A -> B]]$ \\
+      \hline
+    \end{tabular} }
+    \end{center}
+  \caption{Operational semantics, DropStaticType and DynamicType relation for \cal.}
   \label{fig:union:os}
 \end{figure}
 \bruno{Use a notation similar to LOS for FindType. Maybe for LOS you can use
   $\lfloor A \rfloor$ and for FindType you can use $|A|$. Also, rename FindType
-into Dynamic Type.}
+into Dynamic Type.} 
+\baber{Done. I changed the representation to function from inductive relation.
+It looks more readable.}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Type Safety and Determinism
@@ -552,11 +624,14 @@ types are preserved during reduction. Progress
 (\Cref{lemma:union:progress}) states that well typed programs never get
 stuck.  A well typed expression $[[e]]$ is either a value or it can
 take step to some other expression $[[e']]$. Therefore, preservation and progress
-together ensure type safety.  We add one more choice in the conclusion
-of progress lemma to handle non-annotated lambda expressions
-($[[\x.e]]$). This last condition is necessary because the type system
-employs bi-directional type checking and unannotated lambdas (which are not values)
-can be well-typed in the checking mode.
+together ensure type safety.
+Substitution \Cref{lemma:union:substitution} is used in preservation and 
+states that types are preserved during subtitution.
+%We add one more choice in the conclusion
+%of progress lemma to handle non-annotated lambda expressions
+%($[[\x.e]]$). This last condition is necessary because the type system
+%employs bi-directional type checking and unannotated lambdas (which are not values)
+%can be well-typed in the checking mode.
 
 \begin{lemma}[Type Preservation]
 \label{lemma:union:preservation}
@@ -588,20 +663,19 @@ can be well-typed in the checking mode.
 \end{lemma}
 \end{comment}
 
-\begin{lemma}[Substitution]
-\label{lemma:union:substitution}
-  If \ $[[G, x:B , G1 |- e dirflag A]]$ \ and \ $[[G |- e' => B]]$
-  then \ $[[G, G1 |- e [ x ~> e' ] dirflag A]]$
-\end{lemma}
-
 \begin{lemma}[Progress]
 \label{lemma:union:progress}
 If \ $[[ [] |- e dirflag A]]$ then
  \begin{enumerate}
   \item either $[[e]]$ is a value.
   \item or $[[e]]$ can take a step to $[[e']]$.
-  \item or $[[e]]$ = $[[\x.e]]$ and $[[dirflag]]$ = $[[<=]]$
   \end{enumerate}
+\end{lemma}
+
+\begin{lemma}[Substitution]
+\label{lemma:union:substitution}
+  If \ $[[G, x:B , G1 |- e dirflag A]]$ \ and \ $[[G |- e' => B]]$
+  then \ $[[G, G1 |- e [ x ~> e' ] dirflag A]]$
 \end{lemma}
 
 \begin{comment}
@@ -675,13 +749,13 @@ If \ $[[A *s B]]$ \ and \ $[[G |- p <= A]]$ \ and \ $[[G |- p <= B]]$ \ then \ F
 \subsection{An Alternative Specification for Disjointness}
 \label{sec:union:discussion}
 The current definition of disjointness (\cref{def:union:disj}) is inspired
-by work on disjoint intersection types~\cite{}. This definition works well
+by work on disjoint intersection types~\cite{oliveira2016disjoint}. This definition works well
 for the calculus presented in this section. However it is not the only
 possible formulation of disjointness.
 An equivalent formulation of disjointness is shown in Figure~\ref{fig:union:ord}.
 This definition relies on the notion of \emph{ordinary types}, which are essentially
 those types that are primitive, such as integers and functions.
-\bruno{Drop the Ord Top from the figure}.
+\bruno{Drop the Ord Top from the figure}. \baber{Done.}
 The new disjointness definition (\Cref{def:union:disj1}) states that two
 types are disjoint if they do not have common ordinary subtypes.
 
@@ -696,7 +770,7 @@ A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
 
 \begin{figure}
     \centering
-    \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{top, int, arrow}
+    \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
   \medskip
   \begin{definition}
     \centering

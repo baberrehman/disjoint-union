@@ -4,7 +4,7 @@
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% METAVARIABLES
 
-metavar var, x ::= {{ repr-locally-nameless }}
+metavar var, x, y, f ::= {{ repr-locally-nameless }}
 
 metavar i ::= {{ coq nat }}
 
@@ -25,17 +25,20 @@ grammar
     | A /\ B 			   ::   :: inter
     | ( A )                :: S :: paren   {{ coq ([[A]]) }}
 
-  exp, e, v, p             :: 'e_' ::=     {{ com expression }}
+  exp, e, v, p, w             :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
+    | f                    ::   :: varf
     | i                    ::   :: lit
     | b                    ::   :: bexpr
     | s                    ::   :: strexpr
     | e : A                ::   :: ann
     | \ x . e              ::   :: abs     (+ bind x in e +)
+    | \ f . e              ::   :: absf     (+ bind f in e +)
     | e1 e2                ::   :: app
     | switch e A e1 B e2   ::   :: switch {{ tex switch \ [[e]] \ \{(x:[[A]])[[->]][[e1]], (y:[[B]])[[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
+    | 1                    ::   :: lit1
 
 substitutions
   single exp x   :: subst
@@ -55,6 +58,7 @@ grammar
                                            {{ coq list ( atom * typ ) }}
     | []                   ::  :: empty    {{ coq nil }} {{ tex \cdot }}
     | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
+    | G , y : A            ::  :: consy    {{ coq (([[y]]~[[A]])++[[G]]) }}
     | G , x : A , G1       ::  :: conss
     | G , G1               ::  :: consss
 
@@ -117,17 +121,33 @@ PreValue :: '' ::=
 
 
 defns
-Value :: '' ::=
+AValue :: '' ::=
   
   defn
-  value e ::   :: value :: 'value_'
-  {{ com Values }}
+  avalue e ::   :: avalue :: 'aval_'
+  {{ com AValues }}
+  {{ tex AValue \ \ [[e]] }}
   by
 
     prevalue p
-    ------------ :: val
-    value p : A
+    ------------ :: pval
+    avalue p : A
 
+
+defns
+Value :: '' ::=
+  
+  defn
+  value e ::   :: value :: 'val_'
+  {{ com Values }}
+  by
+
+    avalue e
+    ------------ :: aval
+    value e
+
+    -----------  :: abs 
+     value \x.e
 
 
 defns
@@ -135,8 +155,8 @@ FindType :: '' ::=
   
   defn
   findtype p A ::   :: findtype :: 'findtype_'
-  {{ com FindType }}
-  {{ tex FindType \ \ [[p]] \ \ [[A]] }}
+  {{ com DynamicType }}
+  {{ tex [[A]] = \rfloor[[p]]\lfloor }}
   by
 
     ---------------- :: int
@@ -150,6 +170,22 @@ FindType :: '' ::=
 
     ------------------------------------ :: arrow
     findtype ((\x.e) : A -> B) (A -> B)
+
+
+defns
+droptype :: '' ::=
+  
+  defn
+  droptype v e ::   :: droptype :: 'droptype_'
+  {{ com DropStaticType }}
+  {{ tex [[e]] = \rceil[[v]]\lceil }}
+  by
+
+    ---------------- :: pval
+    droptype (p:A) p
+
+    ---------------------- :: abs
+    droptype (\x.e) (\x.e)
 
 
 defns
@@ -260,7 +296,13 @@ BottomLike :: '' ::=
 
 
     A * B
-    -------------------------     :: andsub
+    -------------------------     :: anddisj
+    botlike A /\ B
+
+
+    not A <: B   
+    not B <: A
+    ---------------------------     :: andsub
     botlike A /\ B
 
 
@@ -405,6 +447,9 @@ Subtyping :: '' ::=
     -------------------------      :: disj
     A <: B
 
+    A * B
+    ------------------------       :: dis
+    A /\ B <: Bot
 
 defns
 DSubtyping :: '' ::=
@@ -529,7 +574,7 @@ Typing :: '' ::=
 
     G |- e <= A \/ B
     G, x : A |- e1 <= C
-    G, x : B |- e2 <= C
+    G, y : B |- e2 <= C
     A *s B
     --------------------------------- :: switch
     G |- switch e A e1 B e2 <= C
@@ -562,11 +607,12 @@ Reduction :: '' ::=
 
     e --> e'
     ---------------- :: appr
-    v e --> v e'
+    w e --> v e'
 
 
-    ----------------------------------------------------- :: beta
-    ((\x.e):A1->B1:A2->B2) (p:C) --> ((e [x ~> p:A1]):B1):B2
+     droptype v e1
+    ------------------------------------------------------------ :: beta
+    ((\x.e):A1->B1:A2->B2) v --> ((e [x ~> (e1:A2):A1]):B1):B2
 
 
     ----------------------------------------------------------------------- :: absbeta
@@ -574,7 +620,7 @@ Reduction :: '' ::=
 
 
 
-    not value e:A
+    not avalue e:A
     e --> e'
     ----------------------- :: ann
     e : A --> e' : A
@@ -605,4 +651,4 @@ Reduction :: '' ::=
     findtype p C
     C <: B
     ------------------------------------------------- :: switchr
-    switch (p:D) A e1 B e2 --> e2 [x ~> p:B]
+    switch (p:D) A e1 B e2 --> e2 [y ~> p:B]
