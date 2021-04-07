@@ -348,8 +348,17 @@
 }}
 
 
-\newcommand{\ottdruleblXXandsub}[1]{\ottdrule[#1]{%
+\newcommand{\ottdruleblXXanddisj}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+}{
+ \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
+{\ottdrulename{bl\_anddisj}}{}%
+}}
+
+
+\newcommand{\ottdruleblXXandsub}[1]{\ottdrule[#1]{%
+\ottpremise{ \neg   \ottnt{A}  <:  \ottnt{B}  }%
+\ottpremise{ \neg   \ottnt{B}  <:  \ottnt{A}  }%
 }{
  \rfloor  \ottnt{A}  \wedge  \ottnt{B}  \lfloor }{%
 {\ottdrulename{bl\_andsub}}{}%
@@ -360,6 +369,7 @@
 \ottusedrule{\ottdruleblXXor{}}
 \ottusedrule{\ottdruleblXXandl{}}
 \ottusedrule{\ottdruleblXXandr{}}
+\ottusedrule{\ottdruleblXXanddisj{}}
 \ottusedrule{\ottdruleblXXandsub{}}
 \end{ottdefnblock}}
 
@@ -584,6 +594,14 @@
 {\ottdrulename{s\_disj}}{}%
 }}
 
+
+\newcommand{\ottdrulesXXdis}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+}{
+ \ottnt{A}  \wedge  \ottnt{B}  <:   \bot  }{%
+{\ottdrulename{s\_dis}}{}%
+}}
+
 \newcommand{\ottdefnsubtyping}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  <:  \ottnt{B} $}{\ottcom{Subtyping}}
 \ottusedrule{\ottdrulesXXtop{}}
 \ottusedrule{\ottdrulesXXbot{}}
@@ -598,6 +616,7 @@
 \ottusedrule{\ottdrulesXXandb{}}
 \ottusedrule{\ottdrulesXXandc{}}
 \ottusedrule{\ottdrulesXXdisj{}}
+\ottusedrule{\ottdrulesXXdis{}}
 \end{ottdefnblock}}
 
 

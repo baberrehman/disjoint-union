@@ -28,15 +28,16 @@ from \Cref{sec:union}.  The additional types and rules are shown in
 %more primitive types. We also have $Bool$ and $String$ types in our
 %Coq formalization.
 The most significant difference and novelty in this section
-is because of the addition of intersection types $[[A
-    /\ B]]$. Expressions $[[e]]$, partial expressions $[[p]]$, values
-$[[v]]$, and context $[[G]]$ stay same as in \Cref{sec:union}. Typing
+is because of the addition of intersection types $[[A/\ B]]$.
+Expressions $[[e]]$, pre-values $[[p]]$, annotated values $[[w]]$,
+values $[[v]]$, and context $[[G]]$ stay same as in \Cref{sec:union}. Typing
 and operational semantics are also the same as in \Cref{sec:union}.
 \cal with intersection types is type-safe and deterministic.
 \baber{Need to restate type safety lemmas and discuss challenges
   involved.}
 \bruno{If there are challenges then we can indeed expand the text and discuss the challenges
-perhaps.}
+perhaps.} \baber{I think there is no challenge involve in semantics of \cal with
+intersection types. It is same as in \cal.}
 Type safety is shown by type preservation (\Cref{lemma:inter:preservation}) and
 progress (\Cref{lemma:inter:progress}). \baber{Should we restate determinism lemma too?}
 
@@ -45,20 +46,19 @@ progress (\Cref{lemma:inter:progress}). \baber{Should we restate determinism lem
   If \ $[[G |- e dirflag A]]$ and $[[e --> e']]$ then $[[G |- e' dirflag A]]$.
 \end{lemma}
 
-\begin{lemma}[Substitution]
-\label{lemma:inter:substitution}
-  If \ $[[G, x:B , G1 |- e dirflag A]]$ \ and \ $[[G |- e' => B]]$
-  then \ $[[G, G1 |- e [ x ~> e' ] dirflag A]]$
-\end{lemma}
-
 \begin{lemma}[Progress]
 \label{lemma:inter:progress}
 If \ $[[ [] |- e dirflag A]]$ then
  \begin{enumerate}
   \item either $[[e]]$ is a value.
   \item or $[[e]]$ can take a step to $[[e']]$.
-  \item or $[[e]]$ = $[[\x.e]]$ and $[[dirflag]]$ = $[[<=]]$
   \end{enumerate}
+\end{lemma}
+
+\begin{lemma}[Substitution]
+\label{lemma:inter:substitution}
+  If \ $[[G, x:B , G1 |- e dirflag A]]$ \ and \ $[[G |- e' => B]]$
+  then \ $[[G, G1 |- e [ x ~> e' ] dirflag A]]$
 \end{lemma}
 
 \paragraph{Subtyping}
@@ -74,25 +74,18 @@ and transitive.
 \bruno{If there is space in the end we can state the lemmas.} \baber{Sure.}
 
 \begin{figure}[t]
-  \begin{small}
     \centering
     \begin{tabular}{lrcl} \toprule
       Types & $[[A]], [[B]]$ & $\Coloneqq$ & $ ... \mid [[A /\ B]] $ \\
       \bottomrule
     \end{tabular}
-  \end{small}
   \medskip
-    \begin{small}
     \centering
     \drules[s]{$ [[A <: B ]] $}{Additional Subtyping Rules}{anda, andb, andc}
-  \end{small}
   \medskip
-    \begin{small}
     \centering
     \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
-  \end{small}
   \medskip
-  %\begin{small}
     \centering
     {\renewcommand{\arraystretch}{1.2}
     \begin{tabular}{|llcl|}
@@ -106,8 +99,7 @@ and transitive.
      & $[[findsubtypes A /\ B]]$ & = & $ [[findsubtypes A]] \cap [[findsubtypes B]] $\\
       \hline
     \end{tabular} }
-  %\end{small}
-  \caption{Additional Types, Subtyping, Ordinary Types and Lowest Ordinary Subtypes function for \cal with Intersection Types.}
+  \caption{Additional Types, Subtyping, Ordinary Types and Lowest Ordinary Subtypes function for \cal with intersection types.}
   \label{fig:inter:system}
 \end{figure}
 
@@ -150,12 +142,48 @@ addition of intersection types. For example, common subtypes of type $[[Int]]$ a
 type $[[Bool]]$ also include $[[Int /\ Bool]]$ with the addition of intersection types.
 But $[[Int /\ Bool]]$ is not a bottom-like type. So the disjointness definition fails.
 Reader may think at this point to add intersection of non-overlapping types such as $[[Int /\ Bool]]$
-in bottom-like types to solve the problem. But this imposes additional complexities of mutually
-dependent definitions and makes completeness challenging or even impossible to prove.
+in bottom-like types to solve the problem. A trivial and intuitive approach to think of is:
+
+\begin{center}
+\drule[]{bl-andsub}
+\end{center}
+
+\noindent \Rref{bl-andsub} states that if two types $[[A]]$ and $[[B]]$
+are not subtypes of each other (i.e. non-overlapping) then intersection of
+such types $[[A /\ B]]$ is bottom-like.
+\Rref{bl-andsub} works for simple cases such as $[[Int]]$ and $[[Bool]]$.
+But it fails if  $[[A]]$ = $[[Int /\ Bool]]$ and 
+$[[B]]$ = $[[Int /\ Bool]]$.
+Because $[[A]]$ ($[[Int /\ Bool]]$) and $[[B]]$ ($[[Int /\ Bool]]$) are subtypes
+of each other and are not bottom-like as per \rref{bl-andsub}.
+So, naive addition of \rref{bl-andsub} skips potential bottem-like types.
+Another alternative may be:
+
+\begin{center}
+\drule[]{bl-anddisj}
+\end{center}
+
+\noindent \Rref{bl-anddisj} states that if two types $[[A]]$ and $[[B]]$ are disjoint,
+then intersection of such types $[[A /\ B]]$ is bottom-like.
+But \rref{bl-anddisj} imposes additional complexities of mutually
+dependent definitions among disjointness and bottom-like.
+This makes completeness challenging or even impossible to prove.
 Another possible solution for this is to add a subtyping rule which makes intersection of
-disjoint types to be subtype of $[[Bot]]$ type as in \cite{}. 
-This also complicates the system because
-it adds mutual dependency of subtyping and disjointness.
+disjoint types to be subtype of $[[Bot]]$ type as by \cite{muehlboeck2018empowering}:
+
+\begin{center}
+\drule[]{s-dis}
+\end{center}
+
+\noindent \Rref{s-dis} states that insersection type $[[A /\ B]]$
+of two disjoint types $[[A]]$ and $[[B]]$ is subtype of $[[Bot]]$ type.
+\Rref{s-dis} also complicates the system because
+it adds mutual dependency of subtyping and disjointness
+which is even harder to tackle and makes completeness
+impossible to prove in \cal.
+All approaches discussed above add significant complexity in the
+system even if they work. We discuss a simple disjointness
+approach next which is sound and complete.
 
 
 \paragraph{Disjointness based on Ordinary Types to the Rescue}
@@ -174,7 +202,7 @@ such as $[[Int /\ Bool]]$. We empahsize the point that ordinary types in \cal do
 intersection types. Further, all ordinary types are non-overlapping in \cal.
 Therefore, now we say that
 two types are disjoint if they do not have any common ordinary subtype. $[[Int]]$ and $[[Bool]]$
-do not have any common ordinary subtype. Therefore, $[[Int]]$ and $[[Bool]]$ are disjoint types.
+do not share any common ordinary subtype. Therefore, $[[Int]]$ and $[[Bool]]$ are disjoint types.
 \Cref{def:inter:disj} shows the declarative disjointness for \cal with intersection types:
 
 \begin{definition}
@@ -186,7 +214,8 @@ do not have any common ordinary subtype. Therefore, $[[Int]]$ and $[[Bool]]$ are
 disjoint if the two types $[[A /\ B]]$ do
 not have any common ordinary subtype. For example, $[[Int]]$ and $[[A -> B]]$
 are disjoint types because there is no ordinary type that is a subtype
-of both types.  \Cref{def:inter:disj} is the same as 
+of both types ($[[Int]]$ and $[[A -> B]]$).
+\Cref{def:inter:disj} is the same as 
 \Cref{def:union:disj1}. However, while the \Cref{def:union:disj1} in \Cref{sec:union:discussion}
 is equivalent the definition of disjointness using bottom-like types (\Cref{def:union:disj}),
 in the calculus with intersection types that is no longer the case. We elaborate 
@@ -199,7 +228,7 @@ in the calculus with intersection types that is no longer the case. We elaborate
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Bot]]:}$ \\
         Since there is no ordinary type that is subtype of both $[[Int]]$ and $[[Bot]]$.
         Therefore, $[[Int]]$ and $[[Bot]]$ are disjoint types.
-        In general, type $[[Bot]]$ is disjoint to all types because $[[Bot]]$ type does not
+        In general, $[[Bot]]$ type is disjoint to all types because $[[Bot]]$ type does not
         have any ordinary subtype.
   \item $\boldsymbol{A = [[Int /\ A -> B]], \ B = \ [[Int]]:}$ \\
         Since there is no ordinary type that is subtype of both $[[Int /\ A -> B]]$ and $[[Int]]$.
@@ -263,10 +292,9 @@ disjointness:
 \end{definition}
 
 \noindent The algorithmic formulation of disjointness in
-\emph{lowest ordinary subtypes}\Cref{def:inter:ad} states that two
-\emph{lowest ordinary subtypes}types
-$[[A]]$ and $[[B]]$ are disjoint
-if they do not have any common lowest ordinary subtypes. That is the
+\Cref{def:inter:ad} states that two
+types $[[A]]$ and $[[B]]$ are disjoint
+if they do not have any common \emph{lowest ordinary subtype}. That is the
 set intersection of $[[findsubtypes A]]$ and $[[findsubtypes B]]$ is the empty set.
 %In simple words,
 %two types $[[A]]$ and $[[B]]$ are disjoint if they do not share any common ordinary subtype because
@@ -323,7 +351,8 @@ we compare the disjointness provided by Ceylon with our disjointness definition.
 To start with a very simple Ceylon example:
 
 \begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth,caption=Ceylon disjointness code example]
-//speak function will not type check
+// Student <: Person
+// speak function will not type check
 void speak(Person | Student val) {
   switch (val)
   case (is Person) {print("person speaks");}
@@ -334,10 +363,12 @@ void speak(Person | Student val) {
 \noindent The function \emph{speak} will not type check in Ceylon. Because \emph{Person} and
 \emph{Student} are not disjoint types. \emph{Person} and \emph{Student} both have a common
 subtype which is \emph{Student}. \cal will also reject such programs.
-Difference between the disjointness in Ceylon and \cal is that
+A significant difference between the disjointness in Ceylon and \cal is that
 Ceylon does not provide
 a formal disjointness definition, whereas \cal provides a formal definition for
-disjointness. Next, we compare a few textual descriptive points of disjointness in Ceylon with
+disjointness. Formal definitions are easy to reason about than textual descriptions. 
+
+Next, we compare a few textual descriptive points of disjointness in Ceylon with
 the disjointness definition in \cal. Following points are copied from Ceylon
 documentation \cite{}. Two types X and Y are disjoint if either of the following holds:
 
@@ -350,4 +381,6 @@ documentation \cite{}. Two types X and Y are disjoint if either of the following
 \end{enumerate}
 
 \noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
-Formal definitions are easy to reason about than textual descriptions.
+For example, (2) is one specific case of \Cref{def:inter:disj}. When both types $[[A]]$ and
+$[[B]]$ are not subtypes of each other, they naturally do not share any common subtype.
+(3) is a straightfard rule for union disjointness in \cal.

@@ -296,7 +296,13 @@ BottomLike :: '' ::=
 
 
     A * B
-    -------------------------     :: andsub
+    -------------------------     :: anddisj
+    botlike A /\ B
+
+
+    not A <: B   
+    not B <: A
+    ---------------------------     :: andsub
     botlike A /\ B
 
 
@@ -441,6 +447,9 @@ Subtyping :: '' ::=
     -------------------------      :: disj
     A <: B
 
+    A * B
+    ------------------------       :: dis
+    A /\ B <: Bot
 
 defns
 DSubtyping :: '' ::=
