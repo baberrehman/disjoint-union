@@ -141,81 +141,159 @@ will never get evaluated!
 
 
 \subsection{Eliminating Union Types in Ceylon}
+Ceylon supports type-directed union elimination via the switch/case expression.
+It has multiple branches. Each is annotated by a type and contains a function.
+Together the overloaded function is applied to a input.
+The input has an union type statically.
+But its runtime type can only fit in one branch.
+That makes it different to the previous discussion. Why?
+Because the type annotation of any two branches must be disjoint.
 
-Introduce the Ceylon approach with examples; introduce the idea of
-disjointness informally; contrast with existing constructs.
-Try to motivate the adapotion of disjointness (this should be discussed
-in the Ceylon documentation to some extent).
+\begin{lstlisting}
+  switch (v)
+    case (is String) { print("String: ``v``"); }
+    case (is Integer) { print("Integer: ``v``"); }
+    case (is Float) { print("Float: ``v``"); }
+\end{lstlisting}
+% https://ceylon-lang.org/documentation/1.3/tour/types/
+% case (is Object) { print(v); }
+% case (is Nothing) { print("nothing"); }
 
-Here it is important to give representative examples (look at documentation
-and/or other online resources), including examples
-that demonstrate how Ceylon uses union types to model overloaded functions.
+Being disjoint means it is impossible to find a value that matches with both.
+Each of \lstinline{Integer}, \lstinline{Char}, and \lstinline{String} is
+disjoint to others.
+% Ensured by Ceylon's type system, \lstinline{v} of type \lstinline{Void} can 
+% either be an \lstinline{Object} or \lstinline{Nothing}. 
+Thurs there is no need to use the order of branches to decide
+a program's behavior, and users can totally ignore the order.
+Take the previous function \lstinline{isstudent2} as an example.
+For its definition to be accepted by Ceylon,
+\lstinline{Person} and \lstinline{Student} cannot be subclass of
+each other, assuming they are classes.
+Since Ceylon does not allow multiple inheritance on class,
+the restriction is sufficient to prevent the incoherent scenario.
+In the runtime, type of the input must be a subtype of either \lstinline{Person} 
+or \lstinline{Student}. According to the subtyping relation,
+one branch will be chosen and the input term will be cast
+and substituted in.
+%
+Besides primitive types and classes, 
+distinct members in an enumerated type are also viewed as disjoint.
+% switch/case also handles other types as long as they are disjoint.
+% Some primitive types like \lstinline{Integer}, \lstinline{Char}, and 
+% \lstinline{String} are disjoint to others.
+%
+Forcing all cases in one switch/case expression to be disjoint makes them
+interchangeable.
+That could reduce confusion of program readers and eliminate a potential
+source of bugs.
+
+\begin{lstlisting}
+	void <A> printA(A|Null x) {
+		switch (x)
+		case (is A) { print("an A"); }
+		case (is Null) { print("nothing"); }
+	}
+\end{lstlisting}
+
+For instance, one might expect the second branch to be executed if the above
+function takes \lstinline{null} as input.
+However, without the disjointness constraint, \lstinline{A} might be nullable itself.
+An example is using \lstinline{Integer|Null} to denote a number or infinity
+as a division result.
+In that case the second branch is always shadowed by the first one.
+Note that swapping the two cases cannot prevent all unexpected behaviors.
+When the outside \lstinline{Null} has a different meaning other than infinity,
+they are not distinguishable, and the branch designed for it will take them all.
+% And instead of \lstinline{print}, one might call a function that takes care
+% of \lstinline{Nothing} and the other component in \lstinline{A}.
+This problem is even more serious when the language implements some syntax
+sugar or encode other features via the switch/case construct.
+It could be convenient to have a simple construct for unwrapping \lstinline{A|Null} without writing down the full switch/case expression.
+But once the details are hidden, users may not be able to image that how does
+the order affects the program, as we discussed above.  
+On the other hand, with some requirements on the argument and return types, it is 
+straightforward to support function overloading by combining them in a switch/case expression.
+But it is hard to find a fair criteria to decide which one should be prioritized,
+if two functions can overlap.
+% https://github.com/ceylon/ceylon-spec/issues/50
+% https://github.com/ceylon/ceylon-spec/issues/65
+
+To define disjointness precisely, it often comes to the a concept of \emph{bottom type}.
+Bottom type is a subtype of all types, in contrast to the top type.
+As we have known that disjoint types do not have any common subtype which has
+inhabited values. Certainly the bottom type has no values.
+In Ceylon, it is called \lstinline{Nothing}.
 
 \begin{verbatim}
-  Known problem in Ceylon:
-    (Int | String) & (Int | Char) & (Char | String) is not treated as a bottom-like type
-
-  Potential reason:
-    It defines bottom-like as:
-      Bottom-like A\& B ::= A * B
-      And it doesn't recognize intersection of unions and union of intersection,
-      which is the oopsla18 paper claims to have.
-
-  Possible consequences:
-  - [harmless] we can write a case branch for such type.
-  - The definition of disjointness might be not so presice
-
-
-\begin{verbatim}
-
-alias IoC => Integer | Character;
-alias IoS => Integer | String;
-alias CoS => Character | String;
-alias Bot => IoC & IoS & CoS;
-// Ceylon does not treat Bot as Bottom-like type
-
-void test(Integer | Bot v){
-    switch (v)
-    case (is Integer) {}
-    case (is Bot) {}
-}
-void test2(Integer | Integer&Character v){
-    switch (v)
-    case (is Integer) {}
-//    case (is Integer&Character ) {}
-}
-
+	Known problem in Ceylon:
+	(Int | String) & (Int | Char) & (Char | String) is not treated as a bottom-like type
+	
+	Potential reason:
+	It defines bottom-like as:
+	Bottom-like A\& B ::= A * B
+	And it doesn't recognize intersection of unions and union of intersection,
+	which is the oopsla18 paper claims to have.
+	
+	Possible consequences:
+	- [harmless] we can write a case branch for such type.
+	- The definition of disjointness might be not so presice
+	
+	
+	alias IoC => Integer | Character;
+	alias IoS => Integer | String;
+	alias CoS => Character | String;
+	alias Bot => IoC & IoS & CoS;
+	// Ceylon does not treat Bot as Bottom-like type
+	
+	void test(Integer | Bot v){
+		switch (v)
+		case (is Integer) {}
+		case (is Bot) {}
+	}
+	void test2(Integer | Integer&Character v){
+		switch (v)
+		case (is Integer) {}
+		//    case (is Integer&Character ) {}
+	}
+	
 \end{verbatim}
+
+\bruno{
+	Introduce the Ceylon approach with examples; introduce the idea of
+	disjointness informally; contrast with existing constructs.
+	Try to motivate the adapotion of disjointness (this should be discussed
+	in the Ceylon documentation to some extent).\\
+	Here it is important to give representative examples (look at documentation
+	and/or other online resources), including examples
+	that demonstrate how Ceylon uses union types to model overloaded functions.
+}
 
 \subsection{Our work}
 
 \snow{Some concerns: does the addition of intersection types and distributivity
-  really increase the expressiveness of the system?
-  Currently the only interesting intersection type has the form of (A->B) \& (C->D),
-  like (int->bool)\&(bool->int).
-  But there is no way to construct a term of such type.
-  The closest thing is $\lambda$ x.x, which has (int->int)\&(bool->bool).}
+	really increase the expressiveness of the system?
+	Currently the only interesting intersection type has the form of (A->B) \& (C->D),
+	like (int->bool)\&(bool->int).
+	But there is no way to construct a term of such type.
+	The closest thing is $\lambda$ x.x, which has (int->int)\&(bool->bool).}
 
-Introduce our work, setting the goal to study the construct formally.
-Connect with the work on disjoint intersection types, which also
-employs a notion of disjointness, but for intersection. Explain that
-what is needed is a dual notion of disjointness.
-
-Introduce the first calculus, and explain that it is directly inspired
-by a dual notion of discjointness.
-
-Introduce the second calculus and identify a technical challenge with
-disjointness: the addition of intersection types breaks the previous
-notion of disjointness. Introduce the novel way to find disjoint types.
-
-Summarize/mention key results: type-safety; soundness/completeness of
-disjointness; determinism.
-
-Perhaps here it is also useful to identity, together with Baber, what
-were the most challenging aspects in the formalization, and maybe
-highlight these.
-
-\baber{This section will give an overview.}
+\bruno{
+	Introduce our work, setting the goal to study the construct formally.
+	Connect with the work on disjoint intersection types, which also
+	employs a notion of disjointness, but for intersection. Explain that
+	what is needed is a dual notion of disjointness.\\
+	Introduce the first calculus, and explain that it is directly inspired
+	by a dual notion of discjointness.\\
+	Introduce the second calculus and identify a technical challenge with
+	disjointness: the addition of intersection types breaks the previous
+	notion of disjointness. Introduce the novel way to find disjoint types.\\
+	Summarize/mention key results: type-safety; soundness/completeness of
+	disjointness; determinism.\\
+	Perhaps here it is also useful to identity, together with Baber, what
+	were the most challenging aspects in the formalization, and maybe
+	highlight these.
+}
 
 %%% Local Variables:
 %%% mode: latex
