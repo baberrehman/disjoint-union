@@ -94,8 +94,9 @@ and transitive.
   \medskip
   %\begin{small}
     \centering
-    \begin{tabular}{llcl}
-      \toprule
+    {\renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|llcl|}
+      \hline
       Lowest Ordinary Subtypes (LOS) $[[findsubtypes A]]$ &  & & \\
      & $[[findsubtypes Top]]$ & = & \{$ [[Int]], [[Top -> Bot]]$\}  \\
      & $[[findsubtypes Bot]]$ & = & \{\}  \\
@@ -103,8 +104,8 @@ and transitive.
      & $[[findsubtypes A -> B]]$ & = & \{$ [[Top -> Bot]] $\}  \\
      & $[[findsubtypes A \/ B]]$ & = & $ [[findsubtypes A]] \cup [[findsubtypes B]] $\\
      & $[[findsubtypes A /\ B]]$ & = & $ [[findsubtypes A]] \cap [[findsubtypes B]] $\\
-      \bottomrule
-    \end{tabular}
+      \hline
+    \end{tabular} }
   %\end{small}
   \caption{Additional Types, Subtyping, Ordinary Types and Lowest Ordinary Subtypes function for \cal with Intersection Types.}
   \label{fig:inter:system}

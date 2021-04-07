@@ -25,7 +25,7 @@ grammar
     | A /\ B 			   ::   :: inter
     | ( A )                :: S :: paren   {{ coq ([[A]]) }}
 
-  exp, e, v, p             :: 'e_' ::=     {{ com expression }}
+  exp, e, v, p, w             :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
     | f                    ::   :: varf
     | i                    ::   :: lit
@@ -121,17 +121,33 @@ PreValue :: '' ::=
 
 
 defns
-Value :: '' ::=
+AValue :: '' ::=
   
   defn
-  value e ::   :: value :: 'value_'
-  {{ com Values }}
+  avalue e ::   :: avalue :: 'aval_'
+  {{ com AValues }}
+  {{ tex AValue \ \ [[e]] }}
   by
 
     prevalue p
-    ------------ :: val
-    value p : A
+    ------------ :: pval
+    avalue p : A
 
+
+defns
+Value :: '' ::=
+  
+  defn
+  value e ::   :: value :: 'val_'
+  {{ com Values }}
+  by
+
+    avalue e
+    ------------ :: aval
+    value e
+
+    -----------  :: abs 
+     value \x.e
 
 
 defns
@@ -140,7 +156,7 @@ FindType :: '' ::=
   defn
   findtype p A ::   :: findtype :: 'findtype_'
   {{ com DynamicType }}
-  {{ tex DynamicType \ \ [[p]] \ \ [[A]] }}
+  {{ tex [[A]] = \rfloor[[p]]\lfloor }}
   by
 
     ---------------- :: int
@@ -157,11 +173,27 @@ FindType :: '' ::=
 
 
 defns
+droptype :: '' ::=
+  
+  defn
+  droptype v e ::   :: droptype :: 'droptype_'
+  {{ com DropStaticType }}
+  {{ tex [[e]] = \rceil[[v]]\lceil }}
+  by
+
+    ---------------- :: pval
+    droptype (p:A) p
+
+    ---------------------- :: abs
+    droptype (\x.e) (\x.e)
+
+
+defns
 FindSubTypes :: '' ::=
   
   defn
   findsubtypes A ::   :: fs :: 'fs_'
-  {{ tex \rfloor[[A]]\lfloor }}
+  {{ tex |[[A]]| }}
   {{ com FindSubTypes }}
   by
 
@@ -566,11 +598,12 @@ Reduction :: '' ::=
 
     e --> e'
     ---------------- :: appr
-    v e --> v e'
+    w e --> v e'
 
 
-    ----------------------------------------------------- :: beta
-    ((\x.e):A1->B1:A2->B2) (p:C) --> ((e [x ~> p:A1]):B1):B2
+     droptype v e1
+    ------------------------------------------------------------ :: beta
+    ((\x.e):A1->B1:A2->B2) v --> ((e [x ~> (e1:A2):A1]):B1):B2
 
 
     ----------------------------------------------------------------------- :: absbeta
@@ -578,7 +611,7 @@ Reduction :: '' ::=
 
 
 
-    not value e:A
+    not avalue e:A
     e --> e'
     ----------------------- :: ann
     e : A --> e' : A
@@ -609,4 +642,4 @@ Reduction :: '' ::=
     findtype p C
     C <: B
     ------------------------------------------------- :: switchr
-    switch (p:D) A e1 B e2 --> e2 [x ~> p:B]
+    switch (p:D) A e1 B e2 --> e2 [y ~> p:B]
