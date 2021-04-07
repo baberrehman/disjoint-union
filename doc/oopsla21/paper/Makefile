@@ -29,6 +29,6 @@ $(RULESFILE): $(OTT_FILES)
 
 clean:
 	@latexmk -c
-	@rm -f $(MAIN).pdf $(RULESFILE)  *.aux *.fls *.out *.synctex.gz *.log *.fdb_latexmk *.blg bundle.tar.gz sections/*.mng
+	@rm -f $(MAIN).pdf $(RULESFILE)  *.aux *.fls *.out *.synctex.gz *.log *.fdb_latexmk *.blg bundle.tar.gz sections/*.mng *.bbl
 
 .PHONY: all clean
