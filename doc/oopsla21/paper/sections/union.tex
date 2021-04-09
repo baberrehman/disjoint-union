@@ -159,11 +159,12 @@ for reflexivity and transitivity as these are quite standard.}
 \subsection{Disjointness}
 \label{sec:union:disj}
 Now we turn to the notion of disjointness for
-union types and case expression for \cal. In essence disjointness for \cal is
-the dual to disjointness for $\lambda_i$~\cite{oliveira2016disjoint}, which is
-a calculus with disjoint intersection types. In $\lambda_i$, two
+union types and case expression for \cal. In essence, disjointness for \cal is
+the dual to the disjointness notion in $\lambda_i$~\cite{oliveira2016disjoint},
+a calculus with disjoint intersection types.
+In $\lambda_i$, two
 types in are disjoint if they do not share any common
-\emph{supertype} which is not \emph{top-like}. Dually, in
+\emph{supertype} which is not \emph{top-like} (i.e., isomorphic to the top type). Dually, in
 \cal, two types are disjoint if they do not share any common \emph{subtype} which
 is not \emph{bottom-like}.
 \bruno{In the overview section we need to talk about more about this and
@@ -174,9 +175,9 @@ respectively.
 
 \paragraph{Bottom-Like Types}
 \emph{Bottom-like} types are types that are isomorphic (i.e.
-both supertypes and subtypes) of the type $\bot$. Therefore
+both supertypes and subtypes) of the bottom type $\bot$. Therefore
 any bottom-like types behave like the $[[Bot]]$ type.
-In \name there
+In \name, there
 are infinitely many such types, including, for example $\bot \lor \bot$,
 $\bot \lor \bot \lor \bot$, as well as $\bot$ itself. Bottom-like types
 are important because they allow us to define disjointness.
@@ -192,10 +193,14 @@ Type $[[Bot]]$ is obviously a \emph{bottom-like} type
 a \emph{bottom-like} type (\rref{bl-or}).  It is trivial to conclude
 that a union type is \emph{bottom-like} only if all the 
 types in union are $[[Bot]]$. The correctness of our definition for
-bottom-like types is ensured by the following properties:
+bottom-like types is established by the following properties:
 \snow{Why we need an extra definition for bottom-like rather than
 directly using ``A<:Bot"? And the notation overlaps with the
 DynamicType function later.}
+\ningning{It's just nice to have a standalone and inductive definition I think.}
+\ningning{And yes, Baber, please fix the notation. Maybe use $\lceil this
+  \rceil$  and $\lfloor this \rfloor$ for later functions? Or use one of them
+  for disjointness.  }
 
 \begin{lemma}[Bottom-Like Soundness]
   If \ $[[botlike A]]$ \ then \ $[[A <: B]]$.
@@ -232,7 +237,8 @@ is bottom-like.
 \end{comment}
 
 \paragraph{Declarative Disjointness}
-The (declarative) definition for disjointness in \name is:
+Now we present
+the declarative definition for disjointness as follows.
 %Recall that two types in \cal are disjoint if they do not share any common subtype which is not
 %\emph{bottom-like}. The formal definition of disjoint specifications for this calculus is:
 
@@ -257,7 +263,7 @@ instead of $[[botlike C]]$ in the conclusion. Answer to this question is
 union type with $[[Bot]]$ as all primitive types is also a least subtype in \cal.
 $[[botlike C]]$ also handles this case.
 \end{comment}
-We illustrate this definition with a few simple examples:
+We illustrate this definition with a few examples:
 
 \begin{enumerate}
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ \\
@@ -268,7 +274,8 @@ We illustrate this definition with a few simple examples:
     is disjoint to any other type.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int]]:}$ \\
         $[[Int]]$ and $[[Int]]$ are not disjoint types because they share a common subtype $[[Int]]$ which
-        is not \emph{bottom-like}.
+        is not \emph{bottom-like}. In general, one type is not disjoint with
+        itself, unless it is bottom-like.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
         $[[Int]]$ and $[[Top]]$ are not disjoint types because they share a common
     subtype $[[Int]]$ which is not \emph{bottom-like}. In general no type
@@ -283,6 +290,8 @@ We illustrate this definition with a few simple examples:
 \end{enumerate}
 \snow{I like the idea to use examples here. Can we have one or two with union types
 involved as well?}
+\ningning{I agree. Actually that's important. That's what's special about this
+  system. Baber can you do that? Adding one or two examples would be enough.}
 
 \begin{comment}
 \begin{figure}[t]
@@ -305,9 +314,12 @@ such as $Bool$ and $String$ by adding more rules similar to
 \rref{ad-intl, intr} for additional primitive types.  \Rref{ad-orl,
   ad-orr} are two symmetric rules for union types. Any type $[[C]]$ is
 disjoint to an union type $[[A \/ B]]$ if $[[C]]$ is disjoint to both
-$[[A]]$ and $[[B]]$.  Algorithmic disjointness is sound and complete
-with respect to \Cref{def:union:disj}, and disjointness is a symmetric
-relation. The following lemmas summarize key properties of disjointness.
+$[[A]]$ and $[[B]]$.
+
+We show that algorithmic disjointness is sound and complete
+with respect to its declarative specification (\Cref{def:union:disj}).
+% , and disjointness is a symmetric relation.
+% The following lemmas summarize key properties of disjointness.
 
 \begin{lemma}[Disjointness Soundness]
   If \ $[[A * B]]$ \ then \ $[[A *s B]]$.
@@ -342,27 +354,22 @@ relation. The following lemmas summarize key properties of disjointness.
     \item Case $[[A \/ B]]$ follows directly from inductive hypothesis.
   \end{itemize}
 \end{proof}
-
-\begin{lemma}[Bottom-like Types Disjoint]
-\label{lemma:union:bl-disj}
-  If \ $[[botlike A]]$ \ then: \ $[[A * B]]$.
-\end{lemma}
-
-\begin{lemma}[Disjointness Symmetry]
-\label{lemma:union:disj-sym}
-  If \ $[[A * B]]$ \ then: \ $[[B * A]]$.
-\end{lemma}
 \end{comment}
+
+\ningning{Why this one here? I think we can show it for the declarative
+  definition. Then the following one follows from soundness and completeness.}
 
 \begin{lemma}[Bottom-Like Disjoint]
   If \ $[[botlike A]]$ \ then \ $[[A * B]]$.
 \label{lemma:union:bl-disjoint}
 \end{lemma}
 
-\begin{lemma}[Disjointness Symmetry]
-  If \ $[[A * B]]$ \ then \ $[[B * A]]$.
-\label{lemma:union:disj-sym}
-\end{lemma}
+\ningning{I removed the symmetry lemma as it's too obvious from the rules..}
+
+% \begin{lemma}[Disjointness Symmetry]
+%   If \ $[[A * B]]$ \ then \ $[[B * A]]$.
+% \label{lemma:union:disj-sym}
+% \end{lemma}
 
 \begin{figure}[t]
   \begin{small}
@@ -849,3 +856,9 @@ A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
 The reason to introduce \Cref{def:union:disj1} is that this definition
 will play an important role in the calculus presented in Section~\ref{sec:inter},
 since \Cref{def:union:disj} cannot be used in that setting.
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: "../paper"
+%%% org-ref-default-bibliography: "../paper.bib"
+%%% End:
