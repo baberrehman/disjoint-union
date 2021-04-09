@@ -64,7 +64,7 @@ can be also be understood as the \emph{source type} and \emph{target type}
 of an upcast: i.e. if the value is well-typed we have that $[[A -> B]] <: [[C]]$.
 
 Finally, a context ($[[G]]$) maps variables to their associated types. A typing
-mode ($[[dirflag]]$), as in traditional bidirectional type checking, can either be the
+mode ($[[dirflag]]$), as in traditional bi-directional type checking, can either be the
 inference mode ($[[=>]]$) or the checking mode ($[[<=]]$).
 
 \begin{figure}[t]
@@ -382,7 +382,7 @@ with respect to its declarative specification (\Cref{def:union:disj}).
   \end{small}
   \begin{small}
     \centering
-    \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{int, var, ann, app, sub, abs, switch}
+    \drules[typ]{$ [[G |- e dirflag A]] $}{Bi-directional Typing}{int, var, ann, app, sub, abs, switch}
   \end{small}
   \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.}
   \label{fig:union:disj-typ}
@@ -395,8 +395,8 @@ with respect to its declarative specification (\Cref{def:union:disj}).
 \subsection{Typing}
 \label{sec:union:typ}
 The typing rules are shown at the bottom of \Cref{fig:union:disj-typ}.
-We adopt bidirectional type-checking~\cite{} in our calculus.  There
-are two typing modes in bidirectional typing: inference mode
+We adopt bi-directional type-checking~\cite{} in our calculus.  There
+are two typing modes in bi-directional typing: inference mode
 ($[[=>]]$) and checking mode ($[[<=]]$). In the inference mode, the type of
 an expression $[[e]]$ is inferred.  In the checking
 mode, an expression $[[e]]$ is checked against a given type $[[A]]$.
@@ -413,7 +413,7 @@ function $[[e1]]$ is inferred. Thus the expression $[[e1]]$ should carry
 its own type information, and it will typically include annotated lambdas.
 On the other hand, the argument expression $[[e2]]$ is checked against type $A$,
 and can itself be a function. For instance we could have $[[e2]] = \lambda x. x$
-and $[[A]] = [[Int->Int]]$. In such a case, during reduction, the argument would be
+and $[[A]] = [[Int->Int]]$. In such case, during reduction, the argument would be
 the unnanotated value $\lambda x. x$.
 \Rref{typ-sub} is the subsumption rule. It states that an expression
 $[[e]]$ can be checked against any supertype of its inferred type.
@@ -424,8 +424,7 @@ output type $[[B]]$ in an extended context with parameter $[[x]]$ of
 input type $[[A]]$.
 
 The most interesting and novel typing rule is for
-\emph{switch} expressions. Four conditions are necessary for typing
-\emph{switch} expressions.
+\emph{switch} expressions. There are four conditions.
 %The remaining conditions are standard for a calculus with
 %union types and case expression and have been studied in various
 %calculi (\baber{reference to calculi}).
@@ -458,7 +457,7 @@ for the discussion section, perhaps.}
 \begin{figure}[t]
   \begin{small}
     \centering
-    \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{int, var, ann, app, sub, abs, typeof}
+    \drules[typ]{$ [[G |- e dirflag A]] $}{Bi-directional Typing}{int, var, ann, app, sub, abs, typeof}
   \end{small}
   \caption{Typing for \cal.}
   \label{fig:union:typ}
@@ -470,10 +469,11 @@ for the discussion section, perhaps.}
 %%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Operational Semantics}
 \label{sec:union:os}
-The dynamics of \cal is defined by a small-step operational semantics.
-An important aspect of the semantics is that it is type-directed.
-Type annotations are used to guide reduction, and similar terms
-that differ only on type annotations can reduce in different ways.
+The dynamics of \cal is defined by a small-step operational semantics. An
+important aspect of the semantics is that it is type-directed
+\cite{Huang:typedirected}, where type annotations are used to guide reduction,
+and similar terms that differ only on type annotations can reduce in different
+ways.
 
 \paragraph{The role of type annotations}
 Type annotations play two important roles in the calculus.
@@ -526,6 +526,8 @@ the left expression of an application.
 that we know that the left expression in the application must reduce
 to an annotated value ($[[w]]$): non-annotated lambda expressions
 ($[[\x.e]]$) cannot appear at left side in applications.
+\ningning{\rref{step-appr} looks very fishy. Why $[[w]]$ on the left becomes
+  $[[v]]$ on the right?}
 %Therefore, we have a condition of annotated value ($[[w]]$) at left
 %side of applications instead of value $[[v]]$.
 %\Rref{step-appr} then reduces right expression of application
@@ -539,13 +541,14 @@ $[[x]]$ with $[[e1:A2:A1]]$.
 Drop Static Type ($\rceil[[v]]\lceil$) drops the static type
 from annotated values $[[p:A]]$ and returns $[[p]]$.
 It does not change non-annotated values $[[\x.e]]$ and returns 
-them as it is. Resultant expression $[[e1]]$ of ($\rceil[[v]]\lceil$)
+them as it is. The result expression $[[e1]]$ of ($\rceil[[v]]\lceil$)
 is either a pre-value $[[p]]$ or $[[\x.e]]$.
 Therefore, there are two cases to be considered in beta-reduction
-during substitution. One for pre-values and other for $[[\x.e]]$.
+during substitution: one for pre-values and the other for $[[\x.e]]$.
 
 For the first case, note that the annotation of the pre-value
-$[[p]]$ changes to $[[p:A2:A1]]$ from $[[p:A]]$ during substitution.
+$[[p]]$ changes from $[[p:A]]$ to $[[p:A2:A1]]$ during substitution.
+Specifically,
 $\rceil[[v]]\lceil$ drops $[[A]]$ from $[[p:A]]$ and returns $[[p]]$ 
 as $[[e1]]$. Substitution then
 substitutes free occurrences of variable $[[x]]$ with $[[e1:A2:A1]]$.
@@ -558,21 +561,22 @@ expression is also annotated with both of the output types from
 annotated lambda expression.
 \snow{For the above sentence: We need double annotation here because the
 result of function application might be a raw lambda, right?}
-For the second case, that occurs when the
-argument of a function is a non-annotatted lambda expression.
+The second case occurs when the
+argument of a function is a non-annotated lambda expression.
 With bi-directional type-checking an expression such as:
-($[[\f.f 1:(Int -> Int -> Int) : (Int -> Int -> Int)]]$)($[[\x.x]]$)
+$([[\f.f 1: (Int -> Int -> Int) : (Int -> Int -> Int)]]) ([[\x.x]])$
 \snow{The type annotation is incorrect. Arrows are right-associative.}
 \bruno{example here.} \baber{Done.}
 is well-typed, since bi-directional type-checking propagates
 type information to the arguments. Thus, the dynamic semantics
 needs to deal with such programs. Substitution for second case goes
-as for first case. Except that $\rceil[[v]]\lceil$ returns $[[\x.e]]$ as it is.
+as for first case, except that $\rceil[[v]]\lceil$ returns $[[\x.e]]$ as it is.
+
 \Rref{step-ann}
 reduces an annotated expression only if it is not an annotated value and $[[e]]$
 reduces to some $[[e']]$. \Rref{step-rmann} drops inner
-annotations. \Rref{step-lamann} adds one more type annotation with
-lambda expressions having single type annotation to make them values.
+annotations. \Rref{step-lamann} adds one more type annotation to
+lambda expressions with only single type annotation to make them values.
 
 \begin{comment}
 \Rref{step-beta} deals with a special case, that occurs when the
@@ -593,7 +597,8 @@ annotations. \Rref{step-lamann} adds one more type annotation with
 lambda expressions having single type annotation to make them values.
 \end{comment}
 
-\Rref{step-switch, step-switchl, step-switchr} deal with the reduction
+Of particular interesting are
+\rref{step-switch, step-switchl, step-switchr}, which deal with the reduction
 of \emph{switch} expressions.
 \snow{I have the same linking problem for switchl/r rules here as well.
 Clicking them just bring me to the beginning of the pdf.}
@@ -602,17 +607,18 @@ becomes a value of the form $[[p:D]]$.
 \snow{I suggest explain why the value cannot have a form of lambda here.}
 \Rref{step-switchl} evaluates
 the left branch of the \emph{switch} expression if the dynamic type of $[[p]]$ is
-a subtype of type of left branch.  \Rref{step-switchr} evaluates the right
-branch of the \emph{switch} expression if type of $[[e]]$ is subtype
+a subtype of type of left branch, while \rref{step-switchr} evaluates the right
+branch if type of $[[e]]$ is subtype
 of type of the right branch. The subtyping condition in \rref{step-switchl,
-  step-switchr} is interesting and important to consider. It gives
+  step-switchr} is important, as it gives
 freedom of various subtypes of $[[A]]$ and $[[B]]$ for a corresponding
-branch instead of only type $[[A]]$ and type $[[B]]$. It is important
-to note that types of left and right branches of a \emph{switch}
-expression cannot overlap because of the disjointness constraint in
-typing. \snow{Can refer to \rref{typ-switch}}
-Programs with overlapping types in branches of \emph{switch}
-expression will not type check in \cal.
+branch instead of only type $[[A]]$ and type $[[B]]$. Recall that
+the typing rule for \emph{switch} (\rref{typ-switch}) requires that
+types of left and right branches of a \emph{switch}
+expression to be disjoint.
+This ensures \rref{step-switchl,step-switchr} cannot overlap, which, as we will
+see, is important for the
+operational semantics to be \textit{deterministic}.
 \bruno{The following sentence is out-of-place. It should appear earlier
   when we talk about disjointness. Perhaps you can state the property
 formally at that point.}
