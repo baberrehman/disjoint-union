@@ -1,5 +1,6 @@
 \section{The Union Calculus (\name)}
 \label{sec:union}
+\bruno{Baber, look for cite in latex and fill in the missing references: there are a few.}
 
 This section introduces the union calculus \name. The distinctive feature
 of the \name calculus is a type-based switch expression with disjoint
@@ -20,51 +21,39 @@ sound and deterministic.
 $[[A]]$, $[[B]]$ and $[[C]]$ range over types.  Types include top ($[[Top]]$),
 bottom ($[[Bot]]$), function ($[[A -> B]]$) and union ($[[A \/ B]]$)
 types. Metavariable $[[e]]$ ranges over program
-expressions. Expressions include variables ($[[x]]$), natural numbers
+expressions. Expressions include variables ($[[x]]$), integers
 ($[[i]]$), type annotations ($[[e:A]]$), lambda abstractions
 ($[[\x.e]]$), applications ($[[e1 e2]]$) and a novel switch ($[[switch
-    e A e1 B e2]]$) expression. \emph{Switch} expression is a case
+    e A e1 B e2]]$) expression. The \emph{switch} expression is a case
 expression and evaluates a specific branch by matching the
 type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
-\snow{I think $i$ stands for integers not only natural numbers.
-And we need to say switch must have two exhaustive branches (perhaps
-later in the typing part).}
 
-\paragraph{Values, pre-values and annotated values} In \name all the values have
-a type annotation except of non-annotated lambda expression ($[[\x.e]]$).
-The type annotation represents the dynamic type
-that the value has at runtime, and
-it is helpful for the type-directed dynamic semantics.
-\snow{For lambdas, the inner annotation stands for its dynamic type, right?
-Reading the above sentence makes me feel the outside annotation stands for
-the dynamic type.}
-We divide the representation for values into three parts: pre-values,
-annotated values and values.
+\paragraph{Values, pre-values and annotated values} In \name there are two
+kinds of values: annotated values $w$; and unannotated lambda expressions ($[[\x.e]]$).
+In annotated values, which have the form $p :A$, the type annotation $A$
+represents the dynamic type that the value has at runtime. The dynamic and static types
+are important for the type-directed dynamic semantics.
+%We divide the representation for values into three parts: pre-values,
+%annotated values and values.
 Metavariable $[[p]]$ ranges over pre-values. Pre-values
-consist of natural numbers $[[i]]$
+consist of integers $[[i]]$
 and annotated lambda expressions $[[\x.e : A -> B]]$.
-Metavariable $[[w]]$ ranges over annotated values. 
-Annotated values are pre-values with an additional type annotation i.e. $[[p:A]]$.
-Metavariable $[[v]]$ ranges over
-values. It consists of annotated values $[[w]]$ and non-annotated 
-lambda expressions $[[\x.e]]$.
+%Annotated values are pre-values with an additional type annotation i.e. $[[p:A]]$.
 It is important to note that $[[i]]$ is not a value in this
 calculus, instead $[[i:Int]]$ or $[[i:Top]]$ are values.
-Values which are non-annotated lambda expressions ($[[\x.e]]$) are special case
-and cannot appear at left side in function applications.
-\snow{I feel the above sentence can be rephrased in a simpler way.
-And, can we say that after the typing rule for application is revealed?}
-In addition, lambdas have two annotations in annotated values $[[w]]$.
-That is $[[\x.e : A -> B : C]]$ is a value and can appear at left side in function application.
-\snow{Same applies to this statement about function application.}
+Values which are unannotated lambda expressions ($[[\x.e]]$) are needed
+in our calculus because we employ bi-directional type-checking. In bi-directional
+type-checking unannotated lambda expressions can be arguments of functions, and unannotated lambda values
+will appear as a result of reducing such arguments.
+Annotated lambda values have two annotations.
+That is $[[\x.e : A -> B : C]]$ is a value.
 As already mentioned, $C$ is the dynamic type of the value
 at runtime, whereas $[[A -> B]]$ is the original \emph{static type} of the lambda.
 For readers familiar with calculi with gradual types~\cite{}, the two annotations
 can be also be understood as the \emph{source type} and \emph{target type}
 of an upcast: i.e. if the value is well-typed we have that $[[A -> B]] <: [[C]]$.
-\snow{Is it really related to gradual typing? Or just type casting?}
 
 A context ($[[G]]$) can
 either be empty or contains type bindings of variables and associated
@@ -87,39 +76,32 @@ or inference ($[[=>]]$).
   \end{small}
   \begin{small}
     \centering
-    \drules[s]{$ [[A <: B ]] $}{Algorithmic Subtyping}{top, bot, int, arrow, ora, orb, orc}
+    \drules[s]{$ [[A <: B ]] $}{Subtyping}{top, bot, int, arrow, ora, orb, orc}
   \end{small}
-  \ningning{Why we say the subtyping definition is algorithmic but it is not
-    even syntax-directed?}
 
-  \caption{Syntax and Algorithmic Subtyping for \cal. \snow{We need to add C as
-      a metavariable for types here because it is used later.} \baber{Done.} }
+  \caption{Syntax and Algorithmic Subtyping for \cal.}
   \label{fig:union:syntax}
 \end{figure}
-\bruno{Add the syntax for the bi-directional modes in the Figure.} \baber{Done.}
 
 %%%%%%%%%%%%%%%%%%%%%
 %% Subtyping
 %%%%%%%%%%%%%%%%%%%%%
 \subsection{Subtyping}
 \label{sec:union:sub}
-Algorithmic subtyping rules for \cal are shown in
-\Cref{fig:union:syntax}. The subtyping rules are standard for a system
-with union types.  
-\snow{This above sentence is repetitive to the later statement about
-the three union rules.}
+The subtyping rules for \cal are shown in
+\Cref{fig:union:syntax}. 
 \Rref{s-top} states that all types are subtypes of
 the $[[Top]]$ type. \Rref{s-bot} states that $[[Bot]]$ type is subtype of
 all types. \Rref{s-int, s-arrow} are standard rules for integers and
 functions respectively.  Functions are contravariant in input types
 and covariant in output types. \Rref{s-ora, s-orb, s-orc} are standard
-subtyping rules for union types. The union type of two types $A1$ and $A2$
-is a subtype of another type $A$ if both $A1$ and $A2$ are subtypes of
-$A$, as stated in \rref{s-ora}. \Rref{s-orb, s-orc} states that if a
+subtyping rules for union types. The union type of two types $[[A1]]$ and $[[A2]]$
+is a subtype of another type $[[A]]$ if both $[[A1]]$ and $[[A2]]$ are subtypes of
+$[[A]]$, as stated in \rref{s-ora}. \Rref{s-orb, s-orc} state that if a
 type is subtype of one of the components of a union type, then it is subtype of whole
 union type.  
 \snow{The link for s-orc is lost. Maybe we need to use ``and \rref{s-orc}" instead? Can we use $B$ instead of $A$ in the three union rules to make them
-more readable? Btw ``states" should be ``state".}
+more readable?}
 The subtyping relation for \cal is reflexive and transitive.
 \begin{lemma}[Subtyping Reflexivity]
   $[[A <: A]]$.
@@ -162,14 +144,13 @@ for reflexivity and transitivity as these are quite standard.}
 %%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Disjointness}
 \label{sec:union:disj}
-\baber{Mainly focused on technical details in this section. Story and benefits of disjointness may be discussed in another section.}
-In this section we discuss in detail the notion of disjointness for
+Now we turn to the notion of disjointness for
 union types and case expression for \cal. In essence disjointness for \cal is
 the dual to disjointness for $\lambda_i$~\cite{oliveira2016disjoint}, which is
 a calculus with disjoint intersection types. In $\lambda_i$, two
 types in are disjoint if they do not share any common
-\emph{supertype} which is not \emph{top-like}. In contrast, in
-\cal, two types in are disjoint if they do not share any common \emph{subtype} which
+\emph{supertype} which is not \emph{top-like}. Dually, in
+\cal, two types are disjoint if they do not share any common \emph{subtype} which
 is not \emph{bottom-like}.
 \bruno{In the overview section we need to talk about more about this and
 explain that common subtypes are important for the switch expression.}
@@ -179,7 +160,9 @@ respectively.
 
 \paragraph{Bottom-Like Types}
 \emph{Bottom-like} types are types that are isomorphic (i.e.
-both supertypes and subtypes) of the type $\bot$. In \name there
+both supertypes and subtypes) of the type $\bot$. Therefore
+any bottom-like types behave like the $[[Bot]]$ type.
+In \name there
 are infinitely many such types, including, for example $\bot \lor \bot$,
 $\bot \lor \bot \lor \bot$, as well as $\bot$ itself. Bottom-like types
 are important because they allow us to define disjointness.
@@ -187,14 +170,13 @@ are important because they allow us to define disjointness.
 %\emph{top-like} in $\lambda_i$ \cite{oliveira2016disjoint}. Therefore,
 %it is important to understand the notion of \emph{bottom-like} types
 %before diving into the details of disjointness.
-Intuitively, a
-\emph{bottom-like} type is a type which behaves like $[[Bot]]$ type.
+
 An inductive definition that captures all the bottom-like types
 is shown at the top of \Cref{fig:union:disj-typ}.
 Type $[[Bot]]$ is obviously a \emph{bottom-like} type
 (\rref{bl-bot}), and a union type of two \emph{bottom-like} types is also
 a \emph{bottom-like} type (\rref{bl-or}).  It is trivial to conclude
-that a union type is \emph{bottom-like} only if all the primitive
+that a union type is \emph{bottom-like} only if all the 
 types in union are $[[Bot]]$. The correctness of our definition for
 bottom-like types is ensured by the following properties:
 \snow{Why we need an extra definition for bottom-like rather than
@@ -216,9 +198,14 @@ DynamicType function later.}
 \end{comment}
 
 \begin{lemma}[Bottom-Like Completeness]
-  If \ $[[A <: B]]$ \ then \ $[[botlike A]]$.
+  If \ $[[A <: Bot]]$ \ then \ $[[botlike A]]$.
 \label{lemma:union:bl-completeness}
 \end{lemma}
+
+\noindent The soundness lemma states that if a type is bottom-like, then it is
+a subtype of any other type (and, in particular, it is a subtype of $[[Bot]]$).
+The completeness lemma states that if $[[A]]$ is a subtype of $[[Bot]]$ then $A$
+is bottom-like.
 
 \begin{comment}
 \begin{proof}
@@ -231,7 +218,7 @@ DynamicType function later.}
 \end{comment}
 
 \paragraph{Declarative Disjointness}
-The formal (declarative) definition for disjointness in \name is:
+The (declarative) definition for disjointness in \name is:
 %Recall that two types in \cal are disjoint if they do not share any common subtype which is not
 %\emph{bottom-like}. The formal definition of disjoint specifications for this calculus is:
 
@@ -261,7 +248,7 @@ We illustrate this definition with a few simple examples:
 \begin{enumerate}
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ \\
         $[[Int]]$ and $[[Int -> Bool]]$ are disjoint types. All common subtypes of $[[Int]]$ and $[[A -> B]]$ are bottom-like types,
-        including $[[Bot]]$ and union of $[[Bot]]$ types.
+        including $[[Bot]]$ and unions of $[[Bot]]$ types.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Bot]]:}$ \\
     $[[Int]]$ and $[[Bot]]$ are disjoint types, since again all common subtypes are bottom-like. In general, the type $[[Bot]]$ (or any other bottom-like type)
     is disjoint to any other type.
@@ -271,10 +258,10 @@ We illustrate this definition with a few simple examples:
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
         $[[Int]]$ and $[[Top]]$ are not disjoint types because they share a common
     subtype $[[Int]]$ which is not \emph{bottom-like}. In general no type
-    is disjoint to $[[Top]]$. \snow{Except for bottom-like types.}
+    is disjoint to $[[Top]]$, except for bottom-like types.
   \item $\boldsymbol{A = [[Int -> Bool]], \ B = \ [[String -> Char]]:}$
     The types $[[Int -> Bool]]$ and $[[String -> Char]]$ are not disjoint,
-    since they share we can find non-bottom-like types that are subtypes
+    since we can find non-bottom-like types that are subtypes
     of both types. For instance $[[Top -> Bot]]$ is a subtype of both types.
     More generally, any two function types can never be disjoint: it is always
     possible to find a common subtype, which is not bottom-like.
@@ -297,7 +284,7 @@ involved as well?}
 \paragraph{Algorithmic Disjointness}
 The middle part of \Cref{fig:union:disj-typ} shows an algorithmic
 version of disjointness.  \Rref{ad-btmr, ad-btml} state that the $[[Bot]]$
-type is disjoint to all types.  \Rref{ad-intl, intr} state that
+type is disjoint to all types.  \Rref{ad-intl, ad-intr} state that
 $[[Int]]$ and $[[A -> B]]$ are disjoint types.  Algorithmic
 disjointness can further be scaled to more primitive disjoint types
 such as $Bool$ and $String$ by adding more rules similar to
@@ -376,13 +363,9 @@ relation. The following lemmas summarize key properties of disjointness.
     \centering
     \drules[typ]{$ [[G |- e dirflag A]] $}{Bidirectional Typing}{int, var, ann, app, sub, abs, switch}
   \end{small}
-  \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.
-    \snow{the var name in the third premise os TYP-SWITCH needs to be fixed} \baber{Done.} }
+  \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.}
   \label{fig:union:disj-typ}
 \end{figure}
-\bruno{The syntax of typeof needs to be fixed, otherwise the variable ``x'' in the
-typing rule appears from nowhere!}
-\baber{Done, updated typeof to $[[switch e A e1 B e2]]$.}
 
 
 %%%%%%%%%%%%%%%%%%%%%
@@ -393,34 +376,24 @@ typing rule appears from nowhere!}
 The typing rules are shown at the bottom of \Cref{fig:union:disj-typ}.
 We adopt bidirectional type-checking~\cite{} in our calculus.  There
 are two typing modes in bidirectional typing: inference mode
-($[[=>]]$) and checking mode ($[[<=]]$). In inference mode, the type of
-an expression $[[e]]$ is inferred or calculated based upon certain
-information available in the given context $[[G]]$.  While in checking
+($[[=>]]$) and checking mode ($[[<=]]$). In the inference mode, the type of
+an expression $[[e]]$ is inferred.  In the checking
 mode, an expression $[[e]]$ is checked against a given type $[[A]]$.
 Typing rules are mostly standard. An integer
 expression $[[i]]$ infers type $[[Int]]$ as stated in \rref{typ-int}.
 \Rref{typ-var} states that a variable $[[x]]$ infers type $[[A]]$ if
-$[[x]]$ has type $[[A]]$ in the given context. \Rref{typ-ann} states
-if an expression $[[e]]$ checks against type $[[A]]$, then the
-annotated expression $[[e:A]]$ infers type $[[A]]$.
-\Rref{typ-app} type checks a function application and it is the
-elimination rule for functions.
-\snow{I think here we can say something about the annotated and raw
-lambdas. The typing rule of application requires the function to
-carry type information. A minor suggestion: can we make typing
-a separate figure so that it can be close to the text here?}
-\begin{comment}
-Expression $[[e1]]$ has to
-be a function expression and expression $[[e2]]$ has to check against
-input type of $[[e1]]$.  An important point to notice in
-\rref{typ-app} is $[[e1]]$ infers type $[[A -> B]]$. This may look
-weird at the very first glance because lamda expressions ($[[\x.e]]$)
-are not annotated in program expressions $[[e]]$ and it seems not
-possible for lambda expression to infer its type.  To answer this
-question, we emphasize the use of partial expressions $[[p]]$ and
-values $[[v]]$.  Lambda expression is annotated in $[[p]]$ and so in
-$[[v]]$ because values are defined as annotated partial expressions.
-\end{comment}
+$[[x]]$ has type $[[A]]$ in the given context. \Rref{typ-ann}
+checks an expression $[[e]]$ against the given type annotation $[[A]]$,
+and infers type $[[A]]$.
+
+\Rref{typ-app} is the standard bi-directional rule for
+function application. In \rref{typ-app}, note that the type of the
+function $[[e1]]$ is inferred. Thus the expression $[[e1]]$ should carry
+its own type information, and it will typically include annotated lambdas.
+On the other hand, the argument expression $[[e2]]$ is checked against type $A$,
+and can itself be a function. For instance we could have $[[e2]] = \lambda x. x$
+and $[[A]] = [[Int->Int]]$. In such a case, during reduction, the argument would be
+the unnanotated value $\lambda x. x$.
 \Rref{typ-sub} is the subsumption rule. It states that an expression
 $[[e]]$ can be checked against any supertype of its inferred type.
 \Rref{typ-abs} is the standard introduction rule for lambda
@@ -437,23 +410,28 @@ The most interesting and novel typing rule is for
 %calculi (\baber{reference to calculi}).
 The first condition ($[[G |-
     e <= A \/ B]]$) ensures that case expression $[[e]]$ is well-typed
-and checks against type $[[A \/ B]]$. The next two conditions ensure that
-branches of case expressions are well-typed and check against some type
-$[[C]]$. An important point in these two conditions is that variables
+and checks against type $[[A \/ B]]$. Note that this condition ensures
+\emph{exhaustiveness} of the cases in the switch: $e$ must
+check against the types in the branches of the switch. 
+The next two conditions ensure that
+branches of case expressions are well-typed and check against type
+$[[C]]$, which is the overall type of the switch expression.
+An important point in these two conditions is that variables
 $[[x]]$ and $[[y]]$ are, respectively, of type $[[A]]$ in first branch and of type $[[B]]$ in
 second branch in the extended context. 
-\snow{So they are exhaustive for all possible values of $e$. In other words,
-at least one branch matches with the runtime type of $e$.}
-From the last condition
-$[[A *s B]]$, we guarantee that $[[A]]$ and $[[B]]$ are disjoint
-types. This ensures that overlapping types for the branches of case expressions
+%\snow{So they are exhaustive for all possible values of $e$. In other words,
+%at least one branch matches with the runtime type of $e$.}
+The last condition
+$[[A *s B]]$, guarantees \emph{disjointness} of $[[A]]$ and $[[B]]$.
+This ensures that overlapping types for the branches of case expressions
 are forbidden. Otherwise, overlapping types could lead to
 non-deterministic results.
 Since all the branches check against $[[C]]$, the whole
-\emph{switch} expression checks against $[[C]]$.
+switch expression checks against $[[C]]$.
 \snow{Note that the two branches can have different return types.
 For example, they infer to $A'$ and $B'$ respectively. In that case, the whole
-expression can be checked by $[[A' \/ B']]$.}
+expression can be checked by $[[A' \/ B']]$.}\bruno{I think Snow's point may be something
+for the discussion section, perhaps.}
 
 \begin{comment}
 \begin{figure}[t]
@@ -471,12 +449,22 @@ expression can be checked by $[[A' \/ B']]$.}
 %%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Operational Semantics}
 \label{sec:union:os}
-The dynamics of \cal is defined by small-step operational semantics.
+The dynamics of \cal is defined by a small-step operational semantics.
 An important aspect of the semantics is that it is type-directed.
-Type annotations are used to guide reduction, and the same term
-with different type annotations can reduce in different ways.
+Type annotations are used to guide reduction, and similar terms
+that differ only on type annotations can reduce in different ways.
 
 \paragraph{The role of type annotations}
+Type annotations play two important roles in the calculus.
+Firstly, static types are used by the switch construct
+to select the correct branch to execute. Secondly, the
+dynamic types are needed to ensure type preservation.
+\bruno{The text that was here before (commented now)
+  was just repeating stuff that we already said before.
+  What we need here is text that explains how and where annotations are used during reduction.
+  For instance switches need the static types to select the branches correctly. Furthemore
+the static types are necessary for preservation. So illustrate those two points with examples. }
+\begin{comment}
 Before going
 into the details of operational semantics, it is important to recall
 the definition of pre-values, annotated values and values.
@@ -495,40 +483,40 @@ For functions the static type is not enough and we also need the dynamic type
 For example, if we have:
 $e = [[\x.x:Int->Int:(Int->Int)\/(Bool->Bool)]]$, then the static type of $e$ is
 $[[(Int->Int)\/(Bool->Bool)]]$ and the, more precise, dynamic type is
-$[[Int->Int]]$. If we use the following switch expression:
+$[[Int->Int]]$.
+\end{comment}
+If we use the following switch expression:
 
 \bruno{example here with a switch}
 
-The dynamic type is used to select the correct branch of the switch statement.
-The presence of annotations with the static type, on the other hand,
+The static type is used to select the correct branch of the switch statement.
+The presence of annotations with the dynamic types, on the other hand,
 ensures that types are preserved during substitution in
-beta-reduction and \emph{switch} cases.
+beta-reduction and \emph{switch} cases.\bruno{another example for illustrating
+preservation.}
 
-\paragraph{The Rules of the Operational Semantics}
+\paragraph{Reduction rules}
 \Cref{fig:union:os} shows operational semantics of \cal.
 The operational semantics follows a call-by-value evaluation strategy.
 \Rref{step-int} annotates integer expressions and makes them
-values. \Rref{step-appl} reduces left expression of an application
-unless it becomes an annotated value. \Rref{step-appr} works only if left
-expression of an application is already reduced to annotated
-value ($[[w]]$). We emphasize here again that non-annotated lamda expressions
+values. \Rref{step-appl} is a standard call-by-value rule, reducing
+the left expression of an application.
+\Rref{step-appr} is almost a standard call-by-value rule, except
+that we know that the left expression in the application must reduce
+to an annotated value ($[[w]]$): non-annotated lambda expressions
 ($[[\x.e]]$) cannot appear at left side in applications.
-Only annotated values can appear at left side in applications.
-\snow{I think the reason behind the design deserves some explanation.}
-Therefore, we have a condition of annotated value ($[[w]]$) at left
-side of applications instead of value $[[v]]$.
-\snow{Using $v$ instead of $w$ in this rule does not hurt anything.
-Typing of application ensures it cannot be a raw lambda.}
-\Rref{step-appr} then reduces right expression of application
-to a value.
+%Therefore, we have a condition of annotated value ($[[w]]$) at left
+%side of applications instead of value $[[v]]$.
+%\Rref{step-appr} then reduces right expression of application
+%to a value.
 
-\Rref{step-beta} is the beta-reduction. It applies a dually
+\bruno{Following text needs to be fixed after changes in Figure.}
+\Rref{step-beta} is the beta-reduction rule. It applies a dually
 annotated lambda value $[[\x.e : A1 -> B1 : A2 -> B2]]$ to input
 value $[[v]]$. Substitution replaces free occurences of variable
 $[[x]]$ with $[[e1:A2:A1]]$.
 Drop Static Type ($\rceil[[v]]\lceil$) drops the static type
 from annotated values $[[p:A]]$ and returns $[[p]]$.
-\snow{To me, it is weird to have space in a function's name.}
 It does not change non-annotated values $[[\x.e]]$ and returns 
 them as it is. Resultant expression $[[e1]]$ of ($\rceil[[v]]\lceil$)
 is either a pre-value $[[p]]$ or $[[\x.e]]$.
@@ -634,7 +622,7 @@ Otherwise, for functions, the function annotation $[[A -> B]]$ is returned
   {\renewcommand{\arraystretch}{1.2}
     \begin{tabular}{|llcl|}
       \hline
-      Drop Static Type $\rceil$$[[v]]$$\lceil$ &  & & \\
+      Beta Value $\rceil$$[[v]]$$\lceil$ &  & & \\
      & $\rceil$$[[p:A]]$$\lceil$ & = & $[[p]]$ \\
      & $\rceil$$[[\x.e]]$$\lceil$ & = & $[[\x.e]]$ \\
       \hline
@@ -644,7 +632,7 @@ Otherwise, for functions, the function annotation $[[A -> B]]$ is returned
   {\renewcommand{\arraystretch}{1.2}
     \begin{tabular}{|llcl|}
       \hline
-      Dynamic Type $\rfloor$$[[p]]$$\lfloor$ &  & & \\
+      Static Type $\rfloor$$[[p]]$$\lfloor$ &  & & \\
      & $\rfloor$$[[i]]$$\lfloor$ & = & $[[Int]]$ \\
      & $\rfloor$$[[\x.e: A -> B]]$$\lfloor$ & = & $[[A -> B]]$ \\
       \hline
@@ -653,11 +641,10 @@ Otherwise, for functions, the function annotation $[[A -> B]]$ is returned
   \caption{Operational semantics, DropStaticType and DynamicType relation for \cal.}
   \label{fig:union:os}
 \end{figure}
-\bruno{Use a notation similar to LOS for FindType. Maybe for LOS you can use
-  $\lfloor A \rfloor$ and for FindType you can use $|A|$. Also, rename FindType
-into Dynamic Type.} 
-\baber{Done. I changed the representation to function from inductive relation.
-It looks more readable.}
+\bruno{Don't introduce $[[e1]]$ and $C$ in rules step-beta, step-switchl and step-switchr.
+  Change the notations, since we already use similar notation for bottom-like types. Also, change
+the step-beta rule as discussed in slack, both in the paper and in Coq.} 
+
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Type Safety and Determinism
@@ -666,7 +653,7 @@ It looks more readable.}
 \label{sec:union:safety}
 \cal is type sound and deterministic. In this section we discuss the
 proofs of type safety and determinism for \cal. Type soundness is usually
-considered as composition of type preservation and progress
+considered as the composition of type preservation and progress
 lemma. Type preservation (\Cref{lemma:union:preservation}) states that
 types are preserved during reduction. Progress
 (\Cref{lemma:union:progress}) states that well typed programs never get
@@ -675,7 +662,7 @@ take step to some other expression $[[e']]$. Therefore, preservation and progres
 together ensure type safety.
 \snow{preservation and progress should be theorems rather than lemmas.}
 Substitution \Cref{lemma:union:substitution} is used in preservation and 
-states that types are preserved during subtitution.
+states that types are preserved during substitution.
 %We add one more choice in the conclusion
 %of progress lemma to handle non-annotated lambda expressions
 %($[[\x.e]]$). This last condition is necessary because the type system
@@ -766,8 +753,8 @@ Determinism (\Cref{lemma:union:determinism}) is also a
 critical property for our calculus. Determinism ensures that a program will always
 produce the same unique result.
 Determinism guarantees that switch expressions are not order-sensitive:
-because the calculus is deterministic this implies that \rref{Step-Switchl,Step-Switchr}
-can never be apply for the same well-typed expression.
+because the calculus is deterministic this implies that only one of the \rref{Step-Switchl,Step-Switchr}
+can be applied to a well-typed expression.
 
 \begin{lemma}[Determinism]
 \label{lemma:union:determinism}
@@ -802,47 +789,49 @@ reduction but only related to typing.}
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{An Alternative Specification for Disjointness}
 \label{sec:union:discussion}
+\begin{comment}
 \snow{I feel the reason and consequence are flipped here. 
 The alternative spec definitely equals to the previous one
 because we define ``ordinary types" to satisfy:
 1) no bottom-like types are ordinary;
 2) any type must have an ordinary subtype if it is not bottom-like.
 Or we need to provide some intuition for ordinary types themselves.}
+\end{comment}
 
-The current definition of disjointness (\cref{def:union:disj}) is inspired
+The current definition of disjointness (\Cref{def:union:disj}) is inspired
 by work on disjoint intersection types~\cite{oliveira2016disjoint}. This definition works well
 for the calculus presented in this section. However it is not the only
 possible formulation of disjointness.
-An equivalent formulation of disjointness is shown in Figure~\ref{fig:union:ord}.
-This definition relies on the notion of \emph{ordinary types}, which are essentially
-those types that are primitive, such as integers and functions.
-\bruno{Drop the Ord Top from the figure}. \baber{Done.}
+An equivalent formulation of disjointness is:
+
+\begin{definition}
+    A $*_{s1}$ B $\Coloneqq$ $\forall$ C, $[[ordinary C]]$ $\rightarrow$ $\neg$ ($[[C <: A]]$ $\wedge$ $[[C <: B]]$)
+    \label{def:union:disj1}
+  \end{definition}
+
+\noindent
 The new disjointness definition (\Cref{def:union:disj1}) states that two
 types are disjoint if they do not have common ordinary subtypes.
+\emph{Ordinary types}, are essentially
+those types that are primitive, such as integers and functions:
 
-It is important to establish the fact that definition
-\Cref{def:union:disj1} is indeed equivalent to our current
-definition. We prove equivalence of \Cref{def:union:disj} and
-\Cref{def:union:disj1} to establish this fact.
+\drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
+\medskip
+
+\noindent Note that the static types of (pre-)values in \name are always ordinary.
+%Consequentely values with a dynamic type $A$ should have an ordinary subtype $B$,
+%such that $B <: A$. 
+%terms with bottom types cannot be reduced to values
+%It is important to establish the fact that definition
+%\Cref{def:union:disj1} is indeed equivalent to our current
+%definition. 
+We prove equivalence of \Cref{def:union:disj} and
+\Cref{def:union:disj1}:
 
 \begin{lemma}[Disjointness Equivalence]
 A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
 \end{lemma}
 
-\begin{figure}
-    \centering
-    \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
-  \medskip
-  \begin{definition}
-    \centering
-    A $*_{s1}$ B $\Coloneqq$ $\forall$ C, $[[ordinary C]]$ $\rightarrow$ $\neg$ ($[[C <: A]]$ $\wedge$ $[[C <: B]]$)
-    \label{def:union:disj1}
-  \end{definition}
-  \caption{Updated disjointness and ordinary types for \cal.
-    \snow{I think there is no need to make figure small
-    unless we are going to exceed the page limit.} \baber{Sure, I fixed that.}}
-  \label{fig:union:ord}
-\end{figure}
-
-Definition \Cref{def:union:disj1} will play an important role in the
-calculus presented in Section~\ref{sec:inter}.
+The reason to introduce \Cref{def:union:disj1} is that this definition
+will play an important role in the calculus presented in Section~\ref{sec:inter},
+since \Cref{def:union:disj} cannot be used in that setting.
