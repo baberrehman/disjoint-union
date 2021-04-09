@@ -270,95 +270,6 @@ In Ceylon, this type annotation is not allowed to be bottom-like.
 The compiler uses this type to narrow the static type of the input term
 in switch/case, and rejects the program if the resultant type is equivalent
 to \lstinline{Nothing}.
-
-\begin{verbatim}
-	Known problem in Ceylon:
-	(Int | String) & (Int | Char) & (Char | String) is not treated as a bottom-like type
-	
-	Potential reason:
-	It defines bottom-like as:
-	Bottom-like A\& B ::= A * B
-	And it doesn't recognize intersection of unions and union of intersection,
-	which is the oopsla18 paper claims to have.
-	
-	Possible consequences:
-	- [harmless] we can write a case branch for such type.
-	- The definition of disjointness might be not so presice
-	
-	
-	alias IoC => Integer | Character;
-	alias IoS => Integer | String;
-	alias CoS => Character | String;
-	alias Bot => IoC & IoS & CoS;
-	// Ceylon does not treat Bot as Bottom-like type
-	
-	void test(Integer | Bot v){
-		switch (v)
-		case (is Integer) {}
-		case (is Bot) {}
-	}
-	void test2(Integer | Integer&Character v){
-		switch (v)
-		case (is Integer) {}
-		//    case (is Integer&Character ) {}
-	}
-	
-	
-	< Character | Integer > & < String | Integer > v2 = 100;
-	switch (v2)
-	// case (is Character | String ) { print("String: ``v2``"); }
-	case (is Integer) { print("Integer: ``v2``"); }
-	
-	// <Character|Integer>&<String|Integer> is covered by, but not assignable to, the type Integer (explicitly narrow assigned expression using of Integer)
-	
-	
-	// accepted
-	alias IntLike =>  < Character | Integer > & < String | Integer >;
-	IntLike v1 = 100;
-	switch (v1)
-	case (is Integer) { print("Integer: ``v1``"); }
-	
-	// rejected
-	// Specified expression must be assignable to declared type: the assigned type <Character|Integer>&<String|Integer> is covered by, but not assignable to, the type Integer (explicitly narrow assigned expression using of Integer)
-	 < Character | Integer > & < String | Integer > v2 = 100;
-	switch (v2)
-	case (is Integer) { print("Integer: ``v2``"); }
-	
-	
-	// accepted
-	alias Bot2 => Nothing;
-	Nothing | Integer v3 = 1;
-	switch (v3)
-	case (is Bot2) { print("test2"); }
-	case (is Integer) { print("test2"); }
-	
-	// rj
-	// Narrows to bottom type Nothing: Nothing has empty intersection with Nothing|Integer
-	 Nothing | Integer v3 = 1;
-	switch (v3)
-	case (is Nothing) { print("test2"); }
-	case (is Integer) { print("test2"); }
-	
-	
-	alias IoC => Integer | Character;
-	alias IoS => Integer | String;
-	alias CoS => Character | String;
-	alias Bot => IoC & IoS & CoS;
-	
-	// ac
-	<IoC & IoS & CoS> | Integer v3 = 1;
-	switch (v3)
-	case (is Bot) { print("test"); }
-	case (is Bot2) { print("test"); }
-	case (is Integer) { print("test"); }
-	
-	// rj
-	// Narrows to bottom type Nothing: IoC&IoS&CoS has empty intersection with IoC&IoS&CoS|Integer
-	switch (v3)
-	case (is IoC & IoS & CoS) { print("test"); }
-	case (is Integer) { print("test"); }
-	
-\end{verbatim}
 \end{comment}
 
 \bruno{
@@ -372,6 +283,29 @@ to \lstinline{Nothing}.
 }
 
 \subsection{Our work}
+After seeing the connection between bottom-like types and disjointness,
+it is intuitive to formally define disjointness via bottom-like types.
+
+\begin{definition}
+	A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ $\wedge$ $[[C <: B]]$ $\rightarrow$ $[[botlike C]]$
+	\label{def:union:disj}
+\end{definition}
+
+\snow{Here I copy the definition from union.tex. Maybe we can introduce it
+earlier.}
+
+Two types are disjoint if and only if all of their common subtypes are bottom-like.
+That is to say, there does not exist any term that is assignable to both of
+them.
+For the detailed discussion and an algorithmic formalization of
+disjointness, please refer to Section~\ref{sec:union:disj}.
+
+\snow{Do we need to compare with intersection disjointness or it will be
+distracting?}
+
+\snow{Next: How do we ensure exhaustive? Show the typing rule of switch/case.}
+
+\snow{Next of the next: intersection types and distributivity}
 
 \snow{Some concerns: does the addition of intersection types and distributivity
 	really increase the expressiveness of the system?
