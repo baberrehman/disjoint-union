@@ -3,26 +3,32 @@
 
 \bruno{I'm sketching a possible structure, but it can be changed ofcourse.}
 
+\ningning{We may want to be consistent with the syntax used in examples. Now
+  there are three things going on: examples before introducing Ceylon; examples
+  in Ceylon; examples in our calculi. Will it look confusing as we use three
+  different syntax rules?}
+
 \subsection{Tagged Union Types}
 
 % Brief intro to union types and one or 2 simple examples that show that we
 % can automatically lift values into union type without the need of some
 % tag/constructor. Something like:
 
-Union types have been studied intensively in the literature [?]. In particular,
-an expression with type $[[A\/B]]$ can be consider to have either type $[[A]]$
-\textit{or} type $[[B]]$. Many systems [?] model \textit{tagged union types}
-(also called \textit{sum types} or \textit{variants records}),
-where explicit \textit{tags} are used to construct terms with union types. For
-example, with $\mathsf{inj_1} :: [[A -> A \/ B]]$ and $\mathsf{inj_2} :: [[B ->
-A \/ B]]$, we have
+We start with a brief introduction to union types. An expression has a union
+type $[[A\/B]]$, if it can be considered to have either type $[[A]]$ \textit{or}
+type $[[B]]$. Many systems  model \textit{tagged union types} (also called
+\textit{sum types} or \textit{variants records}), where explicit \textit{tags}
+are used to construct terms with union types. Two introduction forms
+$\mathsf{inj_1} :: [[A -> A \/ B]]$ turns the type of an expression of type
+$[[A]]$ into type $[[A \/ B]]$, and $\mathsf{inj_2} :: [[B -> A \/ B]]$
+turns the type of an expressions of type $[[B]]$ into type $[[A \/ B]]$.
 
 \begin{lstlisting}
 inj1 "foo": String | Int
 inj2 1 : String | Int
 \end{lstlisting}
 
-For example, using tagged union types, we can implement safe division as:
+Using tagged union types, we can implement safe division as:
 
 \begin{lstlisting}
 function safediv (x : Int) (y : Int) : String | Int =
@@ -31,11 +37,9 @@ function safediv (x : Int) (y : Int) : String | Int =
 \end{lstlisting}
 
 Tagged union types are eliminated by \lstinline{switch} statements. For example,
-we can write the following program, which has different behaviors depending on the
+the following program \lstinline{tostring} has different behaviors depending on the
 tag of \lstinline{x}, where \lstinline{show} takes an \lstinline{Int} and
 returns back its string representation.
-
-\ningning{We may want to be consistent with the syntax used in examples.}
 
 \begin{lstlisting}
 function tostring (x: String | Int) : String =
@@ -74,13 +78,14 @@ result of safe division as one \lstinline{String}.
 
 
 While tags are useful to make it explicit which type a value belongs to, they
-also add clutter in the programs, and usually require extra space to store the tags. On
-the other hand, in systems with subtyping for union types [?], explicit tags are
-replaced by implicit coercions represented by the two subtyping rules $[[A <: A \/
-B]]$ and $[[B <: A \/ B]]$. We call such types \textit{untagged union types}, or
-simply \textit{union types}. In those systems, a term of type $[[A]]$ or $[[B]]$
-can be directly used as if it had type $[[A \/ B]]$, and we can model safe
-division as
+also add clutter in the programs, and usually require extra space to store the
+tags. On the other hand, in systems with subtyping for union types
+\cite{dunfield2014elaborating,pierce1991programming,muehlboeck2018empowering},
+explicit tags are replaced by implicit coercions represented by the two
+subtyping rules $[[A <: A \/ B]]$ and $[[B <: A \/ B]]$. We call such types
+\textit{untagged union types}, or simply \textit{union types}. In those systems,
+a term of type $[[A]]$ or $[[B]]$ can be directly used as if it had type $[[A \/
+B]]$, and thus we can model safe division as
 
 \begin{lstlisting}
 function safediv2 (x : Int) (y : Int) : String | Int =
@@ -88,27 +93,55 @@ function safediv2 (x : Int) (y : Int) : String | Int =
   else (x / y)
 \end{lstlisting}
 
-Now elimination of union types cannot reply on tags anymore. Instead, for
-union types, elimination is often \textit{type-directed} [?]. For instance,
-\lstinline{tostring2} have different behaviors depending on the \textit{type} of
-\lstinline{x}.
+However, now elimination of union types cannot reply on tags anymore, and
+different systems implement elimination differently.
+
+
+\paragraph{Single branch elimination.}
+
+In \citet{pierce1991programming,dunfield2014elaborating}, the \lstinline{switch}
+statement on an expression with a union type $[[A \/ B]]$ supports only one
+branch, and the branch needs to have the same type when the expression has type
+$[[A]]$, or type $[[B]]$. For example, in \lstinline{tostring2}, the expression
+\lstinline{show x} must return \lstinline{String} when \lstinline{x : String},
+and when \lstinline{x : Int}, which means \lstinline{show} must be overloaded
+(in \citet{pierce1991programming,dunfield2014elaborating}, this can be
+implemented by requiring \lstinline{show} to have an \textit{intersection type}).
 
 \begin{lstlisting}
 function tostring2 (x: String | Int) : String =
+  switch x of
+    x -> show x
+\end{lstlisting}
+
+This implementation is concise, but it is also restrictive as it can no longer
+support multiple branches according to the different representations of
+\lstinline{x}.
+
+\paragraph{Type-directed elimination.}
+
+On the other hand, some systems [?] support \textit{type-directed} elimination
+of union types. For instance, \lstinline{tostring3} have different behaviors
+depending on the \textit{type} of \lstinline{x}.
+
+\begin{lstlisting}
+function tostring3 (x: String | Int) : String =
   switch x of
     String -> x
     Int -> show x
 \end{lstlisting}
 
-\noindent Note here \lstinline{show} is directly applied to \lstinline{x}, as
-the type-directed elimination \textit{refines} the type of \lstinline{x} from
-\lstinline{String | Int} to \lstinline{Int} in the second branch.
+\noindent Note here \lstinline{show} is directly applied to \lstinline{x}, and
+it does not need to be overloaded, as the type-directed elimination
+\textit{refines} the type of \lstinline{x} from \lstinline{String | Int} to
+\lstinline{Int} in the second branch.
 
-However, compared to tagged union types, extra care must to taken with
-elimination of union types. In particular, ambiguity may arise when types in a
-union type overlap. For example, consider the type \lstinline{Person | Student},
-where we assume \lstinline{Student} is a subtype of \lstinline{Person}. Tagged
-union types can easily distinguish the two types by looking at the tag:
+However, compared to tag-directed elimination, extra care must to taken with
+type-directed elimination. In particular, while we can easily distinguish tags,
+in type-directed elimination, ambiguity may arise when types in a union type
+overlap. For example, consider the type \lstinline{Person | Student}, where we
+assume \lstinline{Student} is a subtype of \lstinline{Person}. With tag-directed
+elimination, we can write the following function:
 
 \begin{lstlisting}
 function isstudent (x: Person | Student) : Bool =
@@ -117,8 +150,8 @@ function isstudent (x: Person | Student) : Bool =
     inj2 student -> True
 \end{lstlisting}
 
-But if we apply the straightforward transformation of this function using union
-types and type-directed elimination, we will get:
+But if we transform this function straightforwardly to type-directed
+elimination, we will get:
 
 \begin{lstlisting}
 function isstudent2 (x: Person | Student) : Bool =
@@ -128,7 +161,7 @@ function isstudent2 (x: Person | Student) : Bool =
 \end{lstlisting}
 
 \noindent Now it is unclear what would happen if we apply \lstinline{isstudent2}
-to a term of \lstinline{Student}, as the term matches both branches. In some
+to a term of \lstinline{Student}, as its type matches both branches. In some
 systems [?], the choice is not decided in the semantics, in the sense either
 branch can be chosen, which leads to \textit{incoherent} behaviors. In some
 other systems [?], branches are inspected from top to bottom, and the first one
