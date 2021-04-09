@@ -9,8 +9,6 @@
 % can automatically lift values into union type without the need of some
 % tag/constructor. Something like:
 
-\ningning{where is syntax highlighting for code? Also probably remove line numbers.}
-
 Union types have been studied intensively in the literature [?]. In particular,
 an expression with type $[[A\/B]]$ can be consider to have either type $[[A]]$
 \textit{or} type $[[B]]$. Many systems [?] model \textit{tagged union types}
@@ -32,16 +30,16 @@ function safediv (x : Int) (y : Int) : String | Int =
   else inj2 (x / y)
 \end{lstlisting}
 
-Tagged union types are eliminated by \lstinline{case} statements. For example,
+Tagged union types are eliminated by \lstinline{switch} statements. For example,
 we can write the following program, which has different behaviors depending on the
 tag of \lstinline{x}, where \lstinline{show} takes an \lstinline{Int} and
 returns back its string representation.
 
-\ningning{maybe use \lstinline{switch} for all case analysis?}
+\ningning{We may want to be consistent with the syntax used in examples.}
 
 \begin{lstlisting}
 function tostring (x: String | Int) : String =
-  case x of
+  switch x of
     inj1 str -> str
     inj2 num -> show num
 \end{lstlisting}
@@ -97,7 +95,7 @@ union types, elimination is often \textit{type-directed} [?]. For instance,
 
 \begin{lstlisting}
 function tostring2 (x: String | Int) : String =
-  case x of
+  switch x of
     String -> x
     Int -> show x
 \end{lstlisting}
@@ -114,7 +112,7 @@ union types can easily distinguish the two types by looking at the tag:
 
 \begin{lstlisting}
 function isstudent (x: Person | Student) : Bool =
-  case x of
+  switch x of
     inj1 person -> False
     inj2 student -> True
 \end{lstlisting}
@@ -124,7 +122,7 @@ types and type-directed elimination, we will get:
 
 \begin{lstlisting}
 function isstudent2 (x: Person | Student) : Bool =
-  case x of
+  switch x of
     Person  -> False
     Student -> True
 \end{lstlisting}
@@ -398,6 +396,43 @@ to \lstinline{Nothing}.
 	were the most challenging aspects in the formalization, and maybe
 	highlight these.
 }
+
+In this paper, we follow type-based union elimination similar to Ceylon.
+We enforce disjointness constraint on the types of branches of a switch
+expression. On the contrary to Ceylon, we provide a formal definition
+of disjointness. Our disjointness definition is inspired by $\lambda_{i}$ 
+\cite{oliveira2016disjoint}. $\lambda_{i}$ formally defines disjointness
+for intersection types and merge operator.
+Intersection of two types $[[A]]$ and $[[B]]$ is dijoint in $\lambda_{i}$
+if $[[A]]$ and $[[B]]$ do not share a common supertype which is not
+\emph{top-like}. So-called \emph{top-like} types are defined in 
+\cite{oliveira2016disjoint} and are such types which are \emph{supertypes}
+of all other types.
+
+Union types are usually considered to be dual of intersection types.
+Therefore, we propose a dual definition of \emph{bottom-like} types.
+In contrast to \emph{top-like} types, \emph{bottom-like} types are
+subtypes of all other types. Further, in contrast to the disjointness
+definition in $\lambda_{i}$, two types $[[A]]$ and $[[B]]$ in the simplest 
+caluclus studied in this paper are disjoint if $[[A]]$ and $[[B]]$
+do not share any common \emph{subtype} which is not \emph{bottom-like}.
+Note that $\lambda_{i}$ proposed \emph{top-like} with \emph{supertypes}.
+We propose \emph{bottom-like} with \emph{subtypes}. This will be discussed
+in detail in \Cref{sec:union}.
+
+Adding intersection types in our calculus
+together with union types poses non-trivial challenges on disjointness.
+Specifically, it makes it impossible to define a complete disjointness
+definition. Therefore, the simple disjointness definition which is dual
+to $\lambda_{i}$ no longer works. We define a notion of ordinary types
+and define disjointness based upon ordinary types to overcome the
+challenge in completeness. Informally, updated disjointness definition states
+that two types $[[A]]$ and $[[B]]$ are disjoint if they do not share any
+common ordinary subtype. This will further be discussed in detail in
+\Cref{sec:inter}.
+
+We propose a sound and complete disjointness definition. Caclulus studied
+in this paper is type-safe and deterministic.
 
 %%% Local Variables:
 %%% mode: latex
