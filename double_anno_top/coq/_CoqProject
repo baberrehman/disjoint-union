@@ -2,4 +2,5 @@
 syntax.v
 syntax_wvalue.v
 typing.v
+typing_wvalue_beta.v
 typing_wvalue.v
