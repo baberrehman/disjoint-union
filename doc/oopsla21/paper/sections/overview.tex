@@ -295,6 +295,43 @@ In Ceylon, it is called \lstinline{Nothing}.
 	highlight these.
 }
 
+In this paper, we follow type-based union elimination similar to Ceylon.
+We enforce disjointness constraint on the types of branches of a switch
+expression. On the contrary to Ceylon, we provide a formal definition
+of disjointness. Our disjointness definition is inspired by $\lambda_{i}$ 
+\cite{oliveira2016disjoint}. $\lambda_{i}$ formally defines disjointness
+for intersection types and merge operator.
+Intersection of two types $[[A]]$ and $[[B]]$ is dijoint in $\lambda_{i}$
+if $[[A]]$ and $[[B]]$ do not share a common supertype which is not
+\emph{top-like}. So-called \emph{top-like} types are defined in 
+\cite{oliveira2016disjoint} and are such types which are \emph{supertypes}
+of all other types.
+
+Union types are usually considered to be dual of intersection types.
+Therefore, we propose a dual definition of \emph{bottom-like} types.
+In contrast to \emph{top-like} types, \emph{bottom-like} types are
+subtypes of all other types. Further, in contrast to the disjointness
+definition in $\lambda_{i}$, two types $[[A]]$ and $[[B]]$ in the simplest 
+caluclus studied in this paper are disjoint if $[[A]]$ and $[[B]]$
+do not share any common \emph{subtype} which is not \emph{bottom-like}.
+Note that $\lambda_{i}$ proposed \emph{top-like} with \emph{supertypes}.
+We propose \emph{bottom-like} with \emph{subtypes}. This will be discussed
+in detail in \Cref{sec:union}.
+
+Adding intersection types in our calculus
+together with union types poses non-trivial challenges on disjointness.
+Specifically, it makes it impossible to define a complete disjointness
+definition. Therefore, the simple disjointness definition which is dual
+to $\lambda_{i}$ no longer works. We define a notion of ordinary types
+and define disjointness based upon ordinary types to overcome the
+challenge in completeness. Informally, updated disjointness definition states
+that two types $[[A]]$ and $[[B]]$ are disjoint if they do not share any
+common ordinary subtype. This will further be discussed in detail in
+\Cref{sec:inter}.
+
+We propose a sound and complete disjointness definition. Caclulus studied
+in this paper is type-safe and deterministic.
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../paper"
