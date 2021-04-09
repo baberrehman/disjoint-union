@@ -30,11 +30,16 @@ type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
 
-\paragraph{Values, pre-values and annotated values} In \name there are two
-kinds of values: annotated values $w$; and unannotated lambda expressions ($[[\x.e]]$).
-In annotated values, which have the form $p :A$, the type annotation $A$
-represents the dynamic type that the value has at runtime. The dynamic and static types
-are important for the type-directed dynamic semantics.
+\ningning{We need to cite \citet{Huang:typedirected} somewhere. Do we need to do
+  it in the overview? I added the citation here. Maybe will also add it in the
+  operational semantics section.}
+
+\paragraph{Values, pre-values and annotated values}
+
+In \name there are two kinds of values ($[[v]]$): annotated values $[[w]]$; and unannotated
+lambda expressions ($[[\x.e]]$). In annotated values, which have the form $[[p
+:A]]$, the type annotation $[[A]]$ represents the \textit{dynamic type} that the
+value has at runtime.
 %We divide the representation for values into three parts: pre-values,
 %annotated values and values.
 Metavariable $[[p]]$ ranges over pre-values. Pre-values
@@ -43,22 +48,24 @@ and annotated lambda expressions $[[\x.e : A -> B]]$.
 %Annotated values are pre-values with an additional type annotation i.e. $[[p:A]]$.
 It is important to note that $[[i]]$ is not a value in this
 calculus, instead $[[i:Int]]$ or $[[i:Top]]$ are values.
-Values which are unannotated lambda expressions ($[[\x.e]]$) are needed
-in our calculus because we employ bi-directional type-checking. In bi-directional
-type-checking unannotated lambda expressions can be arguments of functions, and unannotated lambda values
-will appear as a result of reducing such arguments.
-Annotated lambda values have two annotations.
-That is $[[\x.e : A -> B : C]]$ is a value.
+We have unannotated lambda expressions ($[[\x.e]]$) as values, as
+\name employs bi-directional type-checking, where
+unannotated lambda expressions can be arguments of functions, and
+may appear as a result of reducing such arguments.
+Annotated lambda values have two annotations;
+that is, $[[\x.e : A -> B : C]]$ is a value.
 As already mentioned, $C$ is the dynamic type of the value
 at runtime, whereas $[[A -> B]]$ is the original \emph{static type} of the lambda.
+As we will see, the distinguish between dynamic and static
+types is important for the \textit{type-directed operational semantics}
+\cite{Huang:typedirected}.
 For readers familiar with calculi with gradual types~\cite{}, the two annotations
 can be also be understood as the \emph{source type} and \emph{target type}
 of an upcast: i.e. if the value is well-typed we have that $[[A -> B]] <: [[C]]$.
 
-A context ($[[G]]$) can
-either be empty or contains type bindings of variables and associated
-types. Finally, a typing mode ($[[dirflag]]$) can either be check ($[[<=]]$)
-or inference ($[[=>]]$).
+Finally, a context ($[[G]]$) maps variables to their associated types. A typing
+mode ($[[dirflag]]$), as in traditional bidirectional type checking, can either be the
+inference mode ($[[=>]]$) or the checking mode ($[[<=]]$).
 
 \begin{figure}[t]
   \begin{small}
@@ -70,7 +77,7 @@ or inference ($[[=>]]$).
       AValue & $[[w]]$ & $\Coloneqq$ & $[[p:A]]$\\
       Value & $[[v]]$ & $\Coloneqq$ & $[[w]] \mid [[\x.e]] $\\
       Context & $[[G]]$ & $\Coloneqq$ & $ \cdot \mid [[G , x : A]]$ \\
-      Mode & $[[dirflag]]$ & $\Coloneqq$ & $[[<=]] \ \mid \ [[=>]]$ \\
+      Mode & $[[dirflag]]$ & $\Coloneqq$ & $[[=>]] \ \mid \ [[<=]]$ \\
       \bottomrule
     \end{tabular}
   \end{small}
@@ -79,7 +86,10 @@ or inference ($[[=>]]$).
     \drules[s]{$ [[A <: B ]] $}{Subtyping}{top, bot, int, arrow, ora, orb, orc}
   \end{small}
 
-  \caption{Syntax and Algorithmic Subtyping for \cal.}
+  \ningning{I still think we should remove the word ``algorithmic'' in
+    ``algorithmic subtyping'' in the caption. So I did.}
+
+  \caption{Syntax and Subtyping for \cal.}
   \label{fig:union:syntax}
 \end{figure}
 
@@ -89,19 +99,23 @@ or inference ($[[=>]]$).
 \subsection{Subtyping}
 \label{sec:union:sub}
 The subtyping rules for \cal are shown in
-\Cref{fig:union:syntax}. 
+\Cref{fig:union:syntax}. Most rules are standard.
 \Rref{s-top} states that all types are subtypes of
 the $[[Top]]$ type. \Rref{s-bot} states that $[[Bot]]$ type is subtype of
 all types. \Rref{s-int, s-arrow} are standard rules for integers and
 functions respectively.  Functions are contravariant in input types
-and covariant in output types. \Rref{s-ora, s-orb, s-orc} are standard
-subtyping rules for union types. The union type of two types $[[A1]]$ and $[[A2]]$
+and covariant in output types. \Rref{s-ora,s-orb,s-orc} deal with
+subtyping for union types. \rref{s-ora} says that the union type of two types $[[A1]]$ and $[[A2]]$
 is a subtype of another type $[[A]]$ if both $[[A1]]$ and $[[A2]]$ are subtypes of
-$[[A]]$, as stated in \rref{s-ora}. \Rref{s-orb, s-orc} state that if a
+$[[A]]$. \Rref{s-orb,s-orc} state that if a
 type is subtype of one of the components of a union type, then it is subtype of whole
 union type.  
 \snow{The link for s-orc is lost. Maybe we need to use ``and \rref{s-orc}" instead? Can we use $B$ instead of $A$ in the three union rules to make them
 more readable?}
+\ningning{This can be fixed by not putting extra space between rules or
+  otherwise it will break the hyperlinks. Baber can you fix other ones? There
+  are quite a few.}
+
 The subtyping relation for \cal is reflexive and transitive.
 \begin{lemma}[Subtyping Reflexivity]
   $[[A <: A]]$.
