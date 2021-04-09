@@ -835,7 +835,7 @@ An equivalent formulation of disjointness is:
 The new disjointness definition (\Cref{def:union:disj1}) states that two
 types are disjoint if they do not have common ordinary subtypes.
 \emph{Ordinary types}, are essentially
-those types that are primitive, such as integers and functions:
+those types that are primitive, such as integers and functions. Formally,
 
 \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
 \medskip
@@ -847,16 +847,19 @@ those types that are primitive, such as integers and functions:
 %It is important to establish the fact that definition
 %\Cref{def:union:disj1} is indeed equivalent to our current
 %definition. 
-We prove equivalence of \Cref{def:union:disj} and
-\Cref{def:union:disj1}:
+
+We prove that for the calculus presented in this section, the new definition is
+actually equivalent to the previous definition of disjointness
+(\Cref{def:union:disj}).
 
 \begin{lemma}[Disjointness Equivalence]
 A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
 \end{lemma}
 
-The reason to introduce \Cref{def:union:disj1} is that this definition
-will play an important role in the calculus presented in Section~\ref{sec:inter},
-since \Cref{def:union:disj} cannot be used in that setting.
+Then why do we introduce the new definition of disjointness? It turns out that
+\Cref{def:union:disj} is not sufficient when the calculus is integrated with
+intersection types, as in Section~\ref{sec:inter}, and as we will see,
+\Cref{def:union:disj1} will play an important role.
 
 %%% Local Variables:
 %%% mode: latex
