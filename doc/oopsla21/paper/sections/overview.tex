@@ -214,16 +214,64 @@ But once the details are hidden, users may not be able to image that how does
 the order affects the program, as we discussed above.  
 On the other hand, with some requirements on the argument and return types, it is 
 straightforward to support function overloading by combining them in a switch/case expression.
-But it is hard to find a fair criteria to decide which one should be prioritized,
-if two functions can overlap.
+But it will be hard to find a fair criteria to decide which one
+should be prioritized, if two functions can overlap.
 % https://github.com/ceylon/ceylon-spec/issues/50
 % https://github.com/ceylon/ceylon-spec/issues/65
 
-To define disjointness precisely, it often comes to the a concept of \emph{bottom type}.
+\begin{lstlisting}
+void printAfterPlusOne(Integer|String x) {
+	switch (x)
+	case (is Integer|Float) { print(x+1); }
+	case (is String) { print("String:"+x); }
+}
+\end{lstlisting}
+
+Although the list of cases must be exhaustive, it does need to
+strictly follow the input's type.
+For example, in the above function, \lstinline{x} can only be an integer
+or a string. But it is not harmful for the first branch to expect
+a term of \lstinline{Integer|Float}, since any integer can have such
+type.
+In general, a term of type $A$ is always assignable to any supertype of $A$.
+But in Ceylon, the checking of assignability is not complete to
+subtyping.
+Although the subtyping relation holds between \lstinline{v}'s
+(declarative) type and \lstinline{Integer}, \lstinline{v}
+is not assignable to \lstinline{Integer}, and the following program
+cannot be accepted by Ceylon's compiler.
+% https://try.ceylon-lang.org/#
+
+\begin{lstlisting}
+	< Character | Integer > & < String | Integer > v = 100;
+	switch (v)
+	case (is Integer) { print("Integer: ``v``"); }
+\end{lstlisting}
+
+To dig deeper for disjointness, it often comes to the the concept
+of \emph{bottom type}.
 Bottom type is a subtype of all types, in contrast to the top type.
-As we have known that disjoint types do not have any common subtype which has
-inhabited values. Certainly the bottom type has no values.
-In Ceylon, it is called \lstinline{Nothing}.
+Certainly the bottom type has no value.
+In Ceylon, it is called \lstinline{Nothing}, representing the empty set.
+%
+With the existence of subtyping, a branch in switch/case expression
+can take a term of a subtype of its expected type.
+If the term's type is also a subtype of the other branch's expected
+type, type information will be insufficient to disambiguate.
+To prevent this, disjoint types cannot have any common subtype which has
+inhabited values.
+For two disjoint types $[[A]]$ and $[[B]]$, their intersection $[[A/\B]]$
+is naturally a common subtype, and therefore must be equivalent to
+the bottom type \lstinline{Nothing}.
+
+\begin{comment}
+Let us call them \emph{bottom-like types}.
+% Ceylon treat such types specially.
+In a switch construct, every case has a type annotation.
+In Ceylon, this type annotation is not allowed to be bottom-like.
+The compiler uses this type to narrow the static type of the input term
+in switch/case, and rejects the program if the resultant type is equivalent
+to \lstinline{Nothing}.
 
 \begin{verbatim}
 	Known problem in Ceylon:
@@ -257,7 +305,63 @@ In Ceylon, it is called \lstinline{Nothing}.
 		//    case (is Integer&Character ) {}
 	}
 	
+	
+	< Character | Integer > & < String | Integer > v2 = 100;
+	switch (v2)
+	// case (is Character | String ) { print("String: ``v2``"); }
+	case (is Integer) { print("Integer: ``v2``"); }
+	
+	// <Character|Integer>&<String|Integer> is covered by, but not assignable to, the type Integer (explicitly narrow assigned expression using of Integer)
+	
+	
+	// accepted
+	alias IntLike =>  < Character | Integer > & < String | Integer >;
+	IntLike v1 = 100;
+	switch (v1)
+	case (is Integer) { print("Integer: ``v1``"); }
+	
+	// rejected
+	// Specified expression must be assignable to declared type: the assigned type <Character|Integer>&<String|Integer> is covered by, but not assignable to, the type Integer (explicitly narrow assigned expression using of Integer)
+	 < Character | Integer > & < String | Integer > v2 = 100;
+	switch (v2)
+	case (is Integer) { print("Integer: ``v2``"); }
+	
+	
+	// accepted
+	alias Bot2 => Nothing;
+	Nothing | Integer v3 = 1;
+	switch (v3)
+	case (is Bot2) { print("test2"); }
+	case (is Integer) { print("test2"); }
+	
+	// rj
+	// Narrows to bottom type Nothing: Nothing has empty intersection with Nothing|Integer
+	 Nothing | Integer v3 = 1;
+	switch (v3)
+	case (is Nothing) { print("test2"); }
+	case (is Integer) { print("test2"); }
+	
+	
+	alias IoC => Integer | Character;
+	alias IoS => Integer | String;
+	alias CoS => Character | String;
+	alias Bot => IoC & IoS & CoS;
+	
+	// ac
+	<IoC & IoS & CoS> | Integer v3 = 1;
+	switch (v3)
+	case (is Bot) { print("test"); }
+	case (is Bot2) { print("test"); }
+	case (is Integer) { print("test"); }
+	
+	// rj
+	// Narrows to bottom type Nothing: IoC&IoS&CoS has empty intersection with IoC&IoS&CoS|Integer
+	switch (v3)
+	case (is IoC & IoS & CoS) { print("test"); }
+	case (is Integer) { print("test"); }
+	
 \end{verbatim}
+\end{comment}
 
 \bruno{
 	Introduce the Ceylon approach with examples; introduce the idea of
