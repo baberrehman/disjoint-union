@@ -252,12 +252,13 @@ We further illustrate
 
 \subsection{Algorithmic Disjointness}
 
-The change in the disjointness specification has an impact on an algorithmic
-formulation of disjointness. Attempting to adapt the algorithmic formulation
-in \Cref{sec:union} is problematic. In particular it is hard to obtain
-completeness. Therefore, to obtain a sound, complete and decidable
-formulation of disjointness we employ the novel notion of
-\emph{lowest ordinary subtypes}.
+The change in the disjointness specification has a significant impact on its
+algorithmic formulation. In particular, it is not obvious at all how to adapt
+the algorithmic formulation in \Cref{fig:union:ad}. To obtain a
+sound, complete and decidable formulation of disjointness, we employ the novel
+notion of \emph{lowest ordinary subtypes}.
+
+\ningning{separate the definition of LOS into another figure and put the figure here.}
 
 \paragraph{Lowest Ordinary Subtypes ($[[findsubtypes A]]$)}
 \Cref{fig:inter:system} shows the definition of
@@ -330,7 +331,9 @@ We illustrate \Cref{def:inter:ad} with a few examples:
 \end{comment}
 
 \paragraph{Soundness and Completeness}
-Algorithmic disjointness is sound and complete with respect to declarative disjointness.
+
+We prove that the algorithmic disjointness is sound and complete with respect to
+the declarative specification.
 
 \begin{lemma}[Disjointness Soundness]
   If \ $[[A * B]]$ \ then \ $[[A *s B]]$.
@@ -347,9 +350,13 @@ Algorithmic disjointness is sound and complete with respect to declarative disjo
 
 \subsection{Typing, Semantics and Metatheory}
 
-The typing and operational semantics are also the same as in \Cref{sec:union}.
-\cal with intersection types is type-sound and deterministic. We state the
-key lemmas next: \bruno{add determinism}
+The typing and operational semantics stay the same as in \Cref{sec:union}. Note
+that while those rules stay the same, as types and subtyping rules are extended
+with intersection types, the system is naturally more expressive than
+in \Cref{sec:union}.
+
+We prove that \cal with intersection types preserves type soundness determinism.
+\bruno{add determinism}
 
 \begin{lemma}[Type Preservation]
 \label{lemma:inter:preservation}
@@ -375,10 +382,16 @@ If \ $[[ [] |- e dirflag A]]$ then
 
 \subsection{Disjointness in Ceylon}
 \label{sec:inter:ceylon}
+
+\ningning{I agree this section feels quite weak for now.}
+
 \bruno{I think we can move this discussion to the Discussion section. }
 Ceylon also provides a notion of disjoint types in type-based case analysis. In this section
 we compare the disjointness provided by Ceylon with our disjointness definition.
 \Cref{inter:list:ceylon} shows a simple Ceylon disjointness example.
+
+\ningning{A similar example is used in the overview. Maybe we want to be
+  consistent with the examples.}
 
 \begin{figure}[t]
 \begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
