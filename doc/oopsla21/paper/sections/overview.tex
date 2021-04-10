@@ -205,6 +205,30 @@ or only workers, only one branch can be choosen.
   interesting examples (I gave quite a few pointers and examples from the documentation
   on slack) here!}
 
+\begin{lstlisting}
+// Takes a string and adds "padding" to the left.
+// If 'padding' is a string, then 'padding' is appended to the left side.
+// If 'padding' is a number, then that number of spaces is added to the left side.
+
+String space(Integer n){
+	if (n==0) {
+		return "";
+	} else {
+		return " "+space(n-1);
+	}
+}
+
+String padLeft(String v, String|Integer x){
+	switch (x)
+	case (is Integer) { return space(x)+v; }
+	case (is String) { return x+v; }
+}
+
+
+print( padLeft("?", 5) );
+print( padLeft("World", "Hello ") );
+\end{lstlisting}
+
 \bruno{Please organize the section text using paragraphs, to highlight key topics.
   I think the flow of the text is quite bad and I can't quite figure out what points
   you are trying to make in different parts of the text. In fact it seems that you keep
@@ -231,10 +255,12 @@ That makes it different to the previous discussion. Why?
 Because the types in all branches must be disjoint.
 
 \begin{lstlisting}
-  switch (v)
-    case (is String) { print("String: ``v``"); }
-    case (is Integer) { print("Integer: ``v``"); }
-    case (is Float) { print("Float: ``v``"); }
+  void print(String|Integer|Float x) {
+    switch (x)
+      case (is String) { print("String: ``x``"); }
+      case (is Integer) { print("Integer: ``x``"); }
+      case (is Float) { print("Float: ``x``"); }
+    }
 \end{lstlisting}
 % https://ceylon-lang.org/documentation/1.3/tour/types/
 % case (is Object) { print(v); }
