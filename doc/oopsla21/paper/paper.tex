@@ -152,12 +152,12 @@ languages.
 %supports union types, with an innovative elimination construct that has
 %not been previously studied in the rese
 This paper investigates a particular formulation of union types,
-inpired by the Ceylon programming language, with an elimination
+inspired by the Ceylon programming language, with an elimination
 construct that enables case analysis (or switches) on types.  The
 interesting aspect of such construct is that each clause must operate
 on \emph{disjoint} types. By using such elimination construct, it is
-possible to ensure that all possible cases are
-handled and that none of the cases overlap. In turn, this means that
+possible to ensure \emph{exhaustiveness} (i.e. all possible cases are
+handled), and that none of the cases overlap. In turn, this means that
 the order of the cases does not matter and reordering the cases has no
 impact on the semantics, which can aid program undertanding and
 refactoring. While implemented in the Ceylon language, such construct
@@ -168,12 +168,15 @@ in the context of \emph{disjoint intersection types}.
 We study union types with disjoint switches formally and in a language
 independent way.  We present the \emph{union calculus} (\cal) that
 includes disjoint switches and prove several results, including type
-soundness and determinism. The notion of disjointness in \cal is
-interesting in that it is in essence the dual notion of disjointness
+soundness and determinism. The notion of disjointness in \cal 
+is interesting in that it is in essence the dual notion of disjointness
 for intersection types.  However, there are challenges that arize for
-disjointness when combining union and intersection types.  We also
-study several extensions, including intersection types and
-distributive subtyping and show that such extensions retain all the
+disjointness when extending \name with intersection types. Those challenges
+require us to depart from the dual notion of disjointness for intersection types,
+and use a more general formulation of disjointness instead. We also
+study several extensions, including 
+distributive subtyping and a subtyping rule for a class of types that represent empty
+types. We show that such extensions retain all the
 desired properties. All the results about \cal and its extensions have
 been formalized in the Coq theorem prover.
 \end{abstract}

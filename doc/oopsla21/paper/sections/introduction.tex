@@ -1,7 +1,31 @@
 \section{Introduction}
 \label{sec:intro}
 
-Union types allow expressing terms with alternative types. Several forms of
+Most programming languages support some mechanism to express terms
+with alternative types. Algol 68~\cite{} included a form of
+\emph{tagged} unions for this purpose. With tagged unions
+an explicit tag is needed to distinguish between different cases in the
+union. Such an approach has been adopted by functional languages, like Haskell, ML, or
+OCaml, which allow tagged unions (or sum types~\cite{}) in some form.
+Typically by using either \emph{algebraic datatypes}~\cite{} or \emph{variant
+  types}~\cite{} (in the case of OCaml).  Languages like C or C++ support \emph{untagged} union types where
+values of the alternative types are simply stored at the same memory
+location. However, there is no checking of types when accessing values of
+such untagged types. Thus, it is up to the programmer to ensure that the proper
+values are accessed correctly in different contexts. Otherwise the
+program may crash by accessing the value at the incorrect type.
+Modern OOP languages, such as Scala~\cite{}, Flow~\cite{},
+TypeScript~\cite{} or Ceylon~\cite{} support a form
+of untagged union types, which is inspired by 
+
+algebraic datatypes 
+
+Union types were introduced by 
+
+Union types allow expressing terms with alternative types.
+
+
+Several forms of
 union types have been investigated in the research literature, and
 union types are nowadays a common feature in many modern programming
 languages.
