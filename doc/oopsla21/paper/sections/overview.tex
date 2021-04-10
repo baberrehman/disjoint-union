@@ -199,10 +199,23 @@ potentially choose either branch. However for persons that are only students
 or only workers, only one branch can be choosen.
 
 \subsection{Eliminating Union Types in Ceylon}
+
 \bruno{I suggested using interesting examples from the documentation of Ceylon, but
   I think we only give artificial examples here. Please write a couple of more
   interesting examples (I gave quite a few pointers and examples from the documentation
   on slack) here!}
+
+\bruno{Please organize the section text using paragraphs, to highlight key topics.
+  I think the flow of the text is quite bad and I can't quite figure out what points
+  you are trying to make in different parts of the text. In fact it seems that you keep
+  discussing related points in different parts of the text. Give the text structure
+  and a flow by stating upfront (in a paragraph title) what is the point that you are trying
+  to make in that paragraph. I can think of the following as themes/titles for paragraphs:
+  1) Union types as an alternative to overloading; (motivate a little bit why Ceylon has
+  such a construct).
+  2) Disjointness; 3) Exhaustiveness 4) Problems with Ceylon's approach. 
+}
+
 Ceylon supports type-directed union elimination via a switch expression with
 multiple branches. Each branch matches on a type.
 \bruno{The following text is making some implicit assumptions: firstly it is not obvious
@@ -237,6 +250,13 @@ programmers can reorder the cases without affecting the semantics
 of the program. More importantly, disjointness can avoid subtle bugs
 that may arize from overlapping cases.
 
+\bruno{I'm not sure that that what we want to say is what you say next.
+  A reader may argue what if we want to model such an example. Actually
+  Ceylon does allow you todo the example with an extension of the case construct.
+  But I think what we want to illustrate here is that even with a disjoint construct
+  we can do interesting things. This is why showing more interesting examples
+  from the documentation and other ones that we discussed on slack is important. 
+}
 Take the previous function \lstinline{isstudent2} as an example.
 For its definition to be accepted by Ceylon,
 \lstinline{Person} and \lstinline{Student} cannot be subclass of
@@ -259,6 +279,14 @@ interchangeable.
 That could reduce confusion of program readers and eliminate a potential
 source of bugs.
 
+\bruno{Examples with polymorphism are not good because we don't cover polymorphism
+  in this paper, nor we have disjointness constraints either. Also, I'm not quite
+  sure about the point that you're trying to make with this example. You seem to keep
+  going at overlapping. Are you trying to mention why the Ceylon team has decided
+  to have a construct with disjoint cases? If so, be clear about that, and give references
+  to the discussions that have motivated it! If the reason to write this example was
+  to describe the motivations of the Ceylon team, then maybe it is ok to have the polymorphic
+code. }
 \begin{lstlisting}
 	void <A> printA(A|Null x) {
 		switch (x)
@@ -290,6 +318,7 @@ should be prioritized, if two functions can overlap.
 % https://github.com/ceylon/ceylon-spec/issues/50
 % https://github.com/ceylon/ceylon-spec/issues/65
 
+\bruno{The following example is better, and I guess useful to illustrate exhaustiveness.}
 \begin{lstlisting}
 void printAfterPlusOne(Integer|String x) {
 	switch (x)
@@ -305,6 +334,9 @@ or a string. But it is not harmful for the first branch to expect
 a term of \lstinline{Integer|Float}, since any integer can have such
 type.
 In general, a term of type $A$ is always assignable to any supertype of $A$.
+\bruno{The next text seems to switch to another point, which is issues with the
+  Ceylon approach. So, what you should do is to start a new paragraph that clearly
+identifies the change of topic. }
 But in Ceylon, the checking of assignability is not complete to
 subtyping.
 Although the subtyping relation holds between \lstinline{v}'s
@@ -319,6 +351,10 @@ cannot be accepted by Ceylon's compiler.
 	case (is Integer) { print("Integer: ``v``"); }
 \end{lstlisting}
 
+\bruno{Now you come back to disjointness having spoken about disjointness earlier
+  in this section. Don't jump around topics like this. If you have a paragraph
+  on disjointness, then talk about everything that relates to disjointness under that
+paragraph.}
 To dig deeper for disjointness, it often comes to the the concept
 of \emph{bottom type}.
 Bottom type is a subtype of all types, in contrast to the top type.
