@@ -22,8 +22,9 @@ grammar
     | Bot                  ::   :: bot     {{ tex \bot }}
     | A -> B               ::   :: arrow
     | A \/ B 	             ::   :: union
-    | A /\ B 			   ::   :: inter
+    | A /\ B 			         ::   :: inter
     | ( A )                :: S :: paren   {{ coq ([[A]]) }}
+    | statictype e         ::   :: statictype {{ tex \rceil [[e]] \lceil }}
 
   exp, e, v, p, w             :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
@@ -39,6 +40,7 @@ grammar
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
     | 1                    ::   :: lit1
+    | betavalue v A B      ::   :: betavalue {{ tex [[v]] \mathbin{\lhd} [[A]] \mathbin{\lhd} [[B]] }}
 
 substitutions
   single exp x   :: subst
@@ -172,20 +174,20 @@ FindType :: '' ::=
     findtype ((\x.e) : A -> B) (A -> B)
 
 
-defns
-droptype :: '' ::=
+%defns
+%betavalue :: '' ::=
   
-  defn
-  droptype v e ::   :: droptype :: 'droptype_'
-  {{ com DropStaticType }}
-  {{ tex [[e]] = \rceil[[v]]\lceil }}
-  by
+%  defn
+%  betavalue v A B ::   :: betavalue :: 'betavalue_'
+%  {{ com Beta Value }}
+%  {{ tex \rceil[[v]][[A]][[B]]\lceil }}
+%  by
 
-    ---------------- :: pval
-    droptype (p:A) p
+%    ---------------- :: pval
+%    betavalue (p:A) p
 
-    ---------------------- :: abs
-    droptype (\x.e) (\x.e)
+%    ---------------------- :: abs
+%    betavalue (\x.e) (\x.e)
 
 
 defns
@@ -417,37 +419,37 @@ Subtyping :: '' ::=
     -------------------------     :: arrow
     A1 -> A2 <: B1 -> B2
   
-    A1 <: A
-    A2 <: A
+    A <: C
+    B <: C
     -------------------------     :: ora
-    A1 \/ A2 <: A
+    A \/ B <: C
   
-    A <: A1
+    A <: B
     -------------------------     :: orb
-    A <: A1 \/ A2 
+    A <: B \/ C 
 
-    A <: A2
+    A <: C
     -------------------------     :: orc
-    A <: A1 \/ A2
+    A <: B \/ C
 
-    A <: A1
-    A <: A2
+    A <: B
+    A <: C
     -------------------------     :: anda
-    A <: A1 /\ A2
+    A <: B /\ C
   
-    A1 <: A
+    A <: C
     -------------------------     :: andb
-    A1 /\ A2 <: A 
+    A /\ B <: C 
 
-    A2 <: A
+    B <: C
     -------------------------     :: andc
-    A1 /\ A2 <: A
+    A /\ B <: C
 
     findsubtypesempty A
     -------------------------      :: disj
     A <: B
 
-    A * B
+    A *s B
     ------------------------       :: dis
     A /\ B <: Bot
 
@@ -607,12 +609,10 @@ Reduction :: '' ::=
 
     e --> e'
     ---------------- :: appr
-    w e --> v e'
+    w e --> w e'
 
-
-     droptype v e1
-    ------------------------------------------------------------ :: beta
-    ((\x.e):A1->B1:A2->B2) v --> ((e [x ~> (e1:A2):A1]):B1):B2
+    ---------------------------------------------------------------- :: beta
+    ((\x.e):A1->B1:A2->B2) v --> (e [x ~> (betavalue v A2 A1)]):B1:B2
 
 
     ----------------------------------------------------------------------- :: absbeta
@@ -641,14 +641,12 @@ Reduction :: '' ::=
 
 
     prevalue p
-    findtype p C
-    C <: A
+    statictype p <: A
     ------------------------------------------------- :: switchl
     switch (p:D) A e1 B e2 --> e1 [x ~> p:A]
 
 
     prevalue p
-    findtype p C
-    C <: B
+    statictype p <: B
     ------------------------------------------------- :: switchr
     switch (p:D) A e1 B e2 --> e2 [y ~> p:B]
