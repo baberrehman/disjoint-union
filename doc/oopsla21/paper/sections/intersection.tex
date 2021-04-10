@@ -34,13 +34,13 @@ values $[[v]]$, and context $[[G]]$ stay the same as in \Cref{sec:union}.
 
 \paragraph{Subtyping}
 The new rules for subtyping are shown in upper middle part of
-\Cref{fig:inter:system}.  \Rref{s-anda, s-andb, s-andc} are for newly
+\Cref{fig:inter:system}.  \Rref{s-anda,s-andb,s-andc} are for newly
 added intersection types. \Rref{s-anda} states that a type $[[A]]$ is
-a subtype of intersection of two types $[[A1]]$ and $[[A2]]$ only if
-$[[A]]$ is a subtype of both $[[A1]]$ and $[[A2]]$. \Rref{s-andb,
-  s-andc} state that an intersection type $[[A1 /\ A2]]$ is a subtype
-of some type $[[A]]$ if either of its component types ($[[A1]]$ or
-$[[A2]]$) is a subtype of $[[A]]$. The subtyping relation is reflexive
+a subtype of intersection of two types $[[B]]$ and $[[C]]$ only if
+$[[A]]$ is a subtype of both $[[B]]$ and $[[C]]$. \Rref{s-andb,s-andc} 
+state that an intersection type $[[A /\ B]]$ is a subtype
+of some type $[[C]]$ if either of its component types ($[[A]]$ or
+$[[B]]$) is a subtype of $[[C]]$. The subtyping relation is reflexive
 and transitive.
 
 \begin{figure}[t]
@@ -147,7 +147,7 @@ disjoint types to be subtype of $[[Bot]]$.
 \begin{center}
 \drule[]{s-dis}
 \end{center}
-\bruno{Please use disjointness spec instead of disjoitness algorithm in the rule.}
+%\bruno{Please use disjointness spec instead of disjoitness algorithm in the rule.}
 
 \noindent This rule is adopted by the Ceylon language~\cite{muehlboeck2018empowering}:
 \Rref{s-dis} states that the insersection type $[[A /\ B]]$
@@ -355,8 +355,8 @@ that while those rules stay the same, as types and subtyping rules are extended
 with intersection types, the system is naturally more expressive than
 in \Cref{sec:union}.
 
-We prove that \cal with intersection types preserves type soundness determinism.
-\bruno{add determinism}
+We prove that \cal with intersection types preserves type soundness and determinism.
+%\bruno{add determinism}
 
 \begin{lemma}[Type Preservation]
 \label{lemma:inter:preservation}
@@ -372,6 +372,11 @@ If \ $[[ [] |- e dirflag A]]$ then
   \end{enumerate}
 \end{lemma}
 
+\begin{theorem}[Determinism]
+\label{lemma:union:determinism}
+  If \ $[[G |- e dirflag A]]$ and \ $[[e --> e1]]$ and \ $[[e --> e2]]$ then $[[e1]]$ = $[[e2]]$.
+\end{theorem}
+
 \begin{comment}
 \begin{lemma}[Substitution]
 \label{lemma:inter:substitution}
@@ -379,64 +384,6 @@ If \ $[[ [] |- e dirflag A]]$ then
   then \ $[[G, G1 |- e [ x ~> e' ] dirflag A]]$
 \end{lemma}
 \end{comment}
-
-\subsection{Disjointness in Ceylon}
-\label{sec:inter:ceylon}
-
-\ningning{I agree this section feels quite weak for now.}
-
-\bruno{I think we can move this discussion to the Discussion section. }
-Ceylon also provides a notion of disjoint types in type-based case analysis. In this section
-we compare the disjointness provided by Ceylon with our disjointness definition.
-\Cref{inter:list:ceylon} shows a simple Ceylon disjointness example.
-
-\ningning{A similar example is used in the overview. Maybe we want to be
-  consistent with the examples.}
-
-\begin{figure}[t]
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
-// Student <: Person
-// speak function will not type check
-void speak(Person | Student val) {
-  switch (val)
-  case (is Person) {print("person speaks");}
-  case (is Student) {print("student speaks");} 
-}
-\end{lstlisting}
-\caption{Ceylon disjointness code example.}
-\label{inter:list:ceylon}
-\end{figure}
-
-\noindent The function \emph{speak} in \Cref{inter:list:ceylon} 
-will not type check in Ceylon. Because \emph{Person} and
-\emph{Student} are not disjoint types. \emph{Person} and \emph{Student} both have a common
-subtype which is \emph{Student}. \cal will also reject such programs.
-A significant difference between the disjointness in Ceylon and \cal is that
-Ceylon does not provide
-a formal disjointness definition, whereas \cal provides a formal definition for
-disjointness. Formal definitions are easy to reason about than textual descriptions. 
-
-Next, we compare a few textual descriptive points of disjointness in Ceylon with
-the disjointness definition in \cal. Following points are copied from Ceylon
-documentation \cite{}. Two types X and Y are disjoint if either of the following holds:
-
-\begin{enumerate}
-  \item{X is a subtype of a type A and Y is a subtype of a type B, where A and B are distinct cases of an enumerated type}
-  \item{X and Y are both classes and X is not a subclass of Y and Y is not a subclass of X}
-  \item{X is a union type $[[A \/ B]]$ and both Y and A are disjoint and Y and B are disjoint}
-  \item{X is an enumerated type with cases A1|A2|... and for every case Ai of X, Y and Ai are disjoint}
-  \item{X is an intersection type $[[A/\B]]$ and either Y and A are disjoint or Y and B are disjoint, or}
-\end{enumerate}
-
-\noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
-For example, (2) is one specific case of \Cref{def:inter:disj}. When both types $[[A]]$ and
-$[[B]]$ are not subtypes of each other, they naturally do not share any common subtype.
-(3) is a straightforward rule for union disjointness (\rref{}\bruno{add the rule here}) in \cal.
-\bruno{I was hoping for some more points here, where we actually identify some differences or
-  we would argue that Ceylon definition is not complete from the point of view of our spec. For instance
-  we know that Ceylon does not consider bottom to be disjoint to other types. But other differences would
-  be interesting as well. For instance the bottom-like types that fail to be detected in Ceylon may reveal
-some flaws in their algorithms (and perhaps specs).}
 
 %%% Local Variables:
 %%% mode: latex
