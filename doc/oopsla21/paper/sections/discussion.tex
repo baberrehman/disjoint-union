@@ -8,7 +8,7 @@ adopted in Ceylon.
 As discussed in Section~\ref{sec:inter}, Ceylon includes the following subtyping rule:
 
 \begin{center}
-\drule[]{s-dis}
+\drule[]{s-disj}
 \end{center}
 
 %One property of Ceylon programming language ~\cite{} is that all \emph{bottom-like} types are 
@@ -22,11 +22,12 @@ employ our definition of lowest ordinary subtypes, and add the following rule
 in \cal with intersection types:
 
 \begin{center}
-\drule[]{s-disj}
+\drule[]{s-los}
 \end{center}
 \bruno{Be consistent and use the empty set notation instead of the empty list. Also, call it S-Los.}
+\baber{Done.}
 
-\noindent \Rref{s-disj} is an interesting addition in subtyping of \cal with intersection types.
+\noindent \Rref{s-los} is an interesting addition in subtyping of \cal with intersection types.
 It says that if LOS returns the empty set for some type $[[A]]$, then $[[A]]$
 is subtype of all types. In other words, such type behaves like \emph{bottom-like} type.
 Such rule generalizes the rule employed in Ceylon, since when $[[A]]$ is an intersection type of two
@@ -38,23 +39,35 @@ the bottom type is also the empty set. Therefore \rref{s-bot} can safely be drop
 any loss of expressiveness. It is trivial to prove a lemma which says that $[[Bot]]$ type is
 subtype of all types. We drop \rref{s-bot} from the calculus discussed in \Cref{sec:inter}
 and prove \Cref{lemma:discussion:bls} to show this property instead. It is because that $[[findsubtypes Bot]]$
-returns empty set (\{\}) and \rref{s-disj} makes all such types with $[[findsubtypes A]]$ = \{\} as
+returns empty set ($\{\}$) and \rref{s-los} makes all such types with $[[findsubtypes A]]$ = $\{\}$ as
 subtype of all types.
-\bruno{You should also show a lemma: $A * B$ implies $A \& B <: Bot$ and adjust the text}
+\bruno{You should also show a lemma: $A * B$ implies $A \& B <: Bot$ and adjust the text.}
+\baber{Done.}
 
 \begin{lemma}[Bottom Type Least Subtype]
   $[[Bot <: A]]$.
 \label{lemma:discussion:bls}
 \end{lemma}
 
-\noindent The use of \rref{s-disj} instead of \rref{s-dis} also has the advantage that it does not
+\noindent Since \cal with intersection types should consider the intersection of disjoint types 
+as \emph{bottom-like} types. In other words, intersection of disjoint types
+should be subtype of $[[Bot]]$ type.
+This is again a trivial property (\Cref{lemma:discussion:disjoint-types}) in \cal 
+with the novel disjointness definition and \rref{s-los}.
+
+\begin{lemma}[Disjont Types Intersection Bottom-Like]
+  If $[[A *s B]]$ then $[[A /\ B <: Bot]]$.
+\label{lemma:discussion:disjoint-types}
+\end{lemma}
+
+\noindent The use of \rref{s-los} instead of \rref{s-dis} also has the advantage that it does not
 create a mutual dependency between disjointness and subtyping. We can have a the definition
 of disjointness, which depends only on subtyping and ordinary types, and the definition
 of subtyping, which depends on LOS but not on disjointness.
 
 We have formalized and proved all the metatheory, including type-soundness, transitivity of subtyping,
 soundness and completeness of disjointness and determinism for a variant of \name with intersection types
-and \rref{s-disj}.
+and \rref{s-los}.
 
 \subsection{Subtyping Distributivity}
 \label{sec:inter:dist}
@@ -95,61 +108,3 @@ are equivalent types.
   \caption{Declarative Subtyping}
   \label{fig:discussion:ds}
 \end{figure}
-
-\subsection{Disjointness in Ceylon}
-\label{sec:discussion:ceylon}
-
-\ningning{I agree this section feels quite weak for now.}
-
-\bruno{I think we can move this discussion to the Discussion section. }
-Ceylon also provides a notion of disjoint types in type-based case analysis. In this section
-we compare the disjointness provided by Ceylon with our disjointness definition.
-\Cref{discussion:list:ceylon} shows a simple Ceylon disjointness example.
-
-\ningning{A similar example is used in the overview. Maybe we want to be
-  consistent with the examples.}
-
-\begin{figure}[t]
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
-// Student <: Person
-// speak function will not type check
-void speak(Person | Student val) {
-  switch (val)
-  case (is Person) {print("person speaks");}
-  case (is Student) {print("student speaks");} 
-}
-\end{lstlisting}
-\caption{Ceylon disjointness code example.}
-\label{discussion:list:ceylon}
-\end{figure}
-
-\noindent The function \emph{speak} in \Cref{discussion:list:ceylon} 
-will not type check in Ceylon. Because \emph{Person} and
-\emph{Student} are not disjoint types. \emph{Person} and \emph{Student} both have a common
-subtype which is \emph{Student}. \cal will also reject such programs.
-A significant difference between the disjointness in Ceylon and \cal is that
-Ceylon does not provide
-a formal disjointness definition, whereas \cal provides a formal definition for
-disjointness. Formal definitions are easy to reason about than textual descriptions. 
-
-Next, we compare a few textual descriptive points of disjointness in Ceylon with
-the disjointness definition in \cal. Following points are copied from Ceylon
-documentation \cite{}. Two types X and Y are disjoint if either of the following holds:
-
-\begin{enumerate}
-  \item{X is a subtype of a type A and Y is a subtype of a type B, where A and B are distinct cases of an enumerated type}
-  \item{X and Y are both classes and X is not a subclass of Y and Y is not a subclass of X}
-  \item{X is a union type $[[A \/ B]]$ and both Y and A are disjoint and Y and B are disjoint}
-  \item{X is an enumerated type with cases A1|A2|... and for every case Ai of X, Y and Ai are disjoint}
-  \item{X is an intersection type $[[A/\B]]$ and either Y and A are disjoint or Y and B are disjoint, or}
-\end{enumerate}
-
-\noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
-For example, (2) is one specific case of \Cref{def:inter:disj}. When both types $[[A]]$ and
-$[[B]]$ are not subtypes of each other, they naturally do not share any common subtype.
-(3) is a straightforward rule for union disjointness (\rref{}\bruno{add the rule here}) in \cal.
-\bruno{I was hoping for some more points here, where we actually identify some differences or
-  we would argue that Ceylon definition is not complete from the point of view of our spec. For instance
-  we know that Ceylon does not consider bottom to be disjoint to other types. But other differences would
-  be interesting as well. For instance the bottom-like types that fail to be detected in Ceylon may reveal
-some flaws in their algorithms (and perhaps specs).}

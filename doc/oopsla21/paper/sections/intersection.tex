@@ -49,27 +49,24 @@ and transitive.
       Types & $[[A]], [[B]]$ & $\Coloneqq$ & $ ... \mid [[A /\ B]] $ \\
       \bottomrule
     \end{tabular}
-  \medskip
     \centering
     \drules[s]{$ [[A <: B ]] $}{Additional Subtyping Rules}{anda, andb, andc}
-  \medskip
     \centering
     \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
-  \medskip
-    \centering
-    {\renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|lcl|}
-      \multicolumn{3}{c}{Lowest Ordinary Subtypes (LOS) $[[findsubtypes A]]$} \\
-      \hline
-     $[[findsubtypes Top]]$ & = & \{$ [[Int]], [[Top -> Bot]]$\}  \\
-     $[[findsubtypes Bot]]$ & = & \{\}  \\
-     $[[findsubtypes Int]]$ & = & \{$ [[Int]] $\}  \\
-     $[[findsubtypes A -> B]]$ & = & \{$ [[Top -> Bot]] $\}  \\
-     $[[findsubtypes A \/ B]]$ & = & $ [[findsubtypes A]] \cup [[findsubtypes B]] $\\
-     $[[findsubtypes A /\ B]]$ & = & $ [[findsubtypes A]] \cap [[findsubtypes B]] $\\
-      \hline
-    \end{tabular} }
-  \caption{Additional Types, Subtyping, Ordinary Types and Lowest Ordinary Subtypes function for \cal with intersection types.}
+%    \centering
+%    {\renewcommand{\arraystretch}{1.2}
+%    \begin{tabular}{|lcl|}
+%      \multicolumn{3}{c}{Lowest Ordinary Subtypes (LOS) $[[findsubtypes A]]$} \\
+%      \hline
+%     $[[findsubtypes Top]]$ & = & \{$ [[Int]], [[Top -> Bot]]$\}  \\
+%     $[[findsubtypes Bot]]$ & = & \{\}  \\
+%     $[[findsubtypes Int]]$ & = & \{$ [[Int]] $\}  \\
+%     $[[findsubtypes A -> B]]$ & = & \{$ [[Top -> Bot]] $\}  \\
+%     $[[findsubtypes A \/ B]]$ & = & $ [[findsubtypes A]] \cup [[findsubtypes B]] $\\
+%     $[[findsubtypes A /\ B]]$ & = & $ [[findsubtypes A]] \cap [[findsubtypes B]] $\\
+%      \hline
+%    \end{tabular} }
+  \caption{Additional Types, Subtyping and Ordinary Types for \cal with intersection types.}
   \label{fig:inter:system}
 \end{figure}
 
@@ -259,10 +256,30 @@ sound, complete and decidable formulation of disjointness, we employ the novel
 notion of \emph{lowest ordinary subtypes}.
 
 \ningning{separate the definition of LOS into another figure and put the figure here.}
+\baber{Done.}
+
+\begin{figure}[t]
+    \centering
+    {\renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|lcl|}
+      \multicolumn{3}{c}{Lowest Ordinary Subtypes (LOS) $[[findsubtypes A]]$} \\
+      \hline
+     $[[findsubtypes Top]]$ & = & $\{ [[Int]], [[Top -> Bot]]\}$  \\
+     $[[findsubtypes Bot]]$ & = & $\{\}$  \\
+     $[[findsubtypes Int]]$ & = & $\{ [[Int]] \}$  \\
+     $[[findsubtypes A -> B]]$ & = & $\{ [[Top -> Bot]] \}$  \\
+     $[[findsubtypes A \/ B]]$ & = & $ [[findsubtypes A]] \cup [[findsubtypes B]] $\\
+     $[[findsubtypes A /\ B]]$ & = & $ [[findsubtypes A]] \cap [[findsubtypes B]] $\\
+      \hline
+    \end{tabular} }
+  \caption{Lowest Ordinary Subtypes function for \cal with intersection types.}
+  \label{fig:inter:los}
+\end{figure}
+
 
 \paragraph{Lowest Ordinary Subtypes ($[[findsubtypes A]]$)}
-\Cref{fig:inter:system} shows the definition of
-\emph{lowest ordinary subtypes} (LOS) ($[[findsubtypes A]]$) at the bottom.
+\Cref{fig:inter:los} shows the definition of
+\emph{lowest ordinary subtypes} (LOS) ($[[findsubtypes A]]$).
 LOS are defined as a function which
 returns a set of ordinary subtypes of the given input type. 
 No ordinary type is subtype of $[[Bot]]$ type. The only ordinary
@@ -290,7 +307,7 @@ disjointness:
 \begin{definition}
 \label{def:inter:ad}
 %\texttt{`abc \textasciigrave abc}
-  A $*_a$ B $\Coloneqq$  $ [[findsubtypes A]] \cap [[findsubtypes B]] $ = \{\}.
+  A $*_a$ B $\Coloneqq$  $ [[findsubtypes A]] \cap [[findsubtypes B]] $ = $\{\}$.
 \end{definition}
 
 \noindent The algorithmic formulation of disjointness in
@@ -384,6 +401,64 @@ If \ $[[ [] |- e dirflag A]]$ then
   then \ $[[G, G1 |- e [ x ~> e' ] dirflag A]]$
 \end{lemma}
 \end{comment}
+
+\subsection{Disjointness in Ceylon}
+\label{sec:discussion:ceylon}
+
+\ningning{I agree this section feels quite weak for now.}
+
+\bruno{I think we can move this discussion to the Discussion section. }
+Ceylon also provides a notion of disjoint types in type-based case analysis. In this section
+we compare the disjointness provided by Ceylon with our disjointness definition.
+\Cref{discussion:list:ceylon} shows a simple Ceylon disjointness example.
+
+\ningning{A similar example is used in the overview. Maybe we want to be
+  consistent with the examples.}
+
+\begin{figure}[t]
+\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+// Student <: Person
+// speak function will not type check
+void speak(Person | Student val) {
+  switch (val)
+  case (is Person) {print("person speaks");}
+  case (is Student) {print("student speaks");} 
+}
+\end{lstlisting}
+\caption{Ceylon disjointness code example.}
+\label{discussion:list:ceylon}
+\end{figure}
+
+\noindent The function \emph{speak} in \Cref{discussion:list:ceylon} 
+will not type check in Ceylon. Because \emph{Person} and
+\emph{Student} are not disjoint types. \emph{Person} and \emph{Student} both have a common
+subtype which is \emph{Student}. \cal will also reject such programs.
+A significant difference between the disjointness in Ceylon and \cal is that
+Ceylon does not provide
+a formal disjointness definition, whereas \cal provides a formal definition for
+disjointness. Formal definitions are easy to reason about than textual descriptions. 
+
+Next, we compare a few textual descriptive points of disjointness in Ceylon with
+the disjointness definition in \cal. Following points are copied from Ceylon
+documentation \cite{}. Two types X and Y are disjoint if either of the following holds:
+
+\begin{enumerate}
+  \item{X is a subtype of a type A and Y is a subtype of a type B, where A and B are distinct cases of an enumerated type}
+  \item{X and Y are both classes and X is not a subclass of Y and Y is not a subclass of X}
+  \item{X is a union type $[[A \/ B]]$ and both Y and A are disjoint and Y and B are disjoint}
+  \item{X is an enumerated type with cases A1|A2|... and for every case Ai of X, Y and Ai are disjoint}
+  \item{X is an intersection type $[[A/\B]]$ and either Y and A are disjoint or Y and B are disjoint, or}
+\end{enumerate}
+
+\noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
+For example, (2) is one specific case of \Cref{def:inter:disj}. When both types $[[A]]$ and
+$[[B]]$ are not subtypes of each other, they naturally do not share any common subtype.
+(3) is a straightforward rule for union disjointness (\rref{}\bruno{add the rule here}) in \cal.
+\bruno{I was hoping for some more points here, where we actually identify some differences or
+  we would argue that Ceylon definition is not complete from the point of view of our spec. For instance
+  we know that Ceylon does not consider bottom to be disjoint to other types. But other differences would
+  be interesting as well. For instance the bottom-like types that fail to be detected in Ceylon may reveal
+some flaws in their algorithms (and perhaps specs).}
 
 %%% Local Variables:
 %%% mode: latex
