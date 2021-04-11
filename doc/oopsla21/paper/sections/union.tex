@@ -486,10 +486,7 @@ ways.
 Type annotations play two important roles in the calculus.
 Firstly, static types are used by the switch construct
 to select the correct branch to execute.
-This is employed in \rref{step-switchl,step-switchr}.
-Secondly, the
-dynamic types are needed to ensure type preservation.
-Second case is employed in \rref{step-beta}. 
+This is employed in \rref{step-switchl,step-switchr}. 
 \bruno{The text that was here before (commented now)
   was just repeating stuff that we already said before.
   What we need here is text that explains how and where annotations are used during reduction.
@@ -528,7 +525,7 @@ Int | String double(Int | String val) {
 
 \bruno{example here with a switch} \baber{done}
 
-The static type is used to select the correct branch of the switch statement.
+\noindent The static type is used to select the correct branch of the switch statement.
 Code snippet above doubles the input value. For integers, it multiplies input
 value with 2. For string type values, it concatenates input value with itself.
 Static type of \emph{val} can either be Int or String. Which means that
@@ -536,10 +533,13 @@ Static type of \emph{val} can either be Int or String. Which means that
 When static type of \emph{val} is Int in this code example,
 branch for type Int will always be executed independent of the order of branch.
 Same repeats if static type of \emph{val} happens to be String.
-The presence of annotations with the dynamic types, on the other hand,
+
+Secondly, the dynamic types are needed to ensure type preservation.
+%Second case is employed in \rref{step-beta}.
+The presence of annotations with the dynamic types,
 ensures that types are preserved during substitution in
 beta-reduction and \emph{switch} cases.\bruno{another example for illustrating
-preservation.}
+preservation.} For example:
 
 \begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
 Int | String identity(Int | String val) {
@@ -548,7 +548,7 @@ Int | String identity(Int | String val) {
 \end{lstlisting}
 
 \noindent The code snippet above has an \emph{identity} function. Input of identity function can
-either be Int or String. \baber{to be added.}
+either be Int or String. \baber{to be added: example is not appropriate.}
 
 \paragraph{Reduction rules}
 \Cref{fig:union:os} shows operational semantics of \cal.

@@ -21,8 +21,8 @@ with intersection types.
 %%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Syntax, Subtyping and Ordinary Types}
 \label{sec:inter:system}
-The syntax, subtyping for this section mostly follows
-from \Cref{sec:union}.  The additional types and rules are shown in
+The syntax and subtyping for this section mostly follows
+from \Cref{sec:union}.  The additional types and subtyping rules are shown in
 \Cref{fig:inter:system}.
 %This system can trivially be extended with
 %more primitive types. We also have $Bool$ and $String$ types in our
@@ -33,7 +33,7 @@ Expressions $[[e]]$, pre-values $[[p]]$, annotated values $[[w]]$,
 values $[[v]]$, and context $[[G]]$ stay the same as in \Cref{sec:union}.
 
 \paragraph{Subtyping}
-The new rules for subtyping are shown in upper middle part of
+The new rules for subtyping are shown in middle part of
 \Cref{fig:inter:system}.  \Rref{s-anda,s-andb,s-andc} are for newly
 added intersection types. \Rref{s-anda} states that a type $[[A]]$ is
 a subtype of intersection of two types $[[B]]$ and $[[C]]$ only if
@@ -73,9 +73,9 @@ and transitive.
 \paragraph{Ordinary Types}
 %Declarative disjointness is now defined in terms of ordinary types
 %instead of \emph{bottom-like} types.
-The lower middle part of
-\Cref{fig:inter:system} shows ordinary types~\cite{}, which is the same as given
-in \Cref{sec:union:discussion}.
+Lower part of
+\Cref{fig:inter:system} shows ordinary types~\cite{davies2000intersection}, 
+which is the same as given in \Cref{sec:union:discussion}.
 Ordinary types are essentially primitive types. In \cal they
 are essentially integers and functions. 
 %$[[Top]]$, $[[Int]]$ and $[[A -> B]]$ types are considered as ordinary
@@ -100,10 +100,10 @@ we show how to introduce disjointness in the presence of intersection types.
 Recall that disjointness in \Cref{sec:union} (\Cref{def:union:disj}) depends
 upon bottom-like types, where two types are disjoint only if all their common
 subtypes are bottom-like. However, this definition no longer works with the
-addition of intersection types. Specifically, according to the subtyping rule, any two
-types have their intersection as one common subtype. For
-non-bottom-like types, their intersection is also not bottom-like. For
-example,type $[[Int]]$ and type $[[Bool]]$ now has a subtype $[[Int /\ Bool]]$,
+addition of intersection types. Specifically, according to the subtyping rule
+for intersection types, any two types have their intersection as one common subtype.
+For non-bottom-like types, their intersection is also not bottom-like. For
+example, type $[[Int]]$ and type $[[Bool]]$ now has a subtype $[[Int /\ Bool]]$,
 which is not bottom-like. Therefore, the disjointness definition fails, since we
 can always find a common non-bottom-like subtype for any two (non-bottom-like)
 types.
@@ -142,12 +142,12 @@ A possible solution for this issue is to add a subtyping rule which makes inters
 disjoint types to be subtype of $[[Bot]]$.
 
 \begin{center}
-\drule[]{s-dis}
+\drule[]{s-disj}
 \end{center}
 %\bruno{Please use disjointness spec instead of disjoitness algorithm in the rule.}
 
 \noindent This rule is adopted by the Ceylon language~\cite{muehlboeck2018empowering}:
-\Rref{s-dis} states that the insersection type $[[A /\ B]]$
+\Rref{s-disj} states that the insersection type $[[A /\ B]]$
 of two disjoint types $[[A]]$ and $[[B]]$ is subtype of $[[Bot]]$ type.
 In other words, now the type $[[Int /\ Bool]]$ would be a bottom-like type, and the
 definition of disjointness used in Section~\ref{sec:union} could still work.
@@ -155,17 +155,19 @@ However we do not adopt this solution here for two reasons:
 
 \begin{enumerate}
 
-\item \Rref{s-dis} complicates the system because
+\item \Rref{s-disj} complicates the system because
   it adds a mutual dependency between subtyping and disjointness:
   disjointness is defined in terms of subtyping, and subtyping now
-  uses disjointness as well in \rref{s-dis}. This creates important
+  uses disjointness as well in \rref{s-disj}. This creates important
   challenges for the metatheory. In particular, the completeness proof
   for disjointness becomes quite challenging.
 
 \item Additionaly, the assumption that intersections of disjoint types
-  results is equivalent to bottom is too strong for some calculi with intersection
-  types. If a merge operator~\cite{} is allowed in the calculus, intersection types
-  with disjoint types can be inhabited with values (for example, in \cite{},
+  is equivalent to bottom is too strong for some calculi with intersection
+  types. If a merge operator~\cite{reynolds1988preliminary} is allowed in the calculus, 
+  intersection types
+  with disjoint types can be inhabited with values (for example, in 
+  \cite{muehlboeck2018empowering} \baber{Is this right citation?},
   the type $[[Int /\ Bool]]$ is inhabited by $[[1]] ,, \mathsf{True}$), and considering those
   types bottom-like would lead to a problematic definition of disjointness and the loss
   of determinism.
@@ -224,9 +226,9 @@ We further illustrate
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ \\
         Since there is no ordinary type that is subtype of both $[[Int]]$ and $[[Int -> Bool]]$,
         the two types are disjoint.
-  \item $\boldsymbol{A = [[Int]], \ B = \ [[Bot]]:}$ \\
-    Since there is no ordinary type that is subtype of both $[[Int]]$ and $[[Bot]]$,
-    $[[Int]]$ and $[[Bot]]$ are disjoint types.
+  \item $\boldsymbol{A = [[Int \/ Bool]], \ B = \ [[Bot]]:}$ \\
+    Since there is no ordinary type that is subtype of both $[[Int \/ Bool]]$ and $[[Bot]]$,
+    $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types.
     In general, $[[Bot]]$ type is disjoint to all types because $[[Bot]]$ type does not
     have any ordinary subtype.
   \item $\boldsymbol{A = [[Int /\ (Int -> Bool)]], \ B = \ [[Int]]:}$ \\
@@ -234,12 +236,18 @@ We further illustrate
         Therefore, $[[Int /\ A -> B]]$ and $[[Int]]$ are disjoint types.
         In general, an intersection of two disjoint types ($[[Int /\ A -> B]]$ in this case)
         is always disjoint to all types.
+  \item $\boldsymbol{A = [[Int /\ Bool]], \ B = \ [[Int \/ Bool]]:}$ \\
+        There is no ordinary type that is subtype of both $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$.
+        Therefore, $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$ are disjoint types.
+        This follows from the description in example 3 that type $[[Int /\ Bool]]$ will always be
+        disjoint to all types.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
         In this case, $[[Int]]$ and $[[Top]]$ share a common ordinary subtype which is $[[Int]]$.
         Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
 \end{enumerate}
 
 \ningning{like before, add one or two for unions (like one with both unions and intersections).}
+\baber{I added example 4 and updated example 2 from $[[Int]]$ to $[[Int \/ Bool]]$.}
 %The
 %reason we did not write intersection in \Cref{def:union:disj1} is
 %because we do not have intersection types in \cal discussed in
@@ -251,7 +259,7 @@ We further illustrate
 
 The change in the disjointness specification has a significant impact on its
 algorithmic formulation. In particular, it is not obvious at all how to adapt
-the algorithmic formulation in \Cref{fig:union:ad}. To obtain a
+the algorithmic formulation as in \Cref{fig:union:disj-typ}. To obtain a
 sound, complete and decidable formulation of disjointness, we employ the novel
 notion of \emph{lowest ordinary subtypes}.
 
@@ -390,7 +398,7 @@ If \ $[[ [] |- e dirflag A]]$ then
 \end{lemma}
 
 \begin{theorem}[Determinism]
-\label{lemma:union:determinism}
+\label{lemma:inter:determinism}
   If \ $[[G |- e dirflag A]]$ and \ $[[e --> e1]]$ and \ $[[e --> e2]]$ then $[[e1]]$ = $[[e2]]$.
 \end{theorem}
 
@@ -401,64 +409,6 @@ If \ $[[ [] |- e dirflag A]]$ then
   then \ $[[G, G1 |- e [ x ~> e' ] dirflag A]]$
 \end{lemma}
 \end{comment}
-
-\subsection{Disjointness in Ceylon}
-\label{sec:discussion:ceylon}
-
-\ningning{I agree this section feels quite weak for now.}
-
-\bruno{I think we can move this discussion to the Discussion section. }
-Ceylon also provides a notion of disjoint types in type-based case analysis. In this section
-we compare the disjointness provided by Ceylon with our disjointness definition.
-\Cref{discussion:list:ceylon} shows a simple Ceylon disjointness example.
-
-\ningning{A similar example is used in the overview. Maybe we want to be
-  consistent with the examples.}
-
-\begin{figure}[t]
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
-// Student <: Person
-// speak function will not type check
-void speak(Person | Student val) {
-  switch (val)
-  case (is Person) {print("person speaks");}
-  case (is Student) {print("student speaks");} 
-}
-\end{lstlisting}
-\caption{Ceylon disjointness code example.}
-\label{discussion:list:ceylon}
-\end{figure}
-
-\noindent The function \emph{speak} in \Cref{discussion:list:ceylon} 
-will not type check in Ceylon. Because \emph{Person} and
-\emph{Student} are not disjoint types. \emph{Person} and \emph{Student} both have a common
-subtype which is \emph{Student}. \cal will also reject such programs.
-A significant difference between the disjointness in Ceylon and \cal is that
-Ceylon does not provide
-a formal disjointness definition, whereas \cal provides a formal definition for
-disjointness. Formal definitions are easy to reason about than textual descriptions. 
-
-Next, we compare a few textual descriptive points of disjointness in Ceylon with
-the disjointness definition in \cal. Following points are copied from Ceylon
-documentation \cite{}. Two types X and Y are disjoint if either of the following holds:
-
-\begin{enumerate}
-  \item{X is a subtype of a type A and Y is a subtype of a type B, where A and B are distinct cases of an enumerated type}
-  \item{X and Y are both classes and X is not a subclass of Y and Y is not a subclass of X}
-  \item{X is a union type $[[A \/ B]]$ and both Y and A are disjoint and Y and B are disjoint}
-  \item{X is an enumerated type with cases A1|A2|... and for every case Ai of X, Y and Ai are disjoint}
-  \item{X is an intersection type $[[A/\B]]$ and either Y and A are disjoint or Y and B are disjoint, or}
-\end{enumerate}
-
-\noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
-For example, (2) is one specific case of \Cref{def:inter:disj}. When both types $[[A]]$ and
-$[[B]]$ are not subtypes of each other, they naturally do not share any common subtype.
-(3) is a straightforward rule for union disjointness (\rref{}\bruno{add the rule here}) in \cal.
-\bruno{I was hoping for some more points here, where we actually identify some differences or
-  we would argue that Ceylon definition is not complete from the point of view of our spec. For instance
-  we know that Ceylon does not consider bottom to be disjoint to other types. But other differences would
-  be interesting as well. For instance the bottom-like types that fail to be detected in Ceylon may reveal
-some flaws in their algorithms (and perhaps specs).}
 
 %%% Local Variables:
 %%% mode: latex
