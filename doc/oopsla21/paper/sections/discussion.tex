@@ -75,7 +75,7 @@ some flaws in their algorithms (and perhaps specs).}
 
 \subsection{A More General Subtyping Rule for Bottom  Types}
 \label{sec:inter:refactoring}
-As discussed in Section~\ref{sec:inter}, Ceylon includes the following subtyping rule:
+As discussed in Section~\ref{sec:discussion:ceylon}, Ceylon includes the following subtyping rule:
 
 \begin{center}
 \drule[]{s-disj}
@@ -104,7 +104,7 @@ Such rule generalizes the rule employed in Ceylon, since when $[[A]]$ is an inte
 disjoint types, we get the empty set.
 %Since $[[findsubtypes Int /\ A -> B]]$ returns empty set,
 %therefor \rref{s-disj} makes $[[Int /\ A -> B]]$ subtype of all types.
-Moreover, adding \rref{s-disj} makes \rref{s-bot} redundant as well, since the LOS for
+Moreover, adding \rref{s-los} makes \rref{s-bot} redundant as well, since the LOS for
 the bottom type is also the empty set. Therefore \rref{s-bot} can safely be dropped without any
 any loss of expressiveness. It is trivial to prove a lemma which says that $[[Bot]]$ type is
 subtype of all types. We drop \rref{s-bot} from the calculus discussed in \Cref{sec:inter}
@@ -146,7 +146,7 @@ and \rref{s-los}.
   that require distributivity, and explain those examples, which illustrate the
   distributivity rules with some care. Also say something about disjointness. In particular
   explain that distributivity does not affect disjointness and that the current formulations
-remain sound and complete.}
+remain sound and complete.} \baber{Done.}
 
 Another interesting extension is to add distributive subtyping to \cal.
 Ceylon~\cite{muehlboeck2018empowering} employs an enriched 
