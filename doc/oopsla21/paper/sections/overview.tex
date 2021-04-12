@@ -113,29 +113,27 @@ existing approaches next.
 
 \paragraph{Single branch elimination.}
 
-In \citet{pierce1991programming,dunfield2014elaborating}, the \lstinline{switch}
-statement on an expression with a union type $[[A \/ B]]$ supports only one
-branch, and the branch needs to have the same type when the expression has type
-$[[A]]$, or type $[[B]]$. For example, in \lstinline{tostring2}, the expression
-\lstinline{show x} must return \lstinline{String} when \lstinline{x : String},
-and when \lstinline{x : Int}, which means \lstinline{show} must be overloaded
-(in \citet{pierce1991programming,dunfield2014elaborating}, this can be
-implemented by requiring \lstinline{show} to have an \textit{intersection type}).
+In \citet{pierce1991programming,dunfield2014elaborating}, elimination of an
+expression with a union type $[[A \/ B]]$ supports only one branch, and the
+branch needs to have the same type when the expression has type $[[A]]$, or type
+$[[B]]$. For example\footnote{For better illustration, we adapt their syntax
+  using our notations in the examples, while preserving their semantics.}, in
+\lstinline{tostring2}, the expression \lstinline{show x} must return
+\lstinline{String} when \lstinline{y : String}, and when \lstinline{y : Int},
+which means \lstinline{show} must be overloaded (in
+\citet{pierce1991programming,dunfield2014elaborating}, this can be implemented
+by requiring \lstinline{show} to have an \textit{intersection type}).
 
 \begin{lstlisting}
 function tostring2 (x: String | Int) : String =
   switch x of
-    x -> show x
+    y -> show y
 \end{lstlisting}
 
 This implementation is concise, but it is also restrictive as it can no longer
 support multiple branches according to the different representations of
 \lstinline{x}. Furthermore it relies on the language also supporting overloaded
 functions. Without overloaded functions the construct would not be very useful.
-\bruno{It may also be worthwhile to mention that the syntax used in different approaches
-  may not be quite the same as what we show here, but we use the unified syntax here
-  to ``group'' the key ideas in various approaches together. For instance I think Dunfield's syntax
-is different, but the idea is indeed what you describe.}
 
 \paragraph{Type-directed elimination.}
 
@@ -153,8 +151,8 @@ function tostring3 (x: String | Int) : String =
 \noindent Note here \lstinline{show} is directly applied to \lstinline{x}, and
 it does not need to be overloaded, as the type-directed elimination
 \textit{refines} the type of \lstinline{x} from \lstinline{String | Int} to
-\lstinline{Int} in the second branch.\bruno{You may want to cite work on occurrence typing
-  here (for therefinement of types in branches).}
+\lstinline{Int} in the second branch (such type refinements are also used in
+\textit{occurrence typing} \cite{Tobin:typedscheme}).
 
 However, compared to tag-directed elimination, extra care must to taken with
 type-directed elimination. In particular, while we can easily distinguish tags,
