@@ -520,6 +520,13 @@ to \lstinline{Nothing}.
 
 \subsection{Our Methodology}
 
+The switch construct in our calculus \cal is similar to Ceylon's.
+Its typing rule guarantees that cases are disjoint and exhaustive.
+Reduction preserves types and produces deterministic result with
+the help of annotated values.
+Here we give an overview of our design and discuss some challenges
+we met for the two calculi in the paper.
+
 \subsubsection*{Disjointness, Interacted with Intersection Types}
 After seeing the connection between bottom-like types and disjointness,
 it is intuitive to formally define disjointness via bottom-like types.
@@ -551,9 +558,14 @@ If two intersection types share a part, e.g. $[[Int/\Char]]$ and $[[String/\Int]
 both contains $[[Int]]$, they cannot pass the disjointness checking.
 Moreover, assuming $[[Odd]]$ and $[[Even]]$ denote odd numbers and even numbers,
 they are both subtype of $[[Int]]$, and therefore are not disjoint.
-Consider a scenario where we are looking for a term that is assignable
-to a given type that is not top-like. If all candidates' types are disjoint
-based on this definition, at most one term can be chosen from them.
+The application of this definition is dual to our definition:
+given a type that is not top-like, consider a scenario where we are looking for
+a term that is assignable to the type. If all candidates' types are disjoint, 
+at most one term can be chosen from them.
+\begin{verbatim}
+ (\x. x+1 : Int->Int) (1 ,, True) --> (1+1):Int
+\end{verbatim}
+
 
 In our second calculus , Definition~\ref{def:disjointness} is adapted
 for intersection types.
@@ -576,7 +588,15 @@ LOS(Int -> Int) = ….
 \snow{Next: How do we ensure exhaustive? Show the typing rule of switch/case.}
 \bruno{Yes please: explain how exhaustiveness is ensured.}
 
-\subsubsection*{Annotatted Values}
+\subsubsection*{Annotated Values}
+\begin{verbatim}
+	switch (1) {x:Int -> x+1, y:Bool -> not y} --> (1+1):Int
+\end{verbatim}
+
+in lambdai the return type must be different
+\begin{verbatim}
+	(\x. x+1 : Int->Int ,, \y. not y : Bool->Bool):Int->Int 1 --> (1+1):Int
+\end{verbatim}
 
 \bruno{
 1) use of annotatted values for both reduction (the semantics must be type directed); and preservation;
