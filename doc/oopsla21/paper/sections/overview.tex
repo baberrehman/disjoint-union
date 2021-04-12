@@ -212,7 +212,7 @@ In the runtime, one branch is chosen according to the input's type.
 %
 Static type checking for the switch construct ensures two things: the 
 list of cases is exhaustive, and any two cases are disjoint.
-In the above example, \lstline{x} can be either a string or an integer,
+In the above example, \lstinline{x} can be either a string or an integer,
 or a floating number. There does not have to be exact three cases correspondingly,
 but the combination of all cases must be able to handle all possibilities.
 On the other hand, unlike the previous discussion, it is impossible to have two
@@ -222,7 +222,7 @@ restriction.
 \paragraph{As an Alternative to Overloading}
 A motivation of such type-directed union elimination in Ceylon is to
 model a form of function overloading.
-The following example demonstrate how to define a function \lstline{padLeft}.
+The following example demonstrate how to define a function \lstinline{padLeft}.
 It takes two arguments. The second argument can be either a string or
 an integer.
 
@@ -252,17 +252,31 @@ print( padLeft("World", "Hello ") );
 \end{lstlisting}
 %
 In the two cases of the switch construct, there are two different implementations
-for the \lstline{padLeft} function: one add a string to the left of \lstline{v},
-the other calls function \lstline{space} to generate an string of \lstline{x} spaces,
-and then pad it to of \lstline{v}.
-Although statically \lstline{x} has type \lstline{String|Integer}, as a concrete value 
+for the \lstinline{padLeft} function: one add a string to the left of \lstinline{v},
+the other calls function \lstinline{space} to generate an string of \lstinline{x} spaces,
+and then pad it to of \lstinline{v}.
+Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value 
 it can only be a string or an integer.
 Then the corresponding branch is chosen and executed.
-
+%
+Besides, Ceylon uses union types to encode nullable types (or the optional types).
+The null value is inhabited in \lstinline{A?}, which stands for \lstinline{A|Null}.
+If the switched term has a nullable type, there has to be a branch to handle it.
+Similarly, one can use enumerated types to denote various special cases, or easily
+add another type to the argument type of an existing function when considering
+more possible inputs, to improve the program's robustness.
+Next, we will see how Ceylon's static type checking helps programmers.
 
 \paragraph{Exhaustiveness}
-Ceylon checks whether the union of all cases in a switch construct
-\emph{covers} the type of the analyzed term.
+Ceylon checks the exhaustiveness of a switch by compare the union of all cases and
+the switched term's type. For the switch to be accepted, the former must completely
+\emph{cover} the later. In other words, the switch term can be safely converted into
+the union type. 
+Here we define \lstinline{Node} by enumerating its subtypes. It can be viewed as the
+union of \lstinline{Leaf} and \lstinline{Branch}.
+\begin{comment}
+------------- THE OTHER EXAMPLE -----------------
+Adding more subtype in it causes error in exhaustiveness checking in switch.
 \begin{lstlisting}
 interface Resource of File | Directory | Link { }
 interface File satisfies Resource {}
@@ -276,20 +290,15 @@ void printType(Resource resource){
 	case (is Link) { print("Link"); }
 }
 \end{lstlisting}
-
-------------- THE OTHER EXAMPLE -----------------
-Adding Test in it causes error in exhaustiveness checking in switch.
-
+\end{comment}
+%
 \begin{lstlisting}
-abstract class Node() of Leaf | Branch | Test {}
+abstract class Node() of Leaf | Branch {}
 
 class Leaf(shared Object element) 
 extends Node() {}
 
 class Branch(shared Node left, shared Node right) 
-extends Node() {}
-
-class Test(shared Node left, shared Node right) 
 extends Node() {}
 
 void printTree(Node node) {
@@ -305,8 +314,34 @@ void printTree(Node node) {
 
 printTree(Branch(Branch(Leaf("aap"), Leaf("noot")), Leaf("mies")));
 \end{lstlisting}
+% https://ceylon-lang.org/documentation/1.3/tour/types/
+If we replace the argument type \lstinline{Node} in the function \lstinline{printTree} by
+\lstinline{Node?},
+or we add more subtype in the declaration of \lstinline{Node}, an compiling error
+will be raised: case types must cover all cases of the switch type.
+Such checking reminds programmers to keep consistent when changing the related code
+and avoid runtime errors.
+
+\bruno{The following example is better, and I guess useful to illustrate exhaustiveness.}
+\begin{lstlisting}
+	void printAfterPlusOne(Integer|String x) {
+		switch (x)
+		case (is Integer|Float) { print(x+1); }
+		case (is String) { print("String:"+x); }
+	}
+\end{lstlisting}
+%
+Although the list of cases must be exhaustive, it does need to
+strictly follow the input's type.
+For example, in the above function, \lstinline{x} can only be an integer
+or a string. But it is not harmful for the first branch to expect
+a term of \lstinline{Integer|Float}, since \lstinline{Integer|Float|String}
+still covers \lstinline{Integer|String}.
 
 \paragraph{Disjointness}
+Every pair of cases in a switch cannot overlap. Therefore, their order is
+irrelevant to the program's behavior and its evaluation result.
+
 	
 \bruno{Please organize the section text using paragraphs, to highlight key topics.
   I think the flow of the text is quite bad and I can't quite figure out what points
@@ -423,21 +458,8 @@ should be prioritized, if two functions can overlap.
 % https://github.com/ceylon/ceylon-spec/issues/50
 % https://github.com/ceylon/ceylon-spec/issues/65
 
-\bruno{The following example is better, and I guess useful to illustrate exhaustiveness.}
-\begin{lstlisting}
-void printAfterPlusOne(Integer|String x) {
-	switch (x)
-	case (is Integer|Float) { print(x+1); }
-	case (is String) { print("String:"+x); }
-}
-\end{lstlisting}
+\paragraph{Existing Problems in Ceylon}
 
-Although the list of cases must be exhaustive, it does need to
-strictly follow the input's type.
-For example, in the above function, \lstinline{x} can only be an integer
-or a string. But it is not harmful for the first branch to expect
-a term of \lstinline{Integer|Float}, since any integer can have such
-type.
 In general, a term of type $A$ is always assignable to any supertype of $A$.
 \bruno{The next text seems to switch to another point, which is issues with the
   Ceylon approach. So, what you should do is to start a new paragraph that clearly
