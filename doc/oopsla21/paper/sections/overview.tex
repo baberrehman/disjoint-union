@@ -196,9 +196,35 @@ For instance we could have \lstinline{Student} and \lstinline{Worker} as
 subtypes of \lstinline{Person}. For a person that is both a student and a worker,
 a switch statement that discriminates between workers and students could
 potentially choose either branch. However for persons that are only students
-or only workers, only one branch can be choosen.
+or only workers, only one branch can be chosen.
 
 \subsection{Eliminating Union Types in Ceylon}
+Ceylon supports type-directed union elimination via a switch expression with
+multiple branches. Each branch matches on a type.
+In the runtime, one branch is chosen according to the input's type.
+\begin{lstlisting}
+	void print(String|Integer|Float x) {
+		switch (x)
+		case (is String) { print("String: ``x``"); }
+		case (is Integer|Float) { print("Number: ``x``"); }
+	}
+\end{lstlisting}
+%
+Static type checking for the switch construct ensures two things: the 
+list of cases is exhaustive, and any two cases are disjoint.
+In the above example, \lstline{x} can be either a string or an integer,
+or a floating number. There does not have to be exact three cases correspondingly,
+but the combination of all cases must be able to handle all possibilities.
+On the other hand, unlike the previous discussion, it is impossible to have two
+branches matched with one input at the same time, thanks to the disjointness
+restriction.
+
+\paragraph{As an Alternative to Overloading}
+A motivation of such type-directed union elimination in Ceylon is to
+model a form of function overloading.
+The following example demonstrate how to define a function \lstline{padLeft}.
+It takes two arguments. The second argument can be either a string or
+an integer.
 
 \bruno{I suggested using interesting examples from the documentation of Ceylon, but
   I think we only give artificial examples here. Please write a couple of more
@@ -206,10 +232,6 @@ or only workers, only one branch can be choosen.
   on slack) here!}
 
 \begin{lstlisting}
-// Takes a string and adds "padding" to the left.
-// If 'padding' is a string, then 'padding' is appended to the left side.
-// If 'padding' is a number, then that number of spaces is added to the left side.
-
 String space(Integer n){
 	if (n==0) {
 		return "";
@@ -220,15 +242,72 @@ String space(Integer n){
 
 String padLeft(String v, String|Integer x){
 	switch (x)
-	case (is Integer) { return space(x)+v; }
 	case (is String) { return x+v; }
+	case (is Integer) { return space(x)+v; }
 }
 
 
 print( padLeft("?", 5) );
 print( padLeft("World", "Hello ") );
 \end{lstlisting}
+%
+In the two cases of the switch construct, there are two different implementations
+for the \lstline{padLeft} function: one add a string to the left of \lstline{v},
+the other calls function \lstline{space} to generate an string of \lstline{x} spaces,
+and then pad it to of \lstline{v}.
+Although statically \lstline{x} has type \lstline{String|Integer}, as a concrete value 
+it can only be a string or an integer.
+Then the corresponding branch is chosen and executed.
 
+
+\paragraph{Exhaustiveness}
+Ceylon checks whether the union of all cases in a switch construct
+\emph{covers} the type of the analyzed term.
+\begin{lstlisting}
+interface Resource of File | Directory | Link { }
+interface File satisfies Resource {}
+interface Directory satisfies Resource {}
+interface Link satisfies Resource {}
+
+void printType(Resource resource){
+	switch (resource) 
+	case (is File) { print("File"); }
+	case (is Directory) { print("Directory"); }
+	case (is Link) { print("Link"); }
+}
+\end{lstlisting}
+
+------------- THE OTHER EXAMPLE -----------------
+Adding Test in it causes error in exhaustiveness checking in switch.
+
+\begin{lstlisting}
+abstract class Node() of Leaf | Branch | Test {}
+
+class Leaf(shared Object element) 
+extends Node() {}
+
+class Branch(shared Node left, shared Node right) 
+extends Node() {}
+
+class Test(shared Node left, shared Node right) 
+extends Node() {}
+
+void printTree(Node node) {
+	switch (node)
+	case (is Leaf) {
+		print("Found a leaf: ``node.element``!");
+	}
+	case (is Branch) {
+		printTree(node.left);
+		printTree(node.right);
+	}
+}
+
+printTree(Branch(Branch(Leaf("aap"), Leaf("noot")), Leaf("mies")));
+\end{lstlisting}
+
+\paragraph{Disjointness}
+	
 \bruno{Please organize the section text using paragraphs, to highlight key topics.
   I think the flow of the text is quite bad and I can't quite figure out what points
   you are trying to make in different parts of the text. In fact it seems that you keep
