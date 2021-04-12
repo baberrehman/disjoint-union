@@ -1,14 +1,20 @@
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-We develop a union calculus (\cal) for type-based union elimination. 
-We also add intersection types in
-\cal. The calculus is proved to be sound, complete, type-safe and deterministic.
+We develop a union calculus (\cal) for type-based union elimination.
+Technical details for \cal are discussed in \Cref{sec:union}.
+We also add intersection types in \cal and discuss technical details in \Cref{sec:inter}.
+The calculus is proved to be sound, complete, type-safe and deterministic.
 Such calculi have a variety of practical applications such as in switch expressions
-and function overloading. We plan to extend \cal for practical programming languages.
+and function overloading. We plan to extend \cal for practical programming languages
+with more advance features.
 
 A major future research direction for \cal is to study it with merge operator.
 Intersection types are of significant interest with merge operator. But it is non-trivial
 to naivly add the merge operator for a calculus with union and intersection types.
 One major problem with naive merge operator is that merge operator induces (in)coherence problem.
 Therefore, special care has to be taken to study \cal with merge operator.
+Another domain of future interest is embed dynamic dispatch in \cal by defining a weak
+and more expressive disjointness. Dynamic dispatch will allow type checking more programs
+such as in \Cref{discussion:list:ceylon}. A major challenge of adding dynamic dispatch in
+\cal is to keep the switch branches independent of orders in which they appear.

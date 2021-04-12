@@ -1,7 +1,81 @@
 \section{Introduction}
 \label{sec:intro}
 
-Union types allow expressing terms with alternative types. Several forms of
+Most programming languages support some mechanism to express terms
+with alternative types. Algol 68~\cite{} included a form of
+\emph{tagged} unions for this purpose. With tagged unions
+an explicit tag is needed to distinguish between different cases in the
+union. Such an approach has been adopted by functional languages, like Haskell, ML, or
+OCaml, which allow tagged unions (or sum types~\cite{}), typically via
+either \emph{algebraic datatypes}~\cite{} or \emph{variant types}~\cite{}.
+Languages like C or C++ support \emph{untagged} union types where
+values of the alternative types are simply stored at the same memory
+location. However, there is no checking of types when accessing values of
+such untagged types. Thus, it is up to the programmer to ensure that the proper
+values are accessed correctly in different contexts. Otherwise the
+program may produce errors by accessing the value at the incorrect type.
+
+Modern OOP languages, such as Scala~\cite{}, Flow~\cite{},
+TypeScript~\cite{} or Ceylon~\cite{} support a form
+of untagged union types, which is inspired by set-theoretic connectives.
+In such languages a type $[[A \/ B]]$ denotes values which can have type
+$[[A]]$ or type $[[B]]$. Union types can be useful in many situations.
+For instance, union types provide an alternative to some forms
+of overloading. The idea is that a function that takes an argument
+with a union type acts similarly to an overloaded function.
+Furthermore, union types have other uses.
+For instance, they are commonly used to model error handling.
+If a function returning a number may fail due to some
+error, the union type $[[String \/ Int]]$ can be returned: an integer
+is returned upon successful computation of the result; and
+a string (with an error message) is returned if an error happens.
+
+To safely access the value in an union type, some form of elimination
+construct is needed. The aforementioned languages typically offer
+language constructs that can check the types of the values at runtime,
+and act as elimination constructs. Several elimination constructs for
+(untagged) union types have also been studied in the research
+literature~\cite{}. Typically, such constructs take the form of a
+type-based case analysis expression.
+
+A complication is that the presence of subtyping introduces the
+possibility of \emph{overlapping types}. For instance we may have a
+$Student$ and a $Person$, where every student is a person (but not
+vice-versa). If we try to eliminate a union using such types we can
+run into situations where the type in one branch can cover a type in a
+different branch (for instance $Person$ can also cover
+$Student$). Therefore the design of such elimination constructs has to
+consider what todo in situations where overlapping types arize.  A
+first possibility is to have a \emph{non-deterministic semantics},
+where any of the branches that matches can be taken. However, in
+practice determinism is desirable property in a programming language,
+so this option is not practical. A second possibility, which is
+commonly used for overloading, is to employ a \emph{best-match
+  semantics}, where we attempt to find the case with the type that
+best matches the value. Another option is to employ a
+\emph{first-match semantics}, which employs the order of the branches
+in the case. Various existing elimination constructs for unions~\cite{}
+employ a first-match approach. All of these three options have been studied
+in the literature. 
+
+The Ceylon language is unique in its approach to union types in that it
+employs yet another approach for elimination. The idea in Ceylon is to have
+a type-based construct, where all the cases must be \emph{disjoint}. If two
+types are found to be overlapping then the program is statically rejected.
+
+
+Three common approaches for the design of elimination constructs for unions
+(or related constructs) include: the \emph{non-deterministic semantics};
+the \emph{first-match semantics}; and the \emph{best-match semantics}.
+In the non-deterministic semantics any branch that matches the type
+of the value can be taken. While from the theoretical point of view this
+approach is reasonable, in practice determinism is desirable property in a
+programming language, so this 
+
+
+The research literature of programming languages has also 
+
+Several forms of
 union types have been investigated in the research literature, and
 union types are nowadays a common feature in many modern programming
 languages.

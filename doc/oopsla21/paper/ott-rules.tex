@@ -42,7 +42,8 @@
 \ottprodline{|}{\ottnt{A}  \rightarrow  \ottnt{B}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{A}  \vee  \ottnt{B}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottnt{A}  \wedge  \ottnt{B}}{}{}{}{}\ottprodnewline
-\ottprodline{|}{\ottsym{(}  \ottnt{A}  \ottsym{)}} {\textsf{S}}{}{}{}}
+\ottprodline{|}{\ottsym{(}  \ottnt{A}  \ottsym{)}} {\textsf{S}}{}{}{}\ottprodnewline
+\ottprodline{|}{ \rceil  \ottnt{e}  \lceil }{}{}{}{}}
 
 \newcommand{\ottexp}{
 \ottrulehead{\ottnt{exp}  ,\ \ottnt{e}  ,\ \ottnt{v}  ,\ \ottnt{p}  ,\ \ottnt{w}}{::=}{\ottcom{expression}}\ottprodnewline
@@ -57,7 +58,8 @@
 \ottprodline{|}{\ottnt{e_{{\mathrm{1}}}} \, \ottnt{e_{{\mathrm{2}}}}}{}{}{}{}\ottprodnewline
 \ottprodline{|}{ switch \  \ottnt{e}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \} }{}{}{}{}\ottprodnewline
 \ottprodline{|}{\ottsym{(}  \ottnt{e}  \ottsym{)}} {\textsf{S}}{}{}{}\ottprodnewline
-\ottprodline{|}{\ottsym{1}}{}{}{}{}}
+\ottprodline{|}{\ottsym{1}}{}{}{}{}\ottprodnewline
+\ottprodline{|}{ \ottnt{v}  \mathbin{\lhd}  \ottnt{A}  \mathbin{\lhd}  \ottnt{B} }{}{}{}{}}
 
 \newcommand{\ottctx}{
 \ottrulehead{\ottnt{ctx}  ,\ \Gamma}{::=}{\ottcom{typing context}}\ottprodnewline
@@ -202,30 +204,6 @@
 \newcommand{\ottdefnsFindType}{
 \ottdefnfindtype{}}
 
-% defns droptype
-%% defn droptype
-\newcommand{\ottdruledroptypeXXpval}[1]{\ottdrule[#1]{%
-}{
- \ottnt{p}  = \rceil \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{)} \lceil }{%
-{\ottdrulename{droptype\_pval}}{}%
-}}
-
-
-\newcommand{\ottdruledroptypeXXabs}[1]{\ottdrule[#1]{%
-}{
- \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  = \rceil \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)} \lceil }{%
-{\ottdrulename{droptype\_abs}}{}%
-}}
-
-\newcommand{\ottdefndroptype}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{e}  = \rceil \ottnt{v} \lceil $}{\ottcom{DropStaticType}}
-\ottusedrule{\ottdruledroptypeXXpval{}}
-\ottusedrule{\ottdruledroptypeXXabs{}}
-\end{ottdefnblock}}
-
-
-\newcommand{\ottdefnsdroptype}{
-\ottdefndroptype{}}
-
 % defns FindSubTypes
 %% defn fs
 
@@ -239,7 +217,7 @@
 % defns FindSubTypesEmpty
 %% defn fse
 
-\newcommand{\ottdefnfse}[1]{\begin{ottdefnblock}[#1]{$ | \ottnt{A} | = [] $}{}
+\newcommand{\ottdefnfse}[1]{\begin{ottdefnblock}[#1]{$ | \ottnt{A} | = \{\} $}{}
 \end{ottdefnblock}}
 
 
@@ -538,68 +516,68 @@
 
 
 \newcommand{\ottdrulesXXora}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A_{{\mathrm{1}}}}  <:  \ottnt{A} }%
-\ottpremise{ \ottnt{A_{{\mathrm{2}}}}  <:  \ottnt{A} }%
+\ottpremise{ \ottnt{A}  <:  \ottnt{C} }%
+\ottpremise{ \ottnt{B}  <:  \ottnt{C} }%
 }{
- \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}}  <:  \ottnt{A} }{%
+ \ottnt{A}  \vee  \ottnt{B}  <:  \ottnt{C} }{%
 {\ottdrulename{s\_ora}}{}%
 }}
 
 
 \newcommand{\ottdrulesXXorb}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  <:  \ottnt{A_{{\mathrm{1}}}} }%
+\ottpremise{ \ottnt{A}  <:  \ottnt{B} }%
 }{
- \ottnt{A}  <:  \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}} }{%
+ \ottnt{A}  <:  \ottnt{B}  \vee  \ottnt{C} }{%
 {\ottdrulename{s\_orb}}{}%
 }}
 
 
 \newcommand{\ottdrulesXXorc}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  <:  \ottnt{A_{{\mathrm{2}}}} }%
+\ottpremise{ \ottnt{A}  <:  \ottnt{C} }%
 }{
- \ottnt{A}  <:  \ottnt{A_{{\mathrm{1}}}}  \vee  \ottnt{A_{{\mathrm{2}}}} }{%
+ \ottnt{A}  <:  \ottnt{B}  \vee  \ottnt{C} }{%
 {\ottdrulename{s\_orc}}{}%
 }}
 
 
 \newcommand{\ottdrulesXXanda}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  <:  \ottnt{A_{{\mathrm{1}}}} }%
-\ottpremise{ \ottnt{A}  <:  \ottnt{A_{{\mathrm{2}}}} }%
+\ottpremise{ \ottnt{A}  <:  \ottnt{B} }%
+\ottpremise{ \ottnt{A}  <:  \ottnt{C} }%
 }{
- \ottnt{A}  <:  \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}} }{%
+ \ottnt{A}  <:  \ottnt{B}  \wedge  \ottnt{C} }{%
 {\ottdrulename{s\_anda}}{}%
 }}
 
 
 \newcommand{\ottdrulesXXandb}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A_{{\mathrm{1}}}}  <:  \ottnt{A} }%
+\ottpremise{ \ottnt{A}  <:  \ottnt{C} }%
 }{
- \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}}  <:  \ottnt{A} }{%
+ \ottnt{A}  \wedge  \ottnt{B}  <:  \ottnt{C} }{%
 {\ottdrulename{s\_andb}}{}%
 }}
 
 
 \newcommand{\ottdrulesXXandc}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A_{{\mathrm{2}}}}  <:  \ottnt{A} }%
+\ottpremise{ \ottnt{B}  <:  \ottnt{C} }%
 }{
- \ottnt{A_{{\mathrm{1}}}}  \wedge  \ottnt{A_{{\mathrm{2}}}}  <:  \ottnt{A} }{%
+ \ottnt{A}  \wedge  \ottnt{B}  <:  \ottnt{C} }{%
 {\ottdrulename{s\_andc}}{}%
 }}
 
 
-\newcommand{\ottdrulesXXdisj}[1]{\ottdrule[#1]{%
-\ottpremise{ | \ottnt{A} | = [] }%
+\newcommand{\ottdrulesXXlos}[1]{\ottdrule[#1]{%
+\ottpremise{ | \ottnt{A} | = \{\} }%
 }{
  \ottnt{A}  <:  \ottnt{B} }{%
-{\ottdrulename{s\_disj}}{}%
+{\ottdrulename{s\_los}}{}%
 }}
 
 
-\newcommand{\ottdrulesXXdis}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{A}  *_a  \ottnt{B} }%
+\newcommand{\ottdrulesXXdisj}[1]{\ottdrule[#1]{%
+\ottpremise{ \ottnt{A}  *_s  \ottnt{B} }%
 }{
  \ottnt{A}  \wedge  \ottnt{B}  <:   \bot  }{%
-{\ottdrulename{s\_dis}}{}%
+{\ottdrulename{s\_disj}}{}%
 }}
 
 \newcommand{\ottdefnsubtyping}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  <:  \ottnt{B} $}{\ottcom{Subtyping}}
@@ -615,8 +593,8 @@
 \ottusedrule{\ottdrulesXXanda{}}
 \ottusedrule{\ottdrulesXXandb{}}
 \ottusedrule{\ottdrulesXXandc{}}
+\ottusedrule{\ottdrulesXXlos{}}
 \ottusedrule{\ottdrulesXXdisj{}}
-\ottusedrule{\ottdrulesXXdis{}}
 \end{ottdefnblock}}
 
 
@@ -912,15 +890,14 @@
 \newcommand{\ottdrulestepXXappr}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{e}  \longrightarrow  \ottnt{e'} }%
 }{
- \ottnt{w} \, \ottnt{e}  \longrightarrow  \ottnt{v} \, \ottnt{e'} }{%
+ \ottnt{w} \, \ottnt{e}  \longrightarrow  \ottnt{w} \, \ottnt{e'} }{%
 {\ottdrulename{step\_appr}}{}%
 }}
 
 
 \newcommand{\ottdrulestepXXbeta}[1]{\ottdrule[#1]{%
-\ottpremise{ \ottnt{e_{{\mathrm{1}}}}  = \rceil \ottnt{v} \lceil }%
 }{
- \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottnt{v}  \longrightarrow  \ottsym{(}  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottsym{(}  \ottnt{e_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{1}}}}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}} }{%
+ \ottsym{(}  \ottsym{(}  \lambda  \ottmv{x}  \ottsym{.}  \ottnt{e}  \ottsym{)}  \ottsym{:}  \ottnt{A_{{\mathrm{1}}}}  \rightarrow  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{A_{{\mathrm{2}}}}  \rightarrow  \ottnt{B_{{\mathrm{2}}}}  \ottsym{)} \, \ottnt{v}  \longrightarrow  \ottsym{(}  \ottnt{e}  \ottsym{[}  \ottmv{x}  \leadsto  \ottsym{(}   \ottnt{v}  \mathbin{\lhd}  \ottnt{A_{{\mathrm{2}}}}  \mathbin{\lhd}  \ottnt{A_{{\mathrm{1}}}}   \ottsym{)}  \ottsym{]}  \ottsym{)}  \ottsym{:}  \ottnt{B_{{\mathrm{1}}}}  \ottsym{:}  \ottnt{B_{{\mathrm{2}}}} }{%
 {\ottdrulename{step\_beta}}{}%
 }}
 
@@ -966,8 +943,7 @@
 
 \newcommand{\ottdrulestepXXswitchl}[1]{\ottdrule[#1]{%
 \ottpremise{  }%
-\ottpremise{ \ottnt{C}  = \rfloor \ottnt{p} \lfloor }%
-\ottpremise{ \ottnt{C}  <:  \ottnt{A} }%
+\ottpremise{  \rceil  \ottnt{p}  \lceil   <:  \ottnt{A} }%
 }{
   switch \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow  \ottnt{e_{{\mathrm{1}}}}  \ottsym{[}  \ottmv{x}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{A}  \ottsym{]} }{%
 {\ottdrulename{step\_switchl}}{}%
@@ -976,8 +952,7 @@
 
 \newcommand{\ottdrulestepXXswitchr}[1]{\ottdrule[#1]{%
 \ottpremise{  }%
-\ottpremise{ \ottnt{C}  = \rfloor \ottnt{p} \lfloor }%
-\ottpremise{ \ottnt{C}  <:  \ottnt{B} }%
+\ottpremise{  \rceil  \ottnt{p}  \lceil   <:  \ottnt{B} }%
 }{
   switch \  \ottsym{(}  \ottnt{p}  \ottsym{:}  \ottnt{D}  \ottsym{)}  \ \{(x: \ottnt{A} ) \rightarrow \ottnt{e_{{\mathrm{1}}}} , (y: \ottnt{B} ) \rightarrow \ottnt{e_{{\mathrm{2}}}} \}   \longrightarrow  \ottnt{e_{{\mathrm{2}}}}  \ottsym{[}  \ottmv{y}  \leadsto  \ottnt{p}  \ottsym{:}  \ottnt{B}  \ottsym{]} }{%
 {\ottdrulename{step\_switchr}}{}%
@@ -1008,7 +983,6 @@
 \ottdefnsAValue
 \ottdefnsValue
 \ottdefnsFindType
-\ottdefnsdroptype
 \ottdefnsFindSubTypes
 \ottdefnsFindSubTypesEmpty
 \ottdefnsOrdinary
