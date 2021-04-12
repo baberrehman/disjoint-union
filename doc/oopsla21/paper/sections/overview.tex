@@ -212,7 +212,7 @@ In the runtime, one branch is chosen according to the input's type.
 %
 Static type checking for the switch construct ensures two things: the 
 list of cases is exhaustive, and any two cases are disjoint.
-In the above example, \lstline{x} can be either a string or an integer,
+In the above example, \lstinline{x} can be either a string or an integer,
 or a floating number. There does not have to be exact three cases correspondingly,
 but the combination of all cases must be able to handle all possibilities.
 On the other hand, unlike the previous discussion, it is impossible to have two
@@ -222,7 +222,7 @@ restriction.
 \paragraph{As an Alternative to Overloading}
 A motivation of such type-directed union elimination in Ceylon is to
 model a form of function overloading.
-The following example demonstrate how to define a function \lstline{padLeft}.
+The following example demonstrate how to define a function \lstinline{padLeft}.
 It takes two arguments. The second argument can be either a string or
 an integer.
 
@@ -252,10 +252,10 @@ print( padLeft("World", "Hello ") );
 \end{lstlisting}
 %
 In the two cases of the switch construct, there are two different implementations
-for the \lstline{padLeft} function: one add a string to the left of \lstline{v},
-the other calls function \lstline{space} to generate an string of \lstline{x} spaces,
-and then pad it to of \lstline{v}.
-Although statically \lstline{x} has type \lstline{String|Integer}, as a concrete value 
+for the \lstinline{padLeft} function: one add a string to the left of \lstinline{v},
+the other calls function \lstinline{space} to generate an string of \lstinline{x} spaces,
+and then pad it to of \lstinline{v}.
+Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value 
 it can only be a string or an integer.
 Then the corresponding branch is chosen and executed.
 
