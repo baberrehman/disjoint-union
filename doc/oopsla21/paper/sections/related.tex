@@ -32,25 +32,29 @@ do not use labels and provide type-based union elimination.
 %union elimination have been a challenge in research community.
 \end{comment}
 Union types were first studied in the setting of programming languages
-by \citet{macqueen1984ideal}. Later on, union types have been studied
+by \citet{macqueen1984ideal}. However, the union elimination rule
+proposed by \citet{macqueen1984ideal} is unsound in standard call-by-value
+operational semantics as pointed by \cite{dunfield2003type}.
+Later on, union types have been studied
 in the literature in various contexts. \citet{pierce1991programming}
 studied union types with intersection types and polymorphism. But he
-did not define dynamic semantics for his calculus. Union elimination
-is same in \citep{macqueen1984ideal} and \citep{pierce1991programming}
-and is not deterministic\bruno{We need to be quite careful when making claims like this.
+did not define dynamic semantics for his calculus. Also, Pierce
+uses explicit tags in union elimination. On the contrary, we define
+dynamic semantics for \cal and union elimination is without tags.
+Precisely, we follow type-based union elimination.
+\bruno{We need to be quite careful when making claims like this.
   For Pierce, since he has not defined the dynamic semantics you cannot say this. For MacQueen
   where can I find his semantics for union elimination?}.
-\baber{They both did not define dynamic semantics. I think I am not using appropriate
-wording. What I want to say here is that their typing elimination rule for union
-is unrestricted.}
+\baber{I updated text for MacQeen and Pierce's work.}
 \citet{barbanera1995intersection} proposed
-two approaches for subject reduction in a calculus with union
-types. However, their union elimination is same as last two and follow
-unrestricted union elimination. \bruno{So you are arguying it is non-deterministic?
+two approaches for type preservation in a calculus with intersection and union
+types.
+%However, their union elimination is same as last two and follow
+%unrestricted union elimination.
+\bruno{So you are arguying it is non-deterministic?
 Again where can I find the semantics? Can you paste this on slack?}
-\baber{Again, I refer to typing elimination rule for union types.
-They targeted preservation for union elimination with two approaches.
-Also, their approach is different from ours.}
+\baber{I commented those lines from the paper. I think it is enough to say that
+they target type preservation in their work.}
 
 \citet{freeman1991refinement} studied union types along with intersection types
 in setting of refinement types for ML. Main focus of their work is to infer
@@ -79,24 +83,44 @@ are labelled (i.e. the cases are not based on types)?}
 \baber{this seems right, this is mentioned in few references.
        But the documentation says order in which union types are created
        is significant and it seems like first match. Shall we drop this
-       or it's worthy to mention?}
+       or it's worthy to mention Fallside citation?}
 
-\citet{dunfield2014elaborating} also studied intersection and union
-types. Her approach is to elaborate a source language with union types into a
-target language with (tagged) sum types. Our
-work is different from her work because she used unrestricted union
-elimination\bruno{You need to do better than this. I don't think the elimination
+\citet{dunfield2014elaborating} studied intersection and union
+types with merge operator.
+We do not have merge operator in \cal.
+Her approach is to elaborate a source language with union types into a
+target language with (tagged) sum types.
+Her dynamic semantics for source language is nondeterministic.
+For example, a program like:
+
+\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+Int nondeterministic(Int | Int val) {
+  switch (val)
+  case (is Int) {return 1;}
+  case (is Int) {return 2;} 
+}
+\end{lstlisting}
+
+\noindent may return either 1 or 2 in Dunfield's calculus.
+\baber{She does not have an explicit case in source language.
+Is it fine to show above code or should I show with merge operator?}
+Whereas, such programs will not
+type-check in \cal. Because \cal has a disjointness constraint on
+types of branches in switch expression.
+We propose a type-based union elimination construct which is
+type-safe and deterministic.
+Further, she did not add subtyping distributivity in her calculus.
+We propose a variant of \cal with distributive subtyping in \Cref{sec:discussion}
+which is more expressive than Dunfield's subtyping relation.
+\bruno{You need to do better than this. I don't think the elimination
 construct is unrestricted. You need to explain what that construct allows and disallows.}
-in source language and sum types with explicit injectors
-in target language.
-She also studied merge operator in her calculus. We do not have merge operator
-in \cal. Non-deterministic operational semantics for source language.
-Incoherent calculus. Enforce restriction on expression to be substituted
+\baber{Incoherent calculus. Enforce restriction on expression to be substituted
 to have a single type for sound union elimination typing rule.
 We acheive same by disjointness. No distributive subtyping, she mentions
 it is challenging to add distributive subtyping.
-She does not have case expression in source language.
-Case in target language uses explicit tagging. \baber{need to polish Dunfield work.}
+She does not have dynamic semantics in source language.
+Case in target language uses explicit tagging.}
+
 \citet{castagna2017gradual} studied
 set-theoretic union types in gradual typing setting\bruno{Castagna did alot of work
   on union types before this one, so I'm not sure why we are mentioning only this work
@@ -104,28 +128,73 @@ set-theoretic union types in gradual typing setting\bruno{Castagna did alot of w
 give a dynamic type-based cast for union elimination. But they do not
 have disjointness constraint on case branches and they check the type
 only for first case branch\bruno{Not a very good explanation: you get negated types for the branches}.
-Recently, \citet{muehlboeck2018empowering} gave a general framework of a calculi
+\baber{I will add semantic subtyping here.}
+Union types are also studied with the notion of semantic subtyping 
+\cite{frisch2002semantic,castagna2005gentle,frisch2008semantic}.
+\baber{more text.}
+
+Recently, \citet{muehlboeck2018empowering} gave a general framework for calculi
 with intersection and union types. They illustrated the significane of
-their framework using Ceylon programming language.  They also studied
-disjointness in type-based case expressions.\bruno{Very very weak: this makes it sound
+their framework using Ceylon programming language.
+Objective of their work is to define a generic framework for the 
+distributive subtyping of intersection and union types.
+Although, they mentioned disjointness but they did not study disjointness
+in their work. On the other hand, we formally study disjointness
+along with a type-safe and deterministic type-based case construct for union elimination.
+%They also studied disjointness in type-based case expressions.
+\bruno{Very very weak: this makes it sound
   like that they already did something like our work: they did not. Their work was about
   subtyping relations with unions and intersections and distributivity rules. They briefly mentioned
   the switch construct of Ceylon and disjointness. But they have not studied the formal semantics
 of such construct or formally defined disjointness.}
+\baber{I updated the text.}
 
 \paragraph{Occurrence Typing}
 \bruno{This paragraph is very weak: it gives an incorrect explanation of occurrence typing, and it is not very comprehensive:
   it cover the two works I pointed out (for starters), but nothing else. We may not need to cover much more, but
   we need to make sure that we read some other work on occurrence typing to ensure that we are not missing something that is
 closely related.}
-Occurence typing or flow typing \citet{tobin2008design} specialize or refine the type of variable in different
-case branches. Occurence typing is limmited to have variables in switch expression, whereas \cal
-can have any arbitrary expression in switch expression\bruno{Do not confuse occurrence typing with a switch expression.
+Occurence typing or flow typing \citet{tobin2008design} specializes or refines 
+the type of variable. For example, code example below elaborates occurance typing.
+
+\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+Int occurance(Int | String val) {
+  if (isInt(val)) { return val+1; }
+  else { return toInt(val)+2; }
+}
+\end{lstlisting}
+
+\noindent Code example above takes an input variable \emph{val}
+of type $[[Int \/ String]]$. 
+\emph{If} condition checks if the \emph{val} is of $[[Int]]$ type.
+If the condition succeeds, it is safe to assume that \emph{val} is of $[[Int]]$ type.
+Function \emph{occurance} increments \emph{val} by 1 and returns.
+Otherwise, it is safe to assume that \emph{val} is of $[[String]]$ type.
+We assume that incoming string is a valid representation of some integer
+and \emph{toInt(val)} converts string to integer.
+In this case, function \emph{occurance} increments \emph{val} by 2 and returns.
+Note that occurance typing is specializing the type of
+same existing variable \emph{val} in both cases above.
+Motivation to study occurance typing was to introduce typing in untyped calculi,
+which is a generic technique.
+Whereas, we particularly studied type-based switch expression
+with disjointness to preserve determinism.
+Occurance typing is further studied by \cite{tobin2010logical,castagna2019revisiting}
+with more set-theoratic types such as intersection types.
+
+%\citet{castagna2019revisiting} recently studied
+%occurence typing for set-theoretic types and allowed to have generic 
+%expressions in switch expression.
+
+\baber{will remove occurance typing text below.}
+Occurence typing is limmited to have variables, whereas \cal
+can have any arbitrary expression in switch expression
+\bruno{Do not confuse occurrence typing with a switch expression.
   Occurrence typing is a technique that can be used when modelling case expressions for union types}.
 Also, occurence typing comes with an
-unrestricted typing construct for case expression\bruno{Again you're confusing things: occurrence typing != case expression:
-you could have our switch expression with occurrence typing,  but we chose not to.}. \citet{castagna2019revisiting} recently studied
-occurence typing for set-theoretic types and allowed to have generic expressions in switch expression.
+unrestricted typing construct for case expression
+\bruno{Again you're confusing things: occurrence typing != case expression:
+you could have our switch expression with occurrence typing,  but we chose not to.}.
 
 \paragraph{Disjoint Intersection Types}
 \citet{pottinger1980type} and \citet{coppo1981functional} initially
