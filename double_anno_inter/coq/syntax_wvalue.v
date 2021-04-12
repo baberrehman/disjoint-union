@@ -802,3 +802,10 @@ Proof.
   eapply H; eauto.
   eapply H; eauto.
 Qed.
+
+Lemma disj_bot_like : forall A B, A *a B -> t_and A B <: t_bot.
+Proof.
+  intros.
+  unfold DisjAlgo in H.
+  apply s_disj. simpl. auto.
+Qed.

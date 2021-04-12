@@ -1,113 +1,22 @@
 \section{Discussion}
 \label{sec:discussion}
 In this section we discuss some extensions and provide a comparision with the approach
-adopted in Ceylon. 
-
-\subsection{A More General Subtyping Rule for Bottom  Types}
-\label{sec:inter:refactoring}
-As discussed in Section~\ref{sec:inter}, Ceylon includes the following subtyping rule:
-
-\begin{center}
-\drule[]{s-dis}
-\end{center}
-
-%One property of Ceylon programming language ~\cite{} is that all \emph{bottom-like} types are 
-%subtype of $[[Bot]]$ type.
-\noindent It is possible to support, and in fact generalize, such as rule in \name. The idea is to
-employ our definition of lowest ordinary subtypes, and add the following rule 
-%This property also holds in \cal presented in \Cref{sec:union}. But this property does not
-%hold in \cal with intersection types presented in \Cref{sec:inter} because we updated
-%disjointness definition. We add following novel subtyping rule in subtyping of
-%\Cref{sec:inter} to have this property
-in \cal with intersection types:
-
-\begin{center}
-\drule[]{s-disj}
-\end{center}
-\bruno{Be consistent and use the empty set notation instead of the empty list. Also, call it S-Los.}
-
-\noindent \Rref{s-disj} is an interesting addition in subtyping of \cal with intersection types.
-It says that if LOS returns the empty set for some type $[[A]]$, then $[[A]]$
-is subtype of all types. In other words, such type behaves like \emph{bottom-like} type.
-Such rule generalizes the rule employed in Ceylon, since when $[[A]]$ is an intersection type of two
-disjoint types, we get the empty set.
-%Since $[[findsubtypes Int /\ A -> B]]$ returns empty set,
-%therefor \rref{s-disj} makes $[[Int /\ A -> B]]$ subtype of all types.
-Moreover, adding \rref{s-disj} makes \rref{s-bot} redundant as well, since the LOS for
-the bottom type is also the empty set. Therefore \rref{s-bot} can safely be dropped without any
-any loss of expressiveness. It is trivial to prove a lemma which says that $[[Bot]]$ type is
-subtype of all types. We drop \rref{s-bot} from the calculus discussed in \Cref{sec:inter}
-and prove \Cref{lemma:discussion:bls} to show this property instead. It is because that $[[findsubtypes Bot]]$
-returns empty set (\{\}) and \rref{s-disj} makes all such types with $[[findsubtypes A]]$ = \{\} as
-subtype of all types.
-\bruno{You should also show a lemma: $A * B$ implies $A \& B <: Bot$ and adjust the text}
-
-\begin{lemma}[Bottom Type Least Subtype]
-  $[[Bot <: A]]$.
-\label{lemma:discussion:bls}
-\end{lemma}
-
-\noindent The use of \rref{s-disj} instead of \rref{s-dis} also has the advantage that it does not
-create a mutual dependency between disjointness and subtyping. We can have a the definition
-of disjointness, which depends only on subtyping and ordinary types, and the definition
-of subtyping, which depends on LOS but not on disjointness.
-
-We have formalized and proved all the metatheory, including type-soundness, transitivity of subtyping,
-soundness and completeness of disjointness and determinism for a variant of \name with intersection types
-and \rref{s-disj}.
-
-\subsection{Subtyping Distributivity}
-\label{sec:inter:dist}
-
-\bruno{I think this is lacking some details here: we should show some examples
-  that require distributivity, and explain those examples, which illustrate the
-  distributivity rules with some care. Also say something about disjointness. In particular
-  explain that distributivity does not affect disjointness and that the current formulations
-remain sound and complete.}
-
-Another interesting extension is to add distributive subtyping to \cal.
-Ceylon~\cite{} employs an enriched distributive subtyping relation \cite{}.
-Distributive subtyping is more expressive and accomodates more programs than what we discussed in
-\Cref{sec:inter}. Distributivity is easy to add to \cal and, the resulting 
-calculus preserves soundness, completeness, type-safety and determinism. 
-
-\baber{perhaps an example to show expressiveness of DS.}
-
-\Cref{fig:discussion:ds} shows declarative version of distributive subtyping for \cal with intersection types.
-This subtyping relation is declarative as it includes axioms for subtyping reflexivity (\rref{ds-refl}) and
-subtyping transitivity (\rref{ds-trans}). \Rref{ds-top, ds-btm, ds-int, ds-arrow, ds-ora} have been
-discussed in \Cref{sec:union}. \Rref{ds-anda} has been discussed in \Cref{sec:inter}.
-\Rref{ds-orb, ds-orc} state that sub-part of a union type is a subtype of whole union type.
-\Rref{ds-andb, ds-andc} state that intersection type $[[A1 /\ A2]]$ is a subtype of both $[[A1]]$
-and $[[A2]]$ separately.\bruno{Snow can't we drop some of the distributivity rules? Some of them
-are redundant, right?}
-
-\Rref{ds-distarr, ds-distarrrev}  distribute function types over intersection types.
-They state that $[[(A -> B1) /\ (A -> B2)]]$ and $[[A -> (B1 /\ B2)]]$ are equivalent types.
-\Rref{ds-distarru, ds-distarrurev} state that $[[(A1 -> B) /\ (A2 -> B)]]$ and $[[(A1 \/ A2) -> B]]$
-are equivalent types.
-\Rref{ds-distor, ds-distand} distribute intersection types over union types and vice versa.
-
-
-\begin{figure}[t]
-  %\centering
-  \drules[ds]{$ [[A <<: B ]] $}{Declarative Subtyping}{refl, trans, top, btm, int, arrow, ora, orb, orc, anda, andb, andc, distarr, distarrrev, distarru, distarrurev, distor, distand}
-  \caption{Declarative Subtyping}
-  \label{fig:discussion:ds}
-\end{figure}
+adopted in Ceylon.
 
 \subsection{Disjointness in Ceylon}
 \label{sec:discussion:ceylon}
 
 \ningning{I agree this section feels quite weak for now.}
 
-\bruno{I think we can move this discussion to the Discussion section. }
+\bruno{I think we can move this discussion to the Discussion section. } \baber{I agree.}
 Ceylon also provides a notion of disjoint types in type-based case analysis. In this section
 we compare the disjointness provided by Ceylon with our disjointness definition.
 \Cref{discussion:list:ceylon} shows a simple Ceylon disjointness example.
 
 \ningning{A similar example is used in the overview. Maybe we want to be
   consistent with the examples.}
+\baber{I will make this example consistent with the example in overview. But I suppose
+  I should be using Ceylon syntax in this section.}
 
 \begin{figure}[t]
 \begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
@@ -147,9 +56,164 @@ documentation \cite{}. Two types X and Y are disjoint if either of the following
 \noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
 For example, (2) is one specific case of \Cref{def:inter:disj}. When both types $[[A]]$ and
 $[[B]]$ are not subtypes of each other, they naturally do not share any common subtype.
-(3) is a straightforward rule for union disjointness (\rref{}\bruno{add the rule here}) in \cal.
+(3) is a straightforward rule for union disjointness (\rref{ad-orl}\bruno{add the rule here}
+\baber{Done.}) in \cal.
 \bruno{I was hoping for some more points here, where we actually identify some differences or
   we would argue that Ceylon definition is not complete from the point of view of our spec. For instance
   we know that Ceylon does not consider bottom to be disjoint to other types. But other differences would
   be interesting as well. For instance the bottom-like types that fail to be detected in Ceylon may reveal
 some flaws in their algorithms (and perhaps specs).}
+\baber{I think these points are not worth mentioning after Snow's discovery that these bugs
+       in Ceylon are because of alias? For now, only point that we argue about in this section is
+       that we provide a formal disjointness definition. I agree, this may not be a very strong argument.
+       But I think it adds some difference, for example formal definitions are easy to reason about 
+       (as mentioned above). And perhaps we can mention it is relatively easy to understand and extend
+       formal definition? And should we state again that our disjointness definition (with intersection
+       types) is much simpler? I think we can also mention that Ceylon uses disjuntive normal
+       form which poses a restriction on how one creates types?}
+
+
+\subsection{A More General Subtyping Rule for Bottom  Types}
+\label{sec:inter:refactoring}
+As discussed in Section~\ref{sec:discussion:ceylon}, Ceylon includes the following subtyping rule:
+
+\begin{center}
+\drule[]{s-disj}
+\end{center}
+
+%One property of Ceylon programming language ~\cite{} is that all \emph{bottom-like} types are 
+%subtype of $[[Bot]]$ type.
+\noindent It is possible to support, and in fact generalize, such as rule in \name. The idea is to
+employ our definition of lowest ordinary subtypes, and add the following rule 
+%This property also holds in \cal presented in \Cref{sec:union}. But this property does not
+%hold in \cal with intersection types presented in \Cref{sec:inter} because we updated
+%disjointness definition. We add following novel subtyping rule in subtyping of
+%\Cref{sec:inter} to have this property
+in \cal with intersection types:
+
+\begin{center}
+\drule[]{s-los}
+\end{center}
+\bruno{Be consistent and use the empty set notation instead of the empty list. Also, call it S-Los.}
+\baber{Done.}
+
+\noindent \Rref{s-los} is an interesting addition in subtyping of \cal with intersection types.
+It says that if LOS returns the empty set for some type $[[A]]$, then $[[A]]$
+is subtype of all types. In other words, such type behaves like \emph{bottom-like} type.
+Such rule generalizes the rule employed in Ceylon, since when $[[A]]$ is an intersection type of two
+disjoint types, we get the empty set.
+%Since $[[findsubtypes Int /\ A -> B]]$ returns empty set,
+%therefor \rref{s-disj} makes $[[Int /\ A -> B]]$ subtype of all types.
+Moreover, adding \rref{s-los} makes \rref{s-bot} redundant as well, since the LOS for
+the bottom type is also the empty set. Therefore \rref{s-bot} can safely be dropped without any
+any loss of expressiveness. It is trivial to prove a lemma which says that $[[Bot]]$ type is
+subtype of all types. We drop \rref{s-bot} from the calculus discussed in \Cref{sec:inter}
+and prove \Cref{lemma:discussion:bls} to show this property instead. It is because that $[[findsubtypes Bot]]$
+returns empty set ($\{\}$) and \rref{s-los} makes all such types with $[[findsubtypes A]]$ = $\{\}$ as
+subtype of all types.
+\bruno{You should also show a lemma: $A * B$ implies $A \& B <: Bot$ and adjust the text.}
+\baber{Done.}
+
+\begin{lemma}[Bottom Type Least Subtype]
+  $[[Bot <: A]]$.
+\label{lemma:discussion:bls}
+\end{lemma}
+
+\noindent Since \cal with intersection types should consider the intersection of disjoint types 
+as \emph{bottom-like} types. In other words, intersection of disjoint types
+should be subtype of $[[Bot]]$ type.
+This is again a trivial property (\Cref{lemma:discussion:disjoint-types}) in \cal 
+with the novel disjointness definition and \rref{s-los}.
+
+\begin{lemma}[Disjont Types Intersection Bottom-Like]
+  If $[[A *s B]]$ then $[[A /\ B <: Bot]]$.
+\label{lemma:discussion:disjoint-types}
+\end{lemma}
+
+\noindent The use of \rref{s-los} instead of \rref{s-disj} also has the advantage that it does not
+create a mutual dependency between disjointness and subtyping. We can have the definition
+of disjointness, which depends only on subtyping and ordinary types, and the definition
+of subtyping, which depends on LOS but not on disjointness.
+
+We have formalized and proved all the metatheory, including type-soundness, transitivity of subtyping,
+soundness and completeness of disjointness and determinism for a variant of \name with intersection types
+and \rref{s-los}.
+
+\subsection{Subtyping Distributivity}
+\label{sec:inter:dist}
+
+\bruno{I think this is lacking some details here: we should show some examples
+  that require distributivity, and explain those examples, which illustrate the
+  distributivity rules with some care. Also say something about disjointness. In particular
+  explain that distributivity does not affect disjointness and that the current formulations
+remain sound and complete.} \baber{Done.}
+
+Another interesting extension is to add distributive subtyping to \cal.
+Ceylon~\cite{muehlboeck2018empowering} employs an enriched 
+distributive subtyping relation \cite{barendregt1983filter,barbanera1995intersection}.
+Distributive subtyping is more expressive and accomodates more programs than what we discussed in
+\Cref{sec:inter}. In this section we add distributive subtyping in the variant of \cal with
+intersection types. 
+
+\Cref{fig:discussion:ds} shows declarative version of distributive subtyping for \cal with intersection types.
+This subtyping relation is declarative as it includes axioms for subtyping reflexivity (\rref{ds-refl}) and
+subtyping transitivity (\rref{ds-trans}). \Rref{ds-top,ds-btm,ds-int,ds-arrow,ds-ora} have been
+discussed in \Cref{sec:union}. \Rref{ds-anda} has been discussed in \Cref{sec:inter}.
+\Rref{ds-orb,ds-orc} state that sub-part of a union type is a subtype of whole union type.
+\Rref{ds-andb,ds-andc} state that intersection type $[[A1 /\ A2]]$ is a subtype of both $[[A1]]$
+and $[[A2]]$ separately.\bruno{Snow can't we drop some of the distributivity rules? Some of them
+are redundant, right?}
+
+\Rref{ds-distarr,ds-distarrrev}  distribute function types over intersection types.
+They state that $[[(A -> B1) /\ (A -> B2)]]$ and $[[A -> (B1 /\ B2)]]$ are equivalent types.
+\Rref{ds-distarru,ds-distarrurev} state that $[[(A1 -> B) /\ (A2 -> B)]]$ and $[[(A1 \/ A2) -> B]]$
+are equivalent types.
+\Rref{ds-distor,ds-distand} distribute intersection types over union types and vice versa.
+We show expressiveness of distributive subtyping with following code snippet:
+
+\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+void do((Int & String) | Bool val) {
+  //do something
+}
+\end{lstlisting}
+
+\noindent The function \emph{do} in above code snippet takes input value of type 
+$[[(Int /\ String) \/ Bool]]$. A natural and set-theoratic property of union and
+intersection is that type $[[(Int \/ Bool) /\ (String \/ Bool)]]$ should be
+subtype of $[[(Int /\ String) \/ Bool]]$. Which is simply the distribution
+of intersection over union.
+But our standard subtyping relation discussed in \Cref{sec:union,sec:inter}
+fails to indentify this subtyping relation.
+As a result we cannot pass the
+value of type $[[(Int \/ Bool) /\ (String \/ Bool)]]$ to the function
+\emph{do}. Because our standard subtyping relation in \Cref{sec:union,sec:inter}
+is not expressive enough to deal with such cases and it fails to type-check such
+programs. Distributive subtyping allows type-checking such programs.
+With distributive subtyping, following application type-checks:
+
+\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+  val (Int | Bool) & (String | Bool) x = true;
+  do(x);
+\end{lstlisting}
+
+\noindent Particularly, \rref{ds-distor} allows this specific program to type-check.
+While above function application does not type-check without
+subtyping distributivity.
+Therefore, distributive subtyping is more expressive than standard subtyping
+discussed in \Cref{sec:union,sec:inter}.
+
+It is a trivial update to add subtyping distributivity in \cal with
+intersection types.
+We have studied a variant of \name with intersection types and subtyping distributivity.
+All the metatheory for this variant is proved in Coq. The variant preserves
+type-soundness, soundness and completeness of disjointness and determinism.
+Particularly, addition of subtyping distributivity
+doesn't affect the disjointness definition and disjointness stays same as
+discussed in \Cref{sec:inter}.
+
+\begin{figure}[t]
+  %\centering
+  \drules[ds]{$ [[A <<: B ]] $}{Declarative Subtyping}{refl, trans, top, btm, int, arrow, ora, orb, orc, anda, andb, andc, distarr, distarrrev, distarru, distarrurev, distor, distand}
+  \caption{Declarative Subtyping}
+  \label{fig:discussion:ds}
+\end{figure}

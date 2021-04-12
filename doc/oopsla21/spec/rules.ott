@@ -206,7 +206,7 @@ FindSubTypesEmpty :: '' ::=
   
   defn
   findsubtypesempty A ::   :: fse :: 'fse_'
-  {{ tex |[[A]]| = [] }}
+  {{ tex |[[A]]| = \{\} }}
   by
 
 
@@ -446,11 +446,11 @@ Subtyping :: '' ::=
     A /\ B <: C
 
     findsubtypesempty A
-    -------------------------      :: disj
+    -------------------------      :: los
     A <: B
 
     A *s B
-    ------------------------       :: dis
+    ------------------------       :: disj
     A /\ B <: Bot
 
 defns

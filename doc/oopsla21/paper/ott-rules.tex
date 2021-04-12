@@ -217,7 +217,7 @@
 % defns FindSubTypesEmpty
 %% defn fse
 
-\newcommand{\ottdefnfse}[1]{\begin{ottdefnblock}[#1]{$ | \ottnt{A} | = [] $}{}
+\newcommand{\ottdefnfse}[1]{\begin{ottdefnblock}[#1]{$ | \ottnt{A} | = \{\} $}{}
 \end{ottdefnblock}}
 
 
@@ -565,19 +565,19 @@
 }}
 
 
-\newcommand{\ottdrulesXXdisj}[1]{\ottdrule[#1]{%
-\ottpremise{ | \ottnt{A} | = [] }%
+\newcommand{\ottdrulesXXlos}[1]{\ottdrule[#1]{%
+\ottpremise{ | \ottnt{A} | = \{\} }%
 }{
  \ottnt{A}  <:  \ottnt{B} }{%
-{\ottdrulename{s\_disj}}{}%
+{\ottdrulename{s\_los}}{}%
 }}
 
 
-\newcommand{\ottdrulesXXdis}[1]{\ottdrule[#1]{%
+\newcommand{\ottdrulesXXdisj}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{A}  *_s  \ottnt{B} }%
 }{
  \ottnt{A}  \wedge  \ottnt{B}  <:   \bot  }{%
-{\ottdrulename{s\_dis}}{}%
+{\ottdrulename{s\_disj}}{}%
 }}
 
 \newcommand{\ottdefnsubtyping}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{A}  <:  \ottnt{B} $}{\ottcom{Subtyping}}
@@ -593,8 +593,8 @@
 \ottusedrule{\ottdrulesXXanda{}}
 \ottusedrule{\ottdrulesXXandb{}}
 \ottusedrule{\ottdrulesXXandc{}}
+\ottusedrule{\ottdrulesXXlos{}}
 \ottusedrule{\ottdrulesXXdisj{}}
-\ottusedrule{\ottdrulesXXdis{}}
 \end{ottdefnblock}}
 
 
