@@ -18,25 +18,25 @@ program may produce errors by accessing the value at the incorrect type.
 Modern OOP languages, such as Scala~\cite{}, Flow~\cite{},
 TypeScript~\cite{} or Ceylon~\cite{} support a form
 of untagged union types, which is inspired by set-theoretic connectives.
-In such languages a type $[[A \/ B]]$ denotes values which can have type
+In such languages a union type $[[A \/ B]]$ denotes values which can have type
 $[[A]]$ or type $[[B]]$. Union types can be useful in many situations.
 For instance, union types provide an alternative to some forms
 of overloading. The idea is that a function that takes an argument
 with a union type acts similarly to an overloaded function.
-Furthermore, union types have other uses.
-For instance, they are commonly used to model error handling.
+Furthermore, union types have other uses, such as modelling error handling.
 If a function returning a number may fail due to some
 error, the union type $[[String \/ Int]]$ can be returned: an integer
 is returned upon successful computation of the result; and
-a string (with an error message) is returned if an error happens.
+a string (an error message) is returned if an error happens.
 
-To safely access the value in an union type, some form of elimination
-construct is needed. The aforementioned languages typically offer
-language constructs that can check the types of the values at runtime,
-and act as elimination constructs. Several elimination constructs for
-(untagged) union types have also been studied in the research
-literature~\cite{}. Typically, such constructs take the form of a
-type-based case analysis expression.
+To safely access values with union types, some form of
+\emph{elimination construct} is needed. In many programming languages,
+this is typically done by employing a language construct that checks
+the types of the values at runtime, and acts as the elimination
+construct. Several elimination constructs for (untagged) union types
+have also been studied in the research literature~\cite{}. Typically,
+such constructs take the form of a type-based case analysis
+expression.
 
 A complication is that the presence of subtyping introduces the
 possibility of \emph{overlapping types}. For instance we may have a
@@ -44,80 +44,142 @@ $Student$ and a $Person$, where every student is a person (but not
 vice-versa). If we try to eliminate a union using such types we can
 run into situations where the type in one branch can cover a type in a
 different branch (for instance $Person$ can also cover
-$Student$). Therefore the design of such elimination constructs has to
-consider what todo in situations where overlapping types arize.  A
+$Student$). More generally, types can \emph{partially overlap}
+and for some values two branches with such types can apply, whereas
+for some other values only one branch applies.
+Therefore the design of such elimination constructs has to
+consider what todo in situations where overlapping types arise.  A
 first possibility is to have a \emph{non-deterministic semantics},
 where any of the branches that matches can be taken. However, in
 practice determinism is desirable property in a programming language,
 so this option is not practical. A second possibility, which is
 commonly used for overloading, is to employ a \emph{best-match
   semantics}, where we attempt to find the case with the type that
-best matches the value. Another option is to employ a
+best matches the value. Yet another option is to employ a
 \emph{first-match semantics}, which employs the order of the branches
 in the case. Various existing elimination constructs for unions~\cite{}
-employ a first-match approach. All of these three options have been studied
-in the literature. 
+employ a first-match approach. All of these three options have been explored
+and studied in the literature. 
 
-The Ceylon language is unique in its approach to union types in that it
-employs yet another approach for elimination. The idea in Ceylon is to have
-a type-based construct, where all the cases must be \emph{disjoint}. If two
-types are found to be overlapping then the program is statically rejected.
+The Ceylon language is a JVM-based language that aims to provide an
+alternative to Java. The type system is interesting
+in that it departs from existing language designs, in particular
+with respect to union types and method overloading.
+The Ceylon designers had a few different
+reasons for this. Firstly, they wanted to have a fairly rich type system
+supporting, among others: \emph{subtyping}; \emph{generics with bounded
+quantification}; \emph{union and intersection types}; and \emph{type-inference}.
+They wanted to support most features that are also already available
+in Java, as well as a few new ones. However they wanted to do this in
+a principled way, where all the features interacted nicely.  A
+stumbling block towards this goal was Java-style method
+overloading\footnote{\url{https://github.com/ceylon/ceylon-spec/issues/73}}.
+The interaction of overloading with other
+features was found to be quite challenging. Secondly, the presence of
+overloaded methods with overlapping types
+makes reasoning about the code hard 
+for both tools and humans. Algorithms for finding the best match for an
+overloaded method in the presence of rich type system features (such as
+those in Ceylon) are challenging, and not necessarally well-studied in the
+existing literature. Moreover allowing overlapping methods can make
+the code harder to reason for humans: without a clear knowledge of how
+overloading resolution works, programmers may incorrectly assume that
+a different overloaded method is invoked. Or worse, overloading can
+happen silently, by simply reusing the same name for a new
+method. These problems can lead to subtle bugs.
+For these reasons, the Ceylon designers decided not to support
+Java-style method overloading.
 
-
-Three common approaches for the design of elimination constructs for unions
-(or related constructs) include: the \emph{non-deterministic semantics};
-the \emph{first-match semantics}; and the \emph{best-match semantics}.
-In the non-deterministic semantics any branch that matches the type
-of the value can be taken. While from the theoretical point of view this
-approach is reasonable, in practice determinism is desirable property in a
-programming language, so this 
-
-
-The research literature of programming languages has also 
-
-Several forms of
-union types have been investigated in the research literature, and
-union types are nowadays a common feature in many modern programming
-languages.
-
-%The Ceylon programming language is interesting in that it
-%supports union types, with an innovative elimination construct that has
-%not been previously studied in the rese
-This paper investigates a particular formulation of union types,
-inpired by the Ceylon programming language, with an elimination
-construct that enables case analysis (or switches) on types.  The
-interesting aspect of such construct is that each clause must operate
-on \emph{disjoint} types. By using such elimination construct, it is
-possible to ensure that all possible cases are
-handled and that none of the cases overlap. In turn, this means that
+To counter the absence of overloading, the Ceylon designers turned to
+union types instead. However, they did so in a way that differs from
+existing approaches. Ceylon includes a type-based 
+\emph{switch construct} where all the cases must be \emph{disjoint}.  If
+two types are found to be overlapping, then the program is statically
+rejected. Many common cases of method overloading, which are clearly
+not ambigous, can be modelled using union types and disjoint switches.
+By using an approach based on disjointness, some use cases for
+overloading that involve Java-style overloading with
+overlapping types are forbidden. However,
+programmers can still resort to creating non-overloaded methods in
+such a case, which arguably results in code easier to reason about.
+Disjointness ensures there it is always
+clear which implementation is selected for an ``overloaded'' method,
+and only in such cases overloading is allowed.
+In the switch construct,
 the order of the cases does not matter and reordering the cases has no
-impact on the semantics, which can aid program undertanding and
+impact on the semantics, which can also aid program undertanding and
 refactoring.
+Additionally, union types have other applications besides overloading,
+so we can get other interesting functionality as well. Finally, from
+the language design point of view, it would be strange to support two
+mechanisms (method overloading and union types), which greatly overlap
+in terms of functionality.
+\bruno{Probably it should be noted that there's an extension that does
+allow some overlap in Ceylon?.}
 
 While implemented in the Ceylon language, such construct
-with disjoint switches has not been formally studied in the research
-literature, although a related notion of disjointness has been studied
-in the context of \emph{disjoint intersection types}.
+with disjoint switches has not been formally studied.
+The work by \cite{} is the only work that we are aware of,
+where the Ceylon's switch construct
+and disjointness are briefly mentioned. However, the focus 
+of that work is on algorithmic formulations of subtyping
+with unions types, intersection types and various distributivity
+rules for subtyping. Disjointness is mentioned briefly, but not
+formally defined, and no semantics of the switch construct is given.
+Disjointness is informally defined in various sentences in the
+Ceylon documentation. It involves a set of 14 rules described in English
+~\footnote{\url{http://web.mit.edu/ceylon_v1.3.3/ceylon-1.3.3/doc/en/spec/html_single}}. Some of the rules are relatively generic, while
+others are quite language specific. Interestingly, a notion
+of disjointness has been already studied in the literature
+for intersection types~\cite{}. That line of work studies calculi
+with intersection types and a merge operator. Disjointness
+is used to prevent ambiguity in merges, which can create
+values with types such as $[[Int /\ Bool]]$. Only values
+with disjoint types can be used in a merge.
 
-We study union types
-with disjoint switches formally and in a language independent way.
-We present the \emph{union calculus} (\cal) that includes disjoint
-switches and prove several results, including type soundness and
-determinism. The notion of disjointness in \cal is interesting in that
-it is in essence the dual notion of disjointness for intersection types. 
-
-However, there are challenges that arize for disjointness when combining
-union and intersection types.
-
-We also study several extensions, including intersection
-types and distributive subtyping and show that such extensions retain
-all the desired properties. All the results about \cal and its
+In this paper, we study union types with disjoint switches formally
+and in a language independent way. We present the \emph{union
+  calculus} (\cal) that includes disjoint switches and union types.
+The notion of disjointness in \cal is interesting in that it is
+the dual notion of disjointness for intersection types.
+We prove several results, including type soundness, determinism
+and the soundness and completeness of an algorithmic formulation
+of disjointness.
+We also study several extensions of \cal. In particular,
+the first extension (discussed in Section~\ref{}) adds intersection
+types to \cal. This extension is interesting because it reveals
+a challenge that arises for disjointness when combining
+union and intersection types. 
+The notion of dual notion disjointness borrowed from
+disjoint intersection types no longer works, and we must employ
+a novel, more general, notion instead. Such change also has an impact
+on the algorithmic formulation of disjointness, which must change as
+well. We also study several other extensions, including intersection
+types and distributive subtyping. All the extensions retain
+the original properties of \cal. Moreover, all the results about \cal and its
 extensions have been formalized in the Coq theorem prover.
 
 In summary, the contributions of this paper are:
 
 \begin{itemize}
-\item Contrib 1
+\item {\bf The \name calculus:} We present a simple calculus with union
+  types, and a disjoint switch construct. The calculus is type sound and
+  deterministic. 
+\item {\bf Specifications and algorithmic formulations of disjointness:}
+  We present two formulations of disjointness, which are general and
+  language independent. The first formulation is directly derived from
+  the the existing notion of disjointness for disjoint intersection types,
+  but it only works for a calculus with union types. The second formulation
+  is novel and more general, and can be used in a calculus that includes
+  intersection types as well.
+\item {\bf Extensions:} We study several extensions of \name, including the
+  addition of intersection types, distributive subtyping and
+  subtyping rule for a class of types that represent empty types.
+\item {\bf Mechanical formalization:}
+  All the results about \cal and its
+  extensions have been formalized in the Coq theorem prover.
+  \footnote{{\bf Note to reviewers:} The Coq formalizations can be found in the
+  supplementary material for this paper.}
 \end{itemize}
 
 
