@@ -121,17 +121,44 @@ it is challenging to add distributive subtyping.
 She does not have dynamic semantics in source language.
 Case in target language uses explicit tagging.}
 
+\cite{frisch2002semantic} studied union types and intersection types
+with semantic subtyping and in the context of CDuce programming language.
+However, their case expression (they call it \emph{match}) uses explicit
+tags to select a particular branch. Whereas, we propose dynamic type-based
+case construct.
+\cite{castagna2005gentle} extended this work with typ-based case construct
+in the context of XDuce programming language. Main motivation of their
+work is to elaborate the significance of semantics subtyping.
+However, their underlying technique to select the branch in case construct
+relies on negation types. We, on the other hand, use disjointness
+and static type of the expression. \baber{they also use an extra variable.}
+%\cite{frisch2008semantic}.
+%\baber{more text.}
 \citet{castagna2017gradual} studied
-set-theoretic union types in gradual typing setting\bruno{Castagna did alot of work
+set-theoretic union types, intersection types and negation types
+in gradual typing setting. They also propose a dynamic type-based
+construct for set-theoretic union elimination which is closely
+related to our work.
+However, their underlying technique to select branches in case
+expression is different from ours.
+In particular, negation types play fundamental role in their
+typing construct for the case expressions.
+Whereas, our work relies on disjointness along with a notion of 
+static types to to select a particular branch.
+They also do not provide dynamic semantics for their source language.
+Whereas, we provide a type sound dynamic semantics for \cal.
+\baber{no variables in their case construct?}
+
+\baber{below text will be removed for Castagna's work.}
+\bruno{Castagna did alot of work
   on union types before this one, so I'm not sure why we are mentioning only this work
-  of Castagna, instead of talking about previous work where the ideas were introduced.}. They
-give a dynamic type-based cast for union elimination. But they do not
+  of Castagna, instead of talking about previous work where the ideas were introduced.}
+\baber{Castagna's work includes CDuce, which is mentioned. I added semantic subtyping
+as well now. Should we add more Castagna's work? I think his above mentioned work 
+is relevant to our work.}
+They give a dynamic type-based cast for union elimination. But they do not
 have disjointness constraint on case branches and they check the type
-only for first case branch\bruno{Not a very good explanation: you get negated types for the branches}.
-\baber{I will add semantic subtyping here.}
-Union types are also studied with the notion of semantic subtyping 
-\cite{frisch2002semantic,castagna2005gentle,frisch2008semantic}.
-\baber{more text.}
+only for first case branch\bruno{Not a very good explanation: you get negated types for the branches}. 
 
 Recently, \citet{muehlboeck2018empowering} gave a general framework for calculi
 with intersection and union types. They illustrated the significane of
@@ -154,8 +181,8 @@ of such construct or formally defined disjointness.}
   it cover the two works I pointed out (for starters), but nothing else. We may not need to cover much more, but
   we need to make sure that we read some other work on occurrence typing to ensure that we are not missing something that is
 closely related.}
-Occurence typing or flow typing \citet{tobin2008design} specializes or refines 
-the type of variable. For example, code example below elaborates occurance typing.
+Occurence typing or flow typing \cite{tobin2008design} specializes or refines 
+the type of variable in type test. For example, code example below elaborates occurance typing.
 
 \begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
 Int occurance(Int | String val) {
@@ -179,8 +206,13 @@ Motivation to study occurance typing was to introduce typing in untyped calculi,
 which is a generic technique.
 Whereas, we particularly studied type-based switch expression
 with disjointness to preserve determinism.
-Occurance typing is further studied by \cite{tobin2010logical,castagna2019revisiting}
-with more set-theoratic types such as intersection types.
+Occurance typing is further studied by \cite{tobin2010logical}
+which resulted into the development of Typed Racket.
+\cite{castagna2019revisiting} studied occurance typing with more 
+set-theoratic types such as intersection types and negation types.
+He extended occurance typing to refine the type of
+generic expressions, not just variables. He also studied occurance typing
+together with gradual typing.
 
 %\citet{castagna2019revisiting} recently studied
 %occurence typing for set-theoretic types and allowed to have generic 
