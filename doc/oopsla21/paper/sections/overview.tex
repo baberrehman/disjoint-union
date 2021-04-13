@@ -227,11 +227,10 @@ depends on the particular implementation of the compiler.
 
 
 \subsection{Eliminating Union Types in Ceylon}
-Ceylon supports type-directed union elimination via a switch expression with
-multiple branches. Each branch matches on a type.
-At runtime, one branch is chosen according to the input's type.
-A first example of a Ceylon program with union types and the elimination
-construct is:
+
+The Ceylon language~\cite{} supports type-directed union elimination by a
+switch expression with multiple branches. The following program is an example
+with union types using Ceylon's syntax:
 
 \begin{lstlisting}
 	void print(String|Integer|Float x) {
@@ -242,27 +241,27 @@ construct is:
 \end{lstlisting}
 %
 
-Static type checking for the switch construct ensures two things: the
-list of cases is \emph{exhaustive}, and all cases are
-\emph{disjoint}. In the above example, \lstinline{x} can be either a
-string, an integer or a floating point number. The types used in the
-cases do not have to be exactly match with the types of
-\lstinline{x}. Nevertheless, the combination of all cases must be
-able to handle all possibilities. If the last case only dealt with
-\lstinline{Integer} (instead of \lstinline{Integer|Float}), then
-the program would be statically rejected, since no case would deal
-with a floating point number. 
-Moreover, unlike the other
-approaches described in Section~\ref{subsec:elimination}, it is
-impossible to have two branches that match with one input at the same
-time, thanks to the disjointness restriction. For instance, if the
-first case used the type \lstinline{String | Float} instead of
-\lstinline{String}, the program would be rejected with a static type
-error. Indeed, if the program were to be accepted, then the call
-\lstinline{print(3.0)} would be ambigous, since the two branches could
-deal with floating point numbers.
-Note that, since the cases in a switch cannot overlap, their order is
-irrelevant to the program's behavior and its evaluation result.
+For the switch expression, Ceylon enforces static type checking with two
+guarantees: \textit{exhaustiveness}, and \textit{disjointness}. First, Ceylon
+ensures that all cases in a switch expression are exhaustive. In the above
+example, \lstinline{x} can be either a string, an integer or a floating point
+number. The types used in the cases do not have to exactly match with the types
+of \lstinline{x}. Nevertheless, the combination of all cases must be able to
+handle all possibilities. That means, if the last case only dealt with
+\lstinline{Integer} (instead of \lstinline{Integer|Float}), then the program
+would be statically rejected, since no case would deal with a floating point
+number.
+
+Second, Ceylon enforces that all cases in a switch expression are
+\textit{disjoint}. That is, unlike the approaches described in
+Section~\ref{subsec:elimination}, in Ceylon, it is impossible to have two
+branches that match with the input at the same time. For instance, if the first
+case used the type \lstinline{String | Float} instead of \lstinline{String}, the
+program would be rejected statically with a type error. Indeed, if the program
+were to be accepted, then the call \lstinline{print(3.0)} would be ambiguous,
+since two branches could deal with the floating point number. Note that, since
+the cases in a switch cannot overlap, their order is irrelevant to the program's
+behavior and its evaluation result.
 
 \subsubsection*{Union Types as an Alternative to Overloading}
 A motivation of such type-directed union elimination in Ceylon is to
@@ -271,7 +270,7 @@ The following example, which is adapted from TypeScript's documentation\footnote
 demonstrates how to define an ``overloaded'' function \lstinline{padLeft},
 which adds some padding to a string. The idea is that there can be two versions
 of \lstinline{padLeft}: one where the second argument is a string; and
-another where the second argument is an integer:
+the other where the second argument is an integer:
 
 \begin{lstlisting}
 String space(Integer n){
@@ -294,8 +293,8 @@ print( padLeft("World", "Hello ") ); // "Hello World"
 %
 
 In the two cases of the switch construct, there are two different implementations
-for the \lstinline{padLeft} function: one appends a string to the left of \lstinline{v},
-the other calls function \lstinline{space} to generate a string with \lstinline{x} spaces,
+of the \lstinline{padLeft} function: one that appends a string to the left of \lstinline{v},
+and the other that calls function \lstinline{space} to generate a string with \lstinline{x} spaces,
 and then append that to \lstinline{v}.
 Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value 
 it can only be a string or an integer.
@@ -309,7 +308,7 @@ in Ceylon:
 \bruno{Ceylon code for safediv and to string here, and some short piece of text about the
 example}
 
-Besides, such applications, one other interesting application
+Furthermore, another interesting application
 of union types in Ceylon is to encode nullable types (or optional types).
 A similar approach to nullable types has also been recently proposed for Scala~\citep{nieto20nulls}.
 The \lstinline{null} value is inhabited by the type \lstinline{A?},
