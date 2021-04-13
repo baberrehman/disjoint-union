@@ -62,7 +62,7 @@ returns back its string representation.
 
 \begin{lstlisting}
 function tostring (x: String | Int) : String =
-  switch x of
+  switch x
     inj1 str -> str
     inj2 num -> show num
 \end{lstlisting}
@@ -134,7 +134,7 @@ this can be implemented by requiring \lstinline{show} to have an
 
 \begin{lstlisting}
 function tostring2 (x: String | Int) : String =
-  switch x of
+  switch x
     y -> show y
 \end{lstlisting}
 
@@ -157,7 +157,7 @@ systems~\cite{castagna:settheoretic,muehlboeck2018empowering} support
 
 \begin{lstlisting}
 function tostring3 (x: String | Int) : String =
-  switch x of
+  switch x
     String -> x
     Int -> show x
 \end{lstlisting}
@@ -177,7 +177,7 @@ elimination, we can write the following function:
 
 \begin{lstlisting}
 function isstudent (x: Person | Student) : Bool =
-  switch x of
+  switch x
     inj1 person -> False
     inj2 student -> True
 \end{lstlisting}
@@ -187,7 +187,7 @@ elimination, we will get:
 
 \begin{lstlisting}
 function isstudent2 (x: Person | Student) : Bool =
-  switch x of
+  switch x
     Person  -> False
     Student -> True
 \end{lstlisting}
@@ -223,7 +223,7 @@ example, suppose the type \lstinline{Pegasus} is a subtype of both type
 the type \lstinline{Bird | Horse} to a term of type \lstinline{Pegasus}, which
 branch should we choose, the one with \lstinline{Bird}, or the one with
 \lstinline{Horse}? In such case, the semantics is non-deterministic again, and
-replies solely on the particular implementation of the compiler.
+depends on the particular implementation of the compiler.
 
 
 \subsection{Eliminating Union Types in Ceylon}
