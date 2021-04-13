@@ -18,7 +18,7 @@ in addition to having some text describing such constructs.}
 \end{itemize}
 \end{comment}
 
-\paragraph{Union Types}
+\subsubsection*{Union Types}
 \begin{comment}
 Set-theoretic unions have sound theory and extensively studied in
 mathematics. Set-theoretic unions correspond to union types or
@@ -35,6 +35,7 @@ Union types were first studied in the setting of programming languages
 by \citet{macqueen1984ideal}. However, the union elimination rule
 proposed by \citet{macqueen1984ideal} is unsound in standard call-by-value
 operational semantics as pointed by \cite{dunfield2003type}.
+Also, \citet{macqueen1984ideal} did not define dynamic semantics.
 Later on, union types have been studied
 in the literature in various contexts. \citet{pierce1991programming}
 studied union types with intersection types and polymorphism. But he
@@ -59,10 +60,10 @@ they target type preservation in their work.}
 \citet{freeman1991refinement} studied union types along with intersection types
 in setting of refinement types for ML. Main focus of their work is to infer
 more precise types of expressions, which they call
-refinement types. Also, their work is targeted to contribute for the types
+refinement types. Their work is targeted to contribute for the types
 in ML and not for the expressions. Therefore, they did not define
 expressions and dynamic semantics. On the contrary, our work provides
-a complete calculus with dynamic semantics.
+a complete calculus with type sound dynamic semantics.
 \bruno{and ... Do they have an elimination construct for unions?
   If so how is that related to our work?}.
 \baber{I added few more lines in Freeman citation.}
@@ -84,6 +85,8 @@ are labelled (i.e. the cases are not based on types)?}
        But the documentation says order in which union types are created
        is significant and it seems like first match. Shall we drop this
        or it's worthy to mention Fallside citation?}
+\baber{Upon further reading, I think he restricts creation of types like $[[Int \/ Int]]$
+and $[[Int -> Bool \/ Int -> Bool]]$. }
 
 \citet{dunfield2014elaborating} studied intersection and union
 types with merge operator.
@@ -93,7 +96,7 @@ target language with (tagged) sum types.
 Her dynamic semantics for source language is nondeterministic.
 For example, a program like:
 
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+\begin{lstlisting}
 Int nondeterministic(Int | Int val) {
   switch (val)
   case (is Int) {return 1;}
@@ -107,6 +110,8 @@ Is it fine to show above code or should I show with merge operator?}
 Whereas, such programs will not
 type-check in \cal. Because \cal has a disjointness constraint on
 types of branches in switch expression.
+$[[Int]]$ and $[[Int]]$ are not disjoint types and \cal 
+will reject such programs.
 We propose a type-based union elimination construct which is
 type-safe and deterministic.
 Further, she did not add subtyping distributivity in her calculus.
@@ -122,7 +127,7 @@ She does not have dynamic semantics in source language.
 Case in target language uses explicit tagging.}
 
 \cite{frisch2002semantic} studied union types and intersection types
-with semantic subtyping and in the context of CDuce programming language.
+with semantic subtyping and provide theoretical basis for CDuce programming language.
 However, their case expression (they call it \emph{match}) uses explicit
 tags to select a particular branch. Whereas, we propose dynamic type-based
 case construct.
@@ -176,7 +181,7 @@ along with a type-safe and deterministic type-based case construct for union eli
 of such construct or formally defined disjointness.}
 \baber{I updated the text.}
 
-\paragraph{Occurrence Typing}
+\subsubsection*{Occurrence Typing}
 \bruno{This paragraph is very weak: it gives an incorrect explanation of occurrence typing, and it is not very comprehensive:
   it cover the two works I pointed out (for starters), but nothing else. We may not need to cover much more, but
   we need to make sure that we read some other work on occurrence typing to ensure that we are not missing something that is
@@ -184,7 +189,7 @@ closely related.}
 Occurence typing or flow typing \cite{tobin2008design} specializes or refines 
 the type of variable in type test. For example, code example below elaborates occurance typing.
 
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+\begin{lstlisting}
 Int occurance(Int | String val) {
   if (isInt(val)) { return val+1; }
   else { return toInt(val)+2; }
@@ -195,8 +200,10 @@ Int occurance(Int | String val) {
 of type $[[Int \/ String]]$. 
 \emph{If} condition checks if the \emph{val} is of $[[Int]]$ type.
 If the condition succeeds, it is safe to assume that \emph{val} is of $[[Int]]$ type.
-Function \emph{occurance} increments \emph{val} by 1 and returns.
+Function \emph{occurance} increments \emph{val} by 1 and returns in this case.
 Otherwise, it is safe to assume that \emph{val} is of $[[String]]$ type.
+Because type of \emph{val} is $[[Int \/ String]]$. If \emph{val} is not
+of $[[Int]]$ type, then the other option to consider is only $[[String]]$ type.
 We assume that incoming string is a valid representation of some integer
 and \emph{toInt(val)} converts string to integer.
 In this case, function \emph{occurance} increments \emph{val} by 2 and returns.
@@ -228,7 +235,7 @@ unrestricted typing construct for case expression
 \bruno{Again you're confusing things: occurrence typing != case expression:
 you could have our switch expression with occurrence typing,  but we chose not to.}.
 
-\paragraph{Disjoint Intersection Types}
+\subsubsection*{Disjoint Intersection Types}
 \citet{pottinger1980type} and \citet{coppo1981functional} initially
 studied intersection types in programming languages
 literature. Forsythe~\cite{reynolds1988preliminary} is the first 
@@ -271,7 +278,7 @@ if a calculus includes both disjoint switches and a merge operator,
 then the two notions of disjointness must coexist in the calculus. 
 This will be an interesting path of exploration for future work.
 
-\paragraph{Overloading}
+\subsubsection*{Overloading}
 Union types also provide a kind of function overloading or ad-hoc
 polymorphism using the switch and type-based case analysis. Programmer
 may define the argument type to be union type of certain types. By
