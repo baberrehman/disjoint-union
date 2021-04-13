@@ -442,8 +442,8 @@ cannot be accepted by Ceylon's compiler.
 
 The switch construct in our calculus \cal is similar to Ceylon's.
 Its typing rule guarantees that cases are disjoint and exhaustive.
-Reduction preserves types and produces deterministic result with
-the help of annotated values.
+Reduction preserves types and produces deterministic result in the
+runtime, with the help of annotated values.
 Here we give an overview of our design and discuss some challenges
 we met for the two calculi in the paper.
 
@@ -461,7 +461,8 @@ earlier.}
 
 Two types are disjoint if and only if all of their common subtypes are bottom-like.
 That is to say, there does not exist any term that is assignable to both of
-them.
+them. Specially, a bottom-like type is disjoint to any types, while the top type
+is only disjoint to bottom-like types.
 For the detailed discussion and an algorithmic formalization of
 disjointness, please refer to Section~\ref{sec:union:disj}.
 
@@ -486,42 +487,134 @@ at most one term can be chosen from them.
  (\x. x+1 : Int->Int) (1 ,, True) --> (1+1):Int
 \end{verbatim}
 
+We alter the definition of disjointness (see Section~\ref{sec:inter:disj})
+in our second calculus, which extends \cal by intersection types.
+Any two types $[[A]]$ $[[B]]$ have a trivial subtype $[[A/\B]]$.
+Generally such an intersection type is not bottom-like.
+A new representation for types with no inhabited values is then needed.
+At the end, we come up with a concept that is more like the opposite to it:
+we use \emph{ordinary} to denote types that have corresponding values.
+%
+If two types have a common subtype that is ordinary, any inhabited
+value of the ordinary type is assignable to them.
+Thurs, any ordinary types cannot be a subtype of two disjoint types at
+the same time.
+%
+Literal types are ordinary, like $[[Int]]$.
+All function types are viewed as ordinary for simplification.
+Compound types like intersection or union types are not included in ordinary
+types because they must have subtype that is a literal type if they have
+inhabited values.
+%
+Then we can prove $[[Int/\String\/Bool]]$ is disjoint with $[[Int/\String\/Char]]$.
+Although they have subtype $[[Int/\String]]$, it is not ordinary.
+And $[[Int\/String]]$ is not disjoint with $[[Bool\/String]]$, because of the
+subtype $[[String]]$.
+Especially, types corresponding to no values, like $[[Int/\String]]$, are
+disjoint with any types.
 
-In our second calculus , Definition~\ref{def:disjointness} is adapted
-for intersection types.
-We are forced to change it because with the existence of intersection types,
-any two types $[[A]]$ $[[B]]$ have a trivial subtype $[[A/\B]]$. Generally such an intersection type is not bottom-like.
-Our alternative definition of disjointness is presented in Section~\ref{sec:inter:disj}.
-...
+We cannot enumerate all subtypes of two types to check disjointness.
+Instead we have an algorithmic definition of disjointness (Figure~\ref{fig:union:disj-typ}) for \cal.
+These rules structurally examine two given types, decomposing unions
+and comparing their literal components.
+For example, $[[Int\/String]]$ is disjoint to $[[Char]]$ because both types
+in it is disjoint to $[[Char]]$.
+%
+However, this approach cannot be directly employed to the intersection
+extension. 
+Like we said above, some intersection is disjoint to other types
+because itself is uninhabited.
+So even neither $[[Int]]$ or $[[String]]$ is disjoint with $[[Int\/String]]$,
+together $[[Int/\String]]$ is disjoint with it. 
+Alternatively, for a given type, we use a set of ordinary types to denote
+all possible values of it. For instance, \verb"{Int,Char}" represent the
+union type $[[Int\/Char]]$.
+The set is calculated by function \lstinline{LOS} (\emph{lowest ordinary
+subtypes})in Section~\ref{}.
+To check whether two types are disjoint, we calculate the intersection
+of their sets and see if it is empty.
+From another angle, we normalize and simplify types by \lstinline{LOS},
+and then are able to directly detect uninhabited ones.
 
+The set representation is justified by the distributivity in subtyping (Figure~\ref{}).
+Every type in the set denotes a component in a union type.
+That is to say, any inhabited type must have an equivalent union type,
+except for literal types.
+Only with distributivity, we have $[[(A\/B)/\C]]$ equivalent to 
+$[[(A/\C)\/(B/\C)]]$.
+The soundness and completeness of the algorithmic definition is proved
+with respect to the declarative definition.
+Same applies to the two definitions for \cal without intersection.
 
-\snow{Next of the next: intersection types and distributivity}
-\bruno{We don't need to say much about this, but maybe a few sentences are ok.}
-
-\begin{verbatim}
-LOS
-
-LOS(top) = {Int, Bot -> Top}
-LOS(Int -> Int) = ….
-
-\Cal differ with ceylon in subtyping
-A disadvantage: We cannot reason that (String\/Null)/\Object <: String
-\end{verbatim}
 
 \subsubsection*{Typing and Exhaustiveness}
+In \cal, a switch expression has two branches. For multiple cases,
+one can write nested switch expression.
+We assume the two branches expect $[[A]]$ and $[[B]]$.
+To make sure they exhaust all possible types of the switched term $[[e]]$,
+there is a premise that $[[e]]$ can be checked by $[[A\/B]]$.
+\verb|<=| stands for checking mode in bidirectional typing,
+on contrary to inference mode.
+In other words, the inferred type of $[[e]]$ should be a subtype of $[[A\/B]]$,
+like $[[Int]]$ to $[[Int\/Char]]$.
+%
+\begin{mathpar}
+	\ottdruletypXXswitch{}
+\end{mathpar}
+%
+Another premise requires the two cases to be disjoint.
+Besides, the two branches are typed under different assumption of the bound
+variable. Although the same type $[[C]]$ is used for both of them in the rule,
+it does not prevent them to return different types.
+Assuming the inferred type of $[[e1]]$ is $[[C1]]$ and the inferred type of 
+$[[e2]]$ is $[[C2]]$, we can make $[[C]]$ to be $[[C1\/C2]]$.
 
-\snow{Next: How do we ensure exhaustive? Show the typing rule of switch/case.}
-\bruno{Yes please: explain how exhaustiveness is ensured.}
+\subsubsection*{Reduction and Annotated Values}
+Our reduction preserves type.
+So a term of union type can only evaluates to a value of an union type.
+We use type annotations to construct such values.
+For example, $[[2:Int\/Bool]]$ is a value, and it is the result of
+$[[(switch 1 Int (x p1) Bool (neg y)):Int\/Bool]]$.
 
-\subsubsection*{Annotated Values}
+\snow{I think we might be able to relax preservation by allowing subtyping.
+For which precise reason we failed in that variant? But I guess it is ok
+to omit that unless the reviewers ask}
+
+Lambdas can be annotated. But if a lambda has inferred type, it must
+have two annotation: the outer one is for the preservation purpose,
+while the inner one records its principal type.
+%
+An example is $[[\x.x:Int->Int:Int->Int\/Bool]]$. 
+
+\snow{I don't know why we need to keep a lambda's original type. We
+don't need to distinguish two arrow types in switch.}
+
+Deciding to take which branch in the runtime requires knowing the
+precise type of the switched term.
+Instead of the annotation, we need to look into the wrapped value
+(which is called as \emph{pre-value}) for its principal type.
+Given $[[2:Int\/Bool]]$, we still know that it is an integer inside.
+We then look for a branch that expects a supertype of $[[Int]]$.
+As previously discussed, the exhaustiveness checking promises at least
+one branch matches.
+And the disjointness restriction ensures it can only be one branch.
+Therefore the reduction is deterministic.
+If the two branch types are both supertype of the value type, they violates
+the definition, no matter the Definition~\ref{def:disjointness} or the
+improved one.
+In the following example, the first branch will be chosen, just like when
+we passing $[[1]]$ to it.
+
 \begin{verbatim}
-	switch (1) {x:Int -> x+1, y:Bool -> not y} --> (1+1):Int
+	(switch (2:Int\/Bool) Int (x p1) Bool (neg y)) 
+	--> (2:Int p1) :Int\/Bool
+	--> 3 : Int \/ Bool
 \end{verbatim}
 
-in lambdai the return type must be different
-\begin{verbatim}
-	(\x. x+1 : Int->Int ,, \y. not y : Bool->Bool):Int->Int 1 --> (1+1):Int
-\end{verbatim}
+Wrapping values with annotation also helps us to unify the related reduction rules.
+\snow{I guess so?}
+
+
 
 \bruno{
 1) use of annotatted values for both reduction (the semantics must be type directed); and preservation;
@@ -530,17 +623,7 @@ in lambdai the return type must be different
 4) Dealing with exhaustiveness and reduction in the switch construct
 }
 
-
-
-\snow{Some concerns: does the addition of intersection types and distributivity
-	really increase the expressiveness of the system?
-	Currently the only interesting intersection type has the form of (A->B) \& (C->D),
-	like (int->bool)\&(bool->int).
-	But there is no way to construct a term of such type.
-	The closest thing is $\lambda$ x.x, which has (int->int)\&(bool->bool).}
-\bruno{Why don't you check examples from Ceylon? In any case, I don't think we need
-to talk much about distributivity here: that is not our main focus.}
-
+\begin{comment}
 \bruno{For the following text, this is the level of detail that I expect
   for the introduction, but not for the overview! The overview should
   identify key ideas and challenges in more detail. So the following text
@@ -603,6 +686,7 @@ in this paper is type-safe and deterministic.
 	highlight these.
 }
 
+\end{comment}
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../paper"

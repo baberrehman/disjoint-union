@@ -27,7 +27,8 @@ grammar
     | ( A )                :: S :: paren   {{ coq ([[A]]) }}
     | statictype e         ::   :: statictype {{ tex \rceil [[e]] \lceil }}
 
-  exp, e, v, p, w             :: 'e_' ::=     {{ com expression }}
+  exp, e, v, p, w, 1 {{ tex 1 }}, 2 {{ tex 2 }}, 3 {{ tex 3 }}, p1 {{ tex +1 }}, neg {{ tex \mathsf{not} }}            
+                           :: 'e_' ::=     {{ com expression }}
     | x                    ::   :: var
     | f                    ::   :: varf
     | i                    ::   :: lit
@@ -40,7 +41,6 @@ grammar
     | switch e A e1 B e2   ::   :: switch {{ tex switch \ [[e]] \ \{(x:[[A]])[[->]][[e1]], (y:[[B]])[[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
-    | 1                    ::   :: lit1
     | betavalue v A B      ::   :: betavalue {{ tex [[v]] \mathbin{\lhd} [[A]] \mathbin{\lhd} [[B]] }}
 
 substitutions
