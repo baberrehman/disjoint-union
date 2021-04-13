@@ -468,6 +468,16 @@ inductions Prev.
   eapply typ_sub; eauto. eapply sub_transitivity; eauto.
 Qed.
 
+Lemma expr_chk_sub : forall G e A, typing G e check A -> 
+forall B, A <: B -> typing G e check B.
+Proof.
+intros G e A Typ1 B Sub.
+inductions Typ1.
+ - eapply sub_transitivity in Sub; eauto.
+ - admit.
+ - admit.
+Admitted.
+
 Lemma pexpr_chk_sub : forall G e A, pexpr e -> typing G e check A -> 
 forall B, A <: B -> typing G e check B.
 Proof.

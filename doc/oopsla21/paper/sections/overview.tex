@@ -1,6 +1,10 @@
 \section{Overview}
 \label{sec:overview}
 
+This section provides some background on union types, and some common approaches
+to eliminate union types. Then it describes the Ceylon approach to Union types.
+Finally, it presents the key ideas and challenges in our work and \name.
+
 \ningning{We may want to be consistent with the syntax used in examples. Now
   there are three things going on: examples before introducing Ceylon; examples
   in Ceylon; examples in our calculi. Will it look confusing as we use three
@@ -20,8 +24,8 @@ We start with a brief introduction to union types. An expression has a union
 type $[[A\/B]]$, if it can be considered to have either type $[[A]]$ \textit{or}
 type $[[B]]$. Many systems model \textit{tagged union types} (also called
 \textit{sum types} or \textit{variants types}), where explicit \textit{tags}
-are used to construct terms with union types. Languages with algebraic datatypes~\cite{}
-or (polymorphic) variants~\cite{} support tagged union types. 
+are used to construct terms with union types. Languages with algebraic datatypes~\cite{hope}
+or (polymorphic) variants~\cite{garrigue98} support tagged union types. 
 In their basic form, there are two introduction forms:
 $\mathsf{inj_1} :: [[A -> A \/ B]]$ turn the type of an expression of type
 $[[A]]$ into type $[[A \/ B]]$; and $\mathsf{inj_2} :: [[B -> A \/ B]]$
@@ -33,7 +37,8 @@ inj1 "foo": String | Int
 inj2 1 : String | Int
 \end{lstlisting}
 
-\noindent Using tagged union types, we can implement safe division as:
+\noindent Using tagged union types, we can implement a safe integer
+division function, as:
 
 \begin{lstlisting}
 function safediv (x : Int) (y : Int) : String | Int =
@@ -49,15 +54,15 @@ is performed without errors.
 
 \paragraph{Eliminating tagged union types.}
 Tagged union types are eliminated by some form of case analysis.
-For consistency with the rest of the paper, we use
-\lstinline{switch} statements here for such case analysis. For example,
+For consistency with the rest of the paper, we use a syntactic form with
+\lstinline{switch} expressions for such case analysis. For example,
 the following program \lstinline{tostring} has different behaviors depending on the
 tag of \lstinline{x}, where \lstinline{show} takes an \lstinline{Int} and
 returns back its string representation.
 
 \begin{lstlisting}
 function tostring (x: String | Int) : String =
-  switch x of
+  switch (x)
     inj1 str -> str
     inj2 num -> show num
 \end{lstlisting}
@@ -74,7 +79,7 @@ result of safe division as one \lstinline{String}.
 \end{lstlisting}
 
 
-\subsection{Type-directed Elimination of Union Types}
+\subsection{Type-directed Elimination of Union Types}\label{subsec:elimination}
 
 % Motivate the need for having a construct that can eliminate union types,
 % perhaps trying to use an example where the String above would be a kind
@@ -113,20 +118,23 @@ existing approaches next.
 
 \paragraph{Single branch elimination.}
 
-In \citet{pierce1991programming,dunfield2014elaborating}, elimination of an
-expression with a union type $[[A \/ B]]$ supports only one branch, and the
-branch needs to have the same type when the expression has type $[[A]]$, or type
-$[[B]]$. For example\footnote{For better illustration, we adapt their syntax
-  using our notations in the examples, while preserving their semantics.}, in
-\lstinline{tostring2}, the expression \lstinline{show x} must return
+A possible approach is to use an elimination of an expression with a union type
+$[[A \/ B]]$ supports only one branch, and the branch needs to have the same
+type when the expression has type $[[A]]$, or type $[[B]]$. This approach is
+adopted, for example by \citet{pierce1991programming},
+\citet{barbanera1995intersection}, and more recently,
+\citet{dunfield2014elaborating}. For better illustration, we adapt their syntax
+using our switch notation in the examples, while preserving their semantics. For
+example, in \lstinline{tostring2}, the expression \lstinline{show x} must return
 \lstinline{String} when \lstinline{y : String}, and when \lstinline{y : Int},
-which means \lstinline{show} must be overloaded (in
-\citet{pierce1991programming,dunfield2014elaborating}, this can be implemented
-by requiring \lstinline{show} to have an \textit{intersection type}).
+which means that \lstinline{show} must be overloaded (in
+\citet{pierce1991programming,dunfield2014elaborating,barbanera1995intersection},
+this can be implemented by requiring \lstinline{show} to have an
+\textit{intersection type}).
 
 \begin{lstlisting}
 function tostring2 (x: String | Int) : String =
-  switch x of
+  switch (x)
     y -> show y
 \end{lstlisting}
 
@@ -134,16 +142,22 @@ This implementation is concise, but it is also restrictive as it can no longer
 support multiple branches according to the different representations of
 \lstinline{x}. Furthermore it relies on the language also supporting overloaded
 functions. Without overloaded functions the construct would not be very useful.
+%\bruno{Perhaps, somewhere in this section we need to comment on the non-deterministic semantics.
+%  Maybe we can do that here and point out, for instance, that Dunfield's approach has a
+%  non-deterministic semantics (since it actually allows, for instance two overloaded
+%  implementations of show with integer arguments)}
 
 \paragraph{Type-directed elimination.}
 
-On the other hand, some systems [?] support \textit{type-directed} elimination
-of union types. For instance, \lstinline{tostring3} have different behaviors
-depending on the \textit{type} of \lstinline{x}.
+On the other hand, some
+systems~\cite{castagna:settheoretic,muehlboeck2018empowering} support
+\textit{type-directed} elimination of union types. For instance,
+\lstinline{tostring3} has different behaviors depending on the \textit{type} of
+\lstinline{x}.
 
 \begin{lstlisting}
 function tostring3 (x: String | Int) : String =
-  switch x of
+  switch (x)
     String -> x
     Int -> show x
 \end{lstlisting}
@@ -151,7 +165,7 @@ function tostring3 (x: String | Int) : String =
 \noindent Note here \lstinline{show} is directly applied to \lstinline{x}, and
 it does not need to be overloaded, as the type-directed elimination
 \textit{refines} the type of \lstinline{x} from \lstinline{String | Int} to
-\lstinline{Int} in the second branch (such type refinements are also used in
+\lstinline{Int} in the second branch (such type refinements are basically a form of
 \textit{occurrence typing} \cite{Tobin:typedscheme}).
 
 However, compared to tag-directed elimination, extra care must to taken with
@@ -163,7 +177,7 @@ elimination, we can write the following function:
 
 \begin{lstlisting}
 function isstudent (x: Person | Student) : Bool =
-  switch x of
+  switch (x)
     inj1 person -> False
     inj2 student -> True
 \end{lstlisting}
@@ -173,37 +187,51 @@ elimination, we will get:
 
 \begin{lstlisting}
 function isstudent2 (x: Person | Student) : Bool =
-  switch x of
+  switch (x)
     Person  -> False
     Student -> True
 \end{lstlisting}
 
 \noindent Now it is unclear what would happen if we apply \lstinline{isstudent2}
-to a term of type \lstinline{Student}, as its type matches both branches. In some
-calculi [?], the choice is not determined in the semantics, in the sense either
-branch can be chosen, which leads to a non-deterministic semantics. In some
-other languages or calculi [?], branches are inspected from top to bottom, and the first one
-that matches the type gets chosen. However, in those systems, as
-\lstinline{Person} is a supertype of \lstinline{Student}, the first branch
-subsumes the second one and will always get chosen, and so the second branch
-will never get evaluated! This could be unintentional, and similar programs  
-being accepted could lead to subtle bugs. Even if a warning could be given
-to alert programmers that a case can never be executed, there could be
+to a term of type \lstinline{Student}, as its type matches both branches. In
+some calculi~\citep{dunfield2014elaborating}, the choice is not determined in
+the semantics, in the sense that either branch can be chosen. This leads to a
+non-deterministic semantics. In some other languages or
+calculi~\citep{castagna:settheoretic}, branches are inspected from top to
+bottom, and the first one that matches the type gets chosen. However, in those
+systems, as \lstinline{Person} is a supertype of \lstinline{Student}, the first
+branch subsumes the second one and will always get chosen, and so the second
+branch will never get evaluated! This could be unintentional, and similar
+programs being accepted could lead to subtle bugs. Even if a warning could be
+given to alert programmers that a case can never be executed, there could be
 other situations where two cases overlap, but neither case subsumes the other.
 For instance we could have \lstinline{Student} and \lstinline{Worker} as
-subtypes of \lstinline{Person}. For a person that is both a student and a worker,
-a switch statement that discriminates between workers and students could
-potentially choose either branch. However for persons that are only students
-or only workers, only one branch can be chosen.
+subtypes of \lstinline{Person}. For a person that is both a student and a
+worker, a switch statement that discriminates between workers and students could
+potentially choose either branch. However for persons that are only students or
+only workers, only one branch can be chosen.
+
+Some languages support form of typed-based union elimination via overloading,
+which usually finds in all branches the one that best describes the type. Such
+approach is used in, for example, resolving overloading in Java \cite{javadoc}.
+Then, if we apply \lstinline{isstudent2} to a term of type \lstinline{Student},
+the second branch is chosen, as \lstinline{Student} is the best type describing
+\lstinline{x}. However, even with the best-match strategy, the semantics can be
+confusing when the system features implicit upcasting (e.g., by subtyping). For
+example, suppose the type \lstinline{Pegasus} is a subtype of both type
+\lstinline{Bird} and type \lstinline{Horse}. If we apply a switch expression on
+the type \lstinline{Bird | Horse} to a term of type \lstinline{Pegasus}, which
+branch should we choose, the one with \lstinline{Bird}, or the one with
+\lstinline{Horse}? In such case, the semantics is non-deterministic again, and
+depends on the particular implementation of the compiler.
 
 
 \subsection{Eliminating Union Types in Ceylon}
-A switch expression in Ceylon examine a term of a union type,
-and eliminates the union in a type-directed way.
-It can have multiple branches, each for a different type.
-When evaluating, the one matches with the input's type is chosen
-and executed.
-%
+
+The Ceylon language~\cite{} supports type-directed union elimination by a
+switch expression with multiple branches. The following program is an example
+with union types using Ceylon's syntax:
+
 \begin{lstlisting}
 	void print(String|Integer|Float x) {
 		switch (x)
@@ -212,29 +240,37 @@ and executed.
 	}
 \end{lstlisting}
 %
-Static type checking ensures the switch construct satisfies two requirements:
-the list of cases is exhaustive, and any two cases do not overlap.
-In the above example, \lstinline{x} can be either a string or an integer,
-or a floating number. There does not have to be exact three cases correspondingly,
-but the combination of all cases must be able to handle all possibilities.
-On the other hand, unlike the previous discussion, Ceylon does not allow two
-branches to cover the same type by posing a disjointness restriction.
-For example, \lstinline{String} and \lstinline{Integer|Float} are disjoint,
-since no value has both \lstinline{String} and \lstinline{Integer}, or both
-\lstinline{String} and \lstinline{Float}.
 
-\subsubsection*{As an Alternative to Overloading}
-With such a type-directed union elimination, Ceylon is able to
+For the switch expression, Ceylon enforces static type checking with two
+guarantees: \textit{exhaustiveness}, and \textit{disjointness}. First, Ceylon
+ensures that all cases in a switch expression are exhaustive. In the above
+example, \lstinline{x} can be either a string, an integer or a floating point
+number. The types used in the cases do not have to exactly match with the types
+of \lstinline{x}. Nevertheless, the combination of all cases must be able to
+handle all possibilities. That means, if the last case only dealt with
+\lstinline{Integer} (instead of \lstinline{Integer|Float}), then the program
+would be statically rejected, since no case would deal with a floating point
+number.
+
+Second, Ceylon enforces that all cases in a switch expression are
+\textit{disjoint}. That is, unlike the approaches described in
+Section~\ref{subsec:elimination}, in Ceylon, it is impossible to have two
+branches that match with the input at the same time. For instance, if the first
+case used the type \lstinline{String | Float} instead of \lstinline{String}, the
+program would be rejected statically with a type error. Indeed, if the program
+were to be accepted, then the call \lstinline{print(3.0)} would be ambiguous,
+since two branches could deal with the floating point number. Note that, since
+the cases in a switch cannot overlap, their order is irrelevant to the program's
+behavior and its evaluation result.
+
+\subsubsection*{Union Types as an Alternative to Overloading}
+A motivation of such type-directed union elimination in Ceylon is to
 model a form of function overloading.
-To demonstrate, we define a function \lstinline{padLeft}.
-Its second argument can be either a string or an integer.
-Two different implementations for each of them are embedded
-in the function.
-
-\bruno{I suggested using interesting examples from the documentation of Ceylon, but
-  I think we only give artificial examples here. Please write a couple of more
-  interesting examples (I gave quite a few pointers and examples from the documentation
-  on slack) here!}
+The following example, which is adapted from TypeScript's documentation\footnote{https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html},
+demonstrates how to define an ``overloaded'' function \lstinline{padLeft},
+which adds some padding to a string. The idea is that there can be two versions
+of \lstinline{padLeft}: one where the second argument is a string; and
+the other where the second argument is an integer:
 
 \begin{lstlisting}
 String space(Integer n){
@@ -255,16 +291,41 @@ print( padLeft("?", 5) ); // "     ?"
 print( padLeft("World", "Hello ") ); // "Hello World"
 \end{lstlisting}
 %
-The switch construct has two cases: one add a string to the left of \lstinline{v},
-the other calls function \lstinline{space} to generate an string of \lstinline{x} spaces, and then pad it to of \lstinline{v}.
-As a consequence of the non-overlapping requirement, overloaded functions must have
-disjoint input types.
-There is no restriction on their return types since union types can be introduced
-implicitly. For example, if the above two cases return \lstinline{String} and
-\lstinline{Integer} separately, the \lstinline{padLeft} can have \lstinline{String|Integer} as its return type.
 
+In the two cases of the switch construct, there are two different implementations
+of the \lstinline{padLeft} function: one that appends a string to the left of \lstinline{v},
+and the other that calls function \lstinline{space} to generate a string with \lstinline{x} spaces,
+and then append that to \lstinline{v}.
+Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value 
+it can only be a string or an integer.
+As such, when values with such types are passed to the function,
+the corresponding branch is chosen and executed.
 
+\subsubsection*{Other Applications of Union Types}
+Besides being used for overloading, union types can be used for other purposes to.
+For instance, we can easily encode the \lstinline{safediv} function in Section~\ref{subsec:elimination}
+in Ceylon:
+\bruno{Ceylon code for safediv and to string here, and some short piece of text about the
+example}
+
+Furthermore, another interesting application
+of union types in Ceylon is to encode nullable types (or optional types).
+A similar approach to nullable types has also been recently proposed for Scala~\citep{nieto20nulls}.
+The \lstinline{null} value is inhabited by the type \lstinline{A?},
+which stands for \lstinline{A|Null}.
+If we eliminate a value of type \lstinline{A|Null}, there has to be a branch to handle
+the null value. \bruno{Say more about this, maybe show a (simplified)
+  picture of the subtyping lattice?
+The point is that Null is not a subtype of Object, right? so, by default object
+types have no null value. }
+%Similarly, one can use enumerated types to denote various special cases, or easily
+%add another type to the argument type of an existing function when considering
+%more possible inputs, to improve the program's robustness.
+%Next, we will see how Ceylon's static type checking helps programmers.
+
+\begin{comment}
 \subsubsection*{Exhaustiveness}
+
 Ceylon checks the exhaustiveness of a switch by comparing the union of all
 cases and the switched term's type.
 For the switch to be accepted, the former must be a supertype of the later.
@@ -294,7 +355,7 @@ void printType(Resource resource){
 	case (is Link) { print("Link"); }
 }
 \end{lstlisting}
-\end{comment}
+
 %
 \begin{lstlisting}
 abstract class Node() of Leaf | Branch {}
@@ -405,6 +466,22 @@ But in \lstinline{printAge}, the second branch is always shadowed by the first o
 Any missing data will be interpreted as infinity.
 %
 Note that swapping the two cases cannot prevent all unexpected behaviors.
+When the outside \lstinline{Null} has a different meaning other than infinity,
+they are not distinguishable, and the branch designed for it will take them all.
+% And instead of \lstinline{print}, one might call a function that takes care
+% of \lstinline{Nothing} and the other component in \lstinline{A}.
+This problem is even more serious when the language implements some syntax
+sugar or encode other features via the switch/case construct.
+It could be convenient to have a simple construct for unwrapping \lstinline{A|Null} without writing down the full switch/case expression.
+But once the details are hidden, users may not be able to image that how does
+the order affects the program, as we discussed above.  
+On the other hand, with some requirements on the argument and return types, it is 
+straightforward to support function overloading by combining them in a switch/case expression.
+But it will be hard to find a fair criteria to decide which one
+should be prioritized, if two functions can overlap.
+% https://github.com/ceylon/ceylon-spec/issues/50
+% https://github.com/ceylon/ceylon-spec/issues/65
+
 In that case the meaning of infinity is hidden.
 On contrary, disjoint cases are always distinguishable, and the user, when
 using an existing definition, is guaranteed that there is no hidden conflicts.
@@ -419,9 +496,10 @@ In Ceylon, it is called \lstinline{Nothing}, representing the empty set.
 For two disjoint types $[[A]]$ and $[[B]]$, their intersection $[[A/\B]]$
 is naturally a common subtype, and therefore must be equivalent to
 the bottom type \lstinline{Nothing}.
+\end{comment}
 
+\begin{comment}
 \subsubsection*{Existing Problems in Ceylon}
-
 In general, a term of type $A$ is always assignable to any supertype of $A$.
 But in Ceylon, the checking of assignability is not complete to
 subtyping.
@@ -436,8 +514,40 @@ cannot be accepted by Ceylon's compiler.
 	switch (v)
 	case (is Integer) { print("Integer: ``v``"); }
 \end{lstlisting}
+\end{comment}
 
+\begin{comment}
+\bruno{Now you come back to disjointness having spoken about disjointness earlier
+  in this section. Don't jump around topics like this. If you have a paragraph
+  on disjointness, then talk about everything that relates to disjointness under that
+  paragraph. Or maybe have another paragraph called ``Bottom-like Types just after
+disjointness, since that's clearly related and should follow.}
+To dig deeper for disjointness, it often comes to the the concept
+of \emph{bottom type}.
+Bottom type is a subtype of all types, in contrast to the top type.
+Certainly the bottom type has no value.
+In Ceylon, it is called \lstinline{Nothing}, representing the empty set.
+%
+With the existence of subtyping, a branch in switch/case expression
+can take a term of a subtype of its expected type.
+If the term's type is also a subtype of the other branch's expected
+type, type information will be insufficient to disambiguate.
+To prevent this, disjoint types cannot have any common subtype which has
+inhabited values.
+For two disjoint types $[[A]]$ and $[[B]]$, their intersection $[[A/\B]]$
+is naturally a common subtype, and therefore must be equivalent to
+the bottom type \lstinline{Nothing}.
+\end{comment}
 
+\begin{comment}
+Let us call them \emph{bottom-like types}.
+% Ceylon treat such types specially.
+In a switch construct, every case has a type annotation.
+In Ceylon, this type annotation is not allowed to be bottom-like.
+The compiler uses this type to narrow the static type of the input term
+in switch/case, and rejects the program if the resultant type is equivalent
+to \lstinline{Nothing}.
+\end{comment}
 \subsection{Our Methodology}
 
 The switch construct in our calculus \cal is similar to Ceylon's.
