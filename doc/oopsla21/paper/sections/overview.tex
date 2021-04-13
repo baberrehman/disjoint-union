@@ -118,17 +118,19 @@ existing approaches next.
 
 \paragraph{Single branch elimination.}
 
-A possible approach is to use an elimination of an
-expression with a union type $[[A \/ B]]$ supports only one branch, and the
-branch needs to have the same type when the expression has type $[[A]]$, or type
-$[[B]]$. This approach is adopted, for example by \citet{pierce1991programming}
-and \citet{dunfield2014elaborating}. For better illustration, we adapt their syntax
-  using our switch notation in the examples, while preserving their semantics.
-For example, in \lstinline{tostring2}, the expression \lstinline{show x} must return
+A possible approach is to use an elimination of an expression with a union type
+$[[A \/ B]]$ supports only one branch, and the branch needs to have the same
+type when the expression has type $[[A]]$, or type $[[B]]$. This approach is
+adopted, for example by \citet{pierce1991programming},
+\citet{barbanera1995intersection}, and more recently,
+\citet{dunfield2014elaborating}. For better illustration, we adapt their syntax
+using our switch notation in the examples, while preserving their semantics. For
+example, in \lstinline{tostring2}, the expression \lstinline{show x} must return
 \lstinline{String} when \lstinline{y : String}, and when \lstinline{y : Int},
 which means that \lstinline{show} must be overloaded (in
-\citet{pierce1991programming,dunfield2014elaborating}, this can be implemented
-by requiring \lstinline{show} to have an \textit{intersection type}).
+\citet{pierce1991programming,dunfield2014elaborating,barbanera1995intersection},
+this can be implemented by requiring \lstinline{show} to have an
+\textit{intersection type}).
 
 \begin{lstlisting}
 function tostring2 (x: String | Int) : String =
@@ -147,9 +149,11 @@ functions. Without overloaded functions the construct would not be very useful.
 
 \paragraph{Type-directed elimination.}
 
-On the other hand, some systems~\cite{} support \textit{type-directed} elimination
-of union types. For instance, \lstinline{tostring3} has different behaviors
-depending on the \textit{type} of \lstinline{x}.
+On the other hand, some
+systems~\cite{castagna:settheoretic,muehlboeck2018empowering} support
+\textit{type-directed} elimination of union types. For instance,
+\lstinline{tostring3} has different behaviors depending on the \textit{type} of
+\lstinline{x}.
 
 \begin{lstlisting}
 function tostring3 (x: String | Int) : String =
@@ -189,26 +193,38 @@ function isstudent2 (x: Person | Student) : Bool =
 \end{lstlisting}
 
 \noindent Now it is unclear what would happen if we apply \lstinline{isstudent2}
-to a term of type \lstinline{Student}, as its type matches both branches. In some
-calculi~\citep{dunfield2014elaborating},
-the choice is not determined in the semantics, in the sense that either
-branch can be chosen. This leads to a non-deterministic semantics. In some
-other languages or calculi~\citep{}, branches are inspected from top to bottom, and the first one
-that matches the type gets chosen. However, in those systems, as
-\lstinline{Person} is a supertype of \lstinline{Student}, the first branch
-subsumes the second one and will always get chosen, and so the second branch
-will never get evaluated! This could be unintentional, and similar programs  
-being accepted could lead to subtle bugs. Even if a warning could be given
-to alert programmers that a case can never be executed, there could be
+to a term of type \lstinline{Student}, as its type matches both branches. In
+some calculi~\citep{dunfield2014elaborating}, the choice is not determined in
+the semantics, in the sense that either branch can be chosen. This leads to a
+non-deterministic semantics. In some other languages or
+calculi~\citep{castagna:settheoretic}, branches are inspected from top to
+bottom, and the first one that matches the type gets chosen. However, in those
+systems, as \lstinline{Person} is a supertype of \lstinline{Student}, the first
+branch subsumes the second one and will always get chosen, and so the second
+branch will never get evaluated! This could be unintentional, and similar
+programs being accepted could lead to subtle bugs. Even if a warning could be
+given to alert programmers that a case can never be executed, there could be
 other situations where two cases overlap, but neither case subsumes the other.
 For instance we could have \lstinline{Student} and \lstinline{Worker} as
-subtypes of \lstinline{Person}. For a person that is both a student and a worker,
-a switch statement that discriminates between workers and students could
-potentially choose either branch. However for persons that are only students
-or only workers, only one branch can be chosen.
+subtypes of \lstinline{Person}. For a person that is both a student and a
+worker, a switch statement that discriminates between workers and students could
+potentially choose either branch. However for persons that are only students or
+only workers, only one branch can be chosen.
 
-\bruno{Ningning, as discussed earlier, I think in these 2 first sections we should also talk about
-overloading and the best-match approach.}
+Some languages support form of typed-based union elimination via overloading,
+which usually finds in all branches the one that best describes the type. Such
+approach is used in, for example, resolving overloading in Java \cite{javadoc}.
+Then, if we apply \lstinline{isstudent2} to a term of type \lstinline{Student},
+the second branch is chosen, as \lstinline{Student} is the best type describing
+\lstinline{x}. However, even with the best-match strategy, the semantics can be
+confusing when the system features implicit upcasting (e.g., by subtyping). For
+example, suppose the type \lstinline{Pegasus} is a subtype of both type
+\lstinline{Bird} and type \lstinline{Horse}. If we apply a switch expression on
+the type \lstinline{Bird | Horse} to a term of type \lstinline{Pegasus}, which
+branch should we choose, the one with \lstinline{Bird}, or the one with
+\lstinline{Horse}? In such case, the semantics is non-deterministic again, and
+replies solely on the particular implementation of the compiler.
+
 
 \subsection{Eliminating Union Types in Ceylon}
 Ceylon supports type-directed union elimination via a switch expression with
