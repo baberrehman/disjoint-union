@@ -196,10 +196,14 @@ a switch statement that discriminates between workers and students could
 potentially choose either branch. However for persons that are only students
 or only workers, only one branch can be chosen.
 
+
 \subsection{Eliminating Union Types in Ceylon}
-Ceylon supports type-directed union elimination via a switch expression with
-multiple branches. Each branch matches on a type.
-In the runtime, one branch is chosen according to the input's type.
+A switch expression in Ceylon examine a term of a union type,
+and eliminates the union in a type-directed way.
+It can have multiple branches, each for a different type.
+When evaluating, the one matches with the input's type is chosen
+and executed.
+%
 \begin{lstlisting}
 	void print(String|Integer|Float x) {
 		switch (x)
@@ -208,21 +212,24 @@ In the runtime, one branch is chosen according to the input's type.
 	}
 \end{lstlisting}
 %
-Static type checking for the switch construct ensures two things: the 
-list of cases is exhaustive, and any two cases are disjoint.
+Static type checking ensures the switch construct satisfies two requirements:
+the list of cases is exhaustive, and any two cases do not overlap.
 In the above example, \lstinline{x} can be either a string or an integer,
 or a floating number. There does not have to be exact three cases correspondingly,
 but the combination of all cases must be able to handle all possibilities.
-On the other hand, unlike the previous discussion, it is impossible to have two
-branches matched with one input at the same time, thanks to the disjointness
-restriction.
+On the other hand, unlike the previous discussion, Ceylon does not allow two
+branches to cover the same type by posing a disjointness restriction.
+For example, \lstinline{String} and \lstinline{Integer|Float} are disjoint,
+since no value has both \lstinline{String} and \lstinline{Integer}, or both
+\lstinline{String} and \lstinline{Float}.
 
 \subsubsection*{As an Alternative to Overloading}
-A motivation of such type-directed union elimination in Ceylon is to
+With such a type-directed union elimination, Ceylon is able to
 model a form of function overloading.
-The following example demonstrate how to define a function \lstinline{padLeft}.
-It takes two arguments. The second argument can be either a string or
-an integer.
+To demonstrate, we define a function \lstinline{padLeft}.
+Its second argument can be either a string or an integer.
+Two different implementations for each of them are embedded
+in the function.
 
 \bruno{I suggested using interesting examples from the documentation of Ceylon, but
   I think we only give artificial examples here. Please write a couple of more
@@ -244,33 +251,33 @@ String padLeft(String v, String|Integer x){
 	case (is Integer) { return space(x)+v; }
 }
 
-print( padLeft("?", 5) );
-print( padLeft("World", "Hello ") );
+print( padLeft("?", 5) ); // "     ?"
+print( padLeft("World", "Hello ") ); // "Hello World"
 \end{lstlisting}
 %
-In the two cases of the switch construct, there are two different implementations
-for the \lstinline{padLeft} function: one add a string to the left of \lstinline{v},
-the other calls function \lstinline{space} to generate an string of \lstinline{x} spaces,
-and then pad it to of \lstinline{v}.
-Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value 
-it can only be a string or an integer.
-Then the corresponding branch is chosen and executed.
-%
-Besides, Ceylon uses union types to encode nullable types (or the optional types).
-The null value is inhabited in \lstinline{A?}, which stands for \lstinline{A|Null}.
-If the switched term has a nullable type, there has to be a branch to handle it.
-Similarly, one can use enumerated types to denote various special cases, or easily
-add another type to the argument type of an existing function when considering
-more possible inputs, to improve the program's robustness.
-Next, we will see how Ceylon's static type checking helps programmers.
+The switch construct has two cases: one add a string to the left of \lstinline{v},
+the other calls function \lstinline{space} to generate an string of \lstinline{x} spaces, and then pad it to of \lstinline{v}.
+As a consequence of the non-overlapping requirement, overloaded functions must have
+disjoint input types.
+There is no restriction on their return types since union types can be introduced
+implicitly. For example, if the above two cases return \lstinline{String} and
+\lstinline{Integer} separately, the \lstinline{padLeft} can have \lstinline{String|Integer} as its return type.
+
 
 \subsubsection*{Exhaustiveness}
-Ceylon checks the exhaustiveness of a switch by compare the union of all cases and
-the switched term's type. For the switch to be accepted, the former must completely
-\emph{cover} the later. In other words, the switch term can be safely converted into
-the union type. 
-Here we define \lstinline{Node} by enumerating its subtypes. It can be viewed as the
-union of \lstinline{Leaf} and \lstinline{Branch}.
+Ceylon checks the exhaustiveness of a switch by comparing the union of all
+cases and the switched term's type.
+For the switch to be accepted, the former must be a supertype of the later.
+%Recall that adding more components to a union type make it a supertype of the
+%initial type, like \lstinline{Integer|Float} to \lstinline{Integer}.
+That is to say a switch construct must have enough cases to handle all
+possible runtime types of the term.
+%
+For example, here we define \lstinline{Node} by enumerating its subtypes.
+It can be viewed as the union of \lstinline{Leaf} and \lstinline{Branch}.
+Then in the function \lstinline{printTree} that takes a \lstinline{Node},
+both cases are taken into consideration.
+%
 \begin{comment}
 ------------- THE OTHER EXAMPLE -----------------
 Adding more subtype in it causes error in exhaustiveness checking in switch.
@@ -312,12 +319,23 @@ void printTree(Node node) {
 printTree(Branch(Branch(Leaf("aap"), Leaf("noot")), Leaf("mies")));
 \end{lstlisting}
 % https://ceylon-lang.org/documentation/1.3/tour/types/
-If we replace the argument type \lstinline{Node} in the function \lstinline{printTree} by
-\lstinline{Node?},
-or we add more subtype in the declaration of \lstinline{Node}, an compiling error
-will be raised: case types must cover all cases of the switch type.
-Such checking reminds programmers to keep consistent when changing the related code
-and avoid runtime errors.
+%
+We can allow the input to be \lstinline{null} by replacing the argument type \lstinline{Node} by \lstinline{Node?}.
+Ceylon uses union types to encode nullable types (or the optional types) in a 
+type-safe way.
+The null value is inhabited in \lstinline{Null}, and \lstinline{A?} stands for \lstinline{A|Null}.
+If the switched term has a nullable type, the exhaustive checking makes sure there
+is a branch to handle it.
+%
+Similarly, one can use enumerated types to denote various special cases, or easily
+add another type to the argument type of an existing function when considering
+more possible inputs, to improve the program's robustness.
+%
+If we can add more subtype in the declaration of \lstinline{Node} without
+adapting the function definition, an compiling error will be raised:
+case types must cover all cases of the switch type.
+Such checking reminds programmers to keep consistent when changing the
+related code and avoid potential runtime errors.
 
 \bruno{The following example is better, and I guess useful to illustrate exhaustiveness.}
 \begin{lstlisting}
@@ -328,139 +346,83 @@ and avoid runtime errors.
 	}
 \end{lstlisting}
 %
-Although the list of cases must be exhaustive, it does need to
-strictly follow the input's type.
-For example, in the above function, \lstinline{x} can only be an integer
-or a string. But it is not harmful for the first branch to expect
+Exhaustiveness checking does not prevent the cases in a switch to 
+accept more than necessary.
+For example, in the above function, even though \lstinline{x} cannot be
+a \lstinline{Float}, it is not harmful for the first branch to expect
 a term of \lstinline{Integer|Float}, since \lstinline{Integer|Float|String}
 still covers \lstinline{Integer|String}.
 
+
 \subsubsection*{Disjointness}
-Every pair of cases in a switch cannot overlap. Therefore, their order is
-irrelevant to the program's behavior and its evaluation result.
+Ceylon prevents any pair of cases in a switch from overlapping.
+And disjointness is introduced to describe such relation between two types.
+Being disjoint means the non-existence of a value which can be assigned to
+both types.
+With the existence of subtyping, a branch in switch/case expression
+can take a term of a subtype of its expected type.
+Therefore disjointness roughly equals to no common subtype.
+However, this does not directly lead to an algorithm. So Ceylon
+provides a set of rules: 1) distinct cases in an enumerated type is thought to
+be disjoint, and their subtypes are disjoint too; 2) two classes, if they are
+not subclass of each other, are disjoint; and etc.
+Especially, for a union type $[[A1\/A2]]$, being disjoint with another
+type $B$ requires both $[[A1]]$ and $[[A2]]$ to be disjoint with $B$.
+Eventually, after decomposing and examining subtyping relation, it is decidable
+that two types are disjoint or not.
 
-	
-\bruno{Please organize the section text using paragraphs, to highlight key topics.
-  I think the flow of the text is quite bad and I can't quite figure out what points
-  you are trying to make in different parts of the text. In fact it seems that you keep
-  discussing related points in different parts of the text. Give the text structure
-  and a flow by stating upfront (in a paragraph title) what is the point that you are trying
-  to make in that paragraph. I can think of the following as themes/titles for paragraphs:
-  1) Union types as an alternative to overloading; (motivate a little bit why Ceylon has
-  such a construct).
-  2) Disjointness; 3) Exhaustiveness 4) Problems with Ceylon's approach. 
-}
-
-Ceylon supports type-directed union elimination via a switch expression with
-multiple branches. Each branch matches on a type.
-\bruno{The following text is making some implicit assumptions: firstly it is not obvious
-  why you are calling this an overloaded function: you would need to first explain that
-  Ceylon uses union types as an alternative to model overloaded functions. I think you want
-  to show the function declaration, rather than just a body. Then it is important to show
-  the type of $v$ (and also why this function can be seen as an alternative to overloading).
-  Without that it is not very clear what is being done here.}
-Together the overloaded function is applied to a input.
-The input has an union type statically.
-But its runtime type can only fit in one branch.
-That makes it different to the previous discussion. Why?
-Because the types in all branches must be disjoint.
-
-\begin{lstlisting}
-  void print(String|Integer|Float x) {
-    switch (x)
-      case (is String) { print("String: ``x``"); }
-      case (is Integer) { print("Integer: ``x``"); }
-      case (is Float) { print("Float: ``x``"); }
-    }
-\end{lstlisting}
-% https://ceylon-lang.org/documentation/1.3/tour/types/
-% case (is Object) { print(v); }
-% case (is Nothing) { print("nothing"); }
-
-Being disjoint means it is impossible to find a value that matches both types.
-The three types \lstinline{Integer}, \lstinline{Char}, and \lstinline{String} 
-are disjoint, since no value can have more than one of the types. 
-% Ensured by Ceylon's type system, \lstinline{v} of type \lstinline{Void} can 
-% either be an \lstinline{Object} or \lstinline{Nothing}. 
-With disjointness the order of branches does not matter, and
-programmers can reorder the cases without affecting the semantics
-of the program. More importantly, disjointness can avoid subtle bugs
-that may arize from overlapping cases.
-
-\bruno{I'm not sure that that what we want to say is what you say next.
-  A reader may argue what if we want to model such an example. Actually
-  Ceylon does allow you todo the example with an extension of the case construct.
-  But I think what we want to illustrate here is that even with a disjoint construct
-  we can do interesting things. This is why showing more interesting examples
-  from the documentation and other ones that we discussed on slack is important. 
-}
-Take the previous function \lstinline{isstudent2} as an example.
-For its definition to be accepted by Ceylon,
-\lstinline{Person} and \lstinline{Student} cannot be subclass of
-each other, assuming they are classes.
-Since Ceylon does not allow multiple inheritance on classes,
-the restriction is sufficient to prevent the incoherent scenario.
-In the runtime, type of the input must be a subtype of either \lstinline{Person} 
-or \lstinline{Student}. According to the subtyping relation,
-one branch will be chosen and the input term will be cast
-and substituted in.
-%
-%Besides primitive types and classes, 
-%distinct members in an enumerated type are also viewed as disjoint.
-% switch/case also handles other types as long as they are disjoint.
-% Some primitive types like \lstinline{Integer}, \lstinline{Char}, and 
-% \lstinline{String} are disjoint to others.
-%
-Forcing all cases in one switch/case expression to be disjoint makes them
-interchangeable.
-That could reduce confusion of program readers and eliminate a potential
-source of bugs.
-
-\bruno{Examples with polymorphism are not good because we don't cover polymorphism
-  in this paper, nor we have disjointness constraints either. Also, I'm not quite
-  sure about the point that you're trying to make with this example. You seem to keep
-  going at overlapping. Are you trying to mention why the Ceylon team has decided
-  to have a construct with disjoint cases? If so, be clear about that, and give references
-  to the discussions that have motivated it! If the reason to write this example was
-  to describe the motivations of the Ceylon team, then maybe it is ok to have the polymorphic
-code. }
-\begin{lstlisting}
-	void <A> printA(A|Null x) {
-		switch (x)
-		case (is A) { print("an A"); }
-		case (is Null) { print("nothing"); }
-	}
-\end{lstlisting}
-
-For instance, one might expect the second branch to be executed if the above
-function takes \lstinline{null} as input.
-However, without the disjointness constraint, \lstinline{A} might be nullable itself.
-An example is using \lstinline{Integer|Null} to denote a number or infinity
-as a division result.
-In that case the second branch is always shadowed by the first one.
-Note that swapping the two cases cannot prevent all unexpected behaviors.
-When the outside \lstinline{Null} has a different meaning other than infinity,
-they are not distinguishable, and the branch designed for it will take them all.
-% And instead of \lstinline{print}, one might call a function that takes care
-% of \lstinline{Nothing} and the other component in \lstinline{A}.
-This problem is even more serious when the language implements some syntax
-sugar or encode other features via the switch/case construct.
-It could be convenient to have a simple construct for unwrapping \lstinline{A|Null} without writing down the full switch/case expression.
-But once the details are hidden, users may not be able to image that how does
-the order affects the program, as we discussed above.  
-On the other hand, with some requirements on the argument and return types, it is 
-straightforward to support function overloading by combining them in a switch/case expression.
-But it will be hard to find a fair criteria to decide which one
-should be prioritized, if two functions can overlap.
 % https://github.com/ceylon/ceylon-spec/issues/50
 % https://github.com/ceylon/ceylon-spec/issues/65
+
+Disjointness is the foundation of
+Ceylon's deterministic and order-irrelevant semantics of the switch construct.
+Forcing all cases to be disjoint eliminates ambiguity, and avoid subtle bugs that may arize from overlapping cases.
+%
+People may argue that the programmer should be free to use overlapping cases
+and arrange their order intentionally. The following example provides a scenario
+where the programmer may not notice the dangerous overlapping.
+%
+\begin{lstlisting}
+	alias Number => Integer | Null;
+	String getNumber(Number n) {
+		switch (n)
+		case (is Integer) { return "``n``"; }
+		case (is Null) { return "infinity"; }
+		
+	}
+	void  printAge(Number|Null x) {
+		switch (x)
+		case (is Number) { print("Age is ``getNumber(x)``".); }
+		case (is Null) { print("Age is not provided."); }
+	}
+\end{lstlisting}
+%
+Assume \lstinline{Number} is already defined where \lstinline{null} stands for
+infinity. A client uses it to store age information. 
+Meanwhile, the client use \lstinline{null} to denote missing data.
+Without disjointness checking, the above code will be accepted.
+But in \lstinline{printAge}, the second branch is always shadowed by the first one.
+Any missing data will be interpreted as infinity.
+%
+Note that swapping the two cases cannot prevent all unexpected behaviors.
+In that case the meaning of infinity is hidden.
+On contrary, disjoint cases are always distinguishable, and the user, when
+using an existing definition, is guaranteed that there is no hidden conflicts.
+
+\subsubsection*{The Bottom Type}
+To dig deeper for disjointness, it often comes to the the concept
+of \emph{bottom type}.
+Bottom type is a subtype of all types, in contrast to the top type.
+Certainly the bottom type has no value.
+In Ceylon, it is called \lstinline{Nothing}, representing the empty set.
+%
+For two disjoint types $[[A]]$ and $[[B]]$, their intersection $[[A/\B]]$
+is naturally a common subtype, and therefore must be equivalent to
+the bottom type \lstinline{Nothing}.
 
 \subsubsection*{Existing Problems in Ceylon}
 
 In general, a term of type $A$ is always assignable to any supertype of $A$.
-\bruno{The next text seems to switch to another point, which is issues with the
-  Ceylon approach. So, what you should do is to start a new paragraph that clearly
-identifies the change of topic. }
 But in Ceylon, the checking of assignability is not complete to
 subtyping.
 Although the subtyping relation holds between \lstinline{v}'s
@@ -475,46 +437,6 @@ cannot be accepted by Ceylon's compiler.
 	case (is Integer) { print("Integer: ``v``"); }
 \end{lstlisting}
 
-\bruno{Now you come back to disjointness having spoken about disjointness earlier
-  in this section. Don't jump around topics like this. If you have a paragraph
-  on disjointness, then talk about everything that relates to disjointness under that
-  paragraph. Or maybe have another paragraph called ``Bottom-like Types just after
-disjointness, since that's clearly related and should follow.}
-To dig deeper for disjointness, it often comes to the the concept
-of \emph{bottom type}.
-Bottom type is a subtype of all types, in contrast to the top type.
-Certainly the bottom type has no value.
-In Ceylon, it is called \lstinline{Nothing}, representing the empty set.
-%
-With the existence of subtyping, a branch in switch/case expression
-can take a term of a subtype of its expected type.
-If the term's type is also a subtype of the other branch's expected
-type, type information will be insufficient to disambiguate.
-To prevent this, disjoint types cannot have any common subtype which has
-inhabited values.
-For two disjoint types $[[A]]$ and $[[B]]$, their intersection $[[A/\B]]$
-is naturally a common subtype, and therefore must be equivalent to
-the bottom type \lstinline{Nothing}.
-
-\begin{comment}
-Let us call them \emph{bottom-like types}.
-% Ceylon treat such types specially.
-In a switch construct, every case has a type annotation.
-In Ceylon, this type annotation is not allowed to be bottom-like.
-The compiler uses this type to narrow the static type of the input term
-in switch/case, and rejects the program if the resultant type is equivalent
-to \lstinline{Nothing}.
-\end{comment}
-
-\bruno{
-	Introduce the Ceylon approach with examples; introduce the idea of
-	disjointness informally; contrast with existing constructs.
-	Try to motivate the adapotion of disjointness (this should be discussed
-	in the Ceylon documentation to some extent).\\
-	Here it is important to give representative examples (look at documentation
-	and/or other online resources), including examples
-	that demonstrate how Ceylon uses union types to model overloaded functions.
-}
 
 \subsection{Our Methodology}
 
@@ -576,10 +498,15 @@ Our alternative definition of disjointness is presented in Section~\ref{sec:inte
 \snow{Next of the next: intersection types and distributivity}
 \bruno{We don't need to say much about this, but maybe a few sentences are ok.}
 
+\begin{verbatim}
 LOS
 
 LOS(top) = {Int, Bot -> Top}
 LOS(Int -> Int) = ….
+
+\Cal differ with ceylon in subtyping
+A disadvantage: We cannot reason that (String\/Null)/\Object <: String
+\end{verbatim}
 
 \subsubsection*{Typing and Exhaustiveness}
 

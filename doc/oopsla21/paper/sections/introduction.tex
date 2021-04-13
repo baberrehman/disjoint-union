@@ -127,10 +127,18 @@ of that work is on algorithmic formulations of subtyping
 with unions types, intersection types and various distributivity
 rules for subtyping. Disjointness is mentioned briefly, but not
 formally defined, and no semantics of the switch construct is given.
+\snow{I think the above statement is not precise. Disjointness is
+defined, although the OOPSLA paper has many variants. For example in Fig.14
+and Fig.10 dsj is defined on the literal subtyping. For the semantics,
+I feel they are hinting for some reduction rules on page 4 ``Flow-Sensitivity",
+but we can say no operational semantics definition is given.}
 Disjointness is informally defined in various sentences in the
 Ceylon documentation. It involves a set of 14 rules described in English
 ~\footnote{\url{http://web.mit.edu/ceylon_v1.3.3/ceylon-1.3.3/doc/en/spec/html_single}}. Some of the rules are relatively generic, while
-others are quite language specific. Interestingly, a notion
+others are quite language specific. 
+\snow{Frankly speaking, only three rules among them applies to our calculi
+and they are roughly equal to our algorithmic disjointness.}
+Interestingly, a notion
 of disjointness has been already studied in the literature
 for intersection types~\cite{oliveira2016disjoint}. That line of work studies calculi
 with intersection types and a \textit{merge operator}. Disjointness
