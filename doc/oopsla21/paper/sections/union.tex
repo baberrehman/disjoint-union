@@ -4,10 +4,14 @@
 This section introduces the union calculus \name. The distinctive feature
 of the \name calculus is a type-based switch expression with disjoint
 cases, which can be used to eliminate values with union types.
+Technically speaking, an interesting aspect of the operational
+semantics is that it is type-directed,
+and type annotations
+play a fundamental role in the dynamic semantics.
 %Such type-based
 %switch expression is inspired by a similar construct in the Ceylon programming
 %language.
-We adapt the notion of disjointness from previous work on
+We also adapt the notion of disjointness from previous work on
 \emph{disjoint intersection types}~\cite{oliveira2016disjoint} to \name, and show that \name is type
 sound and deterministic.
 
@@ -22,23 +26,19 @@ bottom ($[[Bot]]$), function ($[[A -> B]]$) and union ($[[A \/ B]]$)
 types. Metavariable $[[e]]$ ranges over program
 expressions. Expressions include variables ($[[x]]$), integers
 ($[[i]]$), type annotations ($[[e:A]]$), lambda abstractions
-($[[\x.e]]$), applications ($[[e1 e2]]$) and a novel switch ($[[switch
-    e A e1 B e2]]$) expression. The \emph{switch} expression is a case
+($[[\x.e]]$), applications ($[[e1 e2]]$) and a novel switch expression ($[[switch
+    e A e1 B e2]]$). The \emph{switch} expression is a case
 expression and evaluates a specific branch by matching the
 type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
 
-\ningning{We need to cite \citet{Huang:typedirected} somewhere. Do we need to do
-  it in the overview? I added the citation here. Maybe will also add it in the
-  operational semantics section.}
-
 \paragraph{Values, pre-values and annotated values}
 
 In \name there are two kinds of values ($[[v]]$): annotated values $[[w]]$; and unannotated
 lambda expressions ($[[\x.e]]$). In annotated values, which have the form $[[p
-:A]]$, the type annotation $[[A]]$ represents the \textit{dynamic type} that the
-value has at runtime.
+:A]]$, the type annotation $[[A]]$ represents the \textit{static type} of the
+value.
 %We divide the representation for values into three parts: pre-values,
 %annotated values and values.
 Metavariable $[[p]]$ ranges over pre-values. Pre-values
@@ -53,9 +53,10 @@ unannotated lambda expressions can be arguments of functions, and
 may appear as a result of reducing such arguments.
 Annotated lambda values have two annotations;
 that is, $[[\x.e : A -> B : C]]$ is a value.
-As already mentioned, $C$ is the dynamic type of the value
-at runtime, whereas $[[A -> B]]$ is the original \emph{static type} of the lambda.
-As we will see, the distinguish between dynamic and static
+As already mentioned, $C$ is the static type of the value,
+whereas $[[A -> B]]$ is the \emph{dynamic} (or more precise)
+type  of the lambda.
+As we will see, the distinction between dynamic and static
 types is important for the \textit{type-directed operational semantics}
 \cite{Huang:typedirected}.
 For readers familiar with calculi with gradual types~\cite{Siek06gradualtyping}, the two annotations
@@ -94,13 +95,13 @@ inference mode ($[[=>]]$) or the checking mode ($[[<=]]$).
 \subsection{Subtyping}
 \label{sec:union:sub}
 The subtyping rules for \cal are shown in
-\Cref{fig:union:syntax}. Most rules are standard.
+\Cref{fig:union:syntax}. The rules are standard.
 \Rref{s-top} states that all types are subtypes of
 the $[[Top]]$ type. \Rref{s-bot} states that $[[Bot]]$ type is subtype of
 all types. \Rref{s-int, s-arrow} are standard rules for integers and
 functions respectively.  Functions are contravariant in input types
 and covariant in output types. \Rref{s-ora,s-orb,s-orc} deal with
-subtyping for union types. \rref{s-ora} says that the union type of two types $[[A]]$ and $[[B]]$
+subtyping for union types. \Rref{s-ora} says that the union type of two types $[[A]]$ and $[[B]]$
 is a subtype of another type $[[C]]$ if both $[[A]]$ and $[[B]]$ are subtypes of
 $[[C]]$. \Rref{s-orb,s-orc} state that if a
 type is subtype of one of the components of a union type, then it is subtype of whole
@@ -354,13 +355,15 @@ with respect to its declarative specification (\Cref{def:union:disj}).
 \end{proof}
 \end{comment}
 
-\ningning{Why this one here? I think we can show it for the declarative
-  definition. Then the following one follows from soundness and completeness.}
+%\ningning{Why this one here? I think we can show it for the declarative
+%  definition. Then the following one follows from soundness and completeness.}
 
+\begin{comment}
 \begin{lemma}[Bottom-Like Disjoint]
   If \ $[[botlike A]]$ \ then \ $[[A * B]]$.
 \label{lemma:union:bl-disjoint}
 \end{lemma}
+\end{comment}
 
 \noindent A natural property of \cal is
 if type $[[A]]$ and type $[[B]]$ are two disjoint types, then subtypes
@@ -421,7 +424,7 @@ its own type information, and it will typically include annotated lambdas.
 On the other hand, the argument expression $[[e2]]$ is checked against type $A$,
 and can itself be a function. For instance we could have $[[e2]] = \lambda x. x$
 and $[[A]] = [[Int->Int]]$. In such case, during reduction, the argument would be
-the unnanotated value $\lambda x. x$.
+the unannotated value $\lambda x. x$.
 \Rref{typ-sub} is the subsumption rule. It states that an expression
 $[[e]]$ can be checked against any supertype of its inferred type.
 \Rref{typ-abs} is the standard introduction rule for lambda
@@ -484,71 +487,47 @@ ways.
 
 \paragraph{The role of type annotations}
 Type annotations play two important roles in the calculus.
-Firstly, static types are used by the switch construct
+Dynamic types are used by the switch construct
 to select the correct branch to execute.
-This is employed in \rref{step-switchl,step-switchr}. 
-\bruno{The text that was here before (commented now)
-  was just repeating stuff that we already said before.
-  What we need here is text that explains how and where annotations are used during reduction.
-  For instance switches need the static types to select the branches correctly. Furthemore
-the dynamic types are necessary for preservation. So illustrate those two points with examples. }
-\begin{comment}
-Before going
-into the details of operational semantics, it is important to recall
-the definition of pre-values, annotated values and values.
-An integer expression $[[i]]$ is not a value unless annotated.
-Non-annotated lambda expressions ($[[\x.e]]$) are values but cannot appear at left
-side in function applications.
-Only annotated values $[[w]]$ can appear at left side in function applications.
-Annotated values consist of annotated pre-values. That is, it consists of
-$[[i:A]]$ and $[[\x.e:(A1->B1):(A2->B2)]]$. This is
-because that the orginal static type is tracked by the operational semantics.
-Therefore, we can end up in a value such as $[[1 : Int]]$ or $[[1 : Top]]$,
-and those two values can behave differently in some contexts.
-\bruno{Give an example here}
-For functions the static type is not enough and we also need the dynamic type
-(which is the original type of the lambda).
-For example, if we have:
-$e = [[\x.x:Int->Int:(Int->Int)\/(Bool->Bool)]]$, then the static type of $e$ is
-$[[(Int->Int)\/(Bool->Bool)]]$ and the, more precise, dynamic type is
-$[[Int->Int]]$.
-\end{comment}
-If we use the following switch expression:
+%This is employed in \rref{step-switchl,step-switchr}. 
+For instance, if we use the following switch expression:
 
 \begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
-Int | String double(Int | String val) {
-  switch (val)
-  case (is Int)    {return val*2;}
-  case (is String) {return val++val;} 
+switch (val) {
+    (x : Int)     -> x*2,
+    (y : String)  -> y 
 }
 \end{lstlisting}
 
-\bruno{example here with a switch} \baber{done}
+\noindent Then if \lstinline{val} is the value \lstinline{1 : Int \/ String},
+the static type is \lstinline{Int \/ String}, but the dynamic
+type is \lstinline{Int}. Therefore, based on the dynamic type,
+the first case is picked. 
 
-\noindent The static type is used to select the correct branch of the switch statement.
-Code snippet above doubles the input value. For integers, it multiplies input
-value with 2. For string type values, it concatenates input value with itself.
-Static type of \emph{val} can either be Int or String. Which means that
-\emph{val} can either be of type Int or String, but not both at same time.
-When static type of \emph{val} is Int in this code example,
-branch for type Int will always be executed independent of the order of branch.
-Same repeats if static type of \emph{val} happens to be String.
-
-Secondly, the dynamic types are needed to ensure type preservation.
+Static types, on the other hand, are needed to ensure type preservation
+and simplify the metatheory.
 %Second case is employed in \rref{step-beta}.
-The presence of annotations with the dynamic types,
-ensures that types are preserved during substitution in
-beta-reduction and \emph{switch} cases.\bruno{another example for illustrating
-preservation.} For example:
+%The presence of annotations with the static types,
+%ensures that types are preserved during substitution in
+%beta-reduction and \emph{switch} cases.
+For example, in the expression:
 
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
-Int | String identity(Int | String val) {
-  return val;
-}
-\end{lstlisting}
+\[(\lambda x . x : [[Int]] \to ([[Int \/ String]])) 1\]
 
-\noindent The code snippet above has an \emph{identity} function. Input of identity function can
-either be Int or String. \baber{to be added: example is not appropriate.}
+\noindent if the result of the expression would simply be $[[1]]$, then some
+static information would be lost, because the type of $[[1]]$ is $[[Int]]$,
+but the static type of the original expression is $[[Int \/ String]]$.
+In other words, the original type would not be preserved. Instead we
+would get a \emph{subtype}. This phenomenon is ofcourse well-known
+in OOP languages and languages with subtyping, where often preservation
+needs to be weakened to allow the type after reduction to be a subtype.
+For instance, in Featherweight Java~\cite{DBLP:journals/toplas/IgarashiPW01}
+the preservation theorem states that the type after reduction is a
+subtype (and not necessarely the original type of the expression). In our
+operational semantics we opted to keep track of the static types instead,
+and preserve the original type.
+This considerably simplifies the metatheory, although in an actual
+implementation not tracking the static type would be more efficient.
 
 \paragraph{Reduction rules}
 \Cref{fig:union:os} shows operational semantics of \cal.
