@@ -25,7 +25,7 @@ type $[[A\/B]]$, if it can be considered to have either type $[[A]]$ \textit{or}
 type $[[B]]$. Many systems model \textit{tagged union types} (also called
 \textit{sum types} or \textit{variants types}), where explicit \textit{tags}
 are used to construct terms with union types. Languages with algebraic datatypes~\cite{hope}
-or (polymorphic) variants~\cite{garrigue98} support tagged union types. 
+or (polymorphic) variants~\cite{garrigue98} support tagged union types.
 In their basic form, there are two introduction forms:
 $\mathsf{inj_1} :: [[A -> A \/ B]]$ turn the type of an expression of type
 $[[A]]$ into type $[[A \/ B]]$; and $\mathsf{inj_2} :: [[B -> A \/ B]]$
@@ -299,7 +299,7 @@ In the two cases of the switch construct, there are two different implementation
 of the \lstinline{padLeft} function: one that appends a string to the left of \lstinline{v},
 and the other that calls function \lstinline{space} to generate a string with \lstinline{x} spaces,
 and then append that to \lstinline{v}.
-Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value 
+Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value
 it can only be a string or an integer.
 As such, when values with such types are passed to the function,
 the corresponding branch is chosen and executed.
@@ -390,7 +390,7 @@ interface Directory satisfies Resource {}
 interface Link satisfies Resource {}
 
 void printType(Resource resource){
-	switch (resource) 
+	switch (resource)
 	case (is File) { print("File"); }
 	case (is Directory) { print("Directory"); }
 	case (is Link) { print("Link"); }
@@ -401,10 +401,10 @@ void printType(Resource resource){
 \begin{lstlisting}
 abstract class Node() of Leaf | Branch {}
 
-class Leaf(shared Object element) 
+class Leaf(shared Object element)
 extends Node() {}
 
-class Branch(shared Node left, shared Node right) 
+class Branch(shared Node left, shared Node right)
 extends Node() {}
 
 void printTree(Node node) {
@@ -423,7 +423,7 @@ printTree(Branch(Branch(Leaf("aap"), Leaf("noot")), Leaf("mies")));
 % https://ceylon-lang.org/documentation/1.3/tour/types/
 %
 We can allow the input to be \lstinline{null} by replacing the argument type \lstinline{Node} by \lstinline{Node?}.
-Ceylon uses union types to encode nullable types (or the optional types) in a 
+Ceylon uses union types to encode nullable types (or the optional types) in a
 type-safe way.
 The null value is inhabited in \lstinline{Null}, and \lstinline{A?} stands for \lstinline{A|Null}.
 If the switched term has a nullable type, the exhaustive checking makes sure there
@@ -448,7 +448,7 @@ related code and avoid potential runtime errors.
 	}
 \end{lstlisting}
 %
-Exhaustiveness checking does not prevent the cases in a switch to 
+Exhaustiveness checking does not prevent the cases in a switch to
 accept more than necessary.
 For example, in the above function, even though \lstinline{x} cannot be
 a \lstinline{Float}, it is not harmful for the first branch to expect
@@ -490,7 +490,7 @@ where the programmer may not notice the dangerous overlapping.
 		switch (n)
 		case (is Integer) { return "``n``"; }
 		case (is Null) { return "infinity"; }
-		
+
 	}
 	void  printAge(Number|Null x) {
 		switch (x)
@@ -500,7 +500,7 @@ where the programmer may not notice the dangerous overlapping.
 \end{lstlisting}
 %
 Assume \lstinline{Number} is already defined where \lstinline{null} stands for
-infinity. A client uses it to store age information. 
+infinity. A client uses it to store age information.
 Meanwhile, the client use \lstinline{null} to denote missing data.
 Without disjointness checking, the above code will be accepted.
 But in \lstinline{printAge}, the second branch is always shadowed by the first one.
@@ -584,7 +584,7 @@ Moreover, assuming $[[Odd]]$ and $[[Even]]$ denote odd numbers and even numbers,
 they are both subtype of $[[Int]]$, and therefore are not disjoint.
 The application of this definition is dual to our definition:
 given a type that is not top-like, consider a scenario where we are looking for
-a term that is assignable to the type. If all candidates' types are disjoint, 
+a term that is assignable to the type. If all candidates' types are disjoint,
 at most one term can be chosen from them.
 \begin{verbatim}
  (\x. x+1 : Int->Int) (1 ,, True) --> (1+1):Int
@@ -624,11 +624,11 @@ For example, $[[Int\/String]]$ is disjoint to $[[Char]]$ because both types
 in it is disjoint to $[[Char]]$.
 %
 However, this approach cannot be directly employed to the intersection
-extension. 
+extension.
 Like we said above, some intersection is disjoint to other types
 because itself is uninhabited.
 So even neither $[[Int]]$ or $[[String]]$ is disjoint with $[[Int\/String]]$,
-together $[[Int/\String]]$ is disjoint with it. 
+together $[[Int/\String]]$ is disjoint with it.
 Alternatively, for a given type, we use a set of ordinary types to denote
 all possible values of it. For instance, \verb"{Int,Char}" represent the
 union type $[[Int\/Char]]$.
@@ -643,7 +643,7 @@ The set representation is justified by the distributivity in subtyping (Figure~\
 Every type in the set denotes a component in a union type.
 That is to say, any inhabited type must have an equivalent union type,
 except for literal types.
-Only with distributivity, we have $[[(A\/B)/\C]]$ equivalent to 
+Only with distributivity, we have $[[(A\/B)/\C]]$ equivalent to
 $[[(A/\C)\/(B/\C)]]$.
 The soundness and completeness of the algorithmic definition is proved
 with respect to the declarative definition.
@@ -669,7 +669,7 @@ Another premise requires the two cases to be disjoint.
 Besides, the two branches are typed under different assumption of the bound
 variable. Although the same type $[[C]]$ is used for both of them in the rule,
 it does not prevent them to return different types.
-Assuming the inferred type of $[[e1]]$ is $[[C1]]$ and the inferred type of 
+Assuming the inferred type of $[[e1]]$ is $[[C1]]$ and the inferred type of
 $[[e2]]$ is $[[C2]]$, we can make $[[C]]$ to be $[[C1\/C2]]$.
 
 \subsubsection*{Reduction and Annotated Values}
@@ -678,19 +678,30 @@ So a term of union type can only evaluates to a value of an union type.
 We use type annotations to construct such values.
 For example, $[[2:Int\/Bool]]$ is a value, and it is the result of
 $[[(switch 1 Int (x p1) Bool (neg y)):Int\/Bool]]$.
+This annotation is necessary for precise type preservation under
+bidirectional typing. It keeps the inferred type of expressions.
 
 \snow{I think we might be able to relax preservation by allowing subtyping.
 For which precise reason we failed in that variant? But I guess it is ok
 to omit that unless the reviewers ask}
 
-Lambdas can be annotated. But if a lambda has inferred type, it must
-have two annotation: the outer one is for the preservation purpose,
-while the inner one records its principal type.
+Lambda values can be unannotated or with two annotations.
+The outer one serves the above purpose, while the inner one keeps the original
+input type, which is used to decorate the input value in beta reduction.
+% The outer one is for the preservation purpose,
+% while the inner one records its principal type.
 %
-An example is $[[\x.x:Int->Int:Int->Int\/Bool]]$. 
+\begin{verbatim}
+e = switch (x) {Char -> ... , Bool -> ...}
 
-\snow{I don't know why we need to keep a lambda's original type. We
-don't need to distinguish two arrow types in switch.}
+(\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [x~>1:Int]
+\end{verbatim}
+The expression was legal when x has type Top but becomes illegal when x has type Int.
+It shows that we have to keep the original input type in lambdas.
+
+\snow{Updated}
+%\snow{I don't know why we need to keep a lambda's original type. We
+%don't need to distinguish two arrow types in switch.}
 
 Deciding to take which branch in the runtime requires knowing the
 precise type of the switched term.
@@ -709,9 +720,9 @@ In the following example, the first branch will be chosen, just like when
 we passing $[[1]]$ to it.
 
 \begin{verbatim}
-	(switch (2:Int\/Bool) Int (x p1) Bool (neg y)) 
-	--> (2:Int p1) :Int\/Bool
-	--> 3 : Int \/ Bool
+       (switch (2:Int\/Bool) Int (x p1) Bool (neg y))
+       --> (2:Int p1) :Int\/Bool
+       --> 3 : Int \/ Bool
 \end{verbatim}
 
 Wrapping values with annotation also helps us to unify the related reduction rules.
@@ -738,12 +749,12 @@ Wrapping values with annotation also helps us to unify the related reduction rul
 In this paper, we follow type-based union elimination similar to Ceylon.
 We enforce disjointness constraint on the types of branches of a switch
 expression. On the contrary to Ceylon, we provide a formal definition
-of disjointness. Our disjointness definition is inspired by $\lambda_{i}$ 
+of disjointness. Our disjointness definition is inspired by $\lambda_{i}$
 \cite{oliveira2016disjoint}. $\lambda_{i}$ formally defines disjointness
 for intersection types and merge operator.
 Intersection of two types $[[A]]$ and $[[B]]$ is dijoint in $\lambda_{i}$
 if $[[A]]$ and $[[B]]$ do not share a common supertype which is not
-\emph{top-like}. So-called \emph{top-like} types are defined in 
+\emph{top-like}. So-called \emph{top-like} types are defined in
 \cite{oliveira2016disjoint} and are such types which are \emph{supertypes}
 of all other types.
 
@@ -751,7 +762,7 @@ Union types are usually considered to be dual of intersection types.
 Therefore, we propose a dual definition of \emph{bottom-like} types.
 In contrast to \emph{top-like} types, \emph{bottom-like} types are
 subtypes of all other types. Further, in contrast to the disjointness
-definition in $\lambda_{i}$, two types $[[A]]$ and $[[B]]$ in the simplest 
+definition in $\lambda_{i}$, two types $[[A]]$ and $[[B]]$ in the simplest
 caluclus studied in this paper are disjoint if $[[A]]$ and $[[B]]$
 do not share any common \emph{subtype} which is not \emph{bottom-like}.
 Note that $\lambda_{i}$ proposed \emph{top-like} with \emph{supertypes}.
