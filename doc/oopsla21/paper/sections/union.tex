@@ -485,6 +485,7 @@ important aspect of the semantics is that it is type-directed
 and similar terms that differ only on type annotations can reduce in different
 ways.
 
+\bruno{Perhaps this paragraph can be discussed in the overview?}
 \paragraph{The role of type annotations}
 Type annotations play two important roles in the calculus.
 Dynamic types are used by the switch construct
@@ -504,7 +505,7 @@ the static type is \lstinline{Int \/ String}, but the dynamic
 type is \lstinline{Int}. Therefore, based on the dynamic type,
 the first case is picked. 
 
-Static types, on the other hand, are needed to ensure type preservation
+Static types, on the other hand, are used to ensure type preservation
 and simplify the metatheory.
 %Second case is employed in \rref{step-beta}.
 %The presence of annotations with the static types,
@@ -512,12 +513,12 @@ and simplify the metatheory.
 %beta-reduction and \emph{switch} cases.
 For example, in the expression:
 
-\[(\lambda x . x : [[Int]] \to ([[Int \/ String]])) 1\]
+\[(\lambda x . x : [[Int]] \to ([[Int \/ String]]))~1\]
 
-\noindent if the result of the expression would simply be $[[1]]$, then some
+\noindent if the result of reduction would simply be $[[1]]$, then some
 static information would be lost, because the type of $[[1]]$ is $[[Int]]$,
 but the static type of the original expression is $[[Int \/ String]]$.
-In other words, the original type would not be preserved. Instead we
+In other words, the original type would not be preserved: we
 would get a \emph{subtype}. This phenomenon is ofcourse well-known
 in OOP languages and languages with subtyping, where often preservation
 needs to be weakened to allow the type after reduction to be a subtype.
@@ -525,7 +526,7 @@ For instance, in Featherweight Java~\cite{DBLP:journals/toplas/IgarashiPW01}
 the preservation theorem states that the type after reduction is a
 subtype (and not necessarely the original type of the expression). In our
 operational semantics we opted to keep track of the static types instead,
-and preserve the original type.
+and preserve the original type. Thus the resulting value is $[[1 : Int \/ String]]$.
 This considerably simplifies the metatheory, although in an actual
 implementation not tracking the static type would be more efficient.
 
@@ -538,7 +539,7 @@ the left expression of an application.
 \Rref{step-appr} is almost a standard call-by-value rule, except
 that we know that the left expression in the application must reduce
 to an annotated value ($[[w]]$): non-annotated lambda expressions
-($[[\x.e]]$) cannot appear at left side in applications.
+($[[\x.e]]$) cannot appear at left side of applications.
 %\ningning{\rref{step-appr} looks very fishy. Why $[[w]]$ on the left becomes
 %  $[[v]]$ on the right?}
 %Therefore, we have a condition of annotated value ($[[w]]$) at left
@@ -546,33 +547,69 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
 %\Rref{step-appr} then reduces right expression of application
 %to a value.
 
+\begin{figure}[t]
+  \begin{small}
+    \centering
+    \drules[step]{$[[e --> e']]$}{Operational Semantics}{int, appl, appr, beta, ann, rmann, lamann, switch, switchl, switchr}
+  \end{small}
+%  \begin{small}
+%    \centering
+%    \drules[findtype]{$[[findtype p A]]$}{FindType}{int, arrow}
+%  \end{small}
+  \bigskip
+  %\begin{small}
+  \begin{center}
+  {\renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|llcl|}
+      \hline
+      Beta Value $[[betavalue v A B]]$ &  & & \\
+     & $[[betavalue p:A B C]]$ & = & $[[p:C]]$ \\
+     & $[[betavalue \x.e B C]]$ & = & $[[\x.e:B:C]]$ \\
+      \hline
+    \end{tabular} } \\
+  \bigskip
+  %\begin{small}
+  {\renewcommand{\arraystretch}{1.2}
+    \begin{tabular}{|llcl|}
+      \hline
+      Dynamic Type $[[statictype p]]$ &  & & \\
+     & $[[statictype i]]$ & = & $[[Int]]$ \\
+     & $\rceil [[\x.e: A -> B]] \lceil$ & = & $[[A -> B]]$ \\
+      \hline
+    \end{tabular} }
+    \end{center}
+  \caption{Operational semantics, Beta Value and Dynamic Type definitions for \cal.}
+  \label{fig:union:os}
+\end{figure}
+%\bruno{Don't introduce $[[e1]]$ and $C$ in rules step-beta, step-switchl and step-switchr.
+%  Change the notations, since we already use similar notation for bottom-like types. Also, change
+%the step-beta rule as discussed in slack, both in the paper and in Coq.} 
+
 %\bruno{Following text needs to be fixed after changes in Figure.}
 \Rref{step-beta} is the beta-reduction rule. It applies a dually
 annotated lambda value $[[\x.e : A1 -> B1 : A2 -> B2]]$ to input
 value $[[v]]$. Substitution replaces free occurences of variable
 $[[x]]$ with beta value ($[[betavalue v A2 A1]]$).
-Beta value ($[[betavalue v B C]]$) is shown at the lower part in 
+The definition of beta value ($[[betavalue v B C]]$) is shown at the lower part in 
 \Cref{fig:union:os}.
 Beta value is a function which takes
 value $[[v]]$ and both static and dynamic input types 
 ($[[A1]]$ and $[[A2]]$) as input and returns value with
 appropriate annotations to be substituted.
 Recall that the values in \cal are consist of $[[w]]$ and $[[\x.e]]$.
-For first case, when $[[v]]$ is $[[w]]$ ($[[p:A]]$), beta value drops $[[A]]$ from
-$[[p:A]]$ and returns $[[p:A1]]$. Note the change in type annotation
-from $[[A]]$ to $[[A1]]$.
-This is to keep the most specific type in the annotation. The substituted
-expression is also annotated with both of the output types from
-annotated lambda expression.
-For second case, when $[[v]]$ is $[[\x.e]]$, beta value annotates $[[\x.e]]$ with
-both dyanmic and static input types ($[[\x.e:A2:A1]]$).
+For first case, when $[[v]]$ is $[[w]]$ ($[[p:A]]$), beta value replaces the static type
+$[[A]]$ (from $[[p:A]]$) by $[[A1]]$ and returns $[[p:A1]]$.
+This is to keep the most specific type in the annotation, for beta-reduction.
+For second case, $[[v]]$ can also be an unnanotated lambda value $[[\x.e]]$.
 With bi-directional type-checking an expression such as:
-$([[\f.f 1: (Int -> Int -> Int) : (Int -> Int -> Int)]]) ([[\x.x]])$
+$([[\f.f 1: (Int -> Int -> Int)]]) ([[\x.x]])$
 is well-typed, since bi-directional type-checking propagates
 type information to the arguments. Thus, the dynamic semantics
-needs to deal with such programs. Substitution for second case goes
-as for first case, except that $[[betavalue \x.e A2 A1]]$
-returns $[[\x.e:A2:A1]]$.
+needs to deal with such programs.
+ Substitution for second uses $[[\x.e:A2:A1]]$ as the value being substituted.
+
+
+
 
 
 %Drop Static Type ($\rceil[[v]]\lceil$) drops the static type
@@ -661,43 +698,7 @@ The definition is shown in the lower part of \Cref{fig:union:os}.
 $[[Int]]$ is returned when $[[p]]$ is an integer $[[i]]$.
 Otherwise, for functions, the function annotation $[[A -> B]]$ is returned.
 
-\begin{figure}[t]
-  \begin{small}
-    \centering
-    \drules[step]{$[[e --> e']]$}{Operational Semantics}{int, appl, appr, beta, ann, rmann, lamann, switch, switchl, switchr}
-  \end{small}
-%  \begin{small}
-%    \centering
-%    \drules[findtype]{$[[findtype p A]]$}{FindType}{int, arrow}
-%  \end{small}
-  \bigskip
-  %\begin{small}
-  \begin{center}
-  {\renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|llcl|}
-      \hline
-      Beta Value $[[betavalue v A B]]$ &  & & \\
-     & $[[betavalue p:A B C]]$ & = & $[[p:C]]$ \\
-     & $[[betavalue \x.e B C]]$ & = & $[[\x.e:B:C]]$ \\
-      \hline
-    \end{tabular} } \\
-  \bigskip
-  %\begin{small}
-  {\renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|llcl|}
-      \hline
-      Static Type $[[statictype p]]$ &  & & \\
-     & $[[statictype i]]$ & = & $[[Int]]$ \\
-     & $\rceil [[\x.e: A -> B]] \lceil$ & = & $[[A -> B]]$ \\
-      \hline
-    \end{tabular} }
-    \end{center}
-  \caption{Operational semantics, DropStaticType and DynamicType relation for \cal.}
-  \label{fig:union:os}
-\end{figure}
-%\bruno{Don't introduce $[[e1]]$ and $C$ in rules step-beta, step-switchl and step-switchr.
-%  Change the notations, since we already use similar notation for bottom-like types. Also, change
-%the step-beta rule as discussed in slack, both in the paper and in Coq.} 
+
 
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
