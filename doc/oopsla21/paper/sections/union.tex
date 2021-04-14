@@ -519,7 +519,7 @@ For example, in the expression:
 static information would be lost, because the type of $[[1]]$ is $[[Int]]$,
 but the static type of the original expression is $[[Int \/ String]]$.
 In other words, the original type would not be preserved: we
-would get a \emph{subtype}. This phenomenon is ofcourse well-known
+would get a \emph{subtype} instead. This phenomenon is ofcourse well-known
 in OOP languages and languages with subtyping, where often preservation
 needs to be weakened to allow the type after reduction to be a subtype.
 For instance, in Featherweight Java~\cite{DBLP:journals/toplas/IgarashiPW01}
@@ -606,7 +606,7 @@ $([[\f.f 1: (Int -> Int -> Int)]]) ([[\x.x]])$
 is well-typed, since bi-directional type-checking propagates
 type information to the arguments. Thus, the dynamic semantics
 needs to deal with such programs.
- Substitution for second uses $[[\x.e:A2:A1]]$ as the value being substituted.
+In such case, substitution uses $[[\x.e:A2:A1]]$ as the value being substituted.
 
 
 
@@ -638,7 +638,8 @@ needs to deal with such programs.
 \Rref{step-ann}
 reduces an annotated expression only if it is not an annotated value and $[[e]]$
 reduces to some $[[e']]$. \Rref{step-rmann} drops inner
-annotations. \Rref{step-lamann} adds one more type annotation to
+annotations, while keeping the static type.
+\Rref{step-lamann} adds one more type annotation to
 lambda expressions with only single type annotation to make them values.
 
 \begin{comment}
@@ -660,44 +661,44 @@ annotations. \Rref{step-lamann} adds one more type annotation with
 lambda expressions having single type annotation to make them values.
 \end{comment}
 
-Of particular interesting are
+Of particular interest are
 \rref{step-switch,step-switchl,step-switchr}, which deal with the reduction
 of \emph{switch} expressions.
 %\snow{I have the same linking problem for switchl/r rules here as well.
 %Clicking them just bring me to the beginning of the pdf.}
-\Rref{step-switch} reduces the case expression $[[e]]$ unless it
-becomes a value of the form $[[p:D]]$.  
-\snow{I suggest explain why the value cannot have a form of lambda here.}
-\baber{I added next few lines to address Snow's comment.}
-It is important to note that non-annotated lambda expressions cannot appear
-in switch expression. Only annotated values appear in switch expression.
-This is because that non-annotated lamda expressions do not preserve type
-and we cannot calculate the static type of non-annotated lambda expressions.
-Significance of static type is already explained above.
+\Rref{step-switch} reduces the case expression $[[e]]$.  
 \Rref{step-switchl} evaluates
 the left branch of the \emph{switch} expression if the dynamic type of $[[p]]$ is
 a subtype of type of left branch, while \rref{step-switchr} evaluates the right
 branch if type of $[[e]]$ is subtype
 of type of the right branch. The subtyping condition in 
-\rref{step-switchl,step-switchr} is important, as it gives
-freedom of various subtypes of $[[A]]$ and $[[B]]$ for a corresponding
-branch instead of only type $[[A]]$ and type $[[B]]$. Recall that
+\rref{step-switchl,step-switchr} is important, as it provides
+flexibility for the value to have various subtypes of $[[A]]$ and $[[B]]$, instead
+of strictly having those types. Recall that
 the typing rule for \emph{switch} (\rref{typ-switch}) requires that
 types of left and right branches of a \emph{switch}
 expression to be disjoint.
 This ensures \rref{step-switchl,step-switchr} cannot overlap, which, as we will
 see, is important for the
 operational semantics to be \textit{deterministic}.
+It is also important to note that non-annotated lambda expressions cannot appear
+in the switch expression. Only annotated values appear in a switch expression.
+%This is because that non-annotated lamda expressions do not preserve type
+%and we cannot calculate the static type of non-annotated lambda expressions.
+%Significance of static type is already explained above.
+
+
 %\bruno{The following sentence is out-of-place. It should appear earlier
 %  when we talk about disjointness. Perhaps you can state the property
 %formally at that point.}
 
-\paragraph{Static Type} The dynamic semantics employs a simple
-function that retrieves the static type of a pre-value.
+\begin{comment}
+\paragraph{Dynamic Type} The dynamic semantics employs a simple
+function that retrieves the dynamic type of a pre-value.
 The definition is shown in the lower part of \Cref{fig:union:os}.
 $[[Int]]$ is returned when $[[p]]$ is an integer $[[i]]$.
 Otherwise, for functions, the function annotation $[[A -> B]]$ is returned.
-
+\end{comment}
 
 
 
@@ -706,10 +707,9 @@ Otherwise, for functions, the function annotation $[[A -> B]]$ is returned.
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \subsection{Type Safety and Determinism}
 \label{sec:union:safety}
-\cal is type sound and deterministic. In this section we discuss the
-proofs of type safety and determinism for \cal. Type soundness is established
+\cal is type sound and deterministic. Type soundness is established
 by the type preservation and progress
-theorem. Type preservation (\Cref{lemma:union:preservation}) states that
+theorems. Type preservation (\Cref{lemma:union:preservation}) states that
 types are preserved during reduction. Progress
 (\Cref{lemma:union:progress}) states that well typed programs never get
 stuck.  A well typed expression $[[e]]$ is either a value or it can
@@ -830,10 +830,10 @@ all expressions, not just pre-values.
 \end{proof}
 \end{comment}
 
-
-\begin{lemma}[Disjoint Types Check False]
+\begin{lemma}[Exclusivity of Disjoint Types]
 \label{lemma:union:check-both-disj-false}
-If \ $[[A *s B]]$ \ and \ $[[G |- p <= A]]$ \ and \ $[[G |- p <= B]]$ \ then \ False.
+If \ $[[A *s B]]$ \ then there is no $[[p]]$ such that
+\ $[[G |- p <= A]]$ \ and \ $[[G |- p <= B]]$ holds.
 \end{lemma}
 
 %\baber{Again, should we show the property that a term cannot be checked against two disjoint types?}
@@ -874,7 +874,7 @@ those types that are primitive, such as integers and functions. Formally,
 \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
 \medskip
 
-\noindent Note that the static types of (pre-)values in \name are always ordinary.
+\noindent Note that the dynamic types of (pre-)values in \name are always ordinary.
 %Consequentely values with a dynamic type $A$ should have an ordinary subtype $B$,
 %such that $B <: A$. 
 %terms with bottom types cannot be reduced to values
@@ -883,17 +883,17 @@ those types that are primitive, such as integers and functions. Formally,
 %definition. 
 
 We prove that for the calculus presented in this section, the new definition is
-actually equivalent to the previous definition of disjointness
+equivalent to the previous definition of disjointness
 (\Cref{def:union:disj}).
 
 \begin{lemma}[Disjointness Equivalence]
 A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
 \end{lemma}
 
-Then why do we introduce the new definition of disjointness? It turns out that
-\Cref{def:union:disj} is not sufficient when the calculus is integrated with
-intersection types, as in Section~\ref{sec:inter}, and as we will see,
-\Cref{def:union:disj1} will play an important role.
+Why do we introduce the new definition of disjointness? It turns out that
+\Cref{def:union:disj} is not sufficient when the calculus is extended with
+intersection types, as in Section~\ref{sec:inter}. We will see,
+\Cref{def:union:disj1} will play an important role in such variant of the calculus.
 
 %%% Local Variables:
 %%% mode: latex
