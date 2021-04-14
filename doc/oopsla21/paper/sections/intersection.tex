@@ -151,7 +151,12 @@ disjoint types to be subtype of $[[Bot]]$.
 of two disjoint types $[[A]]$ and $[[B]]$ is a subtype of the $[[Bot]]$ type.
 In other words, now the type $[[Int /\ Bool]]$ would be a bottom-like type, and the
 definition of disjointness used in Section~\ref{sec:union} could still work.
-However we do not adopt this solution here two reasons:
+The logic behind this rule is that if we interpret types as sets of values,
+and intersection as set intersection, then intersecting disjoint sets should
+gives the empty set. In other words, we would get a type that has no inhabitants (i.e.
+a bottom-like type).
+For instance the set of all integers is disjoint to the set of all booleans.
+However we do not adopt the Ceylon solution here two reasons:
 
 \begin{enumerate}
 
@@ -163,12 +168,12 @@ However we do not adopt this solution here two reasons:
   for disjointness becomes quite challenging.
 
 \item Additionaly, the assumption that intersections of disjoint types
-  are equivalent to bottom is too strong for some calculi with intersection
+  are equivalent to $[[Bot]]$ is too strong for some calculi with intersection
   types. If a merge operator~\cite{reynolds1988preliminary} is allowed in the calculus, 
   intersection types
   with disjoint types can be inhabited with values (for example, in 
   \cite{oliveira2016disjoint},
-  the type $[[Int /\ Bool]]$ is inhabited by $[[1]] ,, \mathsf{True}$), and considering those
+  the type $[[Int /\ Bool]]$ is inhabited by $[[1]] ,, \mathsf{True}$). Considering those
   types bottom-like would lead to a problematic definition of disjointness,
   since some bottom-like types (those based on disjoint types) would
   be inhabited. In turn, using such definition of disjointness would lead to
