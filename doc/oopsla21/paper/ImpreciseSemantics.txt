@@ -1,0 +1,126 @@
+==========
+Motivation
+==========
+
+Currently our semantics has a nice&simply metatheory but can be criticized
+for carying too much type information at runtime. We need to track both static and dynamic
+types, and this has space and time costs.
+
+===========
+Observation
+===========
+
+Static types are only relevant for the metatheory, to ensure preservation.
+
+========
+Proposal
+========
+
+Thus, I propose a second semantics (in addition to the current one),
+which I'm going to call the imprecise semantics. I call it imprecise because
+it loses precision on types, and reduction may transform an expression into
+another expression that has a subtype as a result. In the imprecise semantics
+only the dynamic types are tracked. The imprecise semantics could be used instead
+to guide implementations, and it would be more efficient.
+
+======
+Syntax
+======
+
+The syntax is almost the same, the only changes are in the syntax of values:
+
+v_i = p | \x. e
+
+An imprecise value (v_i) is either a pre-value or an unannotated lambda. Note
+that the difference is that we use pre-value instead of annotated values here.
+
+===================
+Imprecise Reduction
+===================
+
+The reduction rules drop a couple of rules, but otherwise they just follow the existing
+rules, while carrying less types:
+
+---------
+e1 ~~> e2
+---------
+
+e1 ~~> e1'
+---------------- Step-appl
+e1 e2 ~~> e1' e2
+
+e ~~> e'
+---------------- Step-appr     (Note: we use p instead of r here)
+p e ~~> p e' 
+
+---------------------------------------------- Step-beta
+(\x . e : A -> B) v ~~> (e [x |-> v <| A]) : B
+
+e ~~> e'
+----------------- Step-Ann   (no need to test AValue)
+e : A ~~> e' : A
+
+------------ Step-rmann      (simply drop the static annotation & lose precision here)
+p : A ~~> p
+
+e ~~> e'
+----------------------------------------------- Step-switch
+switch e {(x : A) --> e1, (y : B) --> e2} ~~>
+switch e' {(x : A) --> e1, (y : B) --> e2} 
+
+e ~~> e'
+----------------------------------------------- Step-switch
+switch e {(x : A) -> e1, (y : B) -> e2} ~~>
+switch e' {(x : A) -> e1, (y : B) -> e2} 
+
+DynType p <: A
+---------------------------------------------------------- Step-switchl
+switch p {(x : A) -> e1, (y : B) -> e2} ~~> (e1 [x |-> p]) 
+
+DynType p <: B
+---------------------------------------------------------- Step-switchr
+switch p {(x : A) -> e1, (y : B) -> e2} ~~> (e2 [y |-> p]) 
+
+Note: There is no Step-Int and Step-Lamann
+
+-----------
+Beta Value:
+-----------
+
+p <| A     = p
+\x.e <| A  = \x. e : A
+
+==========
+Properties
+==========
+
+We wish to prove that our imprecise semantics is type-safe.
+
+I think we need the following:
+
+Lemma 1: If e1 --> e2 then (exists some v_i such that e1 = v_i) \/ (e1 ~~> e2)
+
+Lemma 1 states that if an expression e1 reduces using the Precise semantics
+(what is on the paper), then it is the case that e1 is either:
+
+1) already an imprecise value; or
+2) an expression that also reduces with the imprecise semantics.
+
+Lemma 2: If e1 -->* v then e1 ~~>* |v|
+
+This leamma states that if e1 reduces to a value after some steps with the imprecise
+semantics, then it reduces to the erased value under the imprecise semantics. Where
+erasure is:
+
+|p : A| = p
+|\x.e|  = \x. e
+
+Lemma 3 (Type safety). As a trivial corollary we can conclude the type safety
+of the imprecise semantics.
+
+If . |- e : A and e ~~> e' then either:
+
+1) e' is an imprecise value /\ . |- e' : B /\ B <: A; or
+
+2) exists e''. e' ~~> e''
+
