@@ -267,7 +267,7 @@ since two branches could deal with the floating point number. Note that, since
 the cases in a switch cannot overlap, their order is irrelevant to the program's
 behavior and its evaluation result.
 
-\subsubsection*{Union Types as an Alternative to Overloading}
+\paragraph{Union types as an alternative to overloading}
 A motivation of such type-directed union elimination in Ceylon is to
 model a form of function overloading.
 The following example, which is adapted from TypeScript's documentation\footnote{https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html},
@@ -305,7 +305,7 @@ it can only be a string or an integer.
 As such, when values with such types are passed to the function,
 the corresponding branch is chosen and executed.
 
-\subsubsection*{Other Applications of Union Types}
+\paragraph{Other applications of union types}
 Besides being used for overloading, union types can be used for other purposes to.
 For instance, we can easily encode the \lstinline{safediv} function in Section~\ref{subsec:elimination}
 in Ceylon:
@@ -388,7 +388,7 @@ types have no null value. }
 %Next, we will see how Ceylon's static type checking helps programmers.
 
 \begin{comment}
-\subsubsection*{Exhaustiveness}
+\paragraph{Exhaustiveness}
 
 Ceylon checks the exhaustiveness of a switch by comparing the union of all
 cases and the switched term's type.
@@ -479,7 +479,7 @@ a term of \lstinline{Integer|Float}, since \lstinline{Integer|Float|String}
 still covers \lstinline{Integer|String}.
 
 
-\subsubsection*{Disjointness}
+\paragraph{Disjointness}
 Ceylon prevents any pair of cases in a switch from overlapping.
 And disjointness is introduced to describe such relation between two types.
 Being disjoint means the non-existence of a value which can be assigned to
@@ -534,7 +534,7 @@ In that case the meaning of infinity is hidden.
 On contrary, disjoint cases are always distinguishable, and the user, when
 using an existing definition, is guaranteed that there is no hidden conflicts.
 
-\subsubsection*{The Bottom Type}
+\paragraph{the bottom type}
 To dig deeper for disjointness, it often comes to the the concept
 of \emph{bottom type}.
 Bottom type is a subtype of all types, in contrast to the top type.
@@ -547,7 +547,7 @@ the bottom type \lstinline{Nothing}.
 \end{comment}
 
 \begin{comment}
-\subsubsection*{Existing Problems in Ceylon}
+\paragraph{Existing problems in Ceylon}
 In general, a term of type $A$ is always assignable to any supertype of $A$.
 But in Ceylon, the checking of assignability is not complete to
 subtyping.
@@ -573,7 +573,7 @@ runtime, with the help of annotated values.
 Here we give an overview of our design and discuss some challenges
 we met for the two calculi in the paper.
 
-\subsubsection*{Disjointness, Interacted with Intersection Types}
+\paragraph{Disjointness, interacted with intersection types}
 After seeing the connection between bottom-like types and disjointness,
 it is intuitive to formally define disjointness via bottom-like types.
 
@@ -673,7 +673,7 @@ with respect to the declarative definition.
 Same applies to the two definitions for \cal without intersection.
 
 
-\subsubsection*{Typing and Exhaustiveness}
+\paragraph{Typing and exhaustiveness}
 In \cal, a switch expression has two branches. For multiple cases,
 one can write nested switch expression.
 We assume the two branches expect $[[A]]$ and $[[B]]$.
@@ -695,7 +695,7 @@ it does not prevent them to return different types.
 Assuming the inferred type of $[[e1]]$ is $[[C1]]$ and the inferred type of
 $[[e2]]$ is $[[C2]]$, we can make $[[C]]$ to be $[[C1\/C2]]$.
 
-\subsubsection*{Reduction and Annotated Values}
+\paragraph{Reduction and annotated values}
 Our reduction preserves type.
 So a term of union type can only evaluates to a value of an union type.
 We use type annotations to construct such values.
