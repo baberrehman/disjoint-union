@@ -162,6 +162,9 @@ function tostring3 (x: String | Int) : String =
     Int -> show x
 \end{lstlisting}
 
+\snow{To be consistent with our syntax, each branch should name a variable, like
+\lstinline{tostring2}. Same applies to \lstinline{isstudent2}.}
+
 \noindent Note here \lstinline{show} is directly applied to \lstinline{x}, and
 it does not need to be overloaded, as the type-directed elimination
 \textit{refines} the type of \lstinline{x} from \lstinline{String | Int} to
@@ -307,14 +310,52 @@ For instance, we can easily encode the \lstinline{safediv} function in Section~\
 in Ceylon:
 \bruno{Ceylon code for safediv and to string here, and some short piece of text about the
 example}
+%
+\begin{lstlisting}
+String | Integer safediv3 (Integer x, Integer y){
+	if (y==0) {
+		return "Divided by zero";
+	} else{
+		return (x/y);
+	}
+}
+\end{lstlisting}
+%
+The return value can be a string or an integer.
+No tag is needed for any of them to be a \lstinline{String|Integer},
+since union types can be implicitly introduced.
+For the declared return type of the function, as long as it is
+a supertype of all possible return values, it is valid
+in Ceylon.
+
 
 Furthermore, another interesting application
-of union types in Ceylon is to encode nullable types (or optional types).
+of union types in Ceylon is to encode nullable types (or optional types)
+in a type-safe way.
 A similar approach to nullable types has also been recently proposed for Scala~\citep{nieto20nulls}.
-The \lstinline{null} value is inhabited by the type \lstinline{A?},
+The \lstinline{null} value is inhabited by the type \lstinline{Null}.
+For type \lstinline{A} to be nullable, one can write \lstinline{A?},
 which stands for \lstinline{A|Null}.
-If we eliminate a value of type \lstinline{A|Null}, there has to be a branch to handle
-the null value. \bruno{Say more about this, maybe show a (simplified)
+If we eliminate a value of type \lstinline{A|Null}, there has to be a branch
+to handle the null value.
+Ceylon define the top type \lstinline{Anything} as an enumerated class.
+\lstinline{Null} is a case of it.
+It differs to the bottom type \lstinline{Nothing} in the sense
+that it is inhabited.
+\lstinline{Anything} has another distinct case called \lstinline{Object}.
+It is the root of primitive types, function types, all interfaces and any user-defined class.
+\lstinline{Null} is disjoint to \lstinline{Object}, and therefore, to all
+these types.
+The following diagram presents their subtyping relation briefly.
+
+\begin{tikzcd}
+	& \begin{smallmatrix}     0 & 0 & 0 \\      & 0 &            \end{smallmatrix}  \arrow[rd] &  & \begin{smallmatrix}     Anything \\      &  &            \end{smallmatrix}  \arrow[rd] &  &  \\
+	&  & \begin{smallmatrix}     Null \\      &  &            \end{smallmatrix}  \arrow[rd] \arrow[ru] &  & \begin{smallmatrix}     Object \\      & &            \end{smallmatrix}  \arrow[rd] &  \\
+	& \begin{smallmatrix}     0 & 0 & 0 \\      & 1 &            \end{smallmatrix}  \arrow[ru] \arrow[rd] &  & \begin{smallmatrix}     Char \\      &  &            \end{smallmatrix}  \arrow[ru] \arrow[rd] &  & \begin{smallmatrix}     Integer \\      &  &            \end{smallmatrix}  \\
+	\begin{smallmatrix}     1 & 1 & 1 \\      & 1 &            \end{smallmatrix}  \arrow[ru] &  & \begin{smallmatrix}     0 & 0 & 0 \\      & 1 &            \end{smallmatrix}  \arrow[ru] &  & \begin{smallmatrix}     Nothing \\      & &            \end{smallmatrix}  \arrow[ru] &
+\end{tikzcd}
+
+\bruno{Say more about this, maybe show a (simplified)
   picture of the subtyping lattice?
 The point is that Null is not a subtype of Object, right? so, by default object
 types have no null value. }
