@@ -348,13 +348,6 @@ It is the root of primitive types, function types, all interfaces and any user-d
 these types.
 The following diagram presents their subtyping relation briefly.
 
-\begin{tikzcd}
-	& \begin{smallmatrix}     0 & 0 & 0 \\      & 0 &            \end{smallmatrix}  \arrow[rd] &  & \begin{smallmatrix}     Anything \\      &  &            \end{smallmatrix}  \arrow[rd] &  &  \\
-	&  & \begin{smallmatrix}     Null \\      &  &            \end{smallmatrix}  \arrow[rd] \arrow[ru] &  & \begin{smallmatrix}     Object \\      & &            \end{smallmatrix}  \arrow[rd] &  \\
-	& \begin{smallmatrix}     0 & 0 & 0 \\      & 1 &            \end{smallmatrix}  \arrow[ru] \arrow[rd] &  & \begin{smallmatrix}     Char \\      &  &            \end{smallmatrix}  \arrow[ru] \arrow[rd] &  & \begin{smallmatrix}     Integer \\      &  &            \end{smallmatrix}  \\
-	\begin{smallmatrix}     1 & 1 & 1 \\      & 1 &            \end{smallmatrix}  \arrow[ru] &  & \begin{smallmatrix}     0 & 0 & 0 \\      & 1 &            \end{smallmatrix}  \arrow[ru] &  & \begin{smallmatrix}     Nothing \\      & &            \end{smallmatrix}  \arrow[ru] &
-\end{tikzcd}
-
 \tikzset{
   state/.style={
     rectangle,
@@ -374,11 +367,11 @@ The following diagram presents their subtyping relation briefly.
   \node[state, anchor=center] (d) at (1, -1) {Char};
   \node[state, anchor=center] (e) at (3, -1) {Integer};
   \node[state, anchor=center] (f) at (2, -2) {Nothing};
-  \draw (a) -- (c);
+  \draw (c) -- (a);
   \draw (c) -- (b);
-  \draw (d) -- (b);
+  \draw (b) -- (d);
   \draw (b) -- (e);
-  \draw (f) -- (e);
+  \draw (e) -- (f);
   \draw (d) -- (f);
   \draw (a) to[out=225,in=180] (f);
 \end{tikzpicture}
