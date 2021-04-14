@@ -71,9 +71,11 @@ intersection types and \rref{s-los}.
 
 Another interesting extension is to add distributive subtyping to \cal.
 Ceylon~\cite{muehlboeck2018empowering} employs an enriched 
-distributive subtyping relation that is based on the B+ logic~\cite{?}\bruno{ask Snow about this reference?}.
+distributive subtyping relation that is based on the 
+B+ logic~\cite{routley1972semantics,van2000minimal}
+\bruno{ask Snow about this reference?}.
 Distributive subtyping is more expressive and accomodates more programs than what we discussed in
-\Cref{sec:inter}. Here we add distributive subtyping in the variant of \cal with
+\Cref{sec:union,sec:inter}. Here we add distributive subtyping in the variant of \cal with
 intersection types. 
 
 \subsubsection*{Distributive subtyping relation.}
@@ -86,18 +88,20 @@ discussed in \Cref{sec:union}. \Rref{ds-anda} has been discussed in \Cref{sec:in
 \Rref{ds-andb,ds-andc} state that intersection type $[[A1 /\ A2]]$ is a subtype of both $[[A1]]$
 and $[[A2]]$ separately.\bruno{Snow can't we drop some of the distributivity rules? Some of them
 are redundant, right?}
+\baber{We dropped 3 rules in figure 6.}
 
-\Rref{ds-distarr,ds-distarrrev}  distribute function types over intersection types.
-They state that $[[(A -> B1) /\ (A -> B2)]]$ and $[[A -> (B1 /\ B2)]]$ are equivalent types.
-\Rref{ds-distarru,ds-distarrurev} state that $[[(A1 -> B) /\ (A2 -> B)]]$ and $[[(A1 \/ A2) -> B]]$
-are equivalent types.
-\Rref{ds-distor,ds-distand} distribute intersection types over union types and vice versa.
+\Rref{ds-distarr} distributes function types over intersection types.
+It states that $[[(A -> B1) /\ (A -> B2)]]$ type is subtype of
+$[[A -> (B1 /\ B2)]]$ type.
+\Rref{ds-distarru} states that $[[(A1 -> B) /\ (A2 -> B)]]$ is subtype of
+$[[(A1 \/ A2) -> B]]$ type.
+\Rref{ds-distor} distributes intersection types over union types.
 
 \subsubsection*{An example of distributive subtyping in Ceylon.}
 We show the use of distributive subtyping with following Ceylon code snippet:
 
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
-void do((Int & String) | Bool val) {
+\begin{lstlisting}
+void do(<Integer & String> | Boolean val) {
   //do something
 }
 \end{lstlisting}
@@ -114,9 +118,9 @@ value of type $[[(Int \/ Bool) /\ (String \/ Bool)]]$ to the function
 Distributive subtyping allows type-checking such programs.
 With distributive subtyping, following Ceylon application type-checks:
 
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
-  val (Int | Bool) & (String | Bool) x = true;
-  do(x);
+\begin{lstlisting}
+val <Integer | Boolean> & <String | Boolean> x = true;
+do(x);
 \end{lstlisting}
 
 \noindent In particular, \rref{ds-distor} allows this specific program to type-check.
@@ -126,7 +130,7 @@ Therefore, distributive subtyping is more expressive than standard subtyping
 discussed in \Cref{sec:union,sec:inter}.
 
 
-\paragraph{\name extension with distributivity.}
+\subsubsection*{\name extension with distributivity.}
 We have studied a variant of \name with intersection types and subtyping distributivity.
 All the metatheory for this variant is proved in Coq. The variant preserves
 type-soundness, soundness and completeness of disjointness and determinism.
@@ -136,7 +140,7 @@ and these definitions are just the same as those discussed in \Cref{sec:inter}.
 
 \begin{figure}[t]
   %\centering
-  \drules[ds]{$ [[A <<: B ]] $}{Declarative Subtyping}{refl, trans, top, btm, int, arrow, ora, orb, orc, anda, andb, andc, distarr, distarrrev, distarru, distarrurev, distor, distand}
+  \drules[ds]{$ [[A <<: B ]] $}{Declarative Subtyping}{refl,trans,top,btm,int,arrow,ora,orb,orc,anda,andb,andc,distarr,distarru,distor}
   \caption{Declarative Subtyping}
   \label{fig:discussion:ds}
 \end{figure}
@@ -191,17 +195,54 @@ According to the specification, two types X and Y are disjoint when:
   \item{X and Y are both classes and X is not a subclass of Y and Y is not a subclass of X}
   \item{X is a union type $[[A \/ B]]$ and both Y and A are disjoint and Y and B are disjoint}
   \item{X is an enumerated type with cases A1|A2|... and for every case Ai of X, Y and Ai are disjoint}
-  \item{X is an intersection type $[[A/\B]]$ and either Y and A are disjoint or Y and B are disjoint, or}
+  \item{X is an intersection type $[[A/\B]]$ and either Y and A are disjoint or Y and B are disjoint}
 \end{enumerate}
 \bruno{Did you cut some text in point 5? You finssh the sentence with ``or''.}
+\baber{I droppped or, it refers to next point in documentation
+which is about generic type and intersections.}
 
 \noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
 \bruno{Since there are only 5 points, instead of just picking 2 points next, talk about all
 the 5 points and explain how they relate. You should give a few more details next.}
+\baber{I think we should drop point 1 and 4. They are not directly related to our calculus.
+or shall we relate enumerated types with intersection types in our calculus? But if we do that
+then there is point 3 that talks about union types separately.}
 For example, (2) is one specific case of \Cref{def:inter:disj}.\bruno{I guess what you may
   want to say is that we can prove something like: $not (A <: B)$ and $not (B <: A)$ implies $A * B$?
 You can make a stronger point by proving this lemma and show it here.}
+\baber{I doubt if this property hold in our calculus. For example,
+A = (Char $\wedge$ Bool) $\vee$ Int, B = (String $\wedge$ Float) $\vee$ Int.
+A and B are not subtypes of each other.
+But they do share an ordinary subtype Int.
+I think this is the counter example, considering Float and Int are non-overlapping types?}
 When both types $[[A]]$ and
-$[[B]]$ are not subtypes of each other, they naturally do not share any common subtype.
+$[[B]]$ are not subtypes of each other, they naturally do not share any common ordinary subtype.
+\baber{I added text for point 3 below.}
 Point (3) is essentially the algorithmic
 rule for union disjointness (\rref{ad-orl} in Section~\ref{sec:union}) in \cal.
+Point (5) is also a specific case of \Cref{def:inter:disj}.
+When a component type (either $[[A]]$ or $[[B]]$) of an intersection type $[[A /\ B]]$
+is disjoint to some type $[[C]]$. Then that specific
+component type (either $[[A]]$ or $[[B]]$) and type $[[C]]$ 
+do not share any common ordinary subtype.
+If a component type of intersection type do not share ordinary subtype
+with some type, then naturally complete intersection type do not share
+ordinary subtype with that type. 
+Therefore, $[[C]]$ is disjoint to $[[A /\ B]]$ if it is disjoint to either of
+the component type in intersection type.
+For example, type $[[Int /\ Top]]$ is disjoint to type $[[Bool]]$.
+Because first component of $[[Int /\ Top]]$, which is $[[Int]]$ in this case,
+is disjoint to $[[Bool]]$.
+Following \Cref{def:inter:disj}, $[[Int]]$ and $[[Bool]]$ do not share any
+ordinary subtype and so $[[Int /\ Top]]$ and $[[Bool]]$.
+We show this property with following two lemmas in \name:
+
+\begin{lemma}[Left Component Type in Intersection Type Disjoint]
+  If $[[A *s C]]$ then $[[(A /\ B) *s C]]$.
+\label{lemma:discussion:comp:left:inter}
+\end{lemma}
+
+\begin{lemma}[Right Component Type in Intersection Type Disjoint]
+  If $[[B *s C]]$ then $[[(A /\ B) *s C]]$.
+\label{lemma:discussion:comp:right:inter}
+\end{lemma}

@@ -809,3 +809,21 @@ Proof.
   unfold DisjAlgo in H.
   apply s_disj. simpl. auto.
 Qed.
+
+Lemma and_disj1 : forall A B C, A *s C -> (t_and A B) *s C.
+Proof.
+  unfold DisjSpec. unfold not.
+  intros.
+  apply sub_and in H1. destruct H1.
+  apply sub_and in H1. destruct H1.
+  forwards*: H H0.
+Qed.
+
+Lemma and_disj2 : forall A B C, B *s C -> (t_and A B) *s C.
+Proof.
+  unfold DisjSpec. unfold not.
+  intros.
+  apply sub_and in H1. destruct H1.
+  apply sub_and in H1. destruct H1.
+  forwards*: H H0.
+Qed.
