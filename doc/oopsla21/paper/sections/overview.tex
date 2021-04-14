@@ -215,19 +215,42 @@ worker, a switch statement that discriminates between workers and students could
 potentially choose either branch. However for persons that are only students or
 only workers, only one branch can be chosen.
 
-Some languages support form of typed-based union elimination via overloading,
-which usually finds in all branches the one that best describes the type. Such
-approach is used in, for example, resolving overloading in Java \cite{javadoc}.
-Then, if we apply \lstinline{isstudent2} to a term of type \lstinline{Student},
-the second branch is chosen, as \lstinline{Student} is the best type describing
-\lstinline{x}. However, even with the best-match strategy, the semantics can be
-confusing when the system features implicit upcasting (e.g., by subtyping). For
-example, suppose the type \lstinline{Pegasus} is a subtype of both type
-\lstinline{Bird} and type \lstinline{Horse}. If we apply a switch expression on
-the type \lstinline{Bird | Horse} to a term of type \lstinline{Pegasus}, which
-branch should we choose, the one with \lstinline{Bird}, or the one with
+\paragraph{Best-match and overloading.}
+
+Some languages support form of typed-based union elimination via method
+overloading. Such form is used in, for example, Java \cite{javadoc}. In Java, we
+can encode \lstinline{isstudent3} as a function, which has different
+behaviors when the type of the argument differs.
+
+\begin{lstlisting}
+boolean isstudent3 (Person x) {
+  return False;
+}
+
+boolean isstudent3 (Student x) {
+  return True;
+}
+\end{lstlisting}
+
+In Java, overloading is resolved by finding in all method implementations the
+one with the \textit{best} type signature that describes the argument. That
+means, if we apply \lstinline{isstudent3} to a term of type \lstinline{Student},
+the second implementation is chosen, as \lstinline{Student} is the best type
+describing the argument. As we can see, such best-match strategy gets rid of the
+order-sensitive problem. In this case, we can have the two implementations of
+\lstinline{isstudent3} in any order, and Java will always try to find the
+best-match one.
+
+However, the best-match strategy can also be confusing, especially when the
+system features implicit upcasting (e.g., by subtyping). For example, suppose
+the type \lstinline{Pegasus} is a subtype of both type \lstinline{Bird} and type
+\lstinline{Horse}. If a method \lstinline{isbird} is overloaded for
+\lstinline{Bird} and \lstinline{Horse}, then which method implementation should
+we choose when we apply \lstinline{isbird} to a term of type
+\lstinline{Pegasus}, the one for \lstinline{Bird}, or the one for
 \lstinline{Horse}? In such case, the semantics is non-deterministic again, and
-depends on the particular implementation of the compiler.
+the behavior of the program depends on the particular implementation of the
+compiler.
 
 
 \subsection{Eliminating Union Types in Ceylon}
