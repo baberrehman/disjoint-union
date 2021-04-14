@@ -1,0 +1,85 @@
+==========
+Motivation
+==========
+
+As observed by Snow it seems that we do not need the dynamic type. This is
+because our switch construct never has to distinghuish between two function types. 
+
+========
+Proposal
+========
+
+Therefore we can try to simplify the semantics to use one level of annotations only.
+
+======
+Syntax
+======
+
+The syntax is almost the same, the only changes are in the syntax of values:
+
+p ::= i | \x . e
+w ::= p : A
+v = w | \x. e
+
+Note that the difference is that there is no annotation on the lambda of the pre-value.
+
+===================
+Simplified Reduction
+===================
+
+The reduction rules drops Step-Lamann, but otherwise they just follow the existing
+rules, while carrying less types:
+
+---------
+e1 ~~> e2
+---------
+
+e1 ~~> e1'
+---------------- Step-appl
+e1 e2 ~~> e1' e2
+
+------------- Step-int
+i ~~> i : Int
+
+e ~~> e'
+---------------- Step-appr     
+w e ~~> w e' 
+
+---------------------------------------------- Step-beta
+(\x . e : A -> B) v ~~> (e [x |-> v <| A]) : B
+
+(e is not a pre-value)   e ~~> e'
+-------------------------------- Step-Ann
+e : A ~~> e' : A
+
+------------------- Step-rmann      
+p : A : B ~~> p : B
+
+e ~~> e'
+----------------------------------------------- Step-switch
+switch e {(x : A) -> e1, (y : B) -> e2} ~~>
+switch e' {(x : A) -> e1, (y : B) -> e2} 
+
+DynType w <: A
+---------------------------------------------------------- Step-switchl
+switch w {(x : A) -> e1, (y : B) -> e2} ~~> (e1 [x |-> p]) 
+
+DynType w <: B
+---------------------------------------------------------- Step-switchr
+switch w {(x : A) -> e1, (y : B) -> e2} ~~> (e2 [y |-> p]) 
+
+
+-----------
+Beta Value:
+-----------
+
+p : B <| A     = p : A
+\x.e <| A      = \x. e : A
+
+-------
+DynType
+-------
+
+DynType (i : A)           = Int
+DynType (\x. e : A -> B)  = A -> B
+
