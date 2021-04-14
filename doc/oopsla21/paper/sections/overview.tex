@@ -150,7 +150,7 @@ functions. Without overloaded functions the construct would not be very useful.
 \paragraph{Type-directed elimination.}
 
 On the other hand, some
-systems~\cite{castagna:settheoretic,muehlboeck2018empowering} support
+systems~\cite{castagna:settheoretic} support
 \textit{type-directed} elimination of union types. For instance,
 \lstinline{tostring3} has different behaviors depending on the \textit{type} of
 \lstinline{x}.
@@ -158,18 +158,19 @@ systems~\cite{castagna:settheoretic,muehlboeck2018empowering} support
 \begin{lstlisting}
 function tostring3 (x: String | Int) : String =
   switch (x)
-    String -> x
-    Int -> show x
+    (y : String) -> y
+    (y : Int) -> show y
 \end{lstlisting}
 
 \snow{To be consistent with our syntax, each branch should name a variable, like
 \lstinline{tostring2}. Same applies to \lstinline{isstudent2}.}
+\ningning{I added variables. Then there is no type refinement anymore.. But I
+  guess it's fine as the reference to occurrence typing is not important anyway.}
 
 \noindent Note here \lstinline{show} is directly applied to \lstinline{x}, and
 it does not need to be overloaded, as the type-directed elimination
-\textit{refines} the type of \lstinline{x} from \lstinline{String | Int} to
-\lstinline{Int} in the second branch (such type refinements are basically a form of
-\textit{occurrence typing} \cite{Tobin:typedscheme}).
+\textit{turns} the variable \lstinline{x} of type \lstinline{String | Int} into
+the variable \lstinline{y} of type \lstinline{Int}.
 
 However, compared to tag-directed elimination, extra care must to taken with
 type-directed elimination. In particular, while we can easily distinguish tags,
@@ -191,8 +192,8 @@ elimination, we will get:
 \begin{lstlisting}
 function isstudent2 (x: Person | Student) : Bool =
   switch (x)
-    Person  -> False
-    Student -> True
+    (y : Person)  -> False
+    (y : Student) -> True
 \end{lstlisting}
 
 \noindent Now it is unclear what would happen if we apply \lstinline{isstudent2}
