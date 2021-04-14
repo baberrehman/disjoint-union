@@ -8,7 +8,7 @@ In this section we add intersection types to \cal.
 %Therefore it is important to understand whether intersection types
 %can be easily added or whether there are some challenges.
 The addition of intersection types poses a challenge,
-since the notion of disjointness inspired from \citet{oliveira2016disjoint}
+since the notion of disjointness inspired from disjoint intersection types~\citep{oliveira2016disjoint}
 no longer works. Fortunately, the alternative specification presented in
 \Cref{sec:union:discussion} comes to the rescue. Furthermore, we show how to obtain
 an algorithmic formulation of disjointness based on a novel notion
@@ -77,7 +77,7 @@ Lower part of
 \Cref{fig:inter:system} shows ordinary types~\cite{davies2000intersection}, 
 which is the same as given in \Cref{sec:union:discussion}.
 Ordinary types are essentially primitive types. In \cal they
-are essentially integers and functions. 
+are integers and functions. 
 %$[[Top]]$, $[[Int]]$ and $[[A -> B]]$ types are considered as ordinary
 %types in \cal with intersection types.
 
@@ -148,10 +148,10 @@ disjoint types to be subtype of $[[Bot]]$.
 
 \noindent This rule is adopted by the Ceylon language~\cite{muehlboeck2018empowering}:
 \Rref{s-disj} states that the insersection type $[[A /\ B]]$
-of two disjoint types $[[A]]$ and $[[B]]$ is subtype of $[[Bot]]$ type.
+of two disjoint types $[[A]]$ and $[[B]]$ is a subtype of the $[[Bot]]$ type.
 In other words, now the type $[[Int /\ Bool]]$ would be a bottom-like type, and the
 definition of disjointness used in Section~\ref{sec:union} could still work.
-However we do not adopt this solution here for two reasons:
+However we do not adopt this solution here two reasons:
 
 \begin{enumerate}
 
@@ -163,22 +163,23 @@ However we do not adopt this solution here for two reasons:
   for disjointness becomes quite challenging.
 
 \item Additionaly, the assumption that intersections of disjoint types
-  is equivalent to bottom is too strong for some calculi with intersection
+  are equivalent to bottom is too strong for some calculi with intersection
   types. If a merge operator~\cite{reynolds1988preliminary} is allowed in the calculus, 
   intersection types
   with disjoint types can be inhabited with values (for example, in 
   \cite{oliveira2016disjoint},
   the type $[[Int /\ Bool]]$ is inhabited by $[[1]] ,, \mathsf{True}$), and considering those
-  types bottom-like would lead to a problematic definition of disjointness and the loss
-  of determinism.
-
-  \ningning{What is a problematic definition of disjointness and loss of
-    determinism? What I can think why it's wrong is that the bottom type is
-    then made inhabited.}
+  types bottom-like would lead to a problematic definition of disjointness,
+  since some bottom-like types (those based on disjoint types) would
+  be inhabited. In turn, using such definition of disjointness would lead to
+  the loss of determinism.
 
 \end{enumerate}
 
-Instead, we adopt a novel solution in \name.
+For those reasons we adopt a different approach in \name.
+Nevertheless, in Section~\ref{sec:inter:refactoring} we will see that it is possible to
+create an extension of \name that includes (and in fact generalizes)
+the Ceylon-style \rref{s-disj}.
 
 \paragraph{Disjointness based on Ordinary Types to the rescue}
 To solve the problem with the disjointness specification, we resort to
@@ -246,8 +247,6 @@ We further illustrate
         Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
 \end{enumerate}
 
-\ningning{like before, add one or two for unions (like one with both unions and intersections).}
-\baber{I added example 4 and updated example 2 from $[[Int]]$ to $[[Int \/ Bool]]$.}
 %The
 %reason we did not write intersection in \Cref{def:union:disj1} is
 %because we do not have intersection types in \cal discussed in
@@ -257,14 +256,11 @@ We further illustrate
 
 \subsection{Algorithmic Disjointness}
 
-The change in the disjointness specification has a significant impact on its
+The change in the disjointness specification has a significant impact on an
 algorithmic formulation. In particular, it is not obvious at all how to adapt
-the algorithmic formulation as in \Cref{fig:union:disj-typ}. To obtain a
+the algorithmic formulation in \Cref{fig:union:disj-typ}. To obtain a
 sound, complete and decidable formulation of disjointness, we employ the novel
 notion of \emph{lowest ordinary subtypes}.
-
-\ningning{separate the definition of LOS into another figure and put the figure here.}
-\baber{Done.}
 
 \begin{figure}[t]
     \centering
@@ -288,9 +284,9 @@ notion of \emph{lowest ordinary subtypes}.
 \paragraph{Lowest Ordinary Subtypes ($[[findsubtypes A]]$)}
 \Cref{fig:inter:los} shows the definition of
 \emph{lowest ordinary subtypes} (LOS) ($[[findsubtypes A]]$).
-LOS are defined as a function which
+LOS is defined as a function which
 returns a set of ordinary subtypes of the given input type. 
-No ordinary type is subtype of $[[Bot]]$ type. The only ordinary
+No ordinary type is a subtype of $[[Bot]]$. The only ordinary
 subtype of $[[Int]]$ is $[[Int]]$ itself. The function case is
 interesting. Since no two functions are disjoint in the calculus
 proposed in this paper, the case for function types $[[A -> B]]$ returns $[[Top
@@ -370,16 +366,11 @@ the declarative specification.
 \label{lemma:inter:disj-complete}
 \end{lemma}
 
-\baber{I think we may want to show the proofs for soundness and completeness for this section?}
-\bruno{Perhaps, if the proofs are simple enough (or we have space) we can discuss}
-
 \subsection{Typing, Semantics and Metatheory}
 
 The typing and operational semantics stay the same as in \Cref{sec:union}. Note
 that while those rules stay the same, as types and subtyping rules are extended
-with intersection types, the system is naturally more expressive than
-in \Cref{sec:union}.
-
+with intersection type.
 We prove that \cal with intersection types preserves type soundness and determinism.
 %\bruno{add determinism}
 

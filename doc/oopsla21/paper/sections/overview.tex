@@ -466,22 +466,6 @@ But in \lstinline{printAge}, the second branch is always shadowed by the first o
 Any missing data will be interpreted as infinity.
 %
 Note that swapping the two cases cannot prevent all unexpected behaviors.
-When the outside \lstinline{Null} has a different meaning other than infinity,
-they are not distinguishable, and the branch designed for it will take them all.
-% And instead of \lstinline{print}, one might call a function that takes care
-% of \lstinline{Nothing} and the other component in \lstinline{A}.
-This problem is even more serious when the language implements some syntax
-sugar or encode other features via the switch/case construct.
-It could be convenient to have a simple construct for unwrapping \lstinline{A|Null} without writing down the full switch/case expression.
-But once the details are hidden, users may not be able to image that how does
-the order affects the program, as we discussed above.  
-On the other hand, with some requirements on the argument and return types, it is 
-straightforward to support function overloading by combining them in a switch/case expression.
-But it will be hard to find a fair criteria to decide which one
-should be prioritized, if two functions can overlap.
-% https://github.com/ceylon/ceylon-spec/issues/50
-% https://github.com/ceylon/ceylon-spec/issues/65
-
 In that case the meaning of infinity is hidden.
 On contrary, disjoint cases are always distinguishable, and the user, when
 using an existing definition, is guaranteed that there is no hidden conflicts.
@@ -516,38 +500,6 @@ cannot be accepted by Ceylon's compiler.
 \end{lstlisting}
 \end{comment}
 
-\begin{comment}
-\bruno{Now you come back to disjointness having spoken about disjointness earlier
-  in this section. Don't jump around topics like this. If you have a paragraph
-  on disjointness, then talk about everything that relates to disjointness under that
-  paragraph. Or maybe have another paragraph called ``Bottom-like Types just after
-disjointness, since that's clearly related and should follow.}
-To dig deeper for disjointness, it often comes to the the concept
-of \emph{bottom type}.
-Bottom type is a subtype of all types, in contrast to the top type.
-Certainly the bottom type has no value.
-In Ceylon, it is called \lstinline{Nothing}, representing the empty set.
-%
-With the existence of subtyping, a branch in switch/case expression
-can take a term of a subtype of its expected type.
-If the term's type is also a subtype of the other branch's expected
-type, type information will be insufficient to disambiguate.
-To prevent this, disjoint types cannot have any common subtype which has
-inhabited values.
-For two disjoint types $[[A]]$ and $[[B]]$, their intersection $[[A/\B]]$
-is naturally a common subtype, and therefore must be equivalent to
-the bottom type \lstinline{Nothing}.
-\end{comment}
-
-\begin{comment}
-Let us call them \emph{bottom-like types}.
-% Ceylon treat such types specially.
-In a switch construct, every case has a type annotation.
-In Ceylon, this type annotation is not allowed to be bottom-like.
-The compiler uses this type to narrow the static type of the input term
-in switch/case, and rejects the program if the resultant type is equivalent
-to \lstinline{Nothing}.
-\end{comment}
 \subsection{Our Methodology}
 
 The switch construct in our calculus \cal is similar to Ceylon's.
