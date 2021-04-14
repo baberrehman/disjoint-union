@@ -232,14 +232,15 @@ boolean isstudent3 (Student x) {
 }
 \end{lstlisting}
 
-In Java, overloading is resolved by finding in all method implementations the
-one with the \textit{best} type signature that describes the argument. That
-means, if we apply \lstinline{isstudent3} to a term of type \lstinline{Student},
-the second implementation is chosen, as \lstinline{Student} is the best type
-describing the argument. As we can see, such best-match strategy gets rid of the
-order-sensitive problem. In this case, we can have the two implementations of
-\lstinline{isstudent3} in any order, and Java will always try to find the
-best-match one.
+Java resolves overloading by finding in all method implementations the one with
+the \textit{best} type signature that describes the argument. That means, if we
+apply \lstinline{isstudent3} to a term of type \lstinline{Student}, the second
+implementation is chosen, as \lstinline{Student} is the best type describing the
+argument. As we can see, such best-match strategy gets rid of the
+order-sensitive problem, as Java always try to find the best-match one despite
+the order of the methods. In this case, we have the method for
+\lstinline{Person} before the one for \lstinline{Student}, but Java still finds
+the one for \lstinline{Student}.
 
 However, the best-match strategy can also be confusing, especially when the
 system features implicit upcasting (e.g., by subtyping). For example, suppose
