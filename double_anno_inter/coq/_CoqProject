@@ -1,7 +1,9 @@
 -R . Top
+syntax_imprecise.v
 syntax_no_top_findsubtypes.v
 syntax.v
 syntax_wvalue.v
+typing_imprecise.v
 typing_no_top_findsubtypes.v
 typing.v
 typing_wvalue_beta.v
