@@ -355,6 +355,35 @@ The following diagram presents their subtyping relation briefly.
 	\begin{smallmatrix}     1 & 1 & 1 \\      & 1 &            \end{smallmatrix}  \arrow[ru] &  & \begin{smallmatrix}     0 & 0 & 0 \\      & 1 &            \end{smallmatrix}  \arrow[ru] &  & \begin{smallmatrix}     Nothing \\      & &            \end{smallmatrix}  \arrow[ru] &
 \end{tikzcd}
 
+\tikzset{
+  state/.style={
+    rectangle,
+    rounded corners,
+    minimum height=2em,
+    inner sep=2pt,
+    text centered,
+    align=center
+  },
+}
+\begin{center}
+\begin{tikzpicture}[->]
+  \footnotesize
+  \node[state, anchor=center] (a) at (0, 0) {Null};
+  \node[state, anchor=center] (b) at (2, 0) {Object};
+  \node[state, anchor=center] (c) at (1, 1) {Anything};
+  \node[state, anchor=center] (d) at (1, -1) {Char};
+  \node[state, anchor=center] (e) at (3, -1) {Integer};
+  \node[state, anchor=center] (f) at (2, -2) {Nothing};
+  \draw (a) -- (c);
+  \draw (c) -- (b);
+  \draw (d) -- (b);
+  \draw (b) -- (e);
+  \draw (f) -- (e);
+  \draw (d) -- (f);
+  \draw (a) to[out=225,in=180] (f);
+\end{tikzpicture}
+\end{center}
+
 \bruno{Say more about this, maybe show a (simplified)
   picture of the subtyping lattice?
 The point is that Null is not a subtype of Object, right? so, by default object
