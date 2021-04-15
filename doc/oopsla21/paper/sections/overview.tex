@@ -25,7 +25,7 @@ type $[[A\/B]]$, if it can be considered to have either type $[[A]]$ \textit{or}
 type $[[B]]$. Many systems model \textit{tagged union types} (also called
 \textit{sum types} or \textit{variants types}), where explicit \textit{tags}
 are used to construct terms with union types. Languages with algebraic datatypes~\cite{hope}
-or (polymorphic) variants~\cite{garrigue98} support tagged union types. 
+or (polymorphic) variants~\cite{garrigue98} support tagged union types.
 In their basic form, there are two introduction forms:
 $\mathsf{inj_1} :: [[A -> A \/ B]]$ turn the type of an expression of type
 $[[A]]$ into type $[[A \/ B]]$; and $\mathsf{inj_2} :: [[B -> A \/ B]]$
@@ -150,7 +150,7 @@ functions. Without overloaded functions the construct would not be very useful.
 \paragraph{Type-directed elimination.}
 
 On the other hand, some
-systems~\cite{castagna:settheoretic,muehlboeck2018empowering} support
+systems~\cite{castagna:settheoretic} support
 \textit{type-directed} elimination of union types. For instance,
 \lstinline{tostring3} has different behaviors depending on the \textit{type} of
 \lstinline{x}.
@@ -158,18 +158,19 @@ systems~\cite{castagna:settheoretic,muehlboeck2018empowering} support
 \begin{lstlisting}
 function tostring3 (x: String | Int) : String =
   switch (x)
-    String -> x
-    Int -> show x
+    (y : String) -> y
+    (y : Int) -> show y
 \end{lstlisting}
 
 \snow{To be consistent with our syntax, each branch should name a variable, like
 \lstinline{tostring2}. Same applies to \lstinline{isstudent2}.}
+\ningning{I added variables. Then there is no type refinement anymore.. But I
+  guess it's fine as the reference to occurrence typing is not important anyway.}
 
 \noindent Note here \lstinline{show} is directly applied to \lstinline{x}, and
 it does not need to be overloaded, as the type-directed elimination
-\textit{refines} the type of \lstinline{x} from \lstinline{String | Int} to
-\lstinline{Int} in the second branch (such type refinements are basically a form of
-\textit{occurrence typing} \cite{Tobin:typedscheme}).
+\textit{turns} the variable \lstinline{x} of type \lstinline{String | Int} into
+the variable \lstinline{y} of type \lstinline{Int}.
 
 However, compared to tag-directed elimination, extra care must to taken with
 type-directed elimination. In particular, while we can easily distinguish tags,
@@ -191,8 +192,8 @@ elimination, we will get:
 \begin{lstlisting}
 function isstudent2 (x: Person | Student) : Bool =
   switch (x)
-    Person  -> False
-    Student -> True
+    (y : Person)  -> False
+    (y : Student) -> True
 \end{lstlisting}
 
 \noindent Now it is unclear what would happen if we apply \lstinline{isstudent2}
@@ -214,19 +215,43 @@ worker, a switch statement that discriminates between workers and students could
 potentially choose either branch. However for persons that are only students or
 only workers, only one branch can be chosen.
 
-Some languages support form of typed-based union elimination via overloading,
-which usually finds in all branches the one that best describes the type. Such
-approach is used in, for example, resolving overloading in Java \cite{javadoc}.
-Then, if we apply \lstinline{isstudent2} to a term of type \lstinline{Student},
-the second branch is chosen, as \lstinline{Student} is the best type describing
-\lstinline{x}. However, even with the best-match strategy, the semantics can be
-confusing when the system features implicit upcasting (e.g., by subtyping). For
-example, suppose the type \lstinline{Pegasus} is a subtype of both type
-\lstinline{Bird} and type \lstinline{Horse}. If we apply a switch expression on
-the type \lstinline{Bird | Horse} to a term of type \lstinline{Pegasus}, which
-branch should we choose, the one with \lstinline{Bird}, or the one with
+\paragraph{Best-match and overloading.}
+
+Some languages support form of typed-based union elimination via method
+overloading. Such form is used in, for example, Java \cite{javadoc}. In Java, we
+can encode \lstinline{isstudent3} as a function, which has different
+behaviors when the type of the argument differs.
+
+\begin{lstlisting}
+boolean isstudent3 (Person x) {
+  return False;
+}
+
+boolean isstudent3 (Student x) {
+  return True;
+}
+\end{lstlisting}
+
+Java resolves overloading by finding in all method implementations the one with
+the \textit{best} type signature that describes the argument. That means, if we
+apply \lstinline{isstudent3} to a term of type \lstinline{Student}, the second
+implementation is chosen, as \lstinline{Student} is the best type describing the
+argument. As we can see, such best-match strategy gets rid of the
+order-sensitive problem, as Java always try to find the best-match one despite
+the order of the methods. In this case, we have the method for
+\lstinline{Person} before the one for \lstinline{Student}, but Java still finds
+the one for \lstinline{Student}.
+
+However, the best-match strategy can also be confusing, especially when the
+system features implicit upcasting (e.g., by subtyping). For example, suppose
+the type \lstinline{Pegasus} is a subtype of both type \lstinline{Bird} and type
+\lstinline{Horse}. If a method \lstinline{isbird} is overloaded for
+\lstinline{Bird} and \lstinline{Horse}, then which method implementation should
+we choose when we apply \lstinline{isbird} to a term of type
+\lstinline{Pegasus}, the one for \lstinline{Bird}, or the one for
 \lstinline{Horse}? In such case, the semantics is non-deterministic again, and
-depends on the particular implementation of the compiler.
+the behavior of the program depends on the particular implementation of the
+compiler.
 
 
 \subsection{Eliminating Union Types in Ceylon}
@@ -246,7 +271,7 @@ with union types using Ceylon's syntax:
 
 For the switch expression, Ceylon enforces static type checking with two
 guarantees: \textit{exhaustiveness}, and \textit{disjointness}. First, Ceylon
-ensures that all cases in a switch expression are exhaustive. In the above
+ensures that all cases in a switch expression are \textit{exhaustive}. In the above
 example, \lstinline{x} can be either a string, an integer or a floating point
 number. The types used in the cases do not have to exactly match with the types
 of \lstinline{x}. Nevertheless, the combination of all cases must be able to
@@ -266,7 +291,7 @@ since two branches could deal with the floating point number. Note that, since
 the cases in a switch cannot overlap, their order is irrelevant to the program's
 behavior and its evaluation result.
 
-\subsubsection*{Union Types as an Alternative to Overloading}
+\paragraph{Union types as an alternative to overloading}
 A motivation of such type-directed union elimination in Ceylon is to
 model a form of function overloading.
 The following example, which is adapted from TypeScript's documentation\footnote{https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html},
@@ -299,13 +324,13 @@ In the two cases of the switch construct, there are two different implementation
 of the \lstinline{padLeft} function: one that appends a string to the left of \lstinline{v},
 and the other that calls function \lstinline{space} to generate a string with \lstinline{x} spaces,
 and then append that to \lstinline{v}.
-Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value 
+Although statically \lstinline{x} has type \lstinline{String|Integer}, as a concrete value
 it can only be a string or an integer.
 As such, when values with such types are passed to the function,
 the corresponding branch is chosen and executed.
 
-\subsubsection*{Other Applications of Union Types}
-Besides being used for overloading, union types can be used for other purposes to.
+\paragraph{Other applications of union types}
+Besides being used for overloading, union types can be used for other purposes too.
 For instance, we can easily encode the \lstinline{safediv} function in Section~\ref{subsec:elimination}
 in Ceylon:
 \bruno{Ceylon code for safediv and to string here, and some short piece of text about the
@@ -329,31 +354,51 @@ a supertype of all possible return values, it is valid
 in Ceylon.
 
 
-Furthermore, another interesting application
-of union types in Ceylon is to encode nullable types (or optional types)
-in a type-safe way.
-A similar approach to nullable types has also been recently proposed for Scala~\citep{nieto20nulls}.
-The \lstinline{null} value is inhabited by the type \lstinline{Null}.
-For type \lstinline{A} to be nullable, one can write \lstinline{A?},
-which stands for \lstinline{A|Null}.
-If we eliminate a value of type \lstinline{A|Null}, there has to be a branch
-to handle the null value.
-Ceylon define the top type \lstinline{Anything} as an enumerated class.
-\lstinline{Null} is a case of it.
-It differs to the bottom type \lstinline{Nothing} in the sense
-that it is inhabited.
-\lstinline{Anything} has another distinct case called \lstinline{Object}.
-It is the root of primitive types, function types, all interfaces and any user-defined class.
-\lstinline{Null} is disjoint to \lstinline{Object}, and therefore, to all
-these types.
-The following diagram presents their subtyping relation briefly.
+Furthermore, another interesting application of union types in Ceylon is to
+encode \textit{nullable types} (or \textit{optional types}) in a type-safe way.
+A similar approach to nullable types has also been recently proposed for
+Scala~\citep{nieto20nulls}. In those languages, the type \lstinline{Null} is
+inhabited by the \lstinline{null} value. The user can then write \lstinline{A?},
+which stands for \lstinline{A|Null}, for a term of type \lstinline{A} to be
+nullable. If we eliminate a value of type \lstinline{A|Null}, there has to be a
+branch to handle the null value. Note that \lstinline{Null} differs from
+\lstinline{Nothing} (the bottom type in Ceylon), in the sense that
+\lstinline{Null} is inhabited while \lstinline{Nothing} is not. To illustrate
+the subtle difference, the following diagram presents part of the subtyping
+lattice in Ceylon. \lstinline{Anything}, the top type in Ceylon, is an
+enumerated class. \lstinline{Anything} has another distinct case called
+\lstinline{Object}, which is the root of primitive types, function types, all
+interfaces and any user-defined class. Notably, \lstinline{Null} is disjoint to
+\lstinline{Object}, and therefore, to all these types.
 
-\begin{tikzcd}
-	& \begin{smallmatrix}     0 & 0 & 0 \\      & 0 &            \end{smallmatrix}  \arrow[rd] &  & \begin{smallmatrix}     Anything \\      &  &            \end{smallmatrix}  \arrow[rd] &  &  \\
-	&  & \begin{smallmatrix}     Null \\      &  &            \end{smallmatrix}  \arrow[rd] \arrow[ru] &  & \begin{smallmatrix}     Object \\      & &            \end{smallmatrix}  \arrow[rd] &  \\
-	& \begin{smallmatrix}     0 & 0 & 0 \\      & 1 &            \end{smallmatrix}  \arrow[ru] \arrow[rd] &  & \begin{smallmatrix}     Char \\      &  &            \end{smallmatrix}  \arrow[ru] \arrow[rd] &  & \begin{smallmatrix}     Integer \\      &  &            \end{smallmatrix}  \\
-	\begin{smallmatrix}     1 & 1 & 1 \\      & 1 &            \end{smallmatrix}  \arrow[ru] &  & \begin{smallmatrix}     0 & 0 & 0 \\      & 1 &            \end{smallmatrix}  \arrow[ru] &  & \begin{smallmatrix}     Nothing \\      & &            \end{smallmatrix}  \arrow[ru] &
-\end{tikzcd}
+\tikzset{
+  state/.style={
+    rectangle,
+    rounded corners,
+    minimum height=2em,
+    inner sep=2pt,
+    text centered,
+    align=center
+  },
+}
+\begin{center}
+\begin{tikzpicture}[->]
+  \footnotesize
+  \node[state, anchor=center] (a) at (0, 0) {Null};
+  \node[state, anchor=center] (b) at (2, 0) {Object};
+  \node[state, anchor=center] (c) at (1, 1) {Anything};
+  \node[state, anchor=center] (d) at (1, -1) {Char};
+  \node[state, anchor=center] (e) at (3, -1) {Integer};
+  \node[state, anchor=center] (f) at (2, -2) {Nothing};
+  \draw (c) -- (a);
+  \draw (c) -- (b);
+  \draw (b) -- (d);
+  \draw (b) -- (e);
+  \draw (e) -- (f);
+  \draw (d) -- (f);
+  \draw (a) to[out=225,in=180] (f);
+\end{tikzpicture}
+\end{center}
 
 \bruno{Say more about this, maybe show a (simplified)
   picture of the subtyping lattice?
@@ -365,7 +410,7 @@ types have no null value. }
 %Next, we will see how Ceylon's static type checking helps programmers.
 
 \begin{comment}
-\subsubsection*{Exhaustiveness}
+\paragraph{Exhaustiveness}
 
 Ceylon checks the exhaustiveness of a switch by comparing the union of all
 cases and the switched term's type.
@@ -390,7 +435,7 @@ interface Directory satisfies Resource {}
 interface Link satisfies Resource {}
 
 void printType(Resource resource){
-	switch (resource) 
+	switch (resource)
 	case (is File) { print("File"); }
 	case (is Directory) { print("Directory"); }
 	case (is Link) { print("Link"); }
@@ -401,10 +446,10 @@ void printType(Resource resource){
 \begin{lstlisting}
 abstract class Node() of Leaf | Branch {}
 
-class Leaf(shared Object element) 
+class Leaf(shared Object element)
 extends Node() {}
 
-class Branch(shared Node left, shared Node right) 
+class Branch(shared Node left, shared Node right)
 extends Node() {}
 
 void printTree(Node node) {
@@ -423,7 +468,7 @@ printTree(Branch(Branch(Leaf("aap"), Leaf("noot")), Leaf("mies")));
 % https://ceylon-lang.org/documentation/1.3/tour/types/
 %
 We can allow the input to be \lstinline{null} by replacing the argument type \lstinline{Node} by \lstinline{Node?}.
-Ceylon uses union types to encode nullable types (or the optional types) in a 
+Ceylon uses union types to encode nullable types (or the optional types) in a
 type-safe way.
 The null value is inhabited in \lstinline{Null}, and \lstinline{A?} stands for \lstinline{A|Null}.
 If the switched term has a nullable type, the exhaustive checking makes sure there
@@ -448,7 +493,7 @@ related code and avoid potential runtime errors.
 	}
 \end{lstlisting}
 %
-Exhaustiveness checking does not prevent the cases in a switch to 
+Exhaustiveness checking does not prevent the cases in a switch to
 accept more than necessary.
 For example, in the above function, even though \lstinline{x} cannot be
 a \lstinline{Float}, it is not harmful for the first branch to expect
@@ -456,7 +501,7 @@ a term of \lstinline{Integer|Float}, since \lstinline{Integer|Float|String}
 still covers \lstinline{Integer|String}.
 
 
-\subsubsection*{Disjointness}
+\paragraph{Disjointness}
 Ceylon prevents any pair of cases in a switch from overlapping.
 And disjointness is introduced to describe such relation between two types.
 Being disjoint means the non-existence of a value which can be assigned to
@@ -490,7 +535,7 @@ where the programmer may not notice the dangerous overlapping.
 		switch (n)
 		case (is Integer) { return "``n``"; }
 		case (is Null) { return "infinity"; }
-		
+
 	}
 	void  printAge(Number|Null x) {
 		switch (x)
@@ -500,7 +545,7 @@ where the programmer may not notice the dangerous overlapping.
 \end{lstlisting}
 %
 Assume \lstinline{Number} is already defined where \lstinline{null} stands for
-infinity. A client uses it to store age information. 
+infinity. A client uses it to store age information.
 Meanwhile, the client use \lstinline{null} to denote missing data.
 Without disjointness checking, the above code will be accepted.
 But in \lstinline{printAge}, the second branch is always shadowed by the first one.
@@ -511,7 +556,7 @@ In that case the meaning of infinity is hidden.
 On contrary, disjoint cases are always distinguishable, and the user, when
 using an existing definition, is guaranteed that there is no hidden conflicts.
 
-\subsubsection*{The Bottom Type}
+\paragraph{the bottom type}
 To dig deeper for disjointness, it often comes to the the concept
 of \emph{bottom type}.
 Bottom type is a subtype of all types, in contrast to the top type.
@@ -524,7 +569,7 @@ the bottom type \lstinline{Nothing}.
 \end{comment}
 
 \begin{comment}
-\subsubsection*{Existing Problems in Ceylon}
+\paragraph{Existing problems in Ceylon}
 In general, a term of type $A$ is always assignable to any supertype of $A$.
 But in Ceylon, the checking of assignability is not complete to
 subtyping.
@@ -550,7 +595,7 @@ runtime, with the help of annotated values.
 Here we give an overview of our design and discuss some challenges
 we met for the two calculi in the paper.
 
-\subsubsection*{Disjointness, Interacted with Intersection Types}
+\paragraph{Disjointness, interacted with intersection types}
 After seeing the connection between bottom-like types and disjointness,
 it is intuitive to formally define disjointness via bottom-like types.
 
@@ -584,7 +629,7 @@ Moreover, assuming $[[Odd]]$ and $[[Even]]$ denote odd numbers and even numbers,
 they are both subtype of $[[Int]]$, and therefore are not disjoint.
 The application of this definition is dual to our definition:
 given a type that is not top-like, consider a scenario where we are looking for
-a term that is assignable to the type. If all candidates' types are disjoint, 
+a term that is assignable to the type. If all candidates' types are disjoint,
 at most one term can be chosen from them.
 \begin{verbatim}
  (\x. x+1 : Int->Int) (1 ,, True) --> (1+1):Int
@@ -624,11 +669,11 @@ For example, $[[Int\/String]]$ is disjoint to $[[Char]]$ because both types
 in it is disjoint to $[[Char]]$.
 %
 However, this approach cannot be directly employed to the intersection
-extension. 
+extension.
 Like we said above, some intersection is disjoint to other types
 because itself is uninhabited.
 So even neither $[[Int]]$ or $[[String]]$ is disjoint with $[[Int\/String]]$,
-together $[[Int/\String]]$ is disjoint with it. 
+together $[[Int/\String]]$ is disjoint with it.
 Alternatively, for a given type, we use a set of ordinary types to denote
 all possible values of it. For instance, \verb"{Int,Char}" represent the
 union type $[[Int\/Char]]$.
@@ -643,14 +688,14 @@ The set representation is justified by the distributivity in subtyping (Figure~\
 Every type in the set denotes a component in a union type.
 That is to say, any inhabited type must have an equivalent union type,
 except for literal types.
-Only with distributivity, we have $[[(A\/B)/\C]]$ equivalent to 
+Only with distributivity, we have $[[(A\/B)/\C]]$ equivalent to
 $[[(A/\C)\/(B/\C)]]$.
 The soundness and completeness of the algorithmic definition is proved
 with respect to the declarative definition.
 Same applies to the two definitions for \cal without intersection.
 
 
-\subsubsection*{Typing and Exhaustiveness}
+\paragraph{Typing and exhaustiveness}
 In \cal, a switch expression has two branches. For multiple cases,
 one can write nested switch expression.
 We assume the two branches expect $[[A]]$ and $[[B]]$.
@@ -669,28 +714,39 @@ Another premise requires the two cases to be disjoint.
 Besides, the two branches are typed under different assumption of the bound
 variable. Although the same type $[[C]]$ is used for both of them in the rule,
 it does not prevent them to return different types.
-Assuming the inferred type of $[[e1]]$ is $[[C1]]$ and the inferred type of 
+Assuming the inferred type of $[[e1]]$ is $[[C1]]$ and the inferred type of
 $[[e2]]$ is $[[C2]]$, we can make $[[C]]$ to be $[[C1\/C2]]$.
 
-\subsubsection*{Reduction and Annotated Values}
+\paragraph{Reduction and annotated values}
 Our reduction preserves type.
 So a term of union type can only evaluates to a value of an union type.
 We use type annotations to construct such values.
 For example, $[[2:Int\/Bool]]$ is a value, and it is the result of
 $[[(switch 1 Int (x p1) Bool (neg y)):Int\/Bool]]$.
+This annotation is necessary for precise type preservation under
+bidirectional typing. It keeps the inferred type of expressions.
 
 \snow{I think we might be able to relax preservation by allowing subtyping.
 For which precise reason we failed in that variant? But I guess it is ok
 to omit that unless the reviewers ask}
 
-Lambdas can be annotated. But if a lambda has inferred type, it must
-have two annotation: the outer one is for the preservation purpose,
-while the inner one records its principal type.
+Lambda values can be unannotated or with two annotations.
+The outer one serves the above purpose, while the inner one keeps the original
+input type, which is used to decorate the input value in beta reduction.
+% The outer one is for the preservation purpose,
+% while the inner one records its principal type.
 %
-An example is $[[\x.x:Int->Int:Int->Int\/Bool]]$. 
+\begin{verbatim}
+e = switch (x) {Char -> ... , Bool -> ...}
 
-\snow{I don't know why we need to keep a lambda's original type. We
-don't need to distinguish two arrow types in switch.}
+(\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [x~>1:Int]
+\end{verbatim}
+The expression was legal when x has type Top but becomes illegal when x has type Int.
+It shows that we have to keep the original input type in lambdas.
+
+\snow{Updated}
+%\snow{I don't know why we need to keep a lambda's original type. We
+%don't need to distinguish two arrow types in switch.}
 
 Deciding to take which branch in the runtime requires knowing the
 precise type of the switched term.
@@ -709,9 +765,9 @@ In the following example, the first branch will be chosen, just like when
 we passing $[[1]]$ to it.
 
 \begin{verbatim}
-	(switch (2:Int\/Bool) Int (x p1) Bool (neg y)) 
-	--> (2:Int p1) :Int\/Bool
-	--> 3 : Int \/ Bool
+       (switch (2:Int\/Bool) Int (x p1) Bool (neg y))
+       --> (2:Int p1) :Int\/Bool
+       --> 3 : Int \/ Bool
 \end{verbatim}
 
 Wrapping values with annotation also helps us to unify the related reduction rules.
@@ -738,12 +794,12 @@ Wrapping values with annotation also helps us to unify the related reduction rul
 In this paper, we follow type-based union elimination similar to Ceylon.
 We enforce disjointness constraint on the types of branches of a switch
 expression. On the contrary to Ceylon, we provide a formal definition
-of disjointness. Our disjointness definition is inspired by $\lambda_{i}$ 
+of disjointness. Our disjointness definition is inspired by $\lambda_{i}$
 \cite{oliveira2016disjoint}. $\lambda_{i}$ formally defines disjointness
 for intersection types and merge operator.
 Intersection of two types $[[A]]$ and $[[B]]$ is dijoint in $\lambda_{i}$
 if $[[A]]$ and $[[B]]$ do not share a common supertype which is not
-\emph{top-like}. So-called \emph{top-like} types are defined in 
+\emph{top-like}. So-called \emph{top-like} types are defined in
 \cite{oliveira2016disjoint} and are such types which are \emph{supertypes}
 of all other types.
 
@@ -751,7 +807,7 @@ Union types are usually considered to be dual of intersection types.
 Therefore, we propose a dual definition of \emph{bottom-like} types.
 In contrast to \emph{top-like} types, \emph{bottom-like} types are
 subtypes of all other types. Further, in contrast to the disjointness
-definition in $\lambda_{i}$, two types $[[A]]$ and $[[B]]$ in the simplest 
+definition in $\lambda_{i}$, two types $[[A]]$ and $[[B]]$ in the simplest
 caluclus studied in this paper are disjoint if $[[A]]$ and $[[B]]$
 do not share any common \emph{subtype} which is not \emph{bottom-like}.
 Note that $\lambda_{i}$ proposed \emph{top-like} with \emph{supertypes}.

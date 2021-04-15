@@ -1,0 +1,313 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% METAVARIABLES
+
+metavar var, x, y ::= {{ repr-locally-nameless }}
+
+metavar i ::= {{ coq nat }}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% GRAMMAR (LNgen portion)
+
+grammar
+
+  typ, A, B, C, D          :: 't_' ::=     {{ com type }}
+    | Top                  ::   :: top {{ tex \top }}
+    | Int                  ::   :: int     {{ tex \mathsf{Int}  }}
+    | Bot                  ::   :: bot     {{ tex \bot }}
+    | A -> B               ::   :: arrow
+    | A \/ B 	           ::   :: or
+    | A /\ B 	           ::   :: and
+    | ( A )                :: S :: paren   {{ coq ([[A]]) }}
+
+  exp, e, v, p             :: 'e_' ::=     {{ com expression }}
+    | x                    ::   :: var
+    | i                    ::   :: lit
+    | e : A                ::   :: ann
+    | \ x : A . e          ::   :: abs     (+ bind x in e +)
+    | e1 e2                ::   :: app
+    | switch e as x A e1 B e2 ::  :: switch  (+ bind x in e1
+                                                bind x in e2 +)
+    | ( e )                :: S :: paren   {{ coq ([[e]]) }}
+    | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
+
+substitutions
+  single exp x   :: subst
+
+freevars
+  exp x      :: fv
+
+parsing
+  t_arrow right t_arrow
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% GRAMMAR  (non LNgen portion)
+
+grammar
+
+  ctx, G {{ tex \Gamma }} :: 'ctx_' ::=    {{ com typing context }}
+                                           {{ coq list ( atom * typ ) }}
+    | []                   ::  :: empty    {{ coq nil }}
+                                           {{ tex \cdot }}
+    | G , x : A            ::  :: cons     {{ coq (([[x]]~[[A]])++[[G]]) }}
+
+  dirflag {{ tex \Leftrightarrow }} :: '' ::=  {{ com typing direction }}
+    | =>                   ::  :: infer    {{ tex \Rightarrow }}
+    | <=                   ::  :: check    {{ tex \Leftarrow }}
+
+terminals :: 'terminals_' ::=
+  | \                    ::  :: lambda     {{ tex \lambda }}
+  | -->                  ::  :: red        {{ tex \longrightarrow }}
+  | ~>                   ::  :: leadsto    {{ tex \leadsto }}
+  | ->                   ::  :: arrow      {{ tex \rightarrow }}
+  | \/                   ::  :: or         {{ tex \vee }}
+  | /\                   ::  :: and        {{ tex \wedge }}  
+  | |-                   ::  :: turnstile  {{ tex \vdash }}
+  | <:                   ::  :: sub        {{ tex \textless: }}
+  | in                   ::  :: in         {{ tex \in }}
+  | ;                    ::  :: ctxAnd     {{ tex ; }}
+  | fv                   ::  :: fv         {{ tex \mathsf{fv}\! }}
+
+formula :: 'formula_' ::=
+  | judgement                ::   :: judgement
+  | not formula              :: M :: not
+    {{ tex \neg [[formula]] }}
+    {{ coq not ([[formula]]) }}
+  | uniq G                   ::   :: uniqG
+    {{ coq uniq [[G]] }}
+    {{ tex  }}
+  | x : A in G               ::   :: inG
+    {{ coq binds [[x]][[A]][[G]] }}
+  | x notin fv e             ::   :: fresh
+    {{ coq [[x]] \notin fv[[e]] }}
+  | x notin dom G            ::   :: notInGx
+    {{ coq ~ AtomSetImpl.In [[x]] (dom [[G]]) }}
+    {{ tex [[x]] \notin [[G]] }}
+
+  | A *s B                   ::   :: disjointSpec
+    {{ coq DisjSpec [[A]] [[B]] }}
+
+
+
+defns
+Value :: '' ::=
+  
+  defn
+  value v ::   :: value :: 'value_'
+  {{ com Values }}
+  by
+
+
+    ------------ :: int
+    value i
+
+    ------------------ :: abs
+    value \x : A . e
+
+
+defns
+FindType :: '' ::=
+  
+  defn
+  findtype p A ::   :: findtype :: 'findtype_'
+  {{ com FindType }}
+  by
+
+    ---------------- :: int
+    findtype i Int
+
+    ------------------------------------ :: arrow
+    findtype \x:A.e  A -> Bot
+
+
+defns
+Ordinary :: '' ::=
+  defn
+  ordinary A ::  :: ordinary :: 'ord_'
+  {{ tex ord ~ [[A]] }}
+  {{ com Ordinary Types }}
+  by
+
+  ---------------- :: top
+  ordinary Top
+
+
+  ---------------- :: int
+  ordinary Int
+
+  ---------------- :: arrow
+  ordinary A -> B
+
+
+%  ordinary A
+%  ordinary B
+%  ---------------- :: union
+%  ordinary A \/ B
+
+
+
+defns
+Subtyping :: '' ::=
+
+  defn
+  A <: B ::  :: sub :: s_
+  {{ com Subtyping }}
+  {{ tex [[A]] <: [[B]] }}
+  
+  by
+
+    -------------------- :: refl
+    A <: A
+
+    A <: B
+    B <: C
+    -------------------- :: trans
+    A <: C
+
+    -------------------- :: top
+    A <: Top
+
+    -------------------- :: btm
+    Bot <: A
+  
+    -------------------- :: int
+    Int <: Int
+  
+    B1 <: A1 
+    A2 <: B2
+    -------------------------     :: arrow
+    A1 -> A2 <: B1 -> B2
+  
+    A1 <: A
+    A2 <: A
+    -------------------------     :: ora
+    A1 \/ A2 <: A
+  
+    -------------------------     :: orb
+    A1 <: A1 \/ A2 
+
+    -------------------------     :: orc
+    A2 <: A1 \/ A2
+
+    A <: A1
+    A <: A2
+    -------------------------     :: anda
+    A <: A1 /\ A2
+  
+    -------------------------     :: andb
+    A1 /\ A2 <: A1 
+
+    -------------------------     :: andc
+    A1 /\ A2 <: A2
+
+    ----------------------------------------- :: distarr
+    (A -> B1) /\ (A -> B2) <: A -> (B1 /\ B2)
+
+    ----------------------------------------- :: distarru
+    (A1 -> B) /\ (A2 -> B) <: (A1 \/ A2) -> B
+
+    ----------------------------------------- :: distor
+    (A1 \/ B) /\ (A2 \/ B) <: (A1 /\ A2) \/ B
+
+
+
+defns
+Typing :: '' ::=
+
+  defn
+  G |- e => A ::   :: typing :: 'typ_'
+  {{ com Typing Rules }}
+  by
+
+    % inference mode
+
+    uniq G
+    ----------------- :: lit
+    G |- i => Int
+
+    uniq G
+    x : A in G
+    -------------- :: var
+    G |- x => A
+
+    G |- e1 => A -> B
+    G |- e2 => A
+    -------------------- :: app
+    G |- e1 e2 => B
+
+    G |- e => B
+    B <: A
+    ----------------- :: sub
+    G |- e : A => A
+
+    G, x:A |- e => B
+    -------------------------- :: abs
+    G |- \x:A. e => A -> B
+
+    G |- e => A \/ B
+    G, x : A |- e1 => C
+    G, x : B |- e2 => C
+    A *s B
+    --------------------------------- :: switch
+    G |- switch e as x A e1 B e2 => C
+
+
+defns
+Reduction :: '' ::=
+
+  defn
+  e --> e' ::   :: step :: 'step_'
+  {{ com Small-step operational semantics }}
+  by
+
+
+%    ------------------------ :: int
+%    i --> i : Int
+
+    e1 --> e1'
+    ---------------- :: appl
+    e1 e2 --> e1' e2
+
+
+    value v
+    e --> e'
+    ---------------- :: appr
+    v e --> v e'
+
+
+    value v
+    ----------------------------------------------------- :: beta
+    (\x:A.e) v --> e [x ~> v]
+
+
+%    not value e:A
+    e --> e'
+    ----------------------- :: ann
+    e : A --> e' : A
+
+
+%    prevalue p
+%    --------------------- :: rm_ann
+%    p : A : B --> p : B
+
+    
+%    --------------------------------- :: lam_ann
+%    (\x.e):A->B --> (\x.e):A->B:A->B
+
+
+    e --> e'
+    ----------------------------------------------------- :: switch
+    switch e as x A e1 B e2 --> switch e' as x A e1 B e2
+
+
+    value v
+    findtype v C
+    C <: A
+    ------------------------------------------------- :: switchl
+    switch v as x A e1 B e2 --> e1 [x ~> v]
+
+
+    value v
+    findtype v C
+    C <: B
+    ------------------------------------------------- :: switchr
+    switch v as x A e1 B e2 --> e2 [x ~> v]
