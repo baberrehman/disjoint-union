@@ -587,8 +587,7 @@ cannot be accepted by Ceylon's compiler.
 \end{lstlisting}
 \end{comment}
 
-\subsection{Our Methodology}
-
+\subsection{Key Ideas of our Work}
 The switch construct in our calculus \cal aims to capture the key ideas for
 elimination of union types, but in a language independent way.
 The typing rules guarantee that cases in the switch are disjoint and exhaustive.
@@ -598,25 +597,93 @@ with the help of annotated values.
 Here we give an overview of our design and discuss some challenges
 we met for the calculi designed in this paper.
 
-\paragraph{Disjointness, interacted with intersection types}
-After seeing the connection between bottom-like types and disjointness,
-it is intuitive to formally define disjointness via bottom-like types.
+\subsubsection*{Disjointness}
+A central concept in the formulation of disjoint switches is disjointness.
+Our first hurdle was to come up with a suitable formal definition of disjointness.
+Since we were not aware of previous definitions of disjointness
+for subtyping relations with union types,
+we looked at the closely related idea of disjointness for intersection
+types~\cite{oliveira2016disjoint}. In that setting two types are disjoint
+if the only supertypes that they can have are top-like types (i.e.
+types such as $[[Top]]$ or $[[Top /\ Top]]$). While this notion of
+disjointness is not what we want for union types, it seems closely related
+to what is needed. Consider the simple \cal switch expression:
+
+\begin{lstlisting}
+switch x {
+  (y : String \/ Int)  -> 0
+  (y : Int \/ Bool)    -> 1
+}
+\end{lstlisting}
+
+\noindent Here we wish to determine whether $[[String \/ Int]]$ and $[[Int \/ Bool]]$
+are disjoint or not. In other words, we wish to determine whether for any possible
+(dynamic) type that $[[x]]$ can have, it is always unambigous which branch to choose.
+In this case, it turns out that there is ambiguity. For instance, if $[[x]]$ is an integer,
+then either branch can be choosen. Thus \cal rejects this program with a disjointness error.
+In this example, the reason to reject the program is basically that $[[Int <: String \/ Int]]$
+and $[[Int <: Int \/ Bool]]$. That is we can find a common subtype ($[[Int]]$) of the
+types in both branches. Moreover that subtype can be inhabited by values (integer values
+in this case). If the only common subtypes of the types in the two branches
+would be types like $[[Bot]]$ (which has no inhabitants), then the switch should
+be safe because we would not be able to find a value for $[[x]]$ that would trigger
+two branches. Now it should be clear what the relationship with disjointness for intersection
+types is. For the switch construct the dual notion -- two types are disjoint if the only
+common subtypes are bottom-like types -- seems to be helpful. 
+Indeed the notion of disjointness employeed in the first variant \cal in Section~\ref{sec:union}
+is exactly this. Formally, we have:
 
 \begin{definition}\label{def:disjointness}
-	A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ $\wedge$ $[[C <: B]]$ $\rightarrow$ $[[botlike C]]$
+	A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ and $[[C <: B]]$ $\rightarrow$ $[[botlike C]]$
 	\label{def:union:disj}
 \end{definition}
 
-\snow{Here I copy the definition from union.tex. Maybe we can introduce it
-earlier.}
+\noindent Here the notation $[[A]] *_s [[B]]$ denotes that types $[[A]]$ and $[[B]]$ are disjoint,
+and $[[botlike C]]$ means that type $[[C]]$ is bottom-like (i.e. $[[C <: Bot]]$)).
+Prior work on disjoint intersection types is also helpful
+to find an algorithmic formulation of disjointness: essentially we can find an algorithmic
+formulation that employs dual rules to those for disjoint intersection types.
 
+\subsubsection*{Disjointness in the presence on intersection types.}
+The variant of \cal in Section~\ref{sec:union} does not include intersection types.
+Unfortunately the disjointness definition above does not work in the presence of
+intersection types. The reason is simple: with intersection types we can always find
+common subtypes, such as $[[Int /\ Bool]]$, which are not bottom-like, and yet
+they have no inhabitants. That is
+$[[Int /\ Bool]]$ is not a subtype of $[[Bot]]$, but no value can have both type
+$[[Int]]$ and type $[[Bool]]$. In other words, when intersection types are added empty types
+and bottom-like types no longer coincide. We address this issue by reformulating
+disjointness in terms of ordinary types~\cite{davies2000intersection}, which are basically primitive types
+(such as integers or functions). Importantly, ordinary types are always inhabited.
+Thus, if we can find common \emph{ordinary} subtypes between two types, we know that they
+are not disjoint. Thus the disjointness definition used for formulations
+of \name with intersection types is:
+
+\begin{definition}
+\label{def:inter:disj}
+  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\rightarrow$ \ $\neg$ \ ($[[C <: A]]$ and $[[C <: B]]$).
+\end{definition}
+
+\noindent Under this definition we can check that $[[Int]]$ and $[[Bool]]$ are disjoint,
+since no ordinary type is a subtype of both these two types. This definition avoids
+the issue with \Cref{def:disjointness}, which would not consider these two types disjoint.
+Moreover, this definition is a generalization of the previous one, and in the
+variant with union types only the two definitions coincide. 
+
+This new definition requires a different approach to algorithmic disjointness. Our new
+approach is to use the notion of \emph{lowest ordinary subtypes}. Since, the lowest ordinary
+subtypes of any type is a finite set, we can easily determine whether two types are disjoint
+by ensuring that the intersection of their lowest ordinary subtypes is empty. 
+
+\begin{comment}
 Two types are disjoint if and only if all of their common subtypes are bottom-like.
 That is to say, there does not exist any term that is assignable to both of
 them. Specially, a bottom-like type is disjoint to any types, while the top type
 is only disjoint to bottom-like types.
 For the detailed discussion and an algorithmic formalization of
 disjointness, please refer to Section~\ref{sec:union:disj}.
-
+\end{comment}
+\begin{comment}
 In literature, there exist a very different definition of disjointness
 in calculi with intersection types that also serves for disambiguity
 purpose~\cite{oliveira2016disjoint}.
@@ -637,7 +704,9 @@ at most one term can be chosen from them.
 \begin{verbatim}
  (\x. x+1 : Int->Int) (1 ,, True) --> (1+1):Int
 \end{verbatim}
+\end{comment}
 
+\begin{comment}
 We alter the definition of disjointness (see Section~\ref{sec:inter:disj})
 in our second calculus, which extends \cal by intersection types.
 Any two types $[[A]]$ $[[B]]$ have a trivial subtype $[[A/\B]]$.
@@ -719,7 +788,60 @@ variable. Although the same type $[[C]]$ is used for both of them in the rule,
 it does not prevent them to return different types.
 Assuming the inferred type of $[[e1]]$ is $[[C1]]$ and the inferred type of
 $[[e2]]$ is $[[C2]]$, we can make $[[C]]$ to be $[[C1\/C2]]$.
+\end{comment}
 
+\subsubsection*{The role of type annotations in the dynamic semantics.}
+Another interesting aspect of \name is the dynamic semantics, which must be type-directed. 
+\name uses and propagates type annotations. Moreover in \name there are two different
+notions: \emph{static types} and \emph{dynamic types}. The static type of an
+expression is the type that is known during type-checking. The dynamic type is the
+more precise type that an expression can have at runtime. Both dynamic and static
+types are important for the dynamic semantics, and they
+play two different roles in the calculus.
+
+Dynamic types are used by the switch construct
+to select the correct branch to execute.
+%This is employed in \rref{step-switchl,step-switchr}. 
+For instance, if we use the following switch expression:
+
+\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+switch (val) {
+    (x : Int)     -> x*2,
+    (y : String)  -> y 
+}
+\end{lstlisting}
+
+\noindent Then if \lstinline{val} is the value \lstinline{1 : Int \/ String},
+the static type is \lstinline{Int \/ String}, but the dynamic
+type is \lstinline{Int}. Therefore, based on the dynamic type,
+the first case is picked. 
+
+Static types, on the other hand, are used to ensure type preservation
+and simplify the metatheory.
+%Second case is employed in \rref{step-beta}.
+%The presence of annotations with the static types,
+%ensures that types are preserved during substitution in
+%beta-reduction and \emph{switch} cases.
+For example, in the expression:
+
+\[(\lambda x . x : [[Int]] \to ([[Int \/ String]]))~1\]
+
+\noindent if the result of reduction would simply be $[[1]]$, then some
+static information would be lost, because the type of $[[1]]$ is $[[Int]]$,
+but the static type of the original expression is $[[Int \/ String]]$.
+In other words, the original type would not be preserved: we
+would get a \emph{subtype} instead. This phenomenon is ofcourse well-known
+in OOP languages and languages with subtyping, where often preservation
+needs to be weakened to allow the type after reduction to be a subtype.
+For instance, in Featherweight Java~\cite{DBLP:journals/toplas/IgarashiPW01}
+the preservation theorem states that the type after reduction is a
+subtype (and not necessarely the original type of the expression). In our
+operational semantics we opted to keep track of the static types instead,
+and preserve the original type. Thus the resulting value is $[[1 : Int \/ String]]$.
+This considerably simplifies the metatheory, although in an actual
+implementation not tracking the static type would be more efficient.
+
+\begin{comment}
 \paragraph{Reduction and annotated values}
 Our reduction preserves type.
 So a term of union type can only evaluates to a value of an union type.
@@ -775,80 +897,9 @@ we passing $[[1]]$ to it.
 
 Wrapping values with annotation also helps us to unify the related reduction rules.
 \snow{I guess so?}
-
-
-
-\bruno{
-1) use of annotatted values for both reduction (the semantics must be type directed); and preservation;
-2) Disjointness based on disjoint intersection, and later novel notion of disjointness in the presence of intersections;
-3) LOS for algorithmic disjointness;
-4) Dealing with exhaustiveness and reduction in the switch construct
-}
-
-\begin{comment}
-\bruno{For the following text, this is the level of detail that I expect
-  for the introduction, but not for the overview! The overview should
-  identify key ideas and challenges in more detail. So the following text
-  is not what I'm hoping for here. For an example of what I'm hoping for here,
-  see for instance Section 2.3 and 2.4 in ``Disjoint Intersection Types'' or
-  Section 2.3, 2.4 and 2.5 in "A Type-Directed Operational Semantics for a
-  Calculus with a Merge Operator''
-}
-In this paper, we follow type-based union elimination similar to Ceylon.
-We enforce disjointness constraint on the types of branches of a switch
-expression. On the contrary to Ceylon, we provide a formal definition
-of disjointness. Our disjointness definition is inspired by $\lambda_{i}$
-\cite{oliveira2016disjoint}. $\lambda_{i}$ formally defines disjointness
-for intersection types and merge operator.
-Intersection of two types $[[A]]$ and $[[B]]$ is dijoint in $\lambda_{i}$
-if $[[A]]$ and $[[B]]$ do not share a common supertype which is not
-\emph{top-like}. So-called \emph{top-like} types are defined in
-\cite{oliveira2016disjoint} and are such types which are \emph{supertypes}
-of all other types.
-
-Union types are usually considered to be dual of intersection types.
-Therefore, we propose a dual definition of \emph{bottom-like} types.
-In contrast to \emph{top-like} types, \emph{bottom-like} types are
-subtypes of all other types. Further, in contrast to the disjointness
-definition in $\lambda_{i}$, two types $[[A]]$ and $[[B]]$ in the simplest
-caluclus studied in this paper are disjoint if $[[A]]$ and $[[B]]$
-do not share any common \emph{subtype} which is not \emph{bottom-like}.
-Note that $\lambda_{i}$ proposed \emph{top-like} with \emph{supertypes}.
-We propose \emph{bottom-like} with \emph{subtypes}. This will be discussed
-in detail in \Cref{sec:union}.
-
-Adding intersection types in our calculus
-together with union types poses non-trivial challenges on disjointness.
-Specifically, it makes it impossible to define a complete disjointness
-definition. Therefore, the simple disjointness definition which is dual
-to $\lambda_{i}$ no longer works. We define a notion of ordinary types
-and define disjointness based upon ordinary types to overcome the
-challenge in completeness. Informally, updated disjointness definition states
-that two types $[[A]]$ and $[[B]]$ are disjoint if they do not share any
-common ordinary subtype. This will further be discussed in detail in
-\Cref{sec:inter}.
-
-We propose a sound and complete disjointness definition. Caclulus studied
-in this paper is type-safe and deterministic.
-
-\bruno{
-	Introduce our work, setting the goal to study the construct formally.
-	Connect with the work on disjoint intersection types, which also
-	employs a notion of disjointness, but for intersection. Explain that
-	what is needed is a dual notion of disjointness.\\
-	Introduce the first calculus, and explain that it is directly inspired
-	by a dual notion of discjointness.\\
-	Introduce the second calculus and identify a technical challenge with
-	disjointness: the addition of intersection types breaks the previous
-	notion of disjointness. Introduce the novel way to find disjoint types.\\
-	Summarize/mention key results: type-safety; soundness/completeness of
-	disjointness; determinism.\\
-	Perhaps here it is also useful to identity, together with Baber, what
-	were the most challenging aspects in the formalization, and maybe
-	highlight these.
-}
-
 \end{comment}
+
+
 %%% Local Variables:
 %%% mode: latex
 %%% TeX-master: "../paper"

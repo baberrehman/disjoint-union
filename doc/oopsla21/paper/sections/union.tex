@@ -485,51 +485,6 @@ important aspect of the semantics is that it is type-directed
 and similar terms that differ only on type annotations can reduce in different
 ways.
 
-\bruno{Perhaps this paragraph can be discussed in the overview?}
-\subsubsection*{The role of type annotations}
-Type annotations play two important roles in the calculus.
-Dynamic types are used by the switch construct
-to select the correct branch to execute.
-%This is employed in \rref{step-switchl,step-switchr}. 
-For instance, if we use the following switch expression:
-
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
-switch (val) {
-    (x : Int)     -> x*2,
-    (y : String)  -> y 
-}
-\end{lstlisting}
-
-\noindent Then if \lstinline{val} is the value \lstinline{1 : Int \/ String},
-the static type is \lstinline{Int \/ String}, but the dynamic
-type is \lstinline{Int}. Therefore, based on the dynamic type,
-the first case is picked. 
-
-Static types, on the other hand, are used to ensure type preservation
-and simplify the metatheory.
-%Second case is employed in \rref{step-beta}.
-%The presence of annotations with the static types,
-%ensures that types are preserved during substitution in
-%beta-reduction and \emph{switch} cases.
-For example, in the expression:
-
-\[(\lambda x . x : [[Int]] \to ([[Int \/ String]]))~1\]
-
-\noindent if the result of reduction would simply be $[[1]]$, then some
-static information would be lost, because the type of $[[1]]$ is $[[Int]]$,
-but the static type of the original expression is $[[Int \/ String]]$.
-In other words, the original type would not be preserved: we
-would get a \emph{subtype} instead. This phenomenon is ofcourse well-known
-in OOP languages and languages with subtyping, where often preservation
-needs to be weakened to allow the type after reduction to be a subtype.
-For instance, in Featherweight Java~\cite{DBLP:journals/toplas/IgarashiPW01}
-the preservation theorem states that the type after reduction is a
-subtype (and not necessarely the original type of the expression). In our
-operational semantics we opted to keep track of the static types instead,
-and preserve the original type. Thus the resulting value is $[[1 : Int \/ String]]$.
-This considerably simplifies the metatheory, although in an actual
-implementation not tracking the static type would be more efficient.
-
 \subsubsection*{Reduction rules}
 \Cref{fig:union:os} shows operational semantics of \cal.
 The operational semantics follows a call-by-value evaluation strategy.
