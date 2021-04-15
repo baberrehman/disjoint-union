@@ -5,15 +5,6 @@ This section provides some background on union types, and some common approaches
 to eliminate union types. Then it describes the Ceylon approach to Union types.
 Finally, it presents the key ideas and challenges in our work and \name.
 
-\ningning{We may want to be consistent with the syntax used in examples. Now
-  there are three things going on: examples before introducing Ceylon; examples
-  in Ceylon; examples in our calculi. Will it look confusing as we use three
-  different syntax rules?}
-\bruno{Three different syntaxes is definitly too much. I think we may be able
-  to get by with two syntaxes: our calculus and Ceylon. Alternatevely, we can
-  use just the syntax in our calculus here, and later, perhaps in the discussion
-  have examples in Ceylon, when comparing to Ceylon. }
-
 \subsection{Tagged Union Types}
 
 % Brief intro to union types and one or 2 simple examples that show that we
@@ -119,18 +110,20 @@ existing approaches next.
 \paragraph{Single branch elimination.}
 
 A possible approach is to use an elimination of an expression with a union type
-$[[A \/ B]]$ supports only one branch, and the branch needs to have the same
+$[[A \/ B]]$ that supports only one branch. The branch needs to have the same
 type when the expression has type $[[A]]$, or type $[[B]]$. This approach is
 adopted, for example by \citet{pierce1991programming},
 \citet{barbanera1995intersection}, and more recently,
-\citet{dunfield2014elaborating}. For better illustration, we adapt their syntax
+\citet{dunfield2014elaborating}. For consistency with the presentation of this paper,
+we adapt their syntax
 using our switch notation in the examples, while preserving their semantics. For
-example, in \lstinline{tostring2}, the expression \lstinline{show x} must return
+example, in \lstinline{tostring2}, the expression \lstinline{show y} must return
 \lstinline{String} when \lstinline{y : String}, and when \lstinline{y : Int},
-which means that \lstinline{show} must be overloaded (in
+which means that \lstinline{show} must be overloaded. In
 \citet{pierce1991programming,dunfield2014elaborating,barbanera1995intersection},
 this can be implemented by requiring \lstinline{show} to have an
-\textit{intersection type}).
+\textit{intersection type} such as $[[(String -> String) /\ (Int -> String)]]$.
+Then we can just write:
 
 \begin{lstlisting}
 function tostring2 (x: String | Int) : String =
@@ -138,7 +131,7 @@ function tostring2 (x: String | Int) : String =
     y -> show y
 \end{lstlisting}
 
-This implementation is concise, but it is also restrictive as it can no longer
+\noindent This implementation is concise, but it is also restrictive as it can no longer
 support multiple branches according to the different representations of
 \lstinline{x}. Furthermore it relies on the language also supporting overloaded
 functions. Without overloaded functions the construct would not be very useful.
@@ -162,13 +155,8 @@ function tostring3 (x: String | Int) : String =
     (y : Int) -> show y
 \end{lstlisting}
 
-\snow{To be consistent with our syntax, each branch should name a variable, like
-\lstinline{tostring2}. Same applies to \lstinline{isstudent2}.}
-\ningning{I added variables. Then there is no type refinement anymore.. But I
-  guess it's fine as the reference to occurrence typing is not important anyway.}
-
-\noindent Note here \lstinline{show} is directly applied to \lstinline{x}, and
-it does not need to be overloaded, as the type-directed elimination
+\noindent Note that here \lstinline{show} does not need to be overloaded,
+as the type-directed elimination
 \textit{turns} the variable \lstinline{x} of type \lstinline{String | Int} into
 the variable \lstinline{y} of type \lstinline{Int}.
 
@@ -216,20 +204,15 @@ potentially choose either branch. However for persons that are only students or
 only workers, only one branch can be chosen.
 
 \paragraph{Best-match and overloading.}
-
-Some languages support form of typed-based union elimination via method
+Some languages support an alternative to typed-based union elimination via method
 overloading. Such form is used in, for example, Java \cite{javadoc}. In Java, we
 can encode \lstinline{isstudent3} as a function, which has different
 behaviors when the type of the argument differs.
 
 \begin{lstlisting}
-boolean isstudent3 (Person x) {
-  return False;
-}
+boolean isstudent3 (Person x) { return False; }
 
-boolean isstudent3 (Student x) {
-  return True;
-}
+boolean isstudent3 (Student x) { return True; }
 \end{lstlisting}
 
 Java resolves overloading by finding in all method implementations the one with
@@ -238,20 +221,44 @@ apply \lstinline{isstudent3} to a term of type \lstinline{Student}, the second
 implementation is chosen, as \lstinline{Student} is the best type describing the
 argument. As we can see, such best-match strategy gets rid of the
 order-sensitive problem, as Java always try to find the best-match one despite
-the order of the methods. In this case, we have the method for
-\lstinline{Person} before the one for \lstinline{Student}, but Java still finds
+the order of the methods. In other words, in Java the order of methods does not matter:
+we have the method for \lstinline{Person} before the one for \lstinline{Student}, but Java still finds
 the one for \lstinline{Student}.
 
 However, the best-match strategy can also be confusing, especially when the
-system features implicit upcasting (e.g., by subtyping). For example, suppose
-the type \lstinline{Pegasus} is a subtype of both type \lstinline{Bird} and type
+system features implicit upcasting (e.g., by subtyping). If programmers
+are not very familiar with how overloading resolution works, they may assume
+that the wrong implementation is called in their code. For instance, in Java
+we may write:
+
+\begin{lstlisting}
+Person p = new Student();
+p.isstudent3();  
+\end{lstlisting}
+
+\noindent In this case Java will pick the \lstinline{isstudent3} method with the
+argument \lstinline{Person}, since Java overloading uses the \emph{static type}
+(\lstinline{p} has the static type \lstinline{Person})
+to resolve overloading. But some programmers may assume that the implementation
+of the method for \lstinline{Student} would be chosen instead, since the person
+is indeed a student in this case. This can be confusing and lead to subtle bugs.
+
+Moreover there are other tricky situations
+that arize when employing a best-match strategy. For example, suppose
+that the type \lstinline{Pegasus} is a subtype of both type \lstinline{Bird} and type
 \lstinline{Horse}. If a method \lstinline{isbird} is overloaded for
 \lstinline{Bird} and \lstinline{Horse}, then which method implementation should
 we choose when we apply \lstinline{isbird} to a term of type
 \lstinline{Pegasus}, the one for \lstinline{Bird}, or the one for
-\lstinline{Horse}? In such case, the semantics is non-deterministic again, and
-the behavior of the program depends on the particular implementation of the
-compiler.
+\lstinline{Horse}? In such case, we have an ambiguity. Things get worse
+when the type system includes more advanced type system features, such as generics,
+intersections and union types,
+or type-inference.
+
+
+%the semantics is non-deterministic again, and
+%the behavior of the program depends on the particular implementation of the
+%compiler.%\bruno{Should we use Worker/Student/Person here to be}
 
 
 \subsection{Eliminating Union Types in Ceylon}
@@ -333,8 +340,6 @@ the corresponding branch is chosen and executed.
 Besides being used for overloading, union types can be used for other purposes too.
 For instance, we can easily encode the \lstinline{safediv} function in Section~\ref{subsec:elimination}
 in Ceylon:
-\bruno{Ceylon code for safediv and to string here, and some short piece of text about the
-example}
 %
 \begin{lstlisting}
 String | Integer safediv3 (Integer x, Integer y){
@@ -400,10 +405,6 @@ interfaces and any user-defined class. Notably, \lstinline{Null} is disjoint to
 \end{tikzpicture}
 \end{center}
 
-\bruno{Say more about this, maybe show a (simplified)
-  picture of the subtyping lattice?
-The point is that Null is not a subtype of Object, right? so, by default object
-types have no null value. }
 %Similarly, one can use enumerated types to denote various special cases, or easily
 %add another type to the argument type of an existing function when considering
 %more possible inputs, to improve the program's robustness.
@@ -588,12 +589,14 @@ cannot be accepted by Ceylon's compiler.
 
 \subsection{Our Methodology}
 
-The switch construct in our calculus \cal is similar to Ceylon's.
-Its typing rule guarantees that cases are disjoint and exhaustive.
-Reduction preserves types and produces deterministic result in the
-runtime, with the help of annotated values.
+The switch construct in our calculus \cal aims to capture the key ideas for
+elimination of union types, but in a language independent way.
+The typing rules guarantee that cases in the switch are disjoint and exhaustive.
+Reduction preserves types and produces deterministic results. Since the semantics
+is type-dependent it uses and propagates type annotations at runtime,
+with the help of annotated values.
 Here we give an overview of our design and discuss some challenges
-we met for the two calculi in the paper.
+we met for the calculi designed in this paper.
 
 \paragraph{Disjointness, interacted with intersection types}
 After seeing the connection between bottom-like types and disjointness,
