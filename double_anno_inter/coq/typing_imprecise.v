@@ -1111,3 +1111,145 @@ Proof.
     inductions red; eauto.
 Qed.
 
+Definition relation (X : Type) := X -> X -> Prop.
+
+Inductive multi {X : Type} (R : relation X) : relation X :=
+  | multi_refl : forall (x : X), multi R x x
+  | multi_step : forall (x y z : X),
+                        R x y ->
+                        multi R y z ->
+                        multi R x z.
+
+Notation " t '-->*' t' " := (multi step t t') (at level 40).
+Notation " t '~~>*' t' " := (multi istep t t') (at level 40).
+
+(* defns erase value *)
+Definition erasevalue (v:exp) :=    (* defn erasevalue *)
+ match v with
+   | (e_ann p A) => p
+   | (e_abs e)   => e_abs e
+   | _           => v
+ end.
+
+Lemma imprecise_lemma2 : forall e v, e -->* v -> e ~~>* erasevalue v.
+ Proof.
+     intros e v red.
+     lets red': red.
+     induction red; eauto.
+     admit.
+     forwards*: IHred.
+     admit.
+Admitted.
+
+(* need to be strengthened *)
+Lemma itype_safety : forall e e' dir T,
+typing empty e dir T ->
+e ~~> e' ->
+(ivalue e') /\ (exists B, typing empty e' dir B /\ B <: T)
+\/ (exists e'', e' --> e'').
+Proof.
+introv Typ red. gen_eq E: (@empty typ). lets Typ': Typ.
+inductions Typ; intros EQ; subst.
+(*case int*)
+ - inversion red.
+ (*case bool*)
+ - inversion red.
+ (*case string*)
+ - inversion red.
+ (*case var*)
+ - apply binds_empty_inv in H0. inversion H0.
+ (*case anno*)
+ - destruct* IHTyp. admit.
+  + inverts H.
+  (*case step-rm-anno*)
+   * inverts H0.
+     right. exists (e_ann p A). apply* step_rm_ann.
+   (*case step-lam-ann*)
+   * inverts Typ. inverts H.
+     right. exists (e_ann (e_ann (e_abs e0)(t_arrow A0 B))(t_arrow A0 B) ).
+     apply* step_lam_ann.
+  + destruct H.
+    dependent destruction Typ.
+     { inverts* Typ.
+       { apply binds_empty_inv in H2. inversion H2. }
+       { 
+         inverts* H0.
+         destruct (value_not_value (e_ann (e_ann e0 B) A)).
+         forwards*: typing_regular Typ'.
+         left*.
+         right. exists*.
+         destruct (value_not_value ((e_ann (e_ann (e_ann p A0) B) A))).
+         forwards*: typing_regular Typ'.
+         left*.
+         right.  exists*.
+       }
+       { right. exists (e_ann x A). apply* step_ann.
+         unfold not. intros. inversion H3. inversion H5. 
+       } 
+     }
+     { inversion H0. }
+     { right. exists (e_ann x C). apply* step_ann.
+       unfold not. intros. inversion H3. inversion H5. }
+(*case typ-app*)
+ - right. destruct* IHTyp1.
+  + destruct* IHTyp2.
+   * inverts* H.
+    inverts* H1. inverts Typ1. inverts H.
+    (*i infers arrow*)
+    inverts H3. inverts H. inverts H1. inverts H.
+    (*b infers arrow*)
+    inverts H3. inverts H. inverts H1. inverts H.
+    (*s infers arrow*)
+    inverts H3. inverts H. inverts H1. inverts H.
+    (*step-beta*)
+    exists* (e_ann (e_ann (open_exp_wrt_exp e (changeanno e2 A A0)) B0) B).
+    inverts Typ1.
+    (*case step-appr*)
+   * destruct H0.
+     destruct H.
+   { exists* (e_app e x). }
+   { inverts Typ1. }
+   (*case step-appl*)
+  + destruct H. 
+    exists (e_app x e2). apply* step_appl.
+    forwards*: typing_regular Typ2.
+(*case typ-sub*)
+ - destruct~ IHTyp.
+(*case typ-abs*)
+ - left. forwards*: typing_regular Typ'.
+   destruct~ H1. inverts* H2.
+(*case typ-typeof*)
+ - right. destruct* IHTyp.
+  + inverts H4. inverts H5. 
+    apply check_pexpr_ann in Typ; auto.
+    eapply check_or_typ in Typ; eauto.
+    destruct Typ.
+   * forwards*: pexpr_inf_typ H4.
+     destruct H6 as [S [H41 H51]].
+     exists (open_exp_wrt_exp e1 (e_ann p A)).
+     pick_fresh y.
+     assert (y \notin L) by auto.
+     lets: H y H6.
+     eapply step_typeofl with (C:=S); eauto.
+     forwards*: typing_regular Typ'.
+     inverts H5; inverts* H41.
+     inversion H4. 
+     inverts H4. eauto. inversion H4.
+   * forwards*: pexpr_inf_typ H4.
+     destruct H6 as [S [H41 H51]].
+     exists (open_exp_wrt_exp e2 (e_ann p B)).
+     pick_fresh y.
+     assert (y \notin L) by auto.
+     lets: H1 y H6.
+     eapply step_typeofr with (C:=S); eauto.
+     forwards*: typing_regular Typ'.
+     inverts H5; inverts* H41.
+     inversion H4.
+     inverts H4. eauto.
+     inversion H4.
+   * inverts Typ. inversion H4.
+  + destruct H4.
+     exists (e_typeof x A e1 B e2).
+     apply step_typeof; auto.
+     forwards*: typing_regular Typ'.
+Qed.
