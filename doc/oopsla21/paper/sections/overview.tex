@@ -234,7 +234,7 @@ we may write:
 
 \begin{lstlisting}
 Person p = new Student();
-p.isstudent3();  
+p.isstudent3();
 \end{lstlisting}
 
 \noindent In this case Java will pick the \lstinline{isstudent3} method with the
@@ -640,7 +640,7 @@ Indeed the notion of disjointness employeed in the first variant \cal in Section
 is exactly this. Formally, we have:
 
 \begin{definition}\label{def:disjointness}
-	A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ and $[[C <: B]]$ $\rightarrow$ $[[botlike C]]$
+	A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ and $[[C <: B]]$ $\Longrightarrow$ $[[botlike C]]$
 	\label{def:union:disj}
 \end{definition}
 
@@ -667,19 +667,26 @@ of \name with intersection types is:
 
 \begin{definition}
 \label{def:inter:disj}
-  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\rightarrow$ \ $\neg$ \ ($[[C <: A]]$ and $[[C <: B]]$).
+  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\Longrightarrow$ \ $\neg$ \ ($[[C <: A]]$ and $[[C <: B]]$).
+\end{definition}
+
+\snow{Following is an alternative definition. Would it looks simpler?}
+
+\begin{definition}
+\label{def:inter:disj}
+  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $\neg$ ($[[ordinary C]]$ and $[[C <: A]]$ and $[[C <: B]]$).
 \end{definition}
 
 \noindent Under this definition we can check that $[[Int]]$ and $[[Bool]]$ are disjoint,
 since no ordinary type is a subtype of both these two types. This definition avoids
 the issue with \Cref{def:disjointness}, which would not consider these two types disjoint.
 Moreover, this definition is a generalization of the previous one, and in the
-variant with union types only the two definitions coincide. 
+variant with union types only the two definitions coincide.
 
 This new definition requires a different approach to algorithmic disjointness. Our new
 approach is to use the notion of \emph{lowest ordinary subtypes}. Since the lowest ordinary
 subtypes of any type is a finite set, we can easily determine whether two types are disjoint
-by ensuring that the intersection of their lowest ordinary subtypes is empty. 
+by ensuring that the intersection of their lowest ordinary subtypes is empty.
 
 \begin{comment}
 Two types are disjoint if and only if all of their common subtypes are bottom-like.
@@ -797,7 +804,7 @@ $[[e2]]$ is $[[C2]]$, we can make $[[C]]$ to be $[[C1\/C2]]$.
 \end{comment}
 
 \paragraph{The role of type annotations in the dynamic semantics.}
-Another interesting aspect of \name is the dynamic semantics, which must be type-directed. 
+Another interesting aspect of \name is the dynamic semantics, which must be type-directed.
 \name uses and propagates type annotations. Moreover in \name there are two different
 notions: \emph{static types} and \emph{dynamic types}. The static type of an
 expression is the type that is known during type-checking. The dynamic type is the
@@ -807,20 +814,20 @@ play two different roles in the calculus.
 
 Dynamic types are used by the switch construct
 to select the correct branch to execute.
-%This is employed in \rref{step-switchl,step-switchr}. 
+%This is employed in \rref{step-switchl,step-switchr}.
 For instance, if we use the following switch expression:
 
-\begin{lstlisting}[xleftmargin=.2\textwidth, xrightmargin=.2\textwidth]
+\begin{lstlisting}
 switch (val) {
     (x : Int)     -> x*2,
-    (y : String)  -> y 
+    (y : String)  -> y
 }
 \end{lstlisting}
 
 \noindent Then if \lstinline{val} is the value \lstinline{1 : Int \/ String},
 the static type is \lstinline{Int \/ String}, but the dynamic
 type is \lstinline{Int}. Therefore, based on the dynamic type,
-the first case is picked. 
+the first case is picked.
 
 Static types, on the other hand, are used to ensure type preservation
 and simplify the metatheory.
@@ -829,9 +836,9 @@ and simplify the metatheory.
 %ensures that types are preserved during substitution in
 %beta-reduction and \emph{switch} cases.
 For example, in the expression:
-
+%
 \[(\lambda x . x : [[Int]] \to ([[Int \/ String]]))~1\]
-
+%
 \noindent if the result of reduction would simply be $[[1]]$, then some
 static information would be lost, because the type of $[[1]]$ is $[[Int]]$,
 but the static type of the original expression is $[[Int \/ String]]$.
@@ -846,6 +853,22 @@ operational semantics we opted to keep track of the static types instead,
 and preserve the original type. Thus the resulting value is $[[1 : Int \/ String]]$.
 This considerably simplifies the metatheory, although in an actual
 implementation not tracking the static type would be more efficient.
+
+\snow{We didn't explain why lambdas have two annotation here. To select the right
+  branch, we don't need the dynamic type annotation of lambda. Moreover, it
+  keeps the preservation in beta reduction. Following are two example:}
+
+\begin{verbatim}
+  (\x . x 1 : (Int->Int)->Int: (Int->Int)->Int) (\x.x+1) --> (\x.x+1) 1
+
+  (\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [x~>1:Int]
+  e ::= switch (x) {Char -> ... , Bool -> ...}
+\end{verbatim}
+
+\snow{The first example shows if we don't add type annotation to the input for subsitutition
+we will reach ill-typed term.
+The second example shows we have to use the dynamic type instead of the static type of lambda.
+The expression $e [x->1:Int]$ was legal when x has type Top but becomes illegal when x has type Int.}
 
 \begin{comment}
 \paragraph{Reduction and annotated values}
