@@ -169,77 +169,6 @@ where "e --> e'" := (step e e') : env_scope.
 Hint Constructors typing step : core.
 
 
-(*********************************
- Imprecise semantics starts here
-**********************************)
-
-(* defns imprecise value *)
-Inductive ivalue : exp -> Prop :=    (* defn value *)
- | ival_wexpr : forall (e:exp),
-     pexpr e ->
-     ivalue e
- | ival_abs : forall (L:vars) e,
-    (forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e (e_var_f x) )  )  ->
-    ivalue (e_abs e).
-
-Hint Constructors ivalue : core.
-
-(* defns imprecise changeanno *)
-Definition ichangeanno (v:exp) (C:typ) :=    (* defn changeanno *)
- match v with
-   | e_lit i5    => e_lit i5
-   | e_bool b    => e_bool b
-   | e_str s     => e_str s
-   | e_ann (e_abs e) (t_arrow A B) => e_ann (e_abs e) (t_arrow A B)
-   | (e_abs e)   => e_ann (e_abs e) C
-   | _           => v
- end.
-
-(* defns imprecise Reduction *)
-Reserved Notation "e ~~> e'" (at level 80).
-Inductive istep : exp -> exp -> Prop :=    (* defn step *)
- | istep_appl : forall (e1 e2 e1':exp),
-     lc_exp e2 ->
-     e1 ~~> e1' ->
-     (e_app e1 e2) ~~> (e_app e1' e2)
- | istep_appr : forall (v e e':exp),
-     pexpr v ->
-     e ~~> e' ->
-     (e_app v e) ~~> (e_app v e')
- | istep_beta : forall (e:exp) (A B:typ) (v:exp),
-     lc_exp (e_abs e) ->
-     value v ->
-     (e_app (e_ann (e_abs e)  (t_arrow A B)) v) ~~> (e_ann (open_exp_wrt_exp e (ichangeanno v A)) B)
- | istep_ann : forall (e:exp) (A:typ) (e':exp),
-     e ~~> e' ->
-     (e_ann e A) ~~> (e_ann e' A)
- | istep_rm_ann : forall (p:exp) (A B:typ),
-     pexpr p ->
-     (e_ann p A) ~~> p
- | istep_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2 e':exp),
-     lc_exp (e_typeof e A e1 B e2) ->
-     e ~~> e' ->
-     (e_typeof e A e1 B e2) ~~> (e_typeof e' A e1 B e2)
- | istep_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
-     lc_exp (e_typeof p A e1 B e2) ->
-     pexpr p ->
-     findtype p C ->
-     subtyping C A ->
-     e_typeof p A e1 B e2 ~~>  (open_exp_wrt_exp e1 (e_ann p A) )
- | istep_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
-    lc_exp (e_typeof p A e1 B e2) ->
-     pexpr p ->
-     findtype p C ->
-     subtyping C B ->
-     e_typeof p A e1 B e2 ~~> (open_exp_wrt_exp e2 (e_ann p B) )
-where "e ~~> e'" := (istep e e') : env_scope.
-
-Hint Constructors istep : core.
-
-(*****************************
-Imprecise semantics ends here
-******************************)
-
 (** Gathering free names already used in the proofs *)
 
 
@@ -1099,3 +1028,86 @@ Proof.
         unfold not in H1.
         forwards*: H1.
 Qed.
+
+(*********************************
+ Imprecise semantics starts here
+**********************************)
+
+(* defns imprecise value *)
+Inductive ivalue : exp -> Prop :=    (* defn value *)
+ | ival_wexpr : forall (e:exp),
+     pexpr e ->
+     ivalue e
+ | ival_abs : forall (L:vars) e,
+    (forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e (e_var_f x) )  )  ->
+    ivalue (e_abs e).
+
+Hint Constructors ivalue : core.
+
+(* defns imprecise changeanno *)
+Definition ichangeanno (v:exp) (C:typ) :=    (* defn changeanno *)
+ match v with
+   | e_lit i5    => e_lit i5
+   | e_bool b    => e_bool b
+   | e_str s     => e_str s
+   | e_ann (e_abs e) (t_arrow A B) => e_ann (e_abs e) (t_arrow A B)
+   | (e_abs e)   => e_ann (e_abs e) C
+   | _           => v
+ end.
+
+(* defns imprecise Reduction *)
+Reserved Notation "e ~~> e'" (at level 80).
+Inductive istep : exp -> exp -> Prop :=    (* defn step *)
+ | istep_appl : forall (e1 e2 e1':exp),
+     lc_exp e2 ->
+     e1 ~~> e1' ->
+     (e_app e1 e2) ~~> (e_app e1' e2)
+ | istep_appr : forall (v e e':exp),
+     pexpr v ->
+     e ~~> e' ->
+     (e_app v e) ~~> (e_app v e')
+ | istep_beta : forall (e:exp) (A B:typ) (v:exp),
+     lc_exp (e_abs e) ->
+     value v ->
+     (e_app (e_ann (e_abs e)  (t_arrow A B)) v) ~~> (e_ann (open_exp_wrt_exp e (ichangeanno v A)) B)
+ | istep_ann : forall (e:exp) (A:typ) (e':exp),
+     e ~~> e' ->
+     (e_ann e A) ~~> (e_ann e' A)
+ | istep_rm_ann : forall (p:exp) (A:typ),
+     pexpr p ->
+     (e_ann p A) ~~> p
+ | istep_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2 e':exp),
+     lc_exp (e_typeof e A e1 B e2) ->
+     e ~~> e' ->
+     (e_typeof e A e1 B e2) ~~> (e_typeof e' A e1 B e2)
+ | istep_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
+     lc_exp (e_typeof p A e1 B e2) ->
+     pexpr p ->
+     findtype p C ->
+     subtyping C A ->
+     e_typeof p A e1 B e2 ~~>  (open_exp_wrt_exp e1 (e_ann p A) )
+ | istep_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
+    lc_exp (e_typeof p A e1 B e2) ->
+     pexpr p ->
+     findtype p C ->
+     subtyping C B ->
+     e_typeof p A e1 B e2 ~~> (open_exp_wrt_exp e2 (e_ann p B) )
+where "e ~~> e'" := (istep e e') : env_scope.
+
+Hint Constructors istep : core.
+
+(*****************************
+Imprecise semantics ends here
+******************************)
+
+(*
+Properties of semantics and imprecise semantics
+*)
+
+Lemma imprecise_lemma1 : forall e e', e --> e' ->
+(exists v, ivalue v -> e = v) \/ (e ~~> e').
+Proof.
+    intros e e' red.
+    inductions red; eauto.
+Qed.
+
