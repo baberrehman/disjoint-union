@@ -2,6 +2,7 @@
 syntax_imprecise.v
 syntax_no_top_findsubtypes.v
 syntax.v
+syntax_wvalue_no_gen_sub.v
 syntax_wvalue.v
 typing_imprecise.v
 typing_no_top_findsubtypes.v

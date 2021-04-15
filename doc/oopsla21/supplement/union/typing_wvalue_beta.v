@@ -1,22 +1,11 @@
 Require Import TLC.LibLN.
-Require Import syntax_imprecise.
+Require Import syntax_wvalue.
 
 (*
-This file is created on April 14, 2021
 
-syntax_imprecise.v is the syntax file for this semantics
+Update start on April 09, 2021.
 
-This file contains type safety and deterministic lemmas
-associated with syntax_imprecise.v
-
-Bool and String primitive type
-
-Removed top from ordinary types
-
-April 06, 2021:
---------------
--> extended from typing_no_top_findsubtypes.v
--> wexpr added
+This is typing file for syntax_wvalue.
 
 April 09, 2020:
 ---------------
@@ -24,54 +13,8 @@ April 09, 2020:
 -> step-beta updated
 -> changeanno inductive changed to changeanno definition
 
-April 14, 2020:
----------------
--> extended from typing_wvalue_beta.v
--> Imprecise semantics
 *)
 
-(** definitions *)
-
-(* defns PreValue *)
-Inductive pexpr : exp -> Prop :=    (* defn pexpr *)
- | pexpr_int : forall i5,
-     pexpr (e_lit i5)
- | pexpr_bool : forall b,
-     pexpr (e_bool b)
- | pexpr_str : forall s,
-     pexpr (e_str s)
- | pexpr_abs : forall (e:exp) (A B:typ),
-     lc_exp (e_abs e) ->
-     pexpr (e_ann  ( (e_abs e) )  (t_arrow A B)).
-
-(* defns wexpr *)
-Inductive wexpr : exp -> Prop :=    (* defn wexpr *)
- | wexpr_pexpr : forall (p:exp) (A:typ),
-     pexpr p ->
-     wexpr (e_ann p A).
-
-(* defns value *)
-Inductive value : exp -> Prop :=    (* defn value *)
- | val_wexpr : forall (e:exp),
-     wexpr e ->
-     value e
- | val_abs : forall (L:vars) e,
-    (forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e (e_var_f x) )  )  ->
-     value (e_abs e).
-
-(* defns FindType *)
-Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
- | findtype_int : forall i5,
-     findtype (e_lit i5) t_int
- | findtype_bool : forall b,
-     findtype (e_bool b) t_bool
- | findtype_str : forall s,
-     findtype (e_str s) t_str
- | findtype_arrow : forall (e:exp) (A B:typ),
-     lc_exp (e_abs e) ->
-     findtype  ( (e_ann  ( (e_abs e) )  (t_arrow A B)) )   (t_arrow A B).
-
-Hint Constructors pexpr wexpr value findtype : core.
 
 (* defns changeanno *)
 Definition changeanno (v:exp) (A:typ) (B:typ) :=    (* defn changeanno *)
@@ -86,12 +29,6 @@ Inductive typing : env -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
  | typ_lit : forall (G:env) i5,
       okt  G  ->
      typing G (e_lit i5) infer t_int
- | typ_bool : forall (G:env) b,
-      okt  G  ->
-     typing G (e_bool b) infer t_bool
- | typ_str : forall (G:env) s,
-      okt G ->
-      typing G (e_str s) infer t_str
  | typ_var : forall (G:env) (x:var) (A:typ),
       okt  G  ->
       binds  x A G  ->
@@ -122,10 +59,6 @@ Reserved Notation "e --> e'" (at level 80).
 Inductive step : exp -> exp -> Prop :=    (* defn step *)
  | step_int : forall i5,
      step (e_lit i5) (e_ann (e_lit i5) t_int)
- | step_bool : forall b,
-     step (e_bool b) (e_ann (e_bool b) t_bool)
- | step_str : forall s,
-     step (e_str s) (e_ann (e_str s) t_str)
  | step_appl : forall (e1 e2 e1':exp),
      lc_exp e2 ->
      step e1 e1' ->
@@ -134,12 +67,18 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      wexpr v ->
      step e e' ->
      step (e_app v e) (e_app v e')
- | step_beta : forall (e:exp) (A1 B1 A2 B2:typ) (v:exp) (C:typ),
+ | step_beta : forall (e:exp) (A1 B1 A2 B2:typ) (v:exp),
      lc_exp (e_abs e) ->
      value v ->
-     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) ( v ) ) --> (e_ann (e_ann  (  (open_exp_wrt_exp  e (changeanno v A2 A1) )  )  B1) B2)
- | step_ann : forall (e:exp) (A:typ) (e':exp),
-     not ( wexpr (e_ann e A) )  ->
+     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) (v) ) --> (e_ann (e_ann  (  (open_exp_wrt_exp  e (changeanno v A2 A1) )  )  B1) B2)
+(*
+     | step_beta_abs : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp) (C:typ) x,
+     lc_exp (e_abs e) ->
+     p = (e_abs x) ->
+     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) ( p ) ) --> (e_ann (e_ann  (  (open_exp_wrt_exp  e (e_ann (e_ann p A2) A1) )  )  B1) B2)
+*)
+     | step_ann : forall (e:exp) (A:typ) (e':exp),
+      not ( wexpr (e_ann e A) )  ->
      step e e' ->
      step (e_ann e A) (e_ann e' A)
  | step_rm_ann : forall (p:exp) (A B:typ),
@@ -166,8 +105,8 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      step (e_typeof (e_ann p D) A e1 B e2)  (open_exp_wrt_exp  e2 (e_ann p B) )
 where "e --> e'" := (step e e') : env_scope.
 
+(** infrastructure *)
 Hint Constructors typing step : core.
-
 
 (** Gathering free names already used in the proofs *)
 
@@ -395,8 +334,6 @@ Lemma typing_weakening : forall E F G e dir T,
 Proof.
   introv Typ. gen F. inductions Typ; introv Ok.
   - apply* typ_lit.
-  - apply* typ_bool.
-  - apply* typ_str.
   - apply* typ_var. apply* binds_weaken.
   - apply* typ_ann.
   - apply* typ_app.
@@ -423,8 +360,6 @@ introv TypT TypU.
 lets TypT': TypT.
 inductions TypT; introv; simpl.
  - apply* typ_lit.
- - apply* typ_bool.
- - apply* typ_str.
  - case_var.
   + binds_get H0.
     lets M: (typing_weakening E F empty u infer U).
@@ -485,8 +420,7 @@ Lemma check_or_typ : forall E e A B,
 Proof.
   intros.
   inductions H1; try solve [ inverts* H | inverts* H0 | inverts* H1].
-  inverts H;
-  inverts* H1; inverts* H2.
+  inverts* H. inverts* H1. inverts* H2. inverts* H1. inverts* H2.
 Qed.
 
 Lemma check_pexpr_ann : forall E p A C,
@@ -498,14 +432,6 @@ intros E p A C Prev Typ.
 inductions Prev.
 - inverts Typ. inverts H. inverts H3. inverts H.
   assert (typing E (e_lit i5) infer t_int). eauto.
-  eapply typ_sub; eauto.
-  eapply sub_transitivity; eauto.
-- inverts Typ. inverts H. inverts H3. inverts H.
-  assert (typing E (e_bool b) infer t_bool). eauto.
-  eapply typ_sub; eauto.
-  eapply sub_transitivity; eauto.
-- inverts Typ. inverts H. inverts H3. inverts H.
-  assert (typing E (e_str s) infer t_str). eauto.
   eapply typ_sub; eauto.
   eapply sub_transitivity; eauto.
 - inverts Typ. inverts H0. inverts H4. inverts H0.
@@ -536,12 +462,6 @@ inductions Prev.
 - exists t_int. constructor. constructor.
   apply typing_regular in Typ. destruct~ Typ.
   dependent destruction Typ. dependent destruction Typ. auto.
-- exists t_bool. constructor. constructor.
-  apply typing_regular in Typ. destruct~ Typ.
-  dependent destruction Typ. dependent destruction Typ. auto.
-- exists t_str. constructor. constructor.
-  apply typing_regular in Typ. destruct~ Typ.
-  dependent destruction Typ. dependent destruction Typ. auto.
 - dependent destruction Typ.
   dependent destruction Typ.
   exists (t_arrow A0 B). constructor. auto. auto.
@@ -567,13 +487,13 @@ Proof.
   - (* app *)
     inverts* Red.
     + (* beta *)
-     inverts H3.
-     * inverts Typ1.
+      inverts H3.
+     * inverts Typ1. 
       do 3 dependent destruction H5.
       { (* infer lam *)
         dependent destruction H5.
       }
-      {  
+      {
         dependent destruction H2.
         constructor.
         pick_fresh x.
@@ -586,7 +506,7 @@ Proof.
         rewrite* concat_empty_r.
         rewrite H5.
       (* prove p:A1 checks *)
-        inverts Typ2. inverts H. inverts H6.
+        inverts* Typ2. inverts* H. inverts H6.
         assert (typing G (e_ann p A1) infer A1).
         assert (B0 <: A1).
         eapply sub_transitivity; eauto.
@@ -612,9 +532,8 @@ Proof.
       inverts Typ2. inverts H7.
       assert (typing G ((e_ann (e_ann (e_abs e0) (t_arrow A0 B0)) A1)) infer A1). eauto.
       forwards*: typing_through_subst_ee.
+      unfold changeanno.
       rewrite* (@subst_ee_intro y).
-      unfold changeanno. forwards*: typing_regular.
-      inversion H3.
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
@@ -626,14 +545,6 @@ Proof.
       rewrite H7.
       dependent destruction H12.
       * assert (typing G (e_lit i5) infer t_int). apply typ_lit.
-        forwards*: typing_regular Typ.
-        forwards*: typing_through_subst_ee.
-        rewrite* (@subst_ee_intro y).
-      * assert (typing G (e_bool b) infer t_bool). apply typ_bool.
-        forwards*: typing_regular Typ.
-        forwards*: typing_through_subst_ee.
-        rewrite* (@subst_ee_intro y).
-      * assert (typing G (e_str s) infer t_str). apply typ_str.
         forwards*: typing_regular Typ.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
@@ -654,14 +565,6 @@ Proof.
         forwards*: typing_regular Typ.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
-      * assert (typing G (e_bool b) infer t_bool). apply typ_bool.
-        forwards*: typing_regular Typ.
-        forwards*: typing_through_subst_ee.
-        rewrite* (@subst_ee_intro y).
-      * assert (typing G (e_str s) infer t_str). apply typ_str.
-        forwards*: typing_regular Typ.
-        forwards*: typing_through_subst_ee.
-        rewrite* (@subst_ee_intro y).
       * assert (typing G (e_ann (e_abs e) (t_arrow A0 B0)) infer (t_arrow A0 B0)). apply typ_ann.
         do 4 dependent destruction Typ. auto.
         forwards*: typing_through_subst_ee.
@@ -679,12 +582,9 @@ Proof.
   clear st. gen_eq E: (@empty typ).  gen U1 U2.
   induction Typ; introv EQT EQE;
    try solve [ inverts* Val | inversion EQT | eauto ].
-  - inverts EQT. inverts H0.
-  - inverts EQT. inverts H0.
-  - inverts EQT. inverts H0.
-  - subst. assert (B <: (t_arrow U1 U2)). {
+    subst. assert (B <: (t_arrow U1 U2)). {
     eapply sub_transitivity. apply H. apply EQT. }
-    eapply IHTyp. apply Val. apply H0. auto.
+   eapply IHTyp. apply Val. apply H0. reflexivity.
 Qed.
 
 Lemma check_both_disj_false : forall E e A B,
@@ -694,20 +594,15 @@ Lemma check_both_disj_false : forall E e A B,
 Proof.
   intros.
   inductions H; try solve [ inverts* H | inverts* H0 | inverts* H2].
- - inverts H1. inverts H. inverts H2. inverts H.
-   unfold DisjSpec in H0. specialize (H0 t_int).
-   forwards*: H0.
- - inverts H1. inverts H. inverts H2. inverts H.
-   unfold DisjSpec in H0. specialize (H0 t_bool).
-   forwards*: H0.
- - inverts H1. inverts H. inverts H2. inverts H.
-   unfold DisjSpec in H0. specialize (H0 t_str).
-   forwards*: H0.
- - inverts H1. inverts H3. inverts H2. inverts H1.
-   unfold DisjSpec in H0.
-   specialize (H0 (t_arrow A0 B0)).
-   forwards*: H0.
+  inverts H1. inverts H. inverts H2. inverts H.
+  unfold DisjSpec in H0. specialize (H0 t_int).
+  forwards*: H0. inverts H.
+  inverts H1. inverts H3. inverts H2. inverts H1.
+  unfold DisjSpec in H0.
+  specialize (H0 (t_arrow A0 B0)).
+  forwards*: H0. inverts H1.
 Qed.
+
 
 Lemma not_expr : forall e t, ~ value (e_ann e t) -> ~ pexpr e.
 Proof.
@@ -721,24 +616,20 @@ Proof.
 introv lc. intros.
 inductions e; try solve [right; unfold not; intros; inversion H0].
 - left*.
-- left*.
-- left*.
 - inductions e; try solve [right; unfold not; intros; inverts H0].
   destruct~ IHe0. inversion lc. subst. auto. unfold not. intros. inversion H0.
   inductions t; try solve [ right; unfold not; intros; inversion H1].
   left. apply pexpr_abs. inversion lc; subst. auto.
 Qed.
 
+
 Lemma value_not_value : forall e, lc_exp e -> (wexpr e) \/ (~ (wexpr e)).
 Proof.
 introv lc.
-intros.
 inductions e;
-try solve [right; unfold not; intros; inversion H].
+try solve [right; unfold not; intros; inversion H; inverts lc].
 destruct~ IHe. inverts* lc.
 - inverts* H. inverts* H0.
- + right. unfold not. intros. inversion H. subst. inversion H1.
- + right. unfold not. intros. inversion H. subst. inversion H1.
  + right. unfold not. intros. inversion H. subst. inversion H1.
  + right. unfold not. intros. inverts H0. inversion H2.
 - apply val_pexpr in H.
@@ -754,24 +645,18 @@ introv Typ. gen_eq E: (@empty typ). lets Typ': Typ.
 inductions Typ; intros EQ; subst.
 (*case int*)
  - right*.
- (*case bool*)
- - right*.
- (*case string*)
- - right*.
- (*case var*)
+(*case typ-var*)
  - apply binds_empty_inv in H0. inversion H0.
- (*case anno*)
+(*case typ-ann*)
  - destruct* IHTyp.
   + inverts H.
-  (*case step-rm-anno*)
-   * inverts H0.
-     right. exists (e_ann p A). apply* step_rm_ann.
-   (*case step-lam-ann*)
-   * inverts Typ. inverts H.
-     right. exists (e_ann (e_ann (e_abs e0)(t_arrow A0 B))(t_arrow A0 B) ).
-     apply* step_lam_ann.
+    * inverts H0.
+      right. exists (e_ann p A). apply* step_rm_ann.
+    * inverts Typ. inverts H.
+      right. exists (e_ann (e_ann (e_abs e0)(t_arrow A0 B))(t_arrow A0 B) ).
+      apply* step_lam_ann.
   + destruct H.
-    dependent destruction Typ.
+     dependent destruction Typ. 
      { inverts* Typ.
        { apply binds_empty_inv in H2. inversion H2. }
        { 
@@ -783,7 +668,7 @@ inductions Typ; intros EQ; subst.
          destruct (value_not_value ((e_ann (e_ann (e_ann p A0) B) A))).
          forwards*: typing_regular Typ'.
          left*.
-         right.  exists*.
+         right. exists*.
        }
        { right. exists (e_ann x A). apply* step_ann.
          unfold not. intros. inversion H3. inversion H5. 
@@ -797,31 +682,22 @@ inductions Typ; intros EQ; subst.
   + destruct* IHTyp2.
    * inverts* H.
     inverts* H1. inverts Typ1. inverts H.
-    (*i infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
-    (*b infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
-    (*s infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
+    (*i infers arrow*) 
+    inverts H3. inverts H. inverts H1.
     (*step-beta*)
     exists* (e_ann (e_ann (open_exp_wrt_exp e (changeanno e2 A A0)) B0) B).
     inverts Typ1.
-    (*case step-appr*)
    * destruct H0.
-     destruct H.
+   destruct H.
    { exists* (e_app e x). }
-   { inverts Typ1. }
-   (*case step-appl*)
-  + destruct H. 
+   { inverts Typ1. } 
+  + destruct H.
     exists (e_app x e2). apply* step_appl.
     forwards*: typing_regular Typ2.
-(*case typ-sub*)
  - destruct~ IHTyp.
-(*case typ-abs*)
- - left. forwards*: typing_regular Typ'.
-   destruct~ H1. inverts* H2.
-(*case typ-typeof*)
- - right. destruct* IHTyp.
+ - left. forwards*:typing_regular Typ'.
+   destruct~ H1. inverts* H2. 
+ - right. destruct* IHTyp. 
   + inverts H4. inverts H5. 
     apply check_pexpr_ann in Typ; auto.
     eapply check_or_typ in Typ; eauto.
@@ -834,8 +710,7 @@ inductions Typ; intros EQ; subst.
      lets: H y H6.
      eapply step_typeofl with (C:=S); eauto.
      forwards*: typing_regular Typ'.
-     inverts H5; inverts* H41.
-     inversion H4. 
+     inverts H5; inverts* H41. inversion H4.
      inverts H4. eauto. inversion H4.
    * forwards*: pexpr_inf_typ H4.
      destruct H6 as [S [H41 H51]].
@@ -849,7 +724,7 @@ inductions Typ; intros EQ; subst.
      inversion H4.
      inverts H4. eauto.
      inversion H4.
-   * inverts Typ. inversion H4.
+   * inverts Typ. inverts H4.  
   + destruct H4.
      exists (e_typeof x A e1 B e2).
      apply step_typeof; auto.
@@ -861,389 +736,123 @@ e --> e1 -> e --> e2 -> e1 = e2.
 Proof.
   introv Typ He1. gen e2 A dir.
   induction He1; introv Typ He2.
-  (*case step-int*)
+(*case step-int*)
   - inverts* He2.
-  (*case step-bool*)
-  - inverts* He2.
-  (*case step-str*) 
-  - inverts* He2.
-  (*case step-appl*)
+(*case step-appl*)
   - inverts* He2.
    + inverts Typ.
      forwards*: IHHe1. rewrite* H0.
      inverts H0. eapply typ_sub with (A:=(t_arrow A0 B)) in H7; eauto.
      forwards*: IHHe1. rewrite* H0.
    + inverts* H2. inverts* H0. 
-    * inverts He1. assert (value (e_ann (e_lit i5) A0)) by auto. 
+    * inverts* He1.
+      assert (value (e_ann (e_lit i5) A0)). eauto.
       inverts H0. contradiction.
-    * inverts He1. assert (value (e_ann (e_bool b) A0)) by auto. 
-      inverts H0. contradiction.
-    * inverts He1. assert (value (e_ann (e_str s) A0)) by auto. 
-      inverts H0. contradiction.
-    * inverts He1.
+    * inverts* He1.
       assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B)) A0)). eauto.
       inverts H0. contradiction.
       inverts* H6.
    + inverts* He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))). eauto.
      inverts H0. contradiction.
-     inverts H6.
-(*case step-appr*)
+     inverts* H6.
+(*case ste-appr*)
   - inverts* He2.
-   + inverts* H. inverts* H0. 
-    * inverts* H4. assert (wexpr (e_ann (e_lit i5) A0)) by auto. 
-      contradiction.
-    * inverts H4. assert (wexpr (e_ann (e_bool b) A0)) by auto. contradiction.
-    * inverts H4. assert (wexpr (e_ann (e_str s) A0)) by auto. contradiction.
-    * inverts* H4. assert (wexpr (e_ann (e_ann (e_abs e0) (t_arrow A1 B)) A0)) by auto.
-     contradiction.
+   + inverts* H. inverts* H0. inverts* H4.
+     assert (value (e_ann (e_lit i5) A0)). eauto.
+     inverts H. contradiction.
+     inverts* H4. assert (value (e_ann (e_ann (e_abs e0) (t_arrow A1 B)) A0)) by auto.
+     inverts H0. contradiction.
      inversion H6.
    + inverts Typ.
      forwards*: IHHe1 H8. rewrite* H0.
      inverts H0. forwards*: IHHe1 H8. rewrite* H0.
-   + inverts H4. inverts H0. inverts H1. 
-    * inverts He1.
+   + inverts H4. inverts H0. inverts H1.
+     inverts He1. 
      assert (wexpr (e_ann (e_lit i5) A0)) by auto. contradiction.
-    * inverts He1. assert (wexpr (e_ann (e_bool b) A0)) by auto. contradiction.
-    * inverts He1. assert (wexpr (e_ann (e_str s) A0)) by auto. contradiction.
-    * inverts He1. assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A3 B)) A0)) by auto.
-      contradiction.
-      inversion H6.
-    * inversion He1.
+     inverts He1.
+     assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A3 B)) A0)) by auto.
+     contradiction.
+     inversion H6.
+     inversion He1.
 (*case step-beta*)
   - inverts* He2.
-   + inverts* H5. 
-     assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
+   + inverts* H5. assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) (t_arrow A2 B2))) by auto.
      contradiction.
      inversion H7.
    + inverts H0. inverts H1. inverts H0. 
-    * inverts H5.
+     inverts H5.
      assert (wexpr (e_ann (e_lit i5) A0)) by auto. contradiction.
-    * inverts H5. assert (wexpr (e_ann (e_bool b) A0)) by auto. contradiction.
-    * inverts H5. assert (wexpr (e_ann (e_str s) A0)) by auto. contradiction.
-    * inverts H5. assert (wexpr (e_ann (e_ann (e_abs e0) (t_arrow A3 B)) A0)) by auto.
-      contradiction.
-      inversion H7.
-    * inversion H5.
-(*case step-ann*)
-  - inverts* He2. 
-    inverts Typ. forwards*: IHHe1 H7. rewrite* H0.
-    inverts H0. forwards*: IHHe1 H6. rewrite* H0.
-    inverts H3.
-   + inverts He1. assert (wexpr (e_ann (e_lit i5) A1)) by auto. contradiction.
-   + inverts He1. assert (wexpr (e_ann (e_bool b) A1)) by auto. contradiction.
-   + inverts He1. assert (wexpr (e_ann (e_str s) A1)) by auto. contradiction.
-   + inverts He1. assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A2 B)) A1)) by auto.
+     inverts H5.
+     assert (wexpr (e_ann (e_ann (e_abs e0) (t_arrow A3 B)) A0)) by auto.
      contradiction.
+     inversion H7.
      inversion H5.
+(*case step-ann*)
+  - inverts* He2.
+   + inverts Typ. forwards*: IHHe1 H7. rewrite* H0.
+     inverts H0. forwards*: IHHe1 H6. rewrite* H0.
+   + inverts* H3. inverts He1.
+     assert (wexpr (e_ann (e_lit i5) A1)) by auto.
+     contradiction.
+     inverts He1.
+     assert (wexpr (e_ann (e_ann (e_abs e)(t_arrow A2 B))A1)) by auto.
+     contradiction.
+     inverts H5.
    + inversion He1.
 (*case step-rm-ann*)
-  - inverts* He2. inverts H.
-   + inverts H4. assert (wexpr (e_ann (e_lit i5) A)) by auto. contradiction.
-   + inverts H4. assert (wexpr (e_ann (e_bool b) A)) by auto. contradiction.
-   + inverts H4. assert (wexpr (e_ann (e_str s) A)) by auto. contradiction.
-   + inverts H4. assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) A)) by auto. contradiction.
-     inversion H6.
+   - inverts* He2. inverts H. inverts H4.
+    assert (value (e_ann (e_lit i5) A)) by auto.
+    inverts H. contradiction.
+    inverts H4. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) A)) by auto.
+    inverts H. contradiction.
+    inversion H6.
 (*case step-lam-ann*)
   - inverts* He2. inversion H4.
-(*case step-typeof*)
- - inverts* He2.
+(*case step-typeof*)  
+  - inverts* He2.
   + inverts Typ. inverts H0.
     forwards*: IHHe1 H10. rewrite* H0.
-  + inverts H8.
-   * inverts He1. assert (wexpr (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts He1. assert (wexpr (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts He1. assert (wexpr (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts He1. assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
-     contradiction.
+  + inverts* H8. inverts He1.
+    assert (value (e_ann (e_lit i5) D)) by auto.
+    inverts H0. contradiction.
+    inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+    inverts H1. contradiction.
     inversion H5.
-  + inverts H8.
-   * inverts He1. assert (wexpr (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts He1. assert (wexpr (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts He1. assert (wexpr (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts He1. assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
-     contradiction.
+  + inverts H8. inverts He1.
+    assert (value (e_ann (e_lit i5) D)) by auto.
+    inverts H0. contradiction.
+    inverts He1. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+    inverts H1. contradiction.
     inversion H5.
 (*case step-typeofl*)
  - inverts* He2.
-  + inverts H1. 
-   * inverts H10. assert (wexpr (e_ann (e_lit i5) D)) by auto. contradiction.
-   * inverts H10. assert (wexpr (e_ann (e_bool b) D)) by auto. contradiction.
-   * inverts H10. assert (wexpr (e_ann (e_str s) D)) by auto. contradiction.
-   * inverts H10. assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
-     contradiction.
+  + inverts H0. inverts H10. assert (value (e_ann (e_lit i5) D)) by auto.
+    inverts H0. contradiction.
+    inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+    inverts H0. contradiction.
     inversion H7.
   + inverts Typ. inverts H3.
     forwards*: typing_regular. destruct H3.
-    inverts* H1. 
-   * inverts H12.
-     unfold DisjSpec in H18. specialize (H18 t_int).
-     forwards*: H18.
-     unfold not in H1.
-     forwards*: H1.
-    * inverts H12.
-      unfold DisjSpec in H18. specialize (H18 t_bool).
-      forwards*: H18.
-      unfold not in H1.
-      forwards*: H1.
-    * inverts H12.
-      unfold DisjSpec in H18. specialize (H18 t_str).
-      forwards*: H18.
-      unfold not in H1.
-      forwards*: H1.
-   * inverts H12.
-     unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
-     forwards*: H18.
-     unfold not in H1.
-     forwards*: H1.
-(*case step-typeofr*) 
-- inverts* He2.
-     + inverts H1. 
-      * inverts H10. assert (wexpr (e_ann (e_lit i5) D)) by auto. contradiction.
-      * inverts H10. assert (wexpr (e_ann (e_bool b) D)) by auto. contradiction.
-      * inverts H10. assert (wexpr (e_ann (e_str s) D)) by auto. contradiction.
-      * inverts H10. assert (wexpr (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
-        contradiction.
-       inversion H7.
-     + inverts Typ. inverts H3.
-       forwards*: typing_regular. destruct H3.
-       inverts* H1. 
-      * inverts H12.
-        unfold DisjSpec in H18. specialize (H18 t_int).
-        forwards*: H18.
-        unfold not in H1.
-        forwards*: H1.
-       * inverts H12.
-         unfold DisjSpec in H18. specialize (H18 t_bool).
-         forwards*: H18.
-         unfold not in H1.
-         forwards*: H1.
-       * inverts H12.
-         unfold DisjSpec in H18. specialize (H18 t_str).
-         forwards*: H18.
-         unfold not in H1.
-         forwards*: H1.
-      * inverts H12.
-        unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
-        forwards*: H18.
-        unfold not in H1.
-        forwards*: H1.
-Qed.
-
-(*********************************
- Imprecise semantics starts here
-**********************************)
-
-(* defns imprecise value *)
-Inductive ivalue : exp -> Prop :=    (* defn value *)
- | ival_wexpr : forall (e:exp),
-     pexpr e ->
-     ivalue e
- | ival_abs : forall (L:vars) e,
-    (forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e (e_var_f x) )  )  ->
-    ivalue (e_abs e).
-
-Hint Constructors ivalue : core.
-
-(* defns imprecise changeanno *)
-Definition ichangeanno (v:exp) (C:typ) :=    (* defn changeanno *)
- match v with
-   | e_lit i5    => e_lit i5
-   | e_bool b    => e_bool b
-   | e_str s     => e_str s
-   | e_ann (e_abs e) (t_arrow A B) => e_ann (e_abs e) (t_arrow A B)
-   | (e_abs e)   => e_ann (e_abs e) C
-   | _           => v
- end.
-
-(* defns imprecise Reduction *)
-Reserved Notation "e ~~> e'" (at level 80).
-Inductive istep : exp -> exp -> Prop :=    (* defn step *)
- | istep_appl : forall (e1 e2 e1':exp),
-     lc_exp e2 ->
-     e1 ~~> e1' ->
-     (e_app e1 e2) ~~> (e_app e1' e2)
- | istep_appr : forall (v e e':exp),
-     pexpr v ->
-     e ~~> e' ->
-     (e_app v e) ~~> (e_app v e')
- | istep_beta : forall (e:exp) (A B:typ) (v:exp),
-     lc_exp (e_abs e) ->
-     value v ->
-     (e_app (e_ann (e_abs e)  (t_arrow A B)) v) ~~> (e_ann (open_exp_wrt_exp e (ichangeanno v A)) B)
- | istep_ann : forall (e:exp) (A:typ) (e':exp),
-     e ~~> e' ->
-     (e_ann e A) ~~> (e_ann e' A)
- | istep_rm_ann : forall (p:exp) (A:typ),
-     pexpr p ->
-     (e_ann p A) ~~> p
- | istep_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2 e':exp),
-     lc_exp (e_typeof e A e1 B e2) ->
-     e ~~> e' ->
-     (e_typeof e A e1 B e2) ~~> (e_typeof e' A e1 B e2)
- | istep_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
-     lc_exp (e_typeof p A e1 B e2) ->
-     pexpr p ->
-     findtype p C ->
-     subtyping C A ->
-     e_typeof p A e1 B e2 ~~>  (open_exp_wrt_exp e1 (e_ann p A) )
- | istep_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
-    lc_exp (e_typeof p A e1 B e2) ->
-     pexpr p ->
-     findtype p C ->
-     subtyping C B ->
-     e_typeof p A e1 B e2 ~~> (open_exp_wrt_exp e2 (e_ann p B) )
-where "e ~~> e'" := (istep e e') : env_scope.
-
-Hint Constructors istep : core.
-
-(*****************************
-Imprecise semantics ends here
-******************************)
-
-(*
-Properties of semantics and imprecise semantics
-*)
-
-Lemma imprecise_lemma1 : forall e e', e --> e' ->
-(exists v, ivalue v -> e = v) \/ (e ~~> e').
-Proof.
-    intros e e' red.
-    inductions red; eauto.
-Qed.
-
-Definition relation (X : Type) := X -> X -> Prop.
-
-Inductive multi {X : Type} (R : relation X) : relation X :=
-  | multi_refl : forall (x : X), multi R x x
-  | multi_step : forall (x y z : X),
-                        R x y ->
-                        multi R y z ->
-                        multi R x z.
-
-Notation " t '-->*' t' " := (multi step t t') (at level 40).
-Notation " t '~~>*' t' " := (multi istep t t') (at level 40).
-
-(* defns erase value *)
-Definition erasevalue (v:exp) :=    (* defn erasevalue *)
- match v with
-   | (e_ann p A) => p
-   | (e_abs e)   => e_abs e
-   | _           => v
- end.
-
-Lemma imprecise_lemma2 : forall e v, e -->* v -> e ~~>* erasevalue v.
- Proof.
-     intros e v red.
-     lets red': red.
-     induction e.
-     inverts red.
-     simpl.
-     eapply multi_refl; eauto.
-     admit.
-     admit.
-     admit.
-     admit.
-     admit.
-     admit.
-     inverts red.
-     simpl. admit.
-     inversion H.
-     inverts red.
-     simpl. admit.
-     admit.
-Admitted.
-
-(* need to be strengthened *)
-Lemma itype_safety : forall e e' dir T,
-typing empty e dir T ->
-e ~~> e' ->
-(ivalue e') /\ (exists B, typing empty e' dir B /\ B <: T)
-\/ (exists e'', e' ~~> e'').
-Proof.
-introv Typ red. gen_eq E: (@empty typ). lets Typ': Typ.
-inductions Typ; intros EQ; subst.
-(*case int*)
- - inversion red.
- (*case bool*)
- - inversion red.
- (*case string*)
- - inversion red.
- (*case var*)
- - apply binds_empty_inv in H0. inversion H0.
- (*case anno*)
- - inverts red.
-   destruct* IHTyp.
-   admit.
-   destruct H.
-   destruct H0. destruct H0.
-   inverts H0.
-   left. split*. exists B.
-   split*.
-   eapply sub_transitivity; eauto.
-   left. split*.
-   inverts Typ. exists B. split*.
-   inversion H2. inversion H2.
-(*case typ-app*)
- - inverts red. 
-  destruct* IHTyp1.
-  destruct* IHTyp2.
-   * inverts* H.
-    inverts* H1. inverts Typ1. inverts H.
-    (*i infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
-    (*b infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
-    (*s infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
-    (*step-beta*)
-    exists* (e_ann (e_ann (open_exp_wrt_exp e (changeanno e2 A A0)) B0) B).
-    inverts Typ1.
-    (*case step-appr*)
-   * destruct H0.
-     destruct H.
-   { exists* (e_app e x). }
-   { inverts Typ1. }
-   (*case step-appl*)
-  + destruct H. 
-    exists (e_app x e2). apply* step_appl.
-    forwards*: typing_regular Typ2.
-(*case typ-sub*)
- - destruct~ IHTyp.
-(*case typ-abs*)
- - left. forwards*: typing_regular Typ'.
-   destruct~ H1. inverts* H2.
-(*case typ-typeof*)
- - right. destruct* IHTyp.
-  + inverts H4. inverts H5. 
-    apply check_pexpr_ann in Typ; auto.
-    eapply check_or_typ in Typ; eauto.
-    destruct Typ.
-   * forwards*: pexpr_inf_typ H4.
-     destruct H6 as [S [H41 H51]].
-     exists (open_exp_wrt_exp e1 (e_ann p A)).
-     pick_fresh y.
-     assert (y \notin L) by auto.
-     lets: H y H6.
-     eapply step_typeofl with (C:=S); eauto.
-     forwards*: typing_regular Typ'.
-     inverts H5; inverts* H41.
-     inversion H4. 
-     inverts H4. eauto. inversion H4.
-   * forwards*: pexpr_inf_typ H4.
-     destruct H6 as [S [H41 H51]].
-     exists (open_exp_wrt_exp e2 (e_ann p B)).
-     pick_fresh y.
-     assert (y \notin L) by auto.
-     lets: H1 y H6.
-     eapply step_typeofr with (C:=S); eauto.
-     forwards*: typing_regular Typ'.
-     inverts H5; inverts* H41.
-     inversion H4.
-     inverts H4. eauto.
-     inversion H4.
-   * inverts Typ. inversion H4.
-  + destruct H4.
-     exists (e_typeof x A e1 B e2).
-     apply step_typeof; auto.
-     forwards*: typing_regular Typ'.
+    inverts* H1. inverts H12.
+    assert (typing E (e_lit i5) check A); eauto.
+    assert (typing E (e_lit i5) check B); eauto.
+    forwards*: check_both_disj_false H1 H5.
+    inverts H12.
+    unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
+    forwards*: H18. inversion H1.
+(*case step-typeof*)
+ - inverts* He2.
+  + inverts H1. inverts H10. assert (value (e_ann (e_lit i5) D)) by auto.
+    inverts H1. contradiction.
+    inverts H10. assert (value (e_ann (e_ann (e_abs e) (t_arrow A1 B0)) D)) by auto.
+    inverts H1. contradiction.
+    inversion H7.
+  + inverts Typ. inverts H3.
+    forwards*: typing_regular. destruct H3.
+    inverts* H1. inverts H12.
+    unfold DisjSpec in H18. specialize (H18 t_int).
+    forwards*: H18. inversion H1.
+    inverts H12.
+    unfold DisjSpec in H18. specialize (H18 (t_arrow A1 B0)).
+    forwards*: H18. inversion H1.
 Qed.
