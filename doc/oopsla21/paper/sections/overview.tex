@@ -635,7 +635,7 @@ would be types like $[[Bot]]$ (which has no inhabitants), then the switch should
 be safe because we would not be able to find a value for $[[x]]$ that would trigger
 two branches. Now it should be clear what the relationship with disjointness for intersection
 types is. For the switch construct the dual notion -- two types are disjoint if the only
-if common subtypes are bottom-like types -- seems to be helpful.
+common subtypes are bottom-like types -- seems to be helpful.
 Indeed the notion of disjointness employeed in the first variant \cal in Section~\ref{sec:union}
 is exactly this. Formally, we have:
 
@@ -677,7 +677,7 @@ Moreover, this definition is a generalization of the previous one, and in the
 variant with union types only the two definitions coincide. 
 
 This new definition requires a different approach to algorithmic disjointness. Our new
-approach is to use the notion of \emph{lowest ordinary subtypes}. Since, the lowest ordinary
+approach is to use the notion of \emph{lowest ordinary subtypes}. Since the lowest ordinary
 subtypes of any type is a finite set, we can easily determine whether two types are disjoint
 by ensuring that the intersection of their lowest ordinary subtypes is empty. 
 
