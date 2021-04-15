@@ -222,6 +222,7 @@ implementation is chosen, as \lstinline{Student} is the best type describing the
 argument. As we can see, such best-match strategy gets rid of the
 order-sensitive problem, as Java always try to find the best-match one despite
 the order of the methods. In other words, in Java the order of methods does not matter:
+in this case,
 we have the method for \lstinline{Person} before the one for \lstinline{Student}, but Java still finds
 the one for \lstinline{Student}.
 
@@ -294,12 +295,12 @@ branches that match with the input at the same time. For instance, if the first
 case used the type \lstinline{String | Float} instead of \lstinline{String}, the
 program would be rejected statically with a type error. Indeed, if the program
 were to be accepted, then the call \lstinline{print(3.0)} would be ambiguous,
-since two branches could deal with the floating point number. Note that, since
+since there are two branches that could deal with the floating point number. Note that, since
 the cases in a switch cannot overlap, their order is irrelevant to the program's
 behavior and its evaluation result.
 
 \paragraph{Union types as an alternative to overloading}
-A motivation of such type-directed union elimination in Ceylon is to
+One motivation of such type-directed union elimination in Ceylon is to
 model a form of function overloading.
 The following example, which is adapted from TypeScript's documentation\footnote{https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html},
 demonstrates how to define an ``overloaded'' function \lstinline{padLeft},
@@ -587,9 +588,14 @@ cannot be accepted by Ceylon's compiler.
 \end{lstlisting}
 \end{comment}
 
+\ningning{I feel something is missing here. Shall we say explicitly here that
+  while Ceylon does type-directed elimination, there is no formalism and we wish
+  to study the feature formally and precisely? It now feels like Ceylon has
+  already done all the work and it's unclear what's new in this work.}
+
 \subsection{Key Ideas of our Work}
 The switch construct in our calculus \cal aims to capture the key ideas for
-elimination of union types, but in a language independent way.
+type-directed elimination of union types, but in a language independent way.
 The typing rules guarantee that cases in the switch are disjoint and exhaustive.
 Reduction preserves types and produces deterministic results. Since the semantics
 is type-dependent it uses and propagates type annotations at runtime,
@@ -597,14 +603,14 @@ with the help of annotated values.
 Here we give an overview of our design and discuss some challenges
 we met for the calculi designed in this paper.
 
-\subsubsection*{Disjointness}
+\paragraph{Disjointness}
 A central concept in the formulation of disjoint switches is disjointness.
 Our first hurdle was to come up with a suitable formal definition of disjointness.
 Since we were not aware of previous definitions of disjointness
 for subtyping relations with union types,
 we looked at the closely related idea of disjointness for intersection
 types~\cite{oliveira2016disjoint}. In that setting two types are disjoint
-if the only supertypes that they can have are top-like types (i.e.
+if the only common supertypes that they can have are top-like types (i.e.
 types such as $[[Top]]$ or $[[Top /\ Top]]$). While this notion of
 disjointness is not what we want for union types, it seems closely related
 to what is needed. Consider the simple \cal switch expression:
@@ -618,7 +624,7 @@ switch x {
 
 \noindent Here we wish to determine whether $[[String \/ Int]]$ and $[[Int \/ Bool]]$
 are disjoint or not. In other words, we wish to determine whether for any possible
-(dynamic) type that $[[x]]$ can have, it is always unambigous which branch to choose.
+(dynamic) type that $[[x]]$ can have, it is unambiguous which branch to choose.
 In this case, it turns out that there is ambiguity. For instance, if $[[x]]$ is an integer,
 then either branch can be choosen. Thus \cal rejects this program with a disjointness error.
 In this example, the reason to reject the program is basically that $[[Int <: String \/ Int]]$
@@ -629,7 +635,7 @@ would be types like $[[Bot]]$ (which has no inhabitants), then the switch should
 be safe because we would not be able to find a value for $[[x]]$ that would trigger
 two branches. Now it should be clear what the relationship with disjointness for intersection
 types is. For the switch construct the dual notion -- two types are disjoint if the only
-common subtypes are bottom-like types -- seems to be helpful. 
+if common subtypes are bottom-like types -- seems to be helpful.
 Indeed the notion of disjointness employeed in the first variant \cal in Section~\ref{sec:union}
 is exactly this. Formally, we have:
 
@@ -644,16 +650,16 @@ Prior work on disjoint intersection types is also helpful
 to find an algorithmic formulation of disjointness: essentially we can find an algorithmic
 formulation that employs dual rules to those for disjoint intersection types.
 
-\subsubsection*{Disjointness in the presence on intersection types.}
+\paragraph{Disjointness in the presence on intersection types.}
 The variant of \cal in Section~\ref{sec:union} does not include intersection types.
 Unfortunately the disjointness definition above does not work in the presence of
 intersection types. The reason is simple: with intersection types we can always find
 common subtypes, such as $[[Int /\ Bool]]$, which are not bottom-like, and yet
-they have no inhabitants. That is
+they have no inhabitants. That is,
 $[[Int /\ Bool]]$ is not a subtype of $[[Bot]]$, but no value can have both type
-$[[Int]]$ and type $[[Bool]]$. In other words, when intersection types are added empty types
+$[[Int]]$ and type $[[Bool]]$. In other words, when intersection types are added, empty types
 and bottom-like types no longer coincide. We address this issue by reformulating
-disjointness in terms of ordinary types~\cite{davies2000intersection}, which are basically primitive types
+disjointness in terms of \textit{ordinary types}~\cite{davies2000intersection}, which are basically primitive types
 (such as integers or functions). Importantly, ordinary types are always inhabited.
 Thus, if we can find common \emph{ordinary} subtypes between two types, we know that they
 are not disjoint. Thus the disjointness definition used for formulations
@@ -790,7 +796,7 @@ Assuming the inferred type of $[[e1]]$ is $[[C1]]$ and the inferred type of
 $[[e2]]$ is $[[C2]]$, we can make $[[C]]$ to be $[[C1\/C2]]$.
 \end{comment}
 
-\subsubsection*{The role of type annotations in the dynamic semantics.}
+\paragraph{The role of type annotations in the dynamic semantics.}
 Another interesting aspect of \name is the dynamic semantics, which must be type-directed. 
 \name uses and propagates type annotations. Moreover in \name there are two different
 notions: \emph{static types} and \emph{dynamic types}. The static type of an
@@ -830,7 +836,7 @@ For example, in the expression:
 static information would be lost, because the type of $[[1]]$ is $[[Int]]$,
 but the static type of the original expression is $[[Int \/ String]]$.
 In other words, the original type would not be preserved: we
-would get a \emph{subtype} instead. This phenomenon is ofcourse well-known
+would get a \emph{subtype} instead. This phenomenon is of course well-known
 in OOP languages and languages with subtyping, where often preservation
 needs to be weakened to allow the type after reduction to be a subtype.
 For instance, in Featherweight Java~\cite{DBLP:journals/toplas/IgarashiPW01}
