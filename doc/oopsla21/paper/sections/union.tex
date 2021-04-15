@@ -33,7 +33,7 @@ type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
 
-\subsubsection*{Values, pre-values and annotated values}
+\paragraph{Values, pre-values and annotated values}
 
 In \name there are two kinds of values ($[[v]]$): annotated values $[[w]]$; and unannotated
 lambda expressions ($[[\x.e]]$). In annotated values, which have the form $[[p
@@ -170,7 +170,7 @@ We emphasize the significance of
 \emph{supertypes} and \emph{subtypes} in $\lambda_i$ and \cal
 respectively.
 
-\subsubsection*{Bottom-Like Types}
+\paragraph{Bottom-Like Types}
 \emph{Bottom-like} types are types that are isomorphic (i.e.
 both supertypes and subtypes) of the bottom type $\bot$. Therefore
 any bottom-like types behave like the $[[Bot]]$ type.
@@ -234,7 +234,7 @@ is bottom-like.
 \end{proof}
 \end{comment}
 
-\subsubsection*{Declarative Disjointness}
+\paragraph{Declarative Disjointness}
 Now we present
 the declarative definition for disjointness as follows.
 %Recall that two types in \cal are disjoint if they do not share any common subtype which is not
@@ -265,11 +265,12 @@ We illustrate this definition with a few examples:
 
 \begin{enumerate}
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ \\
-        $[[Int]]$ and $[[Int -> Bool]]$ are disjoint types. All common subtypes of $[[Int]]$ and $[[A -> B]]$ are bottom-like types,
+        $[[Int]]$ and $[[Int -> Bool]]$ are disjoint types. All common subtypes
+        of $[[Int]]$ and $[[Int -> Bool]]$ are bottom-like types,
         including $[[Bot]]$ and unions of $[[Bot]]$ types.
   \item $\boldsymbol{A = [[Int \/ Bool]], \ B = \ [[Bot]]:}$ \\
     $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types, since again all common subtypes are bottom-like.
-    In general, the type $[[Bot]]$ (or any other bottom-like type)
+    In general, the type $[[Bot]]$ (or any bottom-like type)
     is disjoint to any other type.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int]]:}$ \\
         $[[Int]]$ and $[[Int]]$ are not disjoint types because they share a common subtype $[[Int]]$ which
@@ -285,12 +286,7 @@ We illustrate this definition with a few examples:
     of both types. For instance $[[Top -> Bot]]$ is a subtype of both types.
     More generally, any two function types can never be disjoint: it is always
     possible to find a common subtype, which is not bottom-like.
-    \\
 \end{enumerate}
-%\snow{I like the idea to use examples here. Can we have one or two with union types
-%involved as well?}
-%\ningning{I agree. Actually that's important. That's what's special about this
-%  system. Baber can you do that? Adding one or two examples would be enough.}
 
 \begin{comment}
 \begin{figure}[t]
@@ -303,14 +299,16 @@ We illustrate this definition with a few examples:
 \end{figure}
 \end{comment}
 
-\subsubsection*{Algorithmic Disjointness}
-The middle part of \Cref{fig:union:disj-typ} shows an algorithmic
-version of disjointness.  \Rref{ad-btmr,ad-btml} state that the $[[Bot]]$
+\paragraph{Algorithmic Disjointness}
+However, the declarative disjointness does not directly lead to an algorithm.
+We then present an algorithmic version of disjointness in
+the middle part of \Cref{fig:union:disj-typ}.
+\Rref{ad-btmr,ad-btml} state that the $[[Bot]]$
 type is disjoint to all types.  \Rref{ad-intl,ad-intr} state that
 $[[Int]]$ and $[[A -> B]]$ are disjoint types.  Algorithmic
 disjointness can further be scaled to more primitive disjoint types
 such as $Bool$ and $String$ by adding more rules similar to
-\rref{ad-intl,intr} for additional primitive types.
+\rref{ad-intl,ad-intr} for additional primitive types.
 \Rref{ad-orl,ad-orr} are two symmetric rules for union types. Any type $[[C]]$ is
 disjoint to an union type $[[A \/ B]]$ if $[[C]]$ is disjoint to both
 $[[A]]$ and $[[B]]$.
@@ -485,7 +483,7 @@ important aspect of the semantics is that it is type-directed
 and similar terms that differ only on type annotations can reduce in different
 ways.
 
-\subsubsection*{Reduction rules}
+\paragraph{Reduction rules}
 \Cref{fig:union:os} shows operational semantics of \cal.
 The operational semantics follows a call-by-value evaluation strategy.
 \Rref{step-int} annotates integer expressions and makes them
