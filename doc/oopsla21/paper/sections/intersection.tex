@@ -32,7 +32,7 @@ is the addition of intersection types $[[A/\ B]]$.
 Expressions $[[e]]$, pre-values $[[p]]$, annotated values $[[w]]$,
 values $[[v]]$, and context $[[G]]$ stay the same as in \Cref{sec:union}.
 
-\subsubsection*{Subtyping}
+\paragraph{Subtyping}
 The new rules for subtyping are shown in middle part of
 \Cref{fig:inter:system}.  \Rref{s-anda,s-andb,s-andc} are for newly
 added intersection types. \Rref{s-anda} states that a type $[[A]]$ is
@@ -70,7 +70,7 @@ and transitive.
   \label{fig:inter:system}
 \end{figure}
 
-\subsubsection*{Ordinary Types}
+\paragraph{Ordinary types}
 %Declarative disjointness is now defined in terms of ordinary types
 %instead of \emph{bottom-like} types.
 Lower part of
@@ -95,7 +95,7 @@ we show how to introduce disjointness in the presence of intersection types.
 %discussed in \Cref{sec:union:discussion} and discuss the updated
 %disjointness in detail in this section.
 
-\subsubsection*{Bottom-like Types, Intersection Types and Disjointness}
+\paragraph{Bottom-like types, intersection types and disjointness}
 \noindent %Bottom-like types behave like $[[Bot]]$ type and are discussed in \Cref{sec:union:disj}.
 Recall that disjointness in \Cref{sec:union} (\Cref{def:union:disj}) depends
 upon bottom-like types, where two types are disjoint only if all their common
@@ -137,7 +137,7 @@ But \rref{bl-anddisj} imposes additional complexities of mutually
 dependent definitions among disjointness and bottom-like.
 This makes completeness challenging or even impossible to prove.
 \end{comment}
-\subsubsection*{A possible solution: the Ceylon approach}
+\paragraph{A possible solution: the Ceylon approach}
 A possible solution for this issue is to add a subtyping rule which makes intersection of
 disjoint types to be subtype of $[[Bot]]$.
 
@@ -185,7 +185,7 @@ Nevertheless, in Section~\ref{sec:inter:refactoring} we will see that it is poss
 create an extension of \name that includes (and in fact generalizes)
 the Ceylon-style \rref{s-disj}.
 
-\subsubsection*{Disjointness based on Ordinary Types to the rescue}
+\paragraph{Disjointness based on ordinary types to the rescue}
 To solve the problem with the disjointness specification, we resort to
 the alternative definition of disjointness presented in \Cref{sec:union:discussion}.
 
@@ -285,7 +285,7 @@ notion of \emph{lowest ordinary subtypes}.
 \end{figure}
 
 
-\subsubsection*{Lowest Ordinary Subtypes ($[[findsubtypes A]]$)}
+\paragraph{Lowest ordinary subtypes ($[[findsubtypes A]]$)}
 \Cref{fig:inter:los} shows the definition of
 \emph{lowest ordinary subtypes} (LOS) ($[[findsubtypes A]]$).
 LOS is defined as a function which
@@ -306,7 +306,7 @@ and returns the intersection of the two sets.
 Note that LOS is defined as a structurally recursive function and therefore
 its decidability is immediate.
 
-\subsubsection*{Algorithmic Disjointness}
+\paragraph{Algorithmic disjointness}
 With LOS, it is straightforward to give an algorithmic formulation of
 disjointness:
 %Since we gave a new definition for declarative disjointness.
@@ -355,7 +355,7 @@ We illustrate \Cref{def:inter:ad} with a few examples:
 \end{enumerate}
 \end{comment}
 
-\subsubsection*{Soundness and Completeness}
+\paragraph{Soundness and completeness}
 
 We prove that the algorithmic disjointness is sound and complete with respect to
 the declarative specification.
