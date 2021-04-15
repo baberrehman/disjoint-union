@@ -147,7 +147,7 @@ disjoint types to be subtype of $[[Bot]]$.
 %\bruno{Please use disjointness spec instead of disjoitness algorithm in the rule.}
 
 \noindent This rule is adopted by the Ceylon language~\cite{muehlboeck2018empowering}:
-\Rref{s-disj} states that the insersection type $[[A /\ B]]$
+\rref{s-disj} states that the insersection type $[[A /\ B]]$
 of two disjoint types $[[A]]$ and $[[B]]$ is a subtype of the $[[Bot]]$ type.
 In other words, now the type $[[Int /\ Bool]]$ would be a bottom-like type, and the
 definition of disjointness used in Section~\ref{sec:union} could still work.
@@ -229,22 +229,22 @@ We further illustrate
 
 \begin{enumerate}
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ \\
-        Since there is no ordinary type that is subtype of both $[[Int]]$ and $[[Int -> Bool]]$,
+        Since there is no ordinary type that is a subtype of both $[[Int]]$ and $[[Int -> Bool]]$,
         the two types are disjoint.
   \item $\boldsymbol{A = [[Int \/ Bool]], \ B = \ [[Bot]]:}$ \\
-    Since there is no ordinary type that is subtype of both $[[Int \/ Bool]]$ and $[[Bot]]$,
+    Since there is no ordinary type that is a subtype of both $[[Int \/ Bool]]$ and $[[Bot]]$,
     $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types.
     In general, $[[Bot]]$ type is disjoint to all types because $[[Bot]]$ type does not
     have any ordinary subtype.
   \item $\boldsymbol{A = [[Int /\ (Int -> Bool)]], \ B = \ [[Int]]:}$ \\
-        There is no ordinary type that is subtype of both $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$.
-        Therefore, $[[Int /\ A -> B]]$ and $[[Int]]$ are disjoint types.
-        In general, an intersection of two disjoint types ($[[Int /\ A -> B]]$ in this case)
+        There is no ordinary type that is a subtype of both $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$.
+        Therefore, $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$ are disjoint types.
+        In general, an intersection of two disjoint types ($[[Int /\ (Int -> Bool)]]$ in this case)
         is always disjoint to all types.
   \item $\boldsymbol{A = [[Int /\ Bool]], \ B = \ [[Int \/ Bool]]:}$ \\
-        There is no ordinary type that is subtype of both $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$.
+        There is no ordinary type that is a subtype of both $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$.
         Therefore, $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$ are disjoint types.
-        This follows from the description in example 3 that type $[[Int /\ Bool]]$ will always be
+        This follows from the description in example (3) that type $[[Int /\ Bool]]$ will always be
         disjoint to all types.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
         In this case, $[[Int]]$ and $[[Top]]$ share a common ordinary subtype which is $[[Int]]$.
@@ -373,7 +373,7 @@ the declarative specification.
 \subsection{Typing, Semantics and Metatheory}
 
 The typing and operational semantics stay the same as in \Cref{sec:union}. Note
-that while those rules stay the same, as types and subtyping rules are extended
+that while those rules stay the same, types and subtyping rules are extended
 with intersection type.
 We prove that \cal with intersection types preserves type soundness and determinism.
 %\bruno{add determinism}
@@ -387,8 +387,8 @@ We prove that \cal with intersection types preserves type soundness and determin
 \label{lemma:inter:progress}
 If \ $[[ [] |- e dirflag A]]$ then
  \begin{enumerate}
-  \item either $[[e]]$ is a value.
-  \item or $[[e]]$ can take a step to $[[e']]$.
+  \item either $[[e]]$ is a value; or
+  \item $[[e]]$ can take a step to $[[e']]$.
   \end{enumerate}
 \end{lemma}
 
