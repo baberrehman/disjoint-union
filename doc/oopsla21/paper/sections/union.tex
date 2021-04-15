@@ -33,7 +33,7 @@ type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
 
-\paragraph{Values, pre-values and annotated values}
+\subsubsection*{Values, pre-values and annotated values}
 
 In \name there are two kinds of values ($[[v]]$): annotated values $[[w]]$; and unannotated
 lambda expressions ($[[\x.e]]$). In annotated values, which have the form $[[p
@@ -170,7 +170,7 @@ We emphasize the significance of
 \emph{supertypes} and \emph{subtypes} in $\lambda_i$ and \cal
 respectively.
 
-\paragraph{Bottom-Like Types}
+\subsubsection*{Bottom-Like Types}
 \emph{Bottom-like} types are types that are isomorphic (i.e.
 both supertypes and subtypes) of the bottom type $\bot$. Therefore
 any bottom-like types behave like the $[[Bot]]$ type.
@@ -234,7 +234,7 @@ is bottom-like.
 \end{proof}
 \end{comment}
 
-\paragraph{Declarative Disjointness}
+\subsubsection*{Declarative Disjointness}
 Now we present
 the declarative definition for disjointness as follows.
 %Recall that two types in \cal are disjoint if they do not share any common subtype which is not
@@ -303,7 +303,7 @@ We illustrate this definition with a few examples:
 \end{figure}
 \end{comment}
 
-\paragraph{Algorithmic Disjointness}
+\subsubsection*{Algorithmic Disjointness}
 The middle part of \Cref{fig:union:disj-typ} shows an algorithmic
 version of disjointness.  \Rref{ad-btmr,ad-btml} state that the $[[Bot]]$
 type is disjoint to all types.  \Rref{ad-intl,ad-intr} state that
@@ -486,7 +486,7 @@ and similar terms that differ only on type annotations can reduce in different
 ways.
 
 \bruno{Perhaps this paragraph can be discussed in the overview?}
-\paragraph{The role of type annotations}
+\subsubsection*{The role of type annotations}
 Type annotations play two important roles in the calculus.
 Dynamic types are used by the switch construct
 to select the correct branch to execute.
@@ -530,7 +530,7 @@ and preserve the original type. Thus the resulting value is $[[1 : Int \/ String
 This considerably simplifies the metatheory, although in an actual
 implementation not tracking the static type would be more efficient.
 
-\paragraph{Reduction rules}
+\subsubsection*{Reduction rules}
 \Cref{fig:union:os} shows operational semantics of \cal.
 The operational semantics follows a call-by-value evaluation strategy.
 \Rref{step-int} annotates integer expressions and makes them
