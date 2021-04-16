@@ -390,9 +390,9 @@ nullable. If we eliminate a value of type \lstinline{A|Null}, there has to be a
 branch to handle the null value. Note that \lstinline{Null} differs from
 \lstinline{Nothing} (the bottom type in Ceylon), in the sense that
 \lstinline{Null} is inhabited while \lstinline{Nothing} is not. To illustrate
-the subtle difference, the following diagram presents part of the subtyping
+the subtle difference, the diagram on the right presents part of the subtyping
 lattice in Ceylon. \lstinline{Anything}, the top type in Ceylon, is an
-enumerated class. \lstinline{Anything} has another distinct case called
+enumerated class. \lstinline{Anything} is also a supertype of
 \lstinline{Object}, which is the root of primitive types, function types, all
 interfaces and any user-defined class. Notably, \lstinline{Null} is disjoint to
 \lstinline{Object}, and therefore, to all these types.
