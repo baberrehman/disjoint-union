@@ -225,14 +225,14 @@ We further illustrate
     $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types.
     In general, the $[[Bot]]$ type is disjoint to all types because $[[Bot]]$ does not
     have any ordinary subtype.
-  \item $\boldsymbol{A = [[Int /\ (Int -> Bool)]], \ B = \ [[Int]]:}$ There is no ordinary type that is a subtype of both $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$.
-        Therefore, $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$ are disjoint types.
-        In general, an intersection of two disjoint types ($[[Int /\ (Int -> Bool)]]$ in this case)
-        is always disjoint to all types.
+%  \item $\boldsymbol{A = [[Int /\ (Int -> Bool)]], \ B = \ [[Int]]:}$ There is no ordinary type that is a subtype of both $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$.
+%        Therefore, $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$ are disjoint types.
+%        In general, an intersection of two disjoint types ($[[Int /\ (Int -> Bool)]]$ in this case)
+%        is always disjoint to all types.
   \item $\boldsymbol{A = [[Int /\ Bool]], \ B = \ [[Int \/ Bool]]:}$ There is no ordinary type that is a subtype of both $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$.
         Therefore, $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$ are disjoint types.
-        This follows from the description in example (3) that type $[[Int /\ Bool]]$ will always be
-        disjoint to any type.
+        In general, an intersection of two disjoint types ($[[Int /\ Bool]]$ in this case)
+        is always disjoint to all types.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ In this case, $[[Int]]$ and $[[Top]]$ share a common ordinary subtype which is $[[Int]]$.
     Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
      $[[Top]]$ overlaps with any other types.

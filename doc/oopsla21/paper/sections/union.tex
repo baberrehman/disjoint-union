@@ -32,7 +32,7 @@ type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
 
-\paragraph{Values, pre-values and annotated values}
+\paragraph{Values and pre-values}
 
 In \name there are two kinds of values ($[[v]]$): annotated values $[[w]]$; and unannotated
 lambda expressions ($[[\x.e]]$). In annotated values, which have the form $[[p
@@ -270,14 +270,15 @@ We illustrate this definition with a few examples:
     $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types, since again all common subtypes are bottom-like.
     In general, the type $[[Bot]]$ (or any bottom-like type)
     is disjoint to any other type.
-  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int]]:}$ \\
-        $[[Int]]$ and $[[Int]]$ are not disjoint types because they share a common subtype $[[Int]]$ which
-        is not \emph{bottom-like}. In general, one type is not disjoint with
-        itself, unless it is bottom-like.
+%  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int]]:}$ \\
+%        $[[Int]]$ and $[[Int]]$ are not disjoint types because they share a common subtype $[[Int]]$ which
+%        is not \emph{bottom-like}. In general, one type is not disjoint with
+%        itself, unless it is bottom-like.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
         $[[Int]]$ and $[[Top]]$ are not disjoint types because they share a common
     subtype $[[Int]]$ which is not \emph{bottom-like}. In general no type
     is disjoint to $[[Top]]$, except for bottom-like types.
+    Also, one type is not disjoint with itself, unless it is bottom-like.
   \item $\boldsymbol{A = [[Int -> Bool]], \ B = \ [[String -> Char]]:}$
     The types $[[Int -> Bool]]$ and $[[String -> Char]]$ are not disjoint,
     since we can find non-bottom-like types that are subtypes
@@ -563,7 +564,7 @@ the following example:
 We assume the lambda that contains a switch expression that anaylzes the function input.
 Say $[[e]]$ is $[[switch x Char e1 Bool e2]]$.
 It is acceptable because $[[x]]$ has type $[[Top]]$.
-The function expects an term of type top, but it is given a integer to.
+The function expects a term of type top, but it is given a integer to.
 The switch expression $[[e]]$, if we subsititute $[[x]]$ in it by $[[1 : Int]]$
 it will be comes illegal because it has no branch dealt with an integer.
 So we have to use the dynamic type $[[Top]]$ instead. And that is why
@@ -781,8 +782,8 @@ switch expressions are not order-sensitive: at any time, only one of the
 \rref{Step-Switchl,Step-Switchr} can be applied to a well-typed expression.
 An essential property of \cal for determinism of case expression is
 that a pre-value cannot check against two disjoint types as stated in
-\Cref{lemma:union:check-both-disj-false}. This is in general true for
-all expressions, not just pre-values.
+\Cref{lemma:union:check-both-disj-false}.
+%This is in general true for all expressions, not just pre-values.
 
 \begin{theorem}[Determinism]
 \label{lemma:union:determinism}
