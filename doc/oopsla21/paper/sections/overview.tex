@@ -62,7 +62,7 @@ function tostring (x: String | Int) : String =
     inj2 num -> show num
 \end{lstlisting}
 
-Combining union type construction in \lstinline{safediv} and its elimination in
+\noindent Combining union type construction in \lstinline{safediv} and its elimination in
 \lstinline{tostring}, we can easily implement an interface which returns the
 result of safe division as one \lstinline{String}.
 
@@ -178,7 +178,7 @@ function isstudent (x: Person | Student) : Bool =
     inj2 student -> True
 \end{lstlisting}
 
-But if we transform this function straightforwardly to type-directed
+\noindent But if we transform this function straightforwardly to type-directed
 elimination, we will get:
 
 \begin{lstlisting}
@@ -218,7 +218,7 @@ boolean isstudent3 (Person x) { return False; }
 boolean isstudent3 (Student x) { return True; }
 \end{lstlisting}
 
-Java resolves overloading by finding in all method implementations the one with
+\noindent Java resolves overloading by finding in all method implementations the one with
 the \textit{best} type signature that describes the argument. That means, if we
 apply \lstinline{isstudent3} to a term of type \lstinline{Student}, the second
 implementation is chosen, as \lstinline{Student} is the best type describing the
@@ -267,16 +267,16 @@ or type-inference.
 
 \subsection{Eliminating Union Types in Ceylon}
 
-The Ceylon language~\cite{} supports type-directed union elimination by a
+The Ceylon language~\cite{king2013ceylon} supports type-directed union elimination by a
 switch expression with multiple branches. The following program is an example
 with union types using Ceylon's syntax:
 
 \begin{lstlisting}
-	void print(String|Integer|Float x) {
-		switch (x)
-		case (is String) { print("String: ``x``"); }
-		case (is Integer|Float) { print("Number: ``x``"); }
-	}
+void print(String|Integer|Float x) {
+	switch (x)
+	case (is String) { print("String: ``x``"); }
+	case (is Integer|Float) { print("Number: ``x``"); }
+}
 \end{lstlisting}
 %
 
@@ -331,7 +331,7 @@ print( padLeft("World", "Hello ") ); // "Hello World"
 \end{lstlisting}
 %
 
-In the two cases of the switch construct, there are two different implementations
+\noindent In two cases of the switch construct, there are two different implementations
 of the \lstinline{padLeft} function: one that appends a string to the left of \lstinline{v},
 and the other that calls function \lstinline{space} to generate a string with \lstinline{x} spaces,
 and then append that to \lstinline{v}.
@@ -650,7 +650,6 @@ is exactly this. Formally, we have:
 
 \begin{definition}\label{def:disjointness}
 	A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ and $[[C <: B]]$ $\Longrightarrow$ $[[botlike C]]$
-	\label{def:union:disj}
 \end{definition}
 
 \noindent Here the notation $[[A]] *_s [[B]]$ denotes that types $[[A]]$ and $[[B]]$ are disjoint,
@@ -679,7 +678,7 @@ Thus the disjointness definition used for formulations
 of \name with intersection types is:
 
 \begin{definition}
-\label{def:inter:disj}
+\label{def:over:disj}
   A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\Longrightarrow$ \ $\neg$ \ ($[[C <: A]]$ and $[[C <: B]]$).
 \end{definition}
 
