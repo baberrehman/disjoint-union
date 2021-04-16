@@ -32,16 +32,20 @@ is the addition of intersection types $[[A/\ B]]$.
 Expressions $[[e]]$, pre-values $[[p]]$, annotated values $[[w]]$,
 values $[[v]]$, and context $[[G]]$ stay the same as in \Cref{sec:union}.
 
-\paragraph{Subtyping}
+\paragraph{Subtyping and Ordinary Types}
 The new rules for subtyping are shown in middle part of
 \Cref{fig:inter:system}.  \Rref{s-anda,s-andb,s-andc} are for newly
 added intersection types. \Rref{s-anda} states that a type $[[A]]$ is
-a subtype of intersection of two types $[[B]]$ and $[[C]]$ only if
+a subtype of the intersection of two types $[[B]]$ and $[[C]]$ only if
 $[[A]]$ is a subtype of both $[[B]]$ and $[[C]]$. \Rref{s-andb,s-andc} 
 state that an intersection type $[[A /\ B]]$ is a subtype
 of some type $[[C]]$ if either of its component types ($[[A]]$ or
 $[[B]]$) is a subtype of $[[C]]$. The subtyping relation is reflexive
-and transitive.
+and transitive. The lower part of
+\Cref{fig:inter:system} shows ordinary types~\cite{davies2000intersection}.
+In \cal they are primitive types: integers and function types. 
+%$[[Top]]$, $[[Int]]$ and $[[A -> B]]$ types are considered as ordinary
+%types in \cal with intersection types.
 
 \begin{figure}[t]
     \centering
@@ -70,17 +74,6 @@ and transitive.
   \label{fig:inter:system}
 \end{figure}
 
-\paragraph{Ordinary types}
-%Declarative disjointness is now defined in terms of ordinary types
-%instead of \emph{bottom-like} types.
-Lower part of
-\Cref{fig:inter:system} shows ordinary types~\cite{davies2000intersection}, 
-which is the same as given in \Cref{sec:union:discussion}.
-Ordinary types are essentially primitive types. In \cal they
-are integers and functions. 
-%$[[Top]]$, $[[Int]]$ and $[[A -> B]]$ types are considered as ordinary
-%types in \cal with intersection types.
-
 %%%%%%%%%%%%%%%%%%%%%%%
 %% Disjointness
 %%%%%%%%%%%%%%%%%%%%%%%
@@ -103,7 +96,7 @@ subtypes are bottom-like. However, this definition no longer works with the
 addition of intersection types. Specifically, according to the subtyping rule
 for intersection types, any two types have their intersection as one common subtype.
 For non-bottom-like types, their intersection is also not bottom-like. For
-example, type $[[Int]]$ and type $[[Bool]]$ now has a subtype $[[Int /\ Bool]]$,
+example, type $[[Int]]$ and type $[[Bool]]$ now have a subtype $[[Int /\ Bool]]$,
 which is not bottom-like. Therefore, the disjointness definition fails, since we
 can always find a common non-bottom-like subtype for any two (non-bottom-like)
 types.
@@ -146,16 +139,14 @@ disjoint types to be subtype of $[[Bot]]$.
 \end{center}
 %\bruno{Please use disjointness spec instead of disjoitness algorithm in the rule.}
 
-\noindent This rule is adopted by the Ceylon language~\cite{muehlboeck2018empowering}:
-\rref{s-disj} states that the insersection type $[[A /\ B]]$
-of two disjoint types $[[A]]$ and $[[B]]$ is a subtype of the $[[Bot]]$ type.
-In other words, now the type $[[Int /\ Bool]]$ would be a bottom-like type, and the
+\noindent This rule is adopted by the Ceylon language~\cite{muehlboeck2018empowering}. With \rref{s-disj}
+now the type $[[Int /\ Bool]]$ would be a bottom-like type, and the
 definition of disjointness used in Section~\ref{sec:union} could still work.
 The logic behind this rule is that if we interpret types as sets of values,
 and intersection as set intersection, then intersecting disjoint sets
-is the empty set. In other words, we would get a type that has no inhabitants (i.e.
-a bottom-like type).
-For instance the set of all integers is disjoint to the set of all booleans.
+is the empty set. In other words, we would get a type that has no inhabitants.
+For instance the set of all integers is disjoint to the set of all booleans,
+and the intersection of those sets is empty.
 However we do not adopt the Ceylon solution here two reasons:
 
 \begin{enumerate}
@@ -228,27 +219,23 @@ We further illustrate
 \Cref{def:inter:disj} with a few concrete examples:
 
 \begin{enumerate}
-  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ \\
-        Since there is no ordinary type that is a subtype of both $[[Int]]$ and $[[Int -> Bool]]$,
+  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ Since there is no ordinary type that is a subtype of both $[[Int]]$ and $[[Int -> Bool]]$,
         the two types are disjoint.
-  \item $\boldsymbol{A = [[Int \/ Bool]], \ B = \ [[Bot]]:}$ \\
-    Since there is no ordinary type that is a subtype of both $[[Int \/ Bool]]$ and $[[Bot]]$,
+  \item $\boldsymbol{A = [[Int \/ Bool]], \ B = \ [[Bot]]:}$ Since there is no ordinary type that is a subtype of both $[[Int \/ Bool]]$ and $[[Bot]]$,
     $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types.
-    In general, $[[Bot]]$ type is disjoint to all types because $[[Bot]]$ type does not
+    In general, the $[[Bot]]$ type is disjoint to all types because $[[Bot]]$ does not
     have any ordinary subtype.
-  \item $\boldsymbol{A = [[Int /\ (Int -> Bool)]], \ B = \ [[Int]]:}$ \\
-        There is no ordinary type that is a subtype of both $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$.
+  \item $\boldsymbol{A = [[Int /\ (Int -> Bool)]], \ B = \ [[Int]]:}$ There is no ordinary type that is a subtype of both $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$.
         Therefore, $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$ are disjoint types.
         In general, an intersection of two disjoint types ($[[Int /\ (Int -> Bool)]]$ in this case)
         is always disjoint to all types.
-  \item $\boldsymbol{A = [[Int /\ Bool]], \ B = \ [[Int \/ Bool]]:}$ \\
-        There is no ordinary type that is a subtype of both $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$.
+  \item $\boldsymbol{A = [[Int /\ Bool]], \ B = \ [[Int \/ Bool]]:}$ There is no ordinary type that is a subtype of both $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$.
         Therefore, $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$ are disjoint types.
         This follows from the description in example (3) that type $[[Int /\ Bool]]$ will always be
-        disjoint to all types.
-  \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
-        In this case, $[[Int]]$ and $[[Top]]$ share a common ordinary subtype which is $[[Int]]$.
-        Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
+        disjoint to any type.
+  \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ In this case, $[[Int]]$ and $[[Top]]$ share a common ordinary subtype which is $[[Int]]$.
+    Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
+     $[[Top]]$ overlaps with any other types.
 \end{enumerate}
 
 %The
@@ -374,7 +361,7 @@ the declarative specification.
 
 The typing and operational semantics stay the same as in \Cref{sec:union}. Note
 that while those rules stay the same, types and subtyping rules are extended
-with intersection type.
+with intersection types.
 We prove that \cal with intersection types preserves type soundness and determinism.
 %\bruno{add determinism}
 
