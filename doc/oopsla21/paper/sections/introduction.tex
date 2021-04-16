@@ -18,7 +18,7 @@ program may produce errors by accessing the value at the incorrect type.
 
 Modern OOP languages, such as Scala~\cite{}, Flow~\cite{},
 TypeScript~\cite{} or Ceylon~\cite{} support a form
-of untagged union types, which is inspired by set-theoretic connectives.
+of untagged union types.
 In such languages a union type $[[A \/ B]]$ denotes expressions which can have type
 $[[A]]$ or type $[[B]]$. Union types can be useful in many situations.
 For instance, union types provide an alternative to some forms
@@ -41,18 +41,18 @@ expression.
 
 A complication is that the presence of subtyping introduces the
 possibility of \emph{overlapping types}. For instance we may have a
-$Student$ and a $Person$, where every student is a person (but not
+\lstinline{Student} and a \lstinline{Person}, where every student is a person (but not
 vice-versa). If we try to eliminate a union using such types we can
 run into situations where the type in one branch can cover a type in a
-different branch (for instance $Person$ can also cover
-$Student$). More generally, types can \emph{partially overlap}
+different branch (for instance \lstinline{Person} can also cover
+\lstinline{Student}). More generally, types can \emph{partially overlap}
 and for some values two branches with such types can apply, whereas
 for some other values only one branch applies.
 Therefore the design of such elimination constructs has to
 consider what to do in situations where overlapping types arise.  A
 first possibility is to have a \emph{non-deterministic semantics},
 where any of the branches that matches can be taken. However, in
-practice determinism is desirable property in a programming language,
+practice determinism is a desirable property,
 so this option is not practical. A second possibility, which is
 commonly used for overloading, is to employ a \emph{best-match
   semantics}, where we attempt to find the case with the type that
@@ -67,16 +67,16 @@ alternative to Java. The type system is interesting
 in that it departs from existing language designs, in particular
 with respect to union types and method overloading.
 The Ceylon designers had a few different
-reasons for this. Firstly, they wanted to have a fairly rich type system
+reasons for this. They wanted to have a fairly rich type system
 supporting, among others: \emph{subtyping}; \emph{generics with bounded
 quantification}; \emph{union and intersection types}; and \emph{type-inference}.
-They wanted to support most features that are also already available
+The aim was to support most features that are also already available
 in Java, as well as a few new ones. However they wanted to do this in
 a principled way, where all the features interacted nicely.  A
 stumbling block towards this goal was Java-style method
 overloading\footnote{\url{https://github.com/ceylon/ceylon-spec/issues/73}}.
 The interaction of overloading with other
-features was found to be quite challenging. Secondly, the presence of
+features was found to be quite challenging. Additionally, the presence of
 overloaded methods with overlapping types
 makes reasoning about the code hard 
 for both tools and humans. Algorithms for finding the best match for an
@@ -105,7 +105,9 @@ programmers can still resort to creating non-overloaded methods in
 such a case, which arguably results in code easier to reason about.
 Disjointness ensures that it is always
 clear which implementation is selected for an ``overloaded'' method,
-and only in such cases overloading is allowed.
+and only in such cases overloading is allowed\footnote{Ceylon does
+  allow dynamic type tests, similar to \lstinline{instanceof} in Java, which can be used
+  in combination with the switch construct to simulate some overlapping.}.
 In the switch construct,
 the order of the cases does not matter and reordering the cases has no
 impact on the semantics, which can also aid program undertanding and
@@ -115,48 +117,36 @@ so we can get other interesting functionality as well. Finally, from
 the language design point of view, it would be strange to support two
 mechanisms (method overloading and union types), which greatly overlap
 in terms of functionality.
-\bruno{Probably it should be noted that there's an extension that does
-allow some overlap in Ceylon?.}
-\ningning{Agree. Probably as a footnote? And say something bad about that extension.}
 
 While implemented in the Ceylon language, such construct
-with disjoint switches has not been formally studied.
+with disjoint switches has not been well studied formally.
 The work by \citet{muehlboeck2018empowering} is the only work that we are aware of,
 where the Ceylon's switch construct
 and disjointness are briefly mentioned. However, the focus 
 of that work is on algorithmic formulations of subtyping
 with unions types, intersection types and various distributivity
-rules for subtyping. Disjointness is mentioned briefly, but not
-formally defined, and no semantics of the switch construct is given.
-\snow{I think the above statement is not precise. Disjointness is
-defined, although the OOPSLA paper has many variants. For example in Fig.14
-and Fig.10 dsj is defined on the literal subtyping. For the semantics,
-I feel they are hinting for some reduction rules on page 4 ``Flow-Sensitivity",
-but we can say no operational semantics definition is given.}
+rules for subtyping. No semantics of the switch construct is given.
 Disjointness is informally defined in various sentences in the
-Ceylon documentation. It involves a set of 14 rules described in English
-~\footnote{\url{http://web.mit.edu/ceylon_v1.3.3/ceylon-1.3.3/doc/en/spec/html_single}}. Some of the rules are relatively generic, while
+Ceylon documentation. It involves a set of 14 rules described in English\footnote{\url{http://web.mit.edu/ceylon_v1.3.3/ceylon-1.3.3/doc/en/spec/html_single}}. Some of the rules are relatively generic, while
 others are quite language specific. 
-\snow{Frankly speaking, only three rules among them applies to our calculi
-and they are roughly equal to our algorithmic disjointness.}
 Interestingly, a notion
 of disjointness has been already studied in the literature
 for intersection types~\cite{oliveira2016disjoint}. That line of work studies calculi
-with intersection types and a \textit{merge operator}. Disjointness
+with intersection types and a \textit{merge operator}~\cite{reynolds1988preliminary}. Disjointness
 is used to prevent ambiguity in merges, which can create
 values with types such as $[[Int /\ Bool]]$. Only values
 with disjoint types can be used in a merge.
 
 In this paper, we study union types with disjoint switches formally
 and in a language independent way. We present the \emph{union
-  calculus} (\cal) that includes disjoint switches and union types.
+  calculus} (\cal), which includes disjoint switches and union types.
 The notion of disjointness in \cal is interesting in that it is
 the dual notion of disjointness for intersection types.
-We prove several results, including type soundness, determinism
-and the soundness and completeness of an algorithmic formulation
+We prove several results, including \emph{type soundness}, \emph{determinism}
+and the \emph{soundness} and \emph{completeness} of algorithmic formulations
 of disjointness.
 We also study several extensions of \cal. In particular,
-the first extension (discussed in Section~\ref{}) adds intersection
+the first extension (discussed in Section~\ref{sec:inter}) adds intersection
 types to \cal. It turns out such extension is non-trivial, as it reveals
 a challenge that arises for disjointness when combining
 union and intersection types:
@@ -165,7 +155,7 @@ disjoint intersection types no longer works, and we must employ
 a novel, more general, notion instead. Such change also has an impact
 on the algorithmic formulation of disjointness, which must change as
 well. We also study several other extensions, including intersection
-types and distributive subtyping. And we prove that all the extensions retain
+types and distributive subtyping. We prove that all the extensions retain
 the original properties of \cal. Moreover, all the results about \cal and its
 extensions have been formalized in the Coq theorem prover.
 
