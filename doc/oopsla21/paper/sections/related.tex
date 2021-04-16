@@ -135,32 +135,28 @@ have disjointness constraint on case branches and they check the type
 only for first case branch\bruno{Not a very good explanation: you get negated types for the branches}. 
 \end{comment}
 
-Recently, \citet{muehlboeck2018empowering} gave a general framework for calculi
-with intersection and union types. They illustrated the significane of
+\citet{muehlboeck2018empowering} give a general framework for subtyping
+with intersection and union types. They illustrate the significance of
 their framework using the Ceylon programming language.
-The main objective of their work is to define a generic framework for the
+The main objective of their work is to define a generic framework for
 deriving subtyping algorithms for  
 intersection and union types in the presence of various distributive subtyping rules.
 For instance, their framework could be useful to derive an algorithmic
 formulation for the subtyping relation presented in Figure~\ref{fig:discussion:ds}.
-They also briefly cover disjointness in their work. As part of their framework, they can
+They also briefly cover disjointness in their work. As part of their framework, they
 can also check disjointness given some disjointness axioms. For instance,
 for \name, such axioms could be similar to \rref{ad-mtmr} or \rref{ad-intl}
-in Figure~\ref{}.
-
-They do not have a formal
-specification of disjointness. However,
-
-mentioned disjointness but they did not study disjointness
-in their work. On the other hand, we formally study disjointness
-along with a type-safe and deterministic type-based case construct for union elimination.
-%They also studied disjointness in type-based case expressions.
-\bruno{Very very weak: this makes it sound
-  like that they already did something like our work: they did not. Their work was about
-  subtyping relations with unions and intersections and distributivity rules. They briefly mentioned
-  the switch construct of Ceylon and disjointness. But they have not studied the formal semantics
-of such construct or formally defined disjointness.}
-\baber{I updated the text.}
+in Figure~\ref{fig:union:disj-typ}. 
+However, they do not have a formal
+specification of disjointness. Instead they assume that some sound specification
+exists and that the axioms respect such specification.
+If some unsound axioms are given to their framework (say $[[Int * Int]]$) this
+would lead to a problematic algorithmic for checking disjointness.
+In our work we provide specifications for disjointness together
+with sound and complete algorithmic formulations.
+In addition, unlike us,
+they do not study the semantics of disjoint switch expressions,
+although they mention some Ceylon examples using such expressions.
 
 \paragraph{Occurrence Typing}
 \bruno{This paragraph is very weak: it gives an incorrect explanation of occurrence typing, and it is not very comprehensive:
