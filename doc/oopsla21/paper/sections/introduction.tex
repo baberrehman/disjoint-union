@@ -31,10 +31,10 @@ is returned upon successful computation of the result; and
 a string (an error message) is returned if an error happens.
 
 To safely access values with union types, some form of
-\emph{elimination construct} is needed. In many programming languages,
-this is typically done by employing a language construct that checks
-the types of the values at runtime, and acts as the elimination
-construct. Several elimination constructs for (untagged) union types
+\emph{elimination construct} is needed. Many programming languages often
+employ a language construct that checks
+the types of the values at runtime for this purpose.
+Several elimination constructs for (untagged) union types
 have also been studied in the research literature~
 \cite{benzaken2003cduce,dunfield2014elaborating,castagna:settheoretic}.
 Typically, such constructs take the form of a type-based case analysis
@@ -120,8 +120,8 @@ the language design point of view, it would be strange to support two
 mechanisms (method overloading and union types), which greatly overlap
 in terms of functionality.
 
-While implemented in the Ceylon language, such construct
-with disjoint switches has not been well studied formally.
+While implemented in the Ceylon language,
+disjoint switches have not been well studied formally.
 The work by \citet{muehlboeck2018empowering} is the only work that we are aware of,
 where the Ceylon's switch construct
 and disjointness are briefly mentioned. However, the focus 
