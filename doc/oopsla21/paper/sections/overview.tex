@@ -20,7 +20,7 @@ or (polymorphic) variants~\cite{garrigue98} support tagged union types.
 In their basic form, there are two introduction forms:
 $\mathsf{inj_1} :: [[A -> A \/ B]]$ turn the type of an expression of type
 $[[A]]$ into type $[[A \/ B]]$; and $\mathsf{inj_2} :: [[B -> A \/ B]]$
-turns the type of an expressions of type $[[B]]$ into type $[[A \/ B]]$.
+turns the type of an expressions of type $[[B]]$ into type $[[A \/ B]]$
 For example, we can have:
 
 \begin{lstlisting}
@@ -28,7 +28,11 @@ inj1 "foo": String | Int
 inj2 1 : String | Int
 \end{lstlisting}
 
-\noindent Using tagged union types, we can implement a safe integer
+\noindent Note that in the code above we write union types as
+\lstinline{String | Int} (instead of $[[String \/ Int]]$),
+since this is a common notation in many programming languages,
+including Ceylon.
+Using tagged union types, we can implement a safe integer
 division function, as:
 
 \begin{lstlisting}
@@ -359,24 +363,7 @@ For the declared return type of the function, as long as it is
 a supertype of all possible return values, it is valid
 in Ceylon.
 
-
-Furthermore, another interesting application of union types in Ceylon is to
-encode \textit{nullable types} (or \textit{optional types}) in a type-safe way.
-A similar approach to nullable types has also been recently proposed for
-Scala~\citep{nieto20nulls}. In those languages, the type \lstinline{Null} is
-inhabited by the \lstinline{null} value. The user can then write \lstinline{A?},
-which stands for \lstinline{A|Null}, for a term of type \lstinline{A} to be
-nullable. If we eliminate a value of type \lstinline{A|Null}, there has to be a
-branch to handle the null value. Note that \lstinline{Null} differs from
-\lstinline{Nothing} (the bottom type in Ceylon), in the sense that
-\lstinline{Null} is inhabited while \lstinline{Nothing} is not. To illustrate
-the subtle difference, the following diagram presents part of the subtyping
-lattice in Ceylon. \lstinline{Anything}, the top type in Ceylon, is an
-enumerated class. \lstinline{Anything} has another distinct case called
-\lstinline{Object}, which is the root of primitive types, function types, all
-interfaces and any user-defined class. Notably, \lstinline{Null} is disjoint to
-\lstinline{Object}, and therefore, to all these types.
-
+\begin{wrapfigure}{R}{0.35\textwidth}
 \tikzset{
   state/.style={
     rectangle,
@@ -405,6 +392,26 @@ interfaces and any user-defined class. Notably, \lstinline{Null} is disjoint to
   \draw (a) to[out=225,in=180] (f);
 \end{tikzpicture}
 \end{center}
+\end{wrapfigure}
+
+Furthermore, another interesting application of union types in Ceylon is to
+encode \textit{nullable types} (or \textit{optional types}) in a type-safe way.
+A similar approach to nullable types has also been recently proposed for
+Scala~\citep{nieto20nulls}. In those languages, the type \lstinline{Null} is
+inhabited by the \lstinline{null} value. The user can then write \lstinline{A?},
+which stands for \lstinline{A|Null}, for a term of type \lstinline{A} to be
+nullable. If we eliminate a value of type \lstinline{A|Null}, there has to be a
+branch to handle the null value. Note that \lstinline{Null} differs from
+\lstinline{Nothing} (the bottom type in Ceylon), in the sense that
+\lstinline{Null} is inhabited while \lstinline{Nothing} is not. To illustrate
+the subtle difference, the following diagram presents part of the subtyping
+lattice in Ceylon. \lstinline{Anything}, the top type in Ceylon, is an
+enumerated class. \lstinline{Anything} has another distinct case called
+\lstinline{Object}, which is the root of primitive types, function types, all
+interfaces and any user-defined class. Notably, \lstinline{Null} is disjoint to
+\lstinline{Object}, and therefore, to all these types.
+
+
 
 %Similarly, one can use enumerated types to denote various special cases, or easily
 %add another type to the argument type of an existing function when considering
@@ -588,14 +595,17 @@ cannot be accepted by Ceylon's compiler.
 \end{lstlisting}
 \end{comment}
 
-\ningning{I feel something is missing here. Shall we say explicitly here that
-  while Ceylon does type-directed elimination, there is no formalism and we wish
-  to study the feature formally and precisely? It now feels like Ceylon has
-  already done all the work and it's unclear what's new in this work.}
-
-\subsection{Key Ideas of our Work}
+\subsection{Key Ideas in Our Work}
 The switch construct in our calculus \cal aims to capture the key ideas for
 type-directed elimination of union types, but in a language independent way.
+Currently there is no formalism that studies disjoint switches,
+and our work studies the feature
+formally and precisely. In particular, our work formally defines
+disjointness, disjointness algorithms and the type-directed
+operational semantics.
+Furthermore we prove important properties, such as type soundness, determinism
+and the soundness/completeness of disjointness definitions.
+
 The typing rules guarantee that cases in the switch are disjoint and exhaustive.
 Reduction preserves types and produces deterministic results. Since the semantics
 is type-dependent it uses and propagates type annotations at runtime,
@@ -657,12 +667,16 @@ intersection types. The reason is simple: with intersection types we can always 
 common subtypes, such as $[[Int /\ Bool]]$, which are not bottom-like, and yet
 they have no inhabitants. That is,
 $[[Int /\ Bool]]$ is not a subtype of $[[Bot]]$, but no value can have both type
-$[[Int]]$ and type $[[Bool]]$. In other words, when intersection types are added, empty types
-and bottom-like types no longer coincide. We address this issue by reformulating
+$[[Int]]$ and type $[[Bool]]$.
+%In other words, when intersection types are added, empty types
+%and bottom-like types no longer coincide.
+We address this issue by reformulating
 disjointness in terms of \textit{ordinary types}~\cite{davies2000intersection}, which are basically primitive types
-(such as integers or functions). Importantly, ordinary types are always inhabited.
-Thus, if we can find common \emph{ordinary} subtypes between two types, we know that they
-are not disjoint. Thus the disjointness definition used for formulations
+(such as integers or functions).
+%Importantly, ordinary types are always inhabited.
+If we can find common \emph{ordinary} subtypes between two types, we know that they
+are not disjoint.
+Thus the disjointness definition used for formulations
 of \name with intersection types is:
 
 \begin{definition}
@@ -670,12 +684,14 @@ of \name with intersection types is:
   A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\Longrightarrow$ \ $\neg$ \ ($[[C <: A]]$ and $[[C <: B]]$).
 \end{definition}
 
+\begin{comment}
 \snow{Following is an alternative definition. Would it looks simpler?}
 
 \begin{definition}
 \label{def:inter:disj}
   A $*_s$ B $\Coloneqq$ $\forall$ C, \ $\neg$ ($[[ordinary C]]$ and $[[C <: A]]$ and $[[C <: B]]$).
 \end{definition}
+\end{comment}
 
 \noindent Under this definition we can check that $[[Int]]$ and $[[Bool]]$ are disjoint,
 since no ordinary type is a subtype of both these two types. This definition avoids
@@ -854,21 +870,7 @@ and preserve the original type. Thus the resulting value is $[[1 : Int \/ String
 This considerably simplifies the metatheory, although in an actual
 implementation not tracking the static type would be more efficient.
 
-\snow{We didn't explain why lambdas have two annotation here. To select the right
-  branch, we don't need the dynamic type annotation of lambda. Moreover, it
-  keeps the preservation in beta reduction. Following are two example:}
 
-\begin{verbatim}
-  (\x . x 1 : (Int->Int)->Int: (Int->Int)->Int) (\x.x+1) --> (\x.x+1) 1
-
-  (\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [x~>1:Int]
-  e ::= switch (x) {Char -> ... , Bool -> ...}
-\end{verbatim}
-
-\snow{The first example shows if we don't add type annotation to the input for subsitutition
-we will reach ill-typed term.
-The second example shows we have to use the dynamic type instead of the static type of lambda.
-The expression $e [x->1:Int]$ was legal when x has type Top but becomes illegal when x has type Int.}
 
 \begin{comment}
 \paragraph{Reduction and annotated values}
