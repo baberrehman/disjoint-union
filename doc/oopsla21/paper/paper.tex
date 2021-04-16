@@ -1,17 +1,25 @@
 \documentclass[acmsmall,review,anonymous,screen]{acmart}\settopmatter{printfolios=true,printccs=false,printacmref=false}
 
-\setcopyright{acmcopyright}
+\setcopyright{none}
 \copyrightyear{2018}
 \acmYear{2018}
 \acmDOI{10.1145/1122445.1122456}
 
+%%
+%% These commands are for a JOURNAL article.
+\acmJournal{JACM}
+\acmVolume{37}
+\acmNumber{4}
+\acmArticle{111}
+\acmMonth{8}
+
 %% These commands are for a PROCEEDINGS abstract or paper.
-\acmConference[Woodstock '18]{Woodstock '18: ACM Symposium on Neural
-  Gaze Detection}{June 03--05, 2018}{Woodstock, NY}
-\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
-  June 03--05, 2018, Woodstock, NY}
-\acmPrice{15.00}
-\acmISBN{978-1-4503-XXXX-X/18/06}
+%\acmConference[Woodstock '18]{Woodstock '18: ACM Symposium on Neural
+%  Gaze Detection}{June 03--05, 2018}{Woodstock, NY}
+%\acmBooktitle{Woodstock '18: ACM Symposium on Neural Gaze Detection,
+%  June 03--05, 2018, Woodstock, NY}
+%\acmPrice{15.00}
+%\acmISBN{978-1-4503-XXXX-X/18/06}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\usepackage{geometry}
@@ -148,7 +156,7 @@
 \begin{document}
 
 \begin{abstract}
-Union types allow expressing terms with alternative types, 
+Union types allow expressing terms with alternative types,
 and are nowadays a common feature in many modern programming
 languages.
 %The Ceylon programming language is interesting in that it
@@ -171,13 +179,13 @@ in the context of \emph{disjoint intersection types}.
 We study union types with disjoint switches formally and in a language
 independent way.  We present the \emph{union calculus} (\cal) that
 includes disjoint switches and prove several results, including type
-soundness and determinism. The notion of disjointness in \cal 
+soundness and determinism. The notion of disjointness in \cal
 is interesting in that it is in essence the dual notion of disjointness
 for intersection types.  However, there are challenges that arize for
 disjointness when extending \name with intersection types. Those challenges
 require us to depart from the dual notion of disjointness for intersection types,
 and use a more general formulation of disjointness instead. We also
-study several extensions, including 
+study several extensions, including
 distributive subtyping and a subtyping rule for a class of types that represent empty
 types. We show that such extensions retain all the
 desired properties. All the results about \cal and its extensions have
