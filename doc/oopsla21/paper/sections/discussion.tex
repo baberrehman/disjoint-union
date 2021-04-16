@@ -11,10 +11,10 @@ As discussed in Section~\ref{sec:inter:disj}, Ceylon includes the following subt
 \drule[]{s-disj}
 \end{center}
 
-%One property of Ceylon programming language ~\cite{} is that all \emph{bottom-like} types are 
+%One property of Ceylon programming language ~\cite{} is that all \emph{bottom-like} types are
 %subtype of $[[Bot]]$ type.
 \noindent It is possible to support, and in fact generalize, such as rule in \name. The idea is to
-employ our definition of lowest ordinary subtypes, and add the following rule 
+employ our definition of lowest ordinary subtypes, and add the following rule
 %This property also holds in \cal presented in \Cref{sec:union}. But this property does not
 %hold in \cal with intersection types presented in \Cref{sec:inter} because we updated
 %disjointness definition. We add following novel subtyping rule in subtyping of
@@ -60,7 +60,7 @@ disjointness.
 %rule in calculi with a merge operator for the reasons discussed in Section~\ref{}.
 
 We have formalized and proved all the metatheory, including
-type-soundness, transitivity of subtyping, soundness and completeness
+type soundness, transitivity of subtyping, soundness and completeness
 of disjointness and determinism for a variant of \name with
 intersection types and \rref{s-los}.
 
@@ -68,13 +68,13 @@ intersection types and \rref{s-los}.
 \label{sec:inter:dist}
 
 Another interesting extension is to add distributive subtyping to \cal.
-Ceylon employs an enriched 
+Ceylon employs an enriched
 distributive subtyping relation~\cite{muehlboeck2018empowering}
-that is based on the 
+that is based on the
 B+ logic~\cite{routley1972semantics,van2000minimal}.
 Distributive subtyping is more expressive and accomodates more programs than what we discussed in
 \Cref{sec:union,sec:inter}. Here we add distributive subtyping in the variant of \cal with
-intersection types. 
+intersection types.
 
 \paragraph{Distributive subtyping relation.}
 \Cref{fig:discussion:ds} shows a declarative version of distributive subtyping for
@@ -123,7 +123,7 @@ variable <Integer | Boolean> & <String | Boolean> x = true; do(x);
 \paragraph{\name extension with distributivity.}
 We have studied a variant of \name with intersection types and subtyping distributivity.
 All the metatheory for this variant is proved in Coq. The variant preserves
-type-soundness, soundness and completeness of disjointness and determinism.
+type soundness, soundness and completeness of disjointness and determinism.
 Additionaly, subtyping distributivity
 does not affect the disjointness definitions (both declarative and algorithmic)
 and these definitions are just the same as those discussed in \Cref{sec:inter}.
@@ -149,14 +149,14 @@ and these definitions are just the same as those discussed in \Cref{sec:inter}.
 void speak(Person | Student val) {
   switch (val)
   case (is Person) {print("person speaks");}
-  case (is Student) {print("student speaks");} 
+  case (is Student) {print("student speaks");}
 }
 \end{lstlisting}
 \caption{Ceylon disjointness code example.}
 \label{discussion:list:ceylon}
 \end{figure}
 
-\noindent The function \emph{speak} in \Cref{discussion:list:ceylon} 
+\noindent The function \emph{speak} in \Cref{discussion:list:ceylon}
 will not type check in Ceylon. Because \emph{Person} and
 \emph{Student} are not disjoint types. \emph{Person} and \emph{Student} both have a common
 subtype which is \emph{Student}. \cal will also reject such programs.
@@ -165,14 +165,14 @@ A difference between the disjointness in Ceylon and \cal is that
 Ceylon does not provide
 a formal disjointness definition.
 The Ceylon specification does, however, provide English descriptions
-for disjointness. 
+for disjointness.
 We compare some of those descriptions with
 the disjointness definition in \cal. Ceylon has 14 different points describing
 disjointness, but some of these are quite language specific. For instance, talking
 about disjointness for some of important classes and primitive types in Ceylon.
 We pick 3 points next, copied from the
 Ceylon specification\footnote{\url{https://ceylon-lang.org/documentation/1.3/spec/html_single/}}, which are quite general and they can be related to our
-own definitions of disjointness. 
+own definitions of disjointness.
 According to the specification, two types X and Y are disjoint when:
 
 \begin{enumerate}
@@ -192,11 +192,11 @@ for the disjointness specification of \name with intersection types:
 \begin{comment}
 When a component type (either $[[A]]$ or $[[B]]$) of an intersection type $[[A /\ B]]$
 is disjoint to some type $[[C]]$. Then that specific
-component type (either $[[A]]$ or $[[B]]$) and type $[[C]]$ 
+component type (either $[[A]]$ or $[[B]]$) and type $[[C]]$
 do not share any common ordinary subtype.
 If a component type of intersection type do not share ordinary subtype
 with some type, then naturally complete intersection type do not share
-ordinary subtype with that type. 
+ordinary subtype with that type.
 Therefore, $[[C]]$ is disjoint to $[[A /\ B]]$ if it is disjoint to either of
 the component type in intersection type.
 For example, type $[[Int /\ Top]]$ is disjoint to type $[[Bool]]$.
