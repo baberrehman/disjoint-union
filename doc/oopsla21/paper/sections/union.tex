@@ -187,7 +187,7 @@ is shown at the top of \Cref{fig:union:disj-typ}.
 Type $[[Bot]]$ is obviously a \emph{bottom-like} type
 (\rref{bl-bot}), and a union type of two \emph{bottom-like} types is also
 a \emph{bottom-like} type (\rref{bl-or}).  It is trivial to conclude
-that a union type is \emph{bottom-like} only if all the 
+that a union type is \emph{bottom-like} only if all the
 types in union are $[[Bot]]$. The correctness of our definition for
 bottom-like types is established by the following properties:
 
@@ -438,13 +438,13 @@ The first condition ($[[G |-
     e <= A \/ B]]$) ensures that case expression $[[e]]$ is well-typed
 and checks against type $[[A \/ B]]$. Note that this condition ensures
 \emph{exhaustiveness} of the cases in the switch: $e$ must
-check against the types in the branches of the switch. 
+check against the types in the branches of the switch.
 The next two conditions ensure that
 branches of case expressions are well-typed and check against type
 $[[C]]$, which is the overall type of the switch expression.
 An important point in these two conditions is that variables
 $[[x]]$ and $[[y]]$ are, respectively, of type $[[A]]$ in first branch and of type $[[B]]$ in
-second branch in the extended context. 
+second branch in the extended context.
 %\snow{So they are exhaustive for all possible values of $e$. In other words,
 %at least one branch matches with the runtime type of $e$.}
 The last condition
@@ -533,23 +533,43 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
 \end{figure}
 %\bruno{Don't introduce $[[e1]]$ and $C$ in rules step-beta, step-switchl and step-switchr.
 %  Change the notations, since we already use similar notation for bottom-like types. Also, change
-%the step-beta rule as discussed in slack, both in the paper and in Coq.} 
+%the step-beta rule as discussed in slack, both in the paper and in Coq.}
 
 %\bruno{Following text needs to be fixed after changes in Figure.}
 \Rref{step-beta} is the beta-reduction rule. It applies a dually
 annotated lambda value $[[\x.e : A1 -> B1 : A2 -> B2]]$ to input
 value $[[v]]$. Substitution replaces free occurences of variable
 $[[x]]$ with beta value ($[[betavalue v A2 A1]]$).
-The definition of beta value ($[[betavalue v B C]]$) is shown at the lower part in 
+The definition of beta value ($[[betavalue v B C]]$) is shown at the lower part in
 \Cref{fig:union:os}.
 Beta value is a function which takes
-value $[[v]]$ and both static and dynamic input types 
+value $[[v]]$ and both static and dynamic input types
 ($[[A1]]$ and $[[A2]]$) as input and returns value with
 appropriate annotations to be substituted.
 Recall that the values in \cal consist of $[[w]]$ and $[[\x.e]]$.
 For first case, when $[[v]]$ is $[[w]]$ ($[[p:A]]$), beta value replaces the static type
 $[[A]]$ (from $[[p:A]]$) by $[[A1]]$ and returns $[[p:A1]]$.
 This is to keep the most specific type in the annotation, for beta-reduction.
+
+\snow{
+Assuming we did not keep the dynamic type of lambdas, here we will not be able
+to know $[[A1]]$. And only using $[[A2]]$ may lead to ill-typed programs, like
+the following example:
+}
+
+\begin{verbatim}
+  (\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [ x~>1:Int ]
+  e ::= switch (x) {Char -> ... , Bool -> ...}
+\end{verbatim}
+
+Here we have a lambda that contains a switch expression to anaylze its input.
+The function expects an term of type top, but it is given a integer to.
+The switch expression $[[e]]$, if we subsititute $[[x]]$ in it by $[[1 : Int]]$
+it will be comes illegal because it has no branch dealt with an integer.
+So we have to use the dynamic type $[[Top]]$ instead. And that is why
+we need to keep two annotations for an lambda.
+
+
 For second case, $[[v]]$ can also be an unnanotated lambda value $[[\x.e]]$.
 With bi-directional type-checking an expression such as:
 $([[\f.f 1: (Int -> Int -> Int)]]) ([[\x.x]])$
@@ -558,28 +578,12 @@ type information to the arguments. Thus, the dynamic semantics
 needs to deal with such programs.
 In such case, substitution uses $[[\x.e:A2:A1]]$ as the value being substituted.
 
-\bruno{Regarding these comments, can you write something about them here Snow?}
-\snow{We didn't explain why lambdas have two annotation here. To select the right
-  branch, we don't need the dynamic type annotation of lambda. Moreover, it
-  keeps the preservation in beta reduction. Following are two example:}
-
-\begin{verbatim}
-  (\x . x 1 : (Int->Int)->Int: (Int->Int)->Int) (\x.x+1) --> (\x.x+1) 1
-
-  (\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [x~>1:Int]
-  e ::= switch (x) {Char -> ... , Bool -> ...}
-\end{verbatim}
-
-\snow{The first example shows if we don't add type annotation to the input for subsitutition
-we will reach ill-typed term.
-The second example shows we have to use the dynamic type instead of the static type of lambda.
-The expression $e [x->1:Int]$ was legal when x has type Top but becomes illegal when x has type Int.}
 
 
 
 %Drop Static Type ($\rceil[[v]]\lceil$) drops the static type
 %from annotated values $[[p:A]]$ and returns $[[p]]$.
-%It does not change non-annotated values $[[\x.e]]$ and returns 
+%It does not change non-annotated values $[[\x.e]]$ and returns
 %them as it is. The result expression $[[e1]]$ of ($\rceil[[v]]\lceil$)
 %is either a pre-value $[[p]]$ or $[[\x.e]]$.
 %Therefore, there are two cases to be considered in beta-reduction
@@ -588,7 +592,7 @@ The expression $e [x->1:Int]$ was legal when x has type Top but becomes illegal 
 %For the first case, note that the annotation of the pre-value
 %$[[p]]$ changes from $[[p:A]]$ to $[[p:A2:A1]]$ during substitution.
 %Specifically,
-%$\rceil[[v]]\lceil$ drops $[[A]]$ from $[[p:A]]$ and returns $[[p]]$ 
+%$\rceil[[v]]\lceil$ drops $[[A]]$ from $[[p:A]]$ and returns $[[p]]$
 %as $[[e1]]$. Substitution then
 %substitutes free occurrences of variable $[[x]]$ with $[[e1:A2:A1]]$.
 %\snow{Question about the rule design: why drop $A$? Substituting $x$ by
@@ -631,12 +635,12 @@ Of particular interest are
 of \emph{switch} expressions.
 %\snow{I have the same linking problem for switchl/r rules here as well.
 %Clicking them just bring me to the beginning of the pdf.}
-\Rref{step-switch} reduces the case expression $[[e]]$.  
+\Rref{step-switch} reduces the case expression $[[e]]$.
 \Rref{step-switchl} evaluates
 the left branch of the \emph{switch} expression if the dynamic type of $[[p]]$ is
 a subtype of type of left branch. \Rref{step-switchr} evaluates the right
 branch if type of $[[e]]$ is a subtype
-of type of the right branch. The subtyping condition in 
+of type of the right branch. The subtyping condition in
 \rref{step-switchl,step-switchr} is important, as it provides
 flexibility for the value to have various subtypes of $[[A]]$ and $[[B]]$, instead
 of strictly having those types. Recall that
@@ -768,14 +772,14 @@ If \ $[[G |- p <= A]]$ \ then:
 \end{lemma}
 \end{comment}
 
-We further show that the operational semantics is deterministic 
+We further show that the operational semantics is deterministic
 (\Cref{lemma:union:determinism}), which ensures
 that a program will always produce the same unique result. This property is not
 obvious as many operational semantics rules distinguish between pre-values,
 values and annotated values. Also, by proving determinism, we guarantee that
 switch expressions are not order-sensitive: at any time, only one of the
 \rref{Step-Switchl,Step-Switchr} can be applied to a well-typed expression.
-An essential property of \cal for determinism of case expression is 
+An essential property of \cal for determinism of case expression is
 that a pre-value cannot check against two disjoint types as stated in
 \Cref{lemma:union:check-both-disj-false}. This is in general true for
 all expressions, not just pre-values.
@@ -811,7 +815,7 @@ If \ $[[A *s B]]$ \ then there is no $[[p]]$ such that
 \subsection{An Alternative Specification for Disjointness}
 \label{sec:union:discussion}
 \begin{comment}
-\snow{I feel the reason and consequence are flipped here. 
+\snow{I feel the reason and consequence are flipped here.
 The alternative spec definitely equals to the previous one
 because we define ``ordinary types" to satisfy:
 1) no bottom-like types are ordinary;
@@ -838,11 +842,11 @@ those types that are primitive, such as integers and functions (see bottom
 of Figure~\ref{fig:inter:system} for a formal definition).
 The dynamic types of (pre-)values in \name are always ordinary.
 %Consequentely values with a dynamic type $A$ should have an ordinary subtype $B$,
-%such that $B <: A$. 
+%such that $B <: A$.
 %terms with bottom types cannot be reduced to values
 %It is important to establish the fact that definition
 %\Cref{def:union:disj1} is indeed equivalent to our current
-%definition. 
+%definition.
 
 We prove that for the calculus presented in this section, the new definition is
 equivalent to the previous definition of disjointness
