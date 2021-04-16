@@ -1,15 +1,6 @@
 \section{Related Work}
 \label{sec:related}
 
-\bruno{Generally speaking I feel that either here, or in the overview, we
-  should actually show concrete examples of other union elimination constructs,
-in addition to having some text describing such constructs.}
-\baber{I think we should have other union elimination constructs in overview.
-       Because by doing so reader will have a better idea of our work
-       comparison to available literature throughout the paper.
-       If we put other constructs in related work, reader will only come to read
-       them at the end.}
-
 \begin{comment}
 \begin{itemize}
 	\item {Union Types    (discussing work on union types and elimination constructs for union types) <-- Need to coordinate with Ningning/Snow so that there’s not much overlap there. If the Overview discusses some of these in detail, the RW does not need to have much text in it.}
@@ -34,24 +25,27 @@ do not use labels and provide type-based union elimination.
 Union types were first studied in the setting of programming languages by
 \citet{macqueen1984ideal}, though the union elimination rule there is unsound in
 standard call-by-value operational semantics as pointed out by
-\cite{dunfield2003type}. Also, \citet{macqueen1984ideal} did not define dynamic
-semantics. Later, union types have been studied in the literature in various
+\cite{dunfield2003type}.
+%Also, \citet{macqueen1984ideal} did not define dynamic
+%semantics.
+Later, union types have been studied in the literature in various
 contexts. As discussed in \Cref{subsec:elimination},
 \citet{pierce1991programming} and \cite{dunfield2014elaborating} support
 single-branch elimination. However, as both calculi support intersection types,
 with single-branch elimination the system can also be used to support form of
-overloading. \cite{pierce1991programming} does not give the dynamic semantics.
-On the other hand, \cite{dunfield2014elaborating} shows how to elaborate union
-types into tagged union types. However, the result of such elaboration is
-nondeterministic. For example, in her system, an Integer of type \lstinline{Int | Int}
-can be non-deterministically tagged \lstinline{inj1} or
-\lstinline{inj2}. Moreover, while \citet{dunfield2014elaborating} shows that
+overloading. \citet{pierce1991programming} does not give the dynamic semantics.
+On the other hand, \cite{dunfield2014elaborating} provides
+a nondeterministic dynamic semantics, which can give different
+results when eliminating union types.
+\begin{comment}
+Moreover, while \citet{dunfield2014elaborating} shows that
 subtyping is not necessary for elaboration, it is not obvious how to generalize
 elaboration to support subtyping relations such as
 \lstinline{Student <: Person} without using the subtyping rule. If the
 elaboration were generalized further to support such a subtyping relation, then
 a student with type \lstinline{Student | Person} can also be tagged
 non-deterministically.
+\end{comment}
 
 
 % \citet{barbanera1995intersection} proposed
@@ -59,14 +53,8 @@ non-deterministically.
 % types.
 %However, their union elimination is same as last two and follow
 %unrestricted union elimination.
-\bruno{So you are arguying it is non-deterministic?
-Again where can I find the semantics? Can you paste this on slack?}
-\baber{I commented those lines from the paper. I think it is enough to say that
-they target type preservation in their work.}
 
-\ningning{the text regarding \citet{freeman1991refinement} feels unuseful. In
-  particular, why we want to compare with their work?}
-
+\begin{comment}
 \citet{freeman1991refinement} studied union types along with intersection types
 in setting of refinement types for ML. Main focus of their work is to infer
 more precise types of expressions, which they call
@@ -77,30 +65,38 @@ a complete calculus with type sound dynamic semantics.
 \bruno{and ... Do they have an elimination construct for unions?
   If so how is that related to our work?}.
 \baber{I added few more lines in Freeman citation.}
+\end{comment}
+Union types and elimination constructs based on types are
+widely used in the context of XML processing languages~\cite{hosoya2003xduce,benzaken2003cduce}.
+Generally speaking the elimination constructs in those
+languages offer a first-match semantics,
+where cases can overlap and reordering the cases may change the semantics of the program.
+This is in contrast to our disjointness based approach.
 \citet{hosoya2003xduce} studied union types
-in XDuce programming language. XDuce offers a novel feature of
+in the XDuce programming language. XDuce offers a novel feature of
 so-called regular expression types. Pattern matching can be on
 expressions and types in XDuce.  Expressions are considered as special
-cases of types. Although XDuce offers type-based switch construct,
-it does not ensure disjointness. Thus cases can overlap and
-reordering the cases may change the semantics of the program. CDuce
+cases of types.  CDuce
 \cite{benzaken2003cduce} is an extension of XDuce. CDuce has improved
-pattern matching but it also does not have disjoitness constraint and
-follows firt-match policy.  \citet{fallside2001xml} studied union
+pattern matching but it also
+follows first-match semantics. Work on the more foundational aspects
+of CDuce, and in particular on \emph{semantic subtyping}~\cite{frisch2002semantic}
+and set-theoretic types,
+also employs a form of first-match semantics elimination construct, though in a different form.
+In particular, work by \citet{castagna2005gentle,castagna2017gradual}
+proposes a conditional construct that can test whether a value matches a type.
+If it matches then the first branch is executed and the type for the value is refined.
+Otherwise, the second branch is executed and the type of the value is refined to be
+the negation of the type (expressing that the value does not have such type).
+\begin{comment}
+\citet{fallside2001xml} studied union
 types in markup language, but with a restriction of disjoint top-level
 labels which is different from our work on
 disjointness on types.\bruno{In other words, for the last work, the unions
 are labelled (i.e. the cases are not based on types)?}
-\baber{this seems right, this is mentioned in few references.
-       But the documentation says order in which union types are created
-       is significant and it seems like first match. Shall we drop this
-       or it's worthy to mention Fallside citation?}
-\baber{Upon further reading, I think he restricts creation of types like $[[Int \/ Int]]$
-and $[[Int -> Bool \/ Int -> Bool]]$. }
-
 
 \cite{frisch2002semantic} studied union types and intersection types
-with semantic subtyping and provide theoretical basis for CDuce programming language.
+with semantic subtyping and provide the theoretical basis for CDuce programming language.
 However, their case expression (they call it \emph{match}) uses explicit
 tags to select a particular branch. Whereas, we propose dynamic type-based
 case construct.
@@ -137,22 +133,30 @@ is relevant to our work.}
 They give a dynamic type-based cast for union elimination. But they do not
 have disjointness constraint on case branches and they check the type
 only for first case branch\bruno{Not a very good explanation: you get negated types for the branches}. 
+\end{comment}
 
-Recently, \citet{muehlboeck2018empowering} gave a general framework for calculi
-with intersection and union types. They illustrated the significane of
-their framework using Ceylon programming language.
-Objective of their work is to define a generic framework for the 
-distributive subtyping of intersection and union types.
-Although, they mentioned disjointness but they did not study disjointness
-in their work. On the other hand, we formally study disjointness
-along with a type-safe and deterministic type-based case construct for union elimination.
-%They also studied disjointness in type-based case expressions.
-\bruno{Very very weak: this makes it sound
-  like that they already did something like our work: they did not. Their work was about
-  subtyping relations with unions and intersections and distributivity rules. They briefly mentioned
-  the switch construct of Ceylon and disjointness. But they have not studied the formal semantics
-of such construct or formally defined disjointness.}
-\baber{I updated the text.}
+\citet{muehlboeck2018empowering} give a general framework for subtyping
+with intersection and union types. They illustrate the significance of
+their framework using the Ceylon programming language.
+The main objective of their work is to define a generic framework for
+deriving subtyping algorithms for  
+intersection and union types in the presence of various distributive subtyping rules.
+For instance, their framework could be useful to derive an algorithmic
+formulation for the subtyping relation presented in Figure~\ref{fig:discussion:ds}.
+They also briefly cover disjointness in their work. As part of their framework, they
+can also check disjointness given some disjointness axioms. For instance,
+for \name, such axioms could be similar to \rref{ad-mtmr} or \rref{ad-intl}
+in Figure~\ref{fig:union:disj-typ}. 
+However, they do not have a formal
+specification of disjointness. Instead they assume that some sound specification
+exists and that the axioms respect such specification.
+If some unsound axioms are given to their framework (say $[[Int * Int]]$) this
+would lead to a problematic algorithmic for checking disjointness.
+In our work we provide specifications for disjointness together
+with sound and complete algorithmic formulations.
+In addition, unlike us,
+they do not study the semantics of disjoint switch expressions,
+although they mention some Ceylon examples using such expressions.
 
 \paragraph{Occurrence Typing}
 \bruno{This paragraph is very weak: it gives an incorrect explanation of occurrence typing, and it is not very comprehensive:
