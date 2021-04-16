@@ -514,8 +514,8 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
     \begin{tabular}{|lcl|}
       \multicolumn{3}{c}{Beta Value $[[betavalue v A B]]$} \\
       \hline
-      $[[betavalue p:A B C]]$ & = & $[[p:C]]$ \\
-      $[[betavalue \x.e B C]]$ & = & $[[\x.e:B:C]]$ \\
+      $[[betavalue p:C A B]]$ & = & $[[p:B]]$ \\
+      $[[betavalue \x.e A B]]$ & = & $[[\x.e:A:B]]$ \\
       \hline
     \end{tabular} }
   \bigskip
@@ -541,7 +541,7 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
 annotated lambda value $[[\x.e : A1 -> B1 : A2 -> B2]]$ to input
 value $[[v]]$. Substitution replaces free occurences of variable
 $[[x]]$ with beta value ($[[betavalue v A2 A1]]$).
-The definition of beta value ($[[betavalue v B C]]$) is shown at the lower part in
+The definition of beta value ($[[betavalue v A B]]$) is shown at the lower part in
 \Cref{fig:union:os}.
 Beta value is a function which takes
 value $[[v]]$ and both static and dynamic input types

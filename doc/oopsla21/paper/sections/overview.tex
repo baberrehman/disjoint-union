@@ -55,10 +55,9 @@ tag of \lstinline{x}, where \lstinline{show} takes an \lstinline{Int} and
 returns back its string representation.
 
 \begin{lstlisting}
-function tostring (x: String | Int) : String =
-  switch (x)
-    inj1 str -> str
-    inj2 num -> show num
+function tostring (x: String | Int) : String = switch (x)
+                                                 inj1 str -> str
+                                                 inj2 num -> show num
 \end{lstlisting}
 
 \noindent Combining union type construction in \lstinline{safediv} and its elimination in

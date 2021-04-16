@@ -48,14 +48,11 @@ In \cal they are primitive types: integers and function types.
 %types in \cal with intersection types.
 
 \begin{figure}[t]
-    \centering
     \begin{tabular}{lrcl} \toprule
       Types & $[[A]], [[B]]$ & $\Coloneqq$ & $ ... \mid [[A /\ B]] $ \\
       \bottomrule
     \end{tabular}
-    \centering
     \drules[s]{$ [[A <: B ]] $}{Additional Subtyping Rules}{anda, andb, andc}
-    \centering
     \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
 %    \centering
 %    {\renewcommand{\arraystretch}{1.2}
@@ -70,7 +67,7 @@ In \cal they are primitive types: integers and function types.
 %     $[[findsubtypes A /\ B]]$ & = & $ [[findsubtypes A]] \cap [[findsubtypes B]] $\\
 %      \hline
 %    \end{tabular} }
-  \caption{Additional Types, Subtyping and Ordinary Types for \cal with intersection types.}
+  \caption{Additional types, subtyping and ordinary types for \cal with intersection types.}
   \label{fig:inter:system}
 \end{figure}
 
