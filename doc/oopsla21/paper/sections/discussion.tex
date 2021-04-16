@@ -98,9 +98,7 @@ $[[(A1 \/ A2) -> B]]$ type.
 We show the use of distributive subtyping with the following Ceylon code snippet:
 
 \begin{lstlisting}
-void do(<Integer & String> | Boolean val) {
-  //do something
-}
+void do(<Integer & String> | Boolean val) { /* do something */ }
 \end{lstlisting}
 
 \noindent
@@ -118,8 +116,7 @@ of $[[(Int /\ String) \/ Bool]]$ (in particular, by \rref{ds-distor}). As such
 with distributive subtyping, the following Ceylon program type-checks:
 
 \begin{lstlisting}
-val <Integer | Boolean> & <String | Boolean> x = true;
-do(x);
+variable <Integer | Boolean> & <String | Boolean> x = true; do(x);
 \end{lstlisting}
 
 
@@ -132,8 +129,7 @@ does not affect the disjointness definitions (both declarative and algorithmic)
 and these definitions are just the same as those discussed in \Cref{sec:inter}.
 
 \begin{figure}[t]
-  %\centering
-  \drules[ds]{$ [[A <<: B ]] $}{Declarative Subtyping}{refl,trans,top,btm,int,arrow,ora,orb,orc,anda,andb,andc,distarr,distarru,distor}
+  \drules[ds]{$ [[A <<: B ]] $}{Declarative Subtyping}{refl,trans,top,btm,int,arrow,ora,orb,orc,anda,andb,distarr,andc,distarru,distor}
   \caption{Declarative Subtyping}
   \label{fig:discussion:ds}
 \end{figure}

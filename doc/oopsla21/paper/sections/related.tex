@@ -161,8 +161,8 @@ the type of variable in a type test. For example, with occurrence typing we
 could have:
 
 \begin{lstlisting}
-Int occurence(Int | String val) {
-  if (val is Int) { return val+1; }
+Integer occurence(Integer | String val) {
+  if (val is Integer) { return val+1; }
   else { return toInt(val)+2; }
 }
 \end{lstlisting}
@@ -218,7 +218,7 @@ we can use the following definition of disjointness:
 
 \begin{definition}
 \label{def:related:disj}
-  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\rightarrow$ \ $\neg$ \ ($[[A <: C]]$ and $[[B <: C]]$).
+  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\Longrightarrow$ \ $\neg$ \ ($[[A <: C]]$ and $[[B <: C]]$).
 \end{definition}
 
 \noindent which is, in essence, the dual notion of the definition presented in
