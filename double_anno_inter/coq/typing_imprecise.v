@@ -1126,34 +1126,140 @@ Notation " t '~~>*' t' " := (multi istep t t') (at level 40).
 (* defns erase value *)
 Definition erasevalue (v:exp) :=    (* defn erasevalue *)
  match v with
-   | (e_ann p A) => p
-   | (e_abs e)   => e_abs e
+   | (e_ann (e_lit i5) A) => (e_lit i5)
+   | (e_ann (e_bool b) A) => (e_bool b)
+   | (e_ann (e_str s) A) => (e_str s)
+   | (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) A) => (e_ann (e_abs e) (t_arrow A1 B1))
    | _           => v
  end.
 
+Inductive erasevalue1 : exp -> exp -> Prop :=
+  | erase_pexpr : forall p A,
+            pexpr p ->
+            erasevalue1 (e_ann p A) p
+  | erase_lam   : forall e,
+            erasevalue1 (e_abs e) (e_abs e).
+
 Lemma imprecise_lemma2 : forall e v, e -->* v -> e ~~>* erasevalue v.
  Proof.
-     intros e v red.
-     lets red': red.
-     induction e.
-     inverts red.
-     simpl.
-     eapply multi_refl; eauto.
-     admit.
-     admit.
-     admit.
-     admit.
-     admit.
-     admit.
-     inverts red.
-     simpl. admit.
-     inversion H.
-     inverts red.
-     simpl. admit.
-     admit.
+  intros e v red.
+  lets red': red.
+  induction e.
+  - inverts red. simpl.
+    eapply multi_refl; eauto.
+    inversion H.
+  - inverts red. simpl.
+    eapply multi_refl; eauto.
+    inverts H.
+  - inverts red. simpl.
+    eapply multi_refl; eauto.
+    inverts H.
+    inverts H0.
+    simpl.
+    eapply multi_refl; eauto.
+    inverts* H.
+    assert (wexpr (e_ann (e_lit n) t_int)) by auto.
+    contradiction.
+  - inverts red. simpl.
+    eapply multi_refl; eauto.
+    inverts H.
+    inverts H0.
+    simpl.
+    eapply multi_refl; eauto.
+    inverts* H.
+    assert (wexpr (e_ann (e_bool b) t_bool)) by auto.
+    contradiction.
+  - inverts red. simpl.
+    eapply multi_refl; eauto.
+    inverts H.
+    inverts H0.
+    simpl.
+    eapply multi_refl; eauto.
+    inverts* H.
+    assert (wexpr (e_ann (e_str s) t_str)) by auto.
+    contradiction.
+  - inverts red.
+    admit.
+    admit.
+  - inverts red.
+    simpl.
+    eapply multi_refl; eauto.
+    inversion H.
+  - inverts red.
+    simpl.
+    eapply multi_refl; eauto.
+    admit.
+  - inverts red.
+    simpl.
+    eapply multi_refl; eauto.
+    inverts H.
+    admit.
+    admit.
+    admit.
 Admitted.
 
-(* need to be strengthened *)
+Lemma imprecise_lemma21 : forall e v v1, 
+  e -->* v ->
+  erasevalue1 v v1 -> 
+  e ~~>* v1.
+ Proof.
+  intros e v v1 red erase. gen v1.
+  inductions e; intros.
+  - inverts red.
+    inverts erase.
+    inversion H.
+  - inverts red.
+    inverts erase.
+    inverts H.
+  - inverts red.
+    inverts erase.
+    inverts H.
+    inverts H0.
+    inverts erase.
+    eapply multi_refl.
+    inverts H.
+    assert (wexpr (e_ann (e_lit n) t_int)) by auto.
+    contradiction.
+  - inverts red.
+    inverts erase.
+    inverts H.
+    inverts H0.
+    inverts erase.
+    eapply multi_refl.
+    inverts H.
+    assert (wexpr (e_ann (e_bool b) t_bool)) by auto.
+    contradiction.
+  - inverts red.
+    inverts erase.
+    inverts H.
+    inverts H0.
+    inverts erase.
+    eapply multi_refl.
+    inverts H.
+    assert (wexpr (e_ann (e_str s) t_str)) by auto.
+    contradiction.
+  - 
+    inverts erase.
+    eapply multi_step; eauto.
+    eapply multi_refl.
+    inverts erase. admit.
+    inverts H. admit. admit.
+    admit.
+  - inverts red.
+    inverts erase.
+    eapply multi_refl.
+    inversion H.
+  - inverts red.
+    inverts erase.
+    inverts erase.
+    inverts H0.
+    inverts H.
+    admit.
+    admit.
+    admit.
+  - admit.
+Admitted.
+     
 Lemma itype_safety : forall e e' dir T,
 typing empty e dir T ->
 e ~~> e' ->
