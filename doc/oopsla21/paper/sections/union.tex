@@ -4,7 +4,7 @@
 This section introduces the union calculus \name. The distinctive feature
 of the \name calculus is a type-based switch expression with disjoint
 cases, which can be used to eliminate values with union types.
-Technically speaking, an interesting aspect of the operational
+An interesting aspect of the operational
 semantics is that it is type-directed,
 and type annotations
 play a fundamental role in the dynamic semantics.
@@ -27,8 +27,7 @@ types. Metavariable $[[e]]$ ranges over program
 expressions. Expressions include variables ($[[x]]$), integers
 ($[[i]]$), type annotations ($[[e:A]]$), lambda abstractions
 ($[[\x.e]]$), applications ($[[e1 e2]]$) and a novel switch expression ($[[switch
-    e A e1 B e2]]$). The \emph{switch} expression is a case
-expression and evaluates a specific branch by matching the
+    e A e1 B e2]]$). The \emph{switch} expression evaluates a specific branch by matching the
 type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
@@ -114,19 +113,20 @@ The subtyping relation for \cal is reflexive and transitive.
 %  otherwise it will break the hyperlinks. Baber can you fix other ones? There
 %  are quite a few.}
 
+\begin{comment}
 \begin{lemma}[Subtyping Reflexivity]
   $[[A <: A]]$.
 \label{lemma:union:refl}
 \end{lemma}
-\begin{comment}
+
 \begin{proof}
   By induction on type A. All cases are trivial to prove.
 \end{proof}
-\end{comment}
 \begin{lemma}[Subtyping Transitivity]
   If \ $[[A <: B]]$ \ and \ $[[B <: C]]$ \ then \ $[[A <: C]]$.
   \label{lemma:union:trans}
 \end{lemma}
+\end{comment}
 \begin{comment}
 \begin{proof}
   By induction on type B.
@@ -164,11 +164,9 @@ types in are disjoint if they do not share any common
 \emph{supertype} which is not \emph{top-like} (i.e., isomorphic to the top type). Dually, in
 \cal, two types are disjoint if they do not share any common \emph{subtype} which
 is not \emph{bottom-like}.
-\bruno{In the overview section we need to talk about more about this and
-explain that common subtypes are important for the switch expression.}
-We emphasize the significance of
-\emph{supertypes} and \emph{subtypes} in $\lambda_i$ and \cal
-respectively.
+%We emphasize the significance of
+%\emph{supertypes} and \emph{subtypes} in $\lambda_i$ and \cal
+%respectively.
 
 \paragraph{Bottom-Like Types}
 \emph{Bottom-like} types are types that are isomorphic (i.e.
@@ -176,8 +174,9 @@ both supertypes and subtypes) of the bottom type $\bot$. Therefore
 any bottom-like types behave like the $[[Bot]]$ type.
 In \name, there
 are infinitely many such types, including, for example $\bot \lor \bot$,
-$\bot \lor \bot \lor \bot$, as well as $\bot$ itself. Bottom-like types
-are important because they allow us to define disjointness.
+$\bot \lor \bot \lor \bot$, as well as $\bot$ itself.
+%Bottom-like types
+%are important because they allow us to define disjointness.
 %are integral part of disjoitness in \cal like
 %\emph{top-like} in $\lambda_i$ \cite{oliveira2016disjoint}. Therefore,
 %it is important to understand the notion of \emph{bottom-like} types
@@ -235,13 +234,12 @@ is bottom-like.
 \end{comment}
 
 \paragraph{Declarative Disjointness}
-Now we present
-the declarative definition for disjointness as follows.
+The declarative definition for disjointness is as follows:
 %Recall that two types in \cal are disjoint if they do not share any common subtype which is not
 %\emph{bottom-like}. The formal definition of disjoint specifications for this calculus is:
 
 \begin{definition}
-  A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ $\wedge$ $[[C <: B]]$ $\rightarrow$ $[[botlike C]]$
+  A $*_s$ B $\Coloneqq$ $\forall$ C, $[[C <: A]]$ $\wedge$ $[[C <: B]]$ $\Longrightarrow$ $[[botlike C]]$
 \label{def:union:disj}
 \end{definition}
 
@@ -300,8 +298,8 @@ We illustrate this definition with a few examples:
 \end{comment}
 
 \paragraph{Algorithmic Disjointness}
-However, the declarative disjointness does not directly lead to an algorithm.
-We then present an algorithmic version of disjointness in
+The declarative disjointness does not directly lead to an algorithm.
+We present an algorithmic version of disjointness in
 the middle part of \Cref{fig:union:disj-typ}.
 \Rref{ad-btmr,ad-btml} state that the $[[Bot]]$
 type is disjoint to all types.  \Rref{ad-intl,ad-intr} state that
@@ -364,7 +362,7 @@ with respect to its declarative specification (\Cref{def:union:disj}).
 \end{comment}
 
 \noindent A natural property of \cal is
-if type $[[A]]$ and type $[[B]]$ are two disjoint types, then subtypes
+that if type $[[A]]$ and type $[[B]]$ are two disjoint types, then subtypes
 of $[[A]]$ are disjoint to subtypes of $[[B]]$:
 
 \begin{lemma}[Subtypes Disjoint]
@@ -456,10 +454,9 @@ are forbidden. Otherwise, overlapping types could lead to
 non-deterministic results.
 Since all the branches check against $[[C]]$, the whole
 switch expression checks against $[[C]]$.
-\snow{Note that the two branches can have different return types.
-For example, they infer to $A'$ and $B'$ respectively. In that case, the whole
-expression can be checked by $[[A' \/ B']]$.}\bruno{I think Snow's point may be something
-for the discussion section, perhaps.}
+Note that the two branches can have different return types.
+For example, if $e_1$ and $e_2$ have type $[[Int]]$ and $[[String]]$ respectively,
+the whole expression can be checked with the type $[[Int \/ String]]$.
 
 \begin{comment}
 \begin{figure}[t]
@@ -479,8 +476,8 @@ for the discussion section, perhaps.}
 \label{sec:union:os}
 The dynamics of \cal is defined by a small-step operational semantics. An
 important aspect of the semantics is that it is type-directed
-\cite{Huang:typedirected}, where type annotations are used to guide reduction,
-and similar terms that differ only on type annotations can reduce in different
+\cite{Huang:typedirected}: type annotations are used to guide reduction.
+Similar terms that differ only on type annotations can reduce in different
 ways.
 
 \paragraph{Reduction rules}
@@ -549,7 +546,7 @@ Beta value is a function which takes
 value $[[v]]$ and both static and dynamic input types 
 ($[[A1]]$ and $[[A2]]$) as input and returns value with
 appropriate annotations to be substituted.
-Recall that the values in \cal are consist of $[[w]]$ and $[[\x.e]]$.
+Recall that the values in \cal consist of $[[w]]$ and $[[\x.e]]$.
 For first case, when $[[v]]$ is $[[w]]$ ($[[p:A]]$), beta value replaces the static type
 $[[A]]$ (from $[[p:A]]$) by $[[A1]]$ and returns $[[p:A1]]$.
 This is to keep the most specific type in the annotation, for beta-reduction.
@@ -637,8 +634,8 @@ of \emph{switch} expressions.
 \Rref{step-switch} reduces the case expression $[[e]]$.  
 \Rref{step-switchl} evaluates
 the left branch of the \emph{switch} expression if the dynamic type of $[[p]]$ is
-a subtype of type of left branch, while \rref{step-switchr} evaluates the right
-branch if type of $[[e]]$ is subtype
+a subtype of type of left branch. \Rref{step-switchr} evaluates the right
+branch if type of $[[e]]$ is a subtype
 of type of the right branch. The subtyping condition in 
 \rref{step-switchl,step-switchr} is important, as it provides
 flexibility for the value to have various subtypes of $[[A]]$ and $[[B]]$, instead
@@ -837,12 +834,9 @@ An equivalent formulation of disjointness is:
 The new disjointness definition (\Cref{def:union:disj1}) states that two
 types are disjoint if they do not have common ordinary subtypes.
 \emph{Ordinary types}, are essentially
-those types that are primitive, such as integers and functions. Formally,
-
-\drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
-\medskip
-
-\noindent Note that the dynamic types of (pre-)values in \name are always ordinary.
+those types that are primitive, such as integers and functions (see bottom
+of Figure~\ref{fig:inter:system} for a formal definition).
+The dynamic types of (pre-)values in \name are always ordinary.
 %Consequentely values with a dynamic type $A$ should have an ordinary subtype $B$,
 %such that $B <: A$. 
 %terms with bottom types cannot be reduced to values
