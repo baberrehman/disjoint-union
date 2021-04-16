@@ -151,7 +151,7 @@ However, they do not have a formal
 specification of disjointness. Instead they assume that some sound specification
 exists and that the axioms respect such specification.
 If some unsound axioms are given to their framework (say $[[Int * Int]]$) this
-would lead to a problematic algorithmic for checking disjointness.
+would lead to a problematic algorithm for checking disjointness.
 In our work we provide specifications for disjointness together
 with sound and complete algorithmic formulations.
 In addition, unlike us,
@@ -159,58 +159,36 @@ they do not study the semantics of disjoint switch expressions,
 although they mention some Ceylon examples using such expressions.
 
 \paragraph{Occurrence Typing}
-\bruno{This paragraph is very weak: it gives an incorrect explanation of occurrence typing, and it is not very comprehensive:
-  it cover the two works I pointed out (for starters), but nothing else. We may not need to cover much more, but
-  we need to make sure that we read some other work on occurrence typing to ensure that we are not missing something that is
-closely related.}
 Occurence typing or flow typing \cite{tobin2008design} specializes or refines 
-the type of variable in type test. For example, code example below elaborates occurance typing.
+the type of variable in a type test. For example, with occurrence typing we
+could have: 
 
 \begin{lstlisting}
-Int occurance(Int | String val) {
-  if (isInt(val)) { return val+1; }
+Int occurence(Int | String val) {
+  if (val is Int) { return val+1; }
   else { return toInt(val)+2; }
 }
 \end{lstlisting}
 
-\noindent Code example above takes an input variable \emph{val}
-of type $[[Int \/ String]]$. 
-\emph{If} condition checks if the \emph{val} is of $[[Int]]$ type.
-If the condition succeeds, it is safe to assume that \emph{val} is of $[[Int]]$ type.
-Function \emph{occurance} increments \emph{val} by 1 and returns in this case.
-Otherwise, it is safe to assume that \emph{val} is of $[[String]]$ type.
-Because type of \emph{val} is $[[Int \/ String]]$. If \emph{val} is not
-of $[[Int]]$ type, then the other option to consider is only $[[String]]$ type.
-We assume that incoming string is a valid representation of some integer
-and \emph{toInt(val)} converts string to integer.
-In this case, function \emph{occurance} increments \emph{val} by 2 and returns.
-Note that occurance typing is specializing the type of
-same existing variable \emph{val} in both cases above.
-Motivation to study occurance typing was to introduce typing in untyped calculi,
-which is a generic technique.
-Whereas, we particularly studied type-based switch expression
-with disjointness to preserve determinism.
-Occurance typing is further studied by \cite{tobin2010logical}
+\noindent In such code, \lstinline{val} initially has type $[[Int \/ String]]$. 
+The conditional checks if the \lstinline{val} is of type $[[Int]]$.
+If the condition succeeds, it is safe to assume that \lstinline{val} is of type $[[Int]]$,
+and the type of \lstinline{val} is refined in the branch to be \lstinline{Int}.
+Otherwise, it is safe to assume that \lstinline{val} is of type $[[String]]$, in the
+other branch (and the type is refined accordingly).
+The motivation to study occurrence typing was to introduce typing in dynamically
+typed languages.
+Occurrence typing was further studied by \cite{tobin2010logical},
 which resulted into the development of Typed Racket.
-\cite{castagna2019revisiting} studied occurance typing with more 
-set-theoratic types such as intersection types and negation types.
-He extended occurance typing to refine the type of
-generic expressions, not just variables. He also studied occurance typing
-together with gradual typing.
-
-%\citet{castagna2019revisiting} recently studied
-%occurence typing for set-theoretic types and allowed to have generic 
-%expressions in switch expression.
-
-\baber{will remove occurance typing text below.}
-Occurence typing is limmited to have variables, whereas \cal
-can have any arbitrary expression in switch expression
-\bruno{Do not confuse occurrence typing with a switch expression.
-  Occurrence typing is a technique that can be used when modelling case expressions for union types}.
-Also, occurence typing comes with an
-unrestricted typing construct for case expression
-\bruno{Again you're confusing things: occurrence typing != case expression:
-you could have our switch expression with occurrence typing,  but we chose not to.}.
+Variants of occurrence typing are nowadays employed in mainstream languages
+such as TypeScript or Flow.
+\cite{castagna2019revisiting} proposed a more general formulation of
+occurence typing. He extended occurrence typing to refine the type of
+generic expressions, not just variables. He also studied the combination
+with gradual typing. Occurrence typing provides an alternative
+means to eliminate union types using a first-match semantics. That is the
+order of the type tests determines the priority that is given to the various
+types being tested.
 
 \paragraph{Disjoint Intersection Types}
 \citet{pottinger1980type} and \citet{coppo1981functional} initially
@@ -221,20 +199,20 @@ have union types.  Disjoint intersection types were first
 studied by \citet{oliveira2016disjoint} in the $\lambda_{i}$ calculus
 to give a coherent calculus for intersection types with a merge
 operator. The notion of disjointness used in \cal, discussed in \Cref{sec:union},
-is inspired by the notion of disjointness of $\lambda_{i}$. In essence in
+is inspired by the notion of disjointness of $\lambda_{i}$. In essence,
 disjointness in \cal is the dual notion: while in $\lambda_{i}$ two types
 are disjoint if they only have top-like supertypes, in \cal two types
 are disjoint if they only have bottom-like supertypes.
 
-None of calculi with disjoint intersection types~\cite{} in the literature
+None of calculi with disjoint intersection types~\cite{oliveira2016disjoint,bi_et_al:LIPIcs:2018:9227,alpuimdisjoint} in the literature
 includes union types. One interesting discovery of our work is that the
 presence of both intersections and unions in a calculus can affect disjointness.
 In particular, as we have seen in Section~\ref{sec:inter}, adding intersection types
 required us to change disjointness. The notion of disjointness that was
 derived from $\lambda_{i}$ stops working in the presence of intersection types.
 Interestingly, a similar issue happens when union types are added to
-a calculus with disjoint intersection types. If disjointness of two types $A$
-and $B$ is defined to be that such types can only have top-like types,
+a calculus with disjoint intersection types. If disjointness of two types \lstinline{A}
+and \lstinline{B} is defined to be that such types can only have top-like types,
 then adding union types immediately breaks such definition.
 For example, the types $[[Int]]$ and $[[Bool]]$ are disjoint but, with union
 types, $[[Int \/ Bool]]$ is a common supertype that is not top-like.
@@ -256,19 +234,19 @@ then the two notions of disjointness must coexist in the calculus.
 This will be an interesting path of exploration for future work.
 
 \paragraph{Overloading}
-Union types also provide a kind of function overloading or ad-hoc
-polymorphism using the switch and type-based case analysis. Programmer
-may define the argument type to be union type of certain types. By
-type-based case analysis programmer may choose to execute diffent code
+Union types also provide a form of function overloading or ad-hoc
+polymorphism using the switch and type-based case analysis. A programmer
+may define the argument type to a union type. By
+using type-based case analysis, it is possible to execute different code
 for each specific type of input.  Intersection types have also been
 studied for function overloading. For example a function with type
 $[[Int -> Int /\ Bool -> Bool]]$ can take input values either of type
-$[[Int]]$ or $[[Bool]]$.  It returns either $[[Int]]$ or $[[Bool]]$
+$[[Int]]$ or $[[Bool]]$.  In such case, we return either $[[Int]]$ or $[[Bool]]$
 depending upon the input type.  Function overloading has been studied
 in detail in the literature by \cite{castagna1995calculus},
 \cite{cardelli1985understanding}, \cite{stuckey2005theory} among
-others.  \citet{wadler1989make} studied type classes for the
-overloading of arithmetic operators.
+others.  \citet{wadler1989make} studied type classes as an alternative way
+to provide overloading based on parametric polymorphism.
 
 %%% Local Variables:
 %%% mode: latex
