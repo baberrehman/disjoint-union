@@ -37,8 +37,7 @@ division function, as:
 
 \begin{lstlisting}
 function safediv (x : Int) (y : Int) : String | Int =
-  if (y == 0) then inj1 "Divided by zero"
-  else inj2 (x / y)
+  if (y == 0) then inj1 "Divided by zero" else inj2 (x / y)
 \end{lstlisting}
 
 \noindent Here the intention is to have a safe (integer) division operation that detects
@@ -103,8 +102,7 @@ B]]$, and thus we can model safe division as
 
 \begin{lstlisting}
 function safediv2 (x : Int) (y : Int) : String | Int =
-  if (y == 0) then "Divided by zero"
-  else (x / y)
+  if (y == 0) then "Divided by zero" else (x / y)
 \end{lstlisting}
 
 \noindent However, now elimination of union types cannot rely on tags anymore, and
@@ -130,9 +128,8 @@ this can be implemented by requiring \lstinline{show} to have an
 Then we can just write:
 
 \begin{lstlisting}
-function tostring2 (x: String | Int) : String =
-  switch (x)
-    y -> show y
+function tostring2 (x: String | Int) : String = switch (x)
+                                                  y -> show y
 \end{lstlisting}
 
 \noindent This implementation is concise, but it is also restrictive as it can no longer
@@ -153,10 +150,9 @@ systems~\cite{castagna:settheoretic} support
 \lstinline{x}.
 
 \begin{lstlisting}
-function tostring3 (x: String | Int) : String =
-  switch (x)
-    (y : String) -> y
-    (y : Int) -> show y
+function tostring3 (x: String | Int) : String = switch (x)
+                                                  (y : String) -> y
+                                                  (y : Int) -> show y
 \end{lstlisting}
 
 \noindent Note that here \lstinline{show} does not need to be overloaded,
@@ -172,20 +168,18 @@ assume \lstinline{Student} is a subtype of \lstinline{Person}. With tag-directed
 elimination, we can write the following function:
 
 \begin{lstlisting}
-function isstudent (x: Person | Student) : Bool =
-  switch (x)
-    inj1 person -> False
-    inj2 student -> True
+function isstudent (x: Person | Student) : Bool = switch (x)
+                                                     inj1 person -> False
+                                                     inj2 student -> True
 \end{lstlisting}
 
 \noindent But if we transform this function straightforwardly to type-directed
 elimination, we will get:
 
 \begin{lstlisting}
-function isstudent2 (x: Person | Student) : Bool =
-  switch (x)
-    (y : Person)  -> False
-    (y : Student) -> True
+function isstudent2 (x: Person | Student) : Bool = switch (x)
+                                                     (y : Person)  -> False
+                                                     (y : Student) -> True
 \end{lstlisting}
 
 \noindent Now it is unclear what would happen if we apply \lstinline{isstudent2}
@@ -313,14 +307,10 @@ the other where the second argument is an integer:
 
 \begin{lstlisting}
 String space(Integer n){
-	if (n==0) {
-		return "";
-	} else {
-		return " "+space(n-1);
-	}
+  if (n==0) { return ""; }
+  else { return " "+space(n-1); }
 }
-
-String padLeft(String v, String|Integer x){
+String padLeft(String v, String|Integer x) {
 	switch (x)
 	case (is String) { return x+v; }
 	case (is Integer) { return space(x)+v; }
@@ -347,11 +337,8 @@ in Ceylon:
 %
 \begin{lstlisting}
 String | Integer safediv3 (Integer x, Integer y){
-	if (y==0) {
-		return "Divided by zero";
-	} else{
-		return (x/y);
-	}
+  if (y==0) { return "Divided by zero"; }
+  else { return (x/y); }
 }
 \end{lstlisting}
 %
@@ -403,9 +390,9 @@ nullable. If we eliminate a value of type \lstinline{A|Null}, there has to be a
 branch to handle the null value. Note that \lstinline{Null} differs from
 \lstinline{Nothing} (the bottom type in Ceylon), in the sense that
 \lstinline{Null} is inhabited while \lstinline{Nothing} is not. To illustrate
-the subtle difference, the following diagram presents part of the subtyping
+the subtle difference, the diagram on the right presents part of the subtyping
 lattice in Ceylon. \lstinline{Anything}, the top type in Ceylon, is an
-enumerated class. \lstinline{Anything} has another distinct case called
+enumerated class. \lstinline{Anything} is also a supertype of
 \lstinline{Object}, which is the root of primitive types, function types, all
 interfaces and any user-defined class. Notably, \lstinline{Null} is disjoint to
 \lstinline{Object}, and therefore, to all these types.

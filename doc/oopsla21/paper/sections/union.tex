@@ -84,7 +84,7 @@ inference mode ($[[=>]]$) or the checking mode ($[[<=]]$).
     \centering
     \drules[s]{$ [[A <: B ]] $}{Subtyping}{top, bot, int, arrow, ora, orb, orc}
   \end{small}
-  \caption{Syntax and Subtyping for \cal.}
+  \caption{Syntax and subtyping for \cal.}
   \label{fig:union:syntax}
 \end{figure}
 
@@ -292,7 +292,7 @@ We illustrate this definition with a few examples:
     \centering
     \drules[ad]{$[[A * B]]$}{Algorithmic Disjointness}{btmr, btml, intl, intr, orl, orr}
   \end{small}
-  \caption{Algorithmic Disjointness for \cal.}
+  \caption{Algorithmic disjointness for \cal.}
   \label{fig:union:ad}
 \end{figure}
 \end{comment}
@@ -390,7 +390,7 @@ of $[[A]]$ are disjoint to subtypes of $[[B]]$:
     \centering
     \drules[typ]{$ [[G |- e dirflag A]] $}{Bi-directional Typing}{int, var, ann, app, sub, abs, switch}
   \end{small}
-  \caption{Bottom-Like types, Algorithmic Disjointness and Typing for \cal.}
+  \caption{Bottom-like types, algorithmic disjointness and typing for \cal.}
   \label{fig:union:disj-typ}
 \end{figure}
 
@@ -528,7 +528,7 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
       \hline
     \end{tabular} }
     \end{center}
-  \caption{Operational semantics, Beta Value and Dynamic Type definitions for \cal.}
+  \caption{Operational semantics, beta value and dynamic type definitions for \cal.}
   \label{fig:union:os}
 \end{figure}
 %\bruno{Don't introduce $[[e1]]$ and $C$ in rules step-beta, step-switchl and step-switchr.
@@ -550,19 +550,19 @@ Recall that the values in \cal consist of $[[w]]$ and $[[\x.e]]$.
 For first case, when $[[v]]$ is $[[w]]$ ($[[p:A]]$), beta value replaces the static type
 $[[A]]$ (from $[[p:A]]$) by $[[A1]]$ and returns $[[p:A1]]$.
 This is to keep the most specific type in the annotation, for beta-reduction.
-
-\snow{
+%
 Assuming we did not keep the dynamic type of lambdas, here we will not be able
 to know $[[A1]]$. And only using $[[A2]]$ may lead to ill-typed programs, like
 the following example:
-}
-
-\begin{verbatim}
-  (\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [ x~>1:Int ]
-  e ::= switch (x) {Char -> ... , Bool -> ...}
-\end{verbatim}
-
-Here we have a lambda that contains a switch expression to anaylze its input.
+\[
+  [[ (\x . e : Top -> Int : Int -> Int) (1:Int) ]]
+  [[-->]] [[ (\x . e : Int->Int) (1:Int) ]]
+  [[-->]] [[ e [ x~>1:Int ] ]]
+\]
+%
+We assume the lambda that contains a switch expression that anaylzes the function input.
+Say $[[e]]$ is $[[switch x Char e1 Bool e2]]$.
+It is acceptable because $[[x]]$ has type $[[Top]]$.
 The function expects an term of type top, but it is given a integer to.
 The switch expression $[[e]]$, if we subsititute $[[x]]$ in it by $[[1 : Int]]$
 it will be comes illegal because it has no branch dealt with an integer.
