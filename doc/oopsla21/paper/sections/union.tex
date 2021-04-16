@@ -605,8 +605,8 @@ In such case, substitution uses $[[\x.e:A2:A1]]$ as the value being substituted.
 %argument of a function is a non-annotated lambda expression.
 
 \Rref{step-ann}
-reduces an annotated expression only if it is not an annotated value and $[[e]]$
-reduces to some $[[e']]$. \Rref{step-rmann} drops inner
+reduces an annotated expression only if it is not a value.
+\Rref{step-rmann} drops inner
 annotations, while keeping the static type.
 \Rref{step-lamann} adds one more type annotation to
 lambda expressions with only single type annotation to make them values.
