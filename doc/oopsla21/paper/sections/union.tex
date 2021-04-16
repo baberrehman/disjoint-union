@@ -550,15 +550,16 @@ Recall that the values in \cal consist of $[[w]]$ and $[[\x.e]]$.
 For first case, when $[[v]]$ is $[[w]]$ ($[[p:A]]$), beta value replaces the static type
 $[[A]]$ (from $[[p:A]]$) by $[[A1]]$ and returns $[[p:A1]]$.
 This is to keep the most specific type in the annotation, for beta-reduction.
-
-\snow{
+%
 Assuming we did not keep the dynamic type of lambdas, here we will not be able
 to know $[[A1]]$. And only using $[[A2]]$ may lead to ill-typed programs, like
 the following example:
-}
-
+\[
+  [[ (\x . e : Top -> Int : Int -> Int) (1:Int) ]]
+  [[-->]] [[ (\x . e : Int->Int) (1:Int) ]]
+  [[-->]] [[ e [ x~>1:Int ] ]]
+\]
 \begin{verbatim}
-  (\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [ x~>1:Int ]
   e ::= switch (x) {Char -> ... , Bool -> ...}
 \end{verbatim}
 
