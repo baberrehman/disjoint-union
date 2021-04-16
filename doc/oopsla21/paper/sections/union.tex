@@ -561,7 +561,22 @@ type information to the arguments. Thus, the dynamic semantics
 needs to deal with such programs.
 In such case, substitution uses $[[\x.e:A2:A1]]$ as the value being substituted.
 
+\bruno{Regarding these comments, can you write something about them here Snow?}
+\snow{We didn't explain why lambdas have two annotation here. To select the right
+  branch, we don't need the dynamic type annotation of lambda. Moreover, it
+  keeps the preservation in beta reduction. Following are two example:}
 
+\begin{verbatim}
+  (\x . x 1 : (Int->Int)->Int: (Int->Int)->Int) (\x.x+1) --> (\x.x+1) 1
+
+  (\x . e : Top -> Int : Int -> Int) (1:Int) --> (\x . e : Int->Int) (1:Int) --> e [x~>1:Int]
+  e ::= switch (x) {Char -> ... , Bool -> ...}
+\end{verbatim}
+
+\snow{The first example shows if we don't add type annotation to the input for subsitutition
+we will reach ill-typed term.
+The second example shows we have to use the dynamic type instead of the static type of lambda.
+The expression $e [x->1:Int]$ was legal when x has type Top but becomes illegal when x has type Int.}
 
 
 
