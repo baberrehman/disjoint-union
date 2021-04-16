@@ -22,12 +22,19 @@ do not use labels and provide type-based union elimination.
 %a sound and deterministic union elimination construct for type-based
 %union elimination have been a challenge in research community.
 \end{comment}
-Union types were first studied in the setting of programming languages by
-\citet{macqueen1984ideal}, though the union elimination rule there is unsound in
-standard call-by-value operational semantics as pointed out by
-\cite{dunfield2003type}.
+The union type constructor was first introduced by \citet{macqueen1984ideal}.
+They proposed a typing rule that eliminates union implicitly.
+The rule breaks type preservation under
+the conventional reduction strategy of lambda calculus.
+\citet{barbanera1995intersection} solved the problem by reducing all
+copies of the same redex in parallel.
+\citet{dunfield2003type} took another approach to support
+mutable references. They restricted the typing rules to only allow single
+occurence of the subterm of union type in the typing expression.
 %Also, \citet{macqueen1984ideal} did not define dynamic
 %semantics.
+\snow{I think the following discussion can be more precise. I feel
+  dunfield2003type is very similar to dunfield2014elaborating.}
 Later, union types have been studied in the literature in various
 contexts. As discussed in \Cref{subsec:elimination},
 \citet{pierce1991programming} and \cite{dunfield2014elaborating} support
@@ -117,7 +124,7 @@ However, their underlying technique to select branches in case
 expression is different from ours.
 In particular, negation types play fundamental role in their
 typing construct for the case expressions.
-Whereas, our work relies on disjointness along with a notion of 
+Whereas, our work relies on disjointness along with a notion of
 static types to to select a particular branch.
 They also do not provide dynamic semantics for their source language.
 Whereas, we provide a type sound dynamic semantics for \cal.
@@ -128,25 +135,25 @@ Whereas, we provide a type sound dynamic semantics for \cal.
   on union types before this one, so I'm not sure why we are mentioning only this work
   of Castagna, instead of talking about previous work where the ideas were introduced.}
 \baber{Castagna's work includes CDuce, which is mentioned. I added semantic subtyping
-as well now. Should we add more Castagna's work? I think his above mentioned work 
+as well now. Should we add more Castagna's work? I think his above mentioned work
 is relevant to our work.}
 They give a dynamic type-based cast for union elimination. But they do not
 have disjointness constraint on case branches and they check the type
-only for first case branch\bruno{Not a very good explanation: you get negated types for the branches}. 
+only for first case branch\bruno{Not a very good explanation: you get negated types for the branches}.
 \end{comment}
 
 \citet{muehlboeck2018empowering} give a general framework for subtyping
 with intersection and union types. They illustrate the significance of
 their framework using the Ceylon programming language.
 The main objective of their work is to define a generic framework for
-deriving subtyping algorithms for  
+deriving subtyping algorithms for
 intersection and union types in the presence of various distributive subtyping rules.
 For instance, their framework could be useful to derive an algorithmic
 formulation for the subtyping relation presented in Figure~\ref{fig:discussion:ds}.
 They also briefly cover disjointness in their work. As part of their framework, they
 can also check disjointness given some disjointness axioms. For instance,
 for \name, such axioms could be similar to \rref{ad-mtmr} or \rref{ad-intl}
-in Figure~\ref{fig:union:disj-typ}. 
+in Figure~\ref{fig:union:disj-typ}.
 However, they do not have a formal
 specification of disjointness. Instead they assume that some sound specification
 exists and that the axioms respect such specification.
@@ -159,9 +166,9 @@ they do not study the semantics of disjoint switch expressions,
 although they mention some Ceylon examples using such expressions.
 
 \paragraph{Occurrence Typing}
-Occurence typing or flow typing \cite{tobin2008design} specializes or refines 
+Occurence typing or flow typing \cite{tobin2008design} specializes or refines
 the type of variable in a type test. For example, with occurrence typing we
-could have: 
+could have:
 
 \begin{lstlisting}
 Int occurence(Int | String val) {
@@ -170,7 +177,7 @@ Int occurence(Int | String val) {
 }
 \end{lstlisting}
 
-\noindent In such code, \lstinline{val} initially has type $[[Int \/ String]]$. 
+\noindent In such code, \lstinline{val} initially has type $[[Int \/ String]]$.
 The conditional checks if the \lstinline{val} is of type $[[Int]]$.
 If the condition succeeds, it is safe to assume that \lstinline{val} is of type $[[Int]]$,
 and the type of \lstinline{val} is refined in the branch to be \lstinline{Int}.
@@ -193,7 +200,7 @@ types being tested.
 \paragraph{Disjoint Intersection Types}
 \citet{pottinger1980type} and \citet{coppo1981functional} initially
 studied intersection types in programming languages
-literature. Forsythe~\cite{reynolds1988preliminary} is the first 
+literature. Forsythe~\cite{reynolds1988preliminary} is the first
 programming language to have intersection types, but it did not
 have union types.  Disjoint intersection types were first
 studied by \citet{oliveira2016disjoint} in the $\lambda_{i}$ calculus
@@ -230,7 +237,7 @@ be disjoint since we cannot find an common ordinary supertype (and $[[Int \/ Boo
 is a supertype, but it is not ordinary). Furthermore, there should be a
 dual notion to LOS, capturing the greatest ordinary supertypes. Moreover,
 if a calculus includes both disjoint switches and a merge operator,
-then the two notions of disjointness must coexist in the calculus. 
+then the two notions of disjointness must coexist in the calculus.
 This will be an interesting path of exploration for future work.
 
 \paragraph{Overloading}
