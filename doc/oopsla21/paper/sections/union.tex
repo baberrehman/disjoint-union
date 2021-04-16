@@ -506,25 +506,25 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
 %    \centering
 %    \drules[findtype]{$[[findtype p A]]$}{FindType}{int, arrow}
 %  \end{small}
-  \bigskip
+  %\bigskip
   %\begin{small}
   \begin{center}
   {\renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|llcl|}
+    \begin{tabular}{|lcl|}
+      \multicolumn{3}{c}{Beta Value $[[betavalue v A B]]$} \\
       \hline
-      Beta Value $[[betavalue v A B]]$ &  & & \\
-     & $[[betavalue p:A B C]]$ & = & $[[p:C]]$ \\
-     & $[[betavalue \x.e B C]]$ & = & $[[\x.e:B:C]]$ \\
+      $[[betavalue p:A B C]]$ & = & $[[p:C]]$ \\
+      $[[betavalue \x.e B C]]$ & = & $[[\x.e:B:C]]$ \\
       \hline
-    \end{tabular} } \\
+    \end{tabular} }
   \bigskip
   %\begin{small}
   {\renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|llcl|}
+    \begin{tabular}{|lcl|}
+      \multicolumn{3}{c}{Dynamic Type $[[statictype p]]$} \\
       \hline
-      Dynamic Type $[[statictype p]]$ &  & & \\
-     & $[[statictype i]]$ & = & $[[Int]]$ \\
-     & $\rceil [[\x.e: A -> B]] \lceil$ & = & $[[A -> B]]$ \\
+      $[[statictype i]]$ & = & $[[Int]]$ \\
+      $\rceil [[\x.e: A -> B]] \lceil$ & = & $[[A -> B]]$ \\
       \hline
     \end{tabular} }
     \end{center}
@@ -853,10 +853,10 @@ equivalent to the previous definition of disjointness
 (\Cref{def:union:disj}).
 
 \begin{lemma}[Disjointness Equivalence]
-A $*_{s}$ B $\Longleftrightarrow$ A $*_{s1}$ B.
+A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
 \end{lemma}
 
-Why do we introduce the new definition of disjointness? It turns out that
+\noindent Why do we introduce the new definition of disjointness? It turns out that
 \Cref{def:union:disj} is not sufficient when the calculus is extended with
 intersection types, as in Section~\ref{sec:inter}. We will see,
 \Cref{def:union:disj1} will play an important role in such variant of the calculus.
