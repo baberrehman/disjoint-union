@@ -34,9 +34,7 @@ disjoint types, we get the empty set.
 %Since $[[findsubtypes Int /\ A -> B]]$ returns empty set,
 %therefor \rref{s-disj} makes $[[Int /\ A -> B]]$ subtype of all types.
 Moreover, adding \rref{s-los} makes \rref{s-bot} redundant as well, since the LOS for
-the bottom type is also the empty set. Therefore \rref{s-bot} can safely be dropped without any
-loss of expressiveness. It is trivial to prove a lemma which says that $[[Bot]]$ type is
-subtype of all types. We drop \rref{s-bot} from the calculus discussed in \Cref{sec:inter}
+the bottom type is also the empty set. It is trivial to prove a lemma which says that $[[Bot]]$ is a subtype of all types. We drop \rref{s-bot} from the calculus discussed in \Cref{sec:inter}
 and prove \Cref{lemma:discussion:bls} to show this property instead:
 
 \begin{lemma}[Bottom Type Least Subtype]
@@ -70,10 +68,10 @@ intersection types and \rref{s-los}.
 \label{sec:inter:dist}
 
 Another interesting extension is to add distributive subtyping to \cal.
-Ceylon~\cite{muehlboeck2018empowering} employs an enriched 
-distributive subtyping relation that is based on the 
-B+ logic~\cite{routley1972semantics,van2000minimal}
-\bruno{ask Snow about this reference?}.
+Ceylon employs an enriched 
+distributive subtyping relation~\cite{muehlboeck2018empowering}
+that is based on the 
+B+ logic~\cite{routley1972semantics,van2000minimal}.
 Distributive subtyping is more expressive and accomodates more programs than what we discussed in
 \Cref{sec:union,sec:inter}. Here we add distributive subtyping in the variant of \cal with
 intersection types. 
@@ -81,14 +79,13 @@ intersection types.
 \paragraph{Distributive subtyping relation.}
 \Cref{fig:discussion:ds} shows a declarative version of distributive subtyping for
 \cal with intersection types.
-This subtyping relation is declarative as it includes axioms for subtyping reflexivity (\rref{ds-refl}) and
+The subtyping relation includes
+axioms for subtyping reflexivity (\rref{ds-refl}) and
 subtyping transitivity (\rref{ds-trans}). \Rref{ds-top,ds-btm,ds-int,ds-arrow,ds-ora} have been
 discussed in \Cref{sec:union}. \Rref{ds-anda} has been discussed in \Cref{sec:inter}.
 \Rref{ds-orb,ds-orc} state that a subpart of a union type is a subtype of whole union type.
 \Rref{ds-andb,ds-andc} state that intersection type $[[A1 /\ A2]]$ is a subtype of both $[[A1]]$
-and $[[A2]]$ separately.\bruno{Snow can't we drop some of the distributivity rules? Some of them
-are redundant, right?}
-\baber{We dropped 3 rules in figure 6.}
+and $[[A2]]$ separately.
 
 \Rref{ds-distarr} distributes function types over intersection types.
 It states that $[[(A -> B1) /\ (A -> B2)]]$ type is subtype of
@@ -143,14 +140,6 @@ and these definitions are just the same as those discussed in \Cref{sec:inter}.
 
 \subsection{Disjointness in Ceylon}
 \label{sec:discussion:ceylon}
-
-\ningning{I think this part is actually important. When we say Ceylon doesn't
-  study the feature formally, we should also point out whether our formal study
-  fits the Ceylon implementation or how it differs. So I would say we should
-  keep this section.}
-
-In this subsection
-we briefly compare the disjointness provided by Ceylon with our disjointness definition.
 \begin{comment}
 \ningning{A similar example is used in the overview. Maybe we want to be
   consistent with the examples.}
@@ -181,47 +170,30 @@ Ceylon does not provide
 a formal disjointness definition.
 The Ceylon specification does, however, provide English descriptions
 for disjointness. 
-
 We compare some of those descriptions with
 the disjointness definition in \cal. Ceylon has 14 different points describing
 disjointness, but some of these are quite language specific. For instance, talking
 about disjointness for some of important classes and primitive types in Ceylon.
-We pick 5 points next which are quite general, and they can be related to our
-own definitions of disjointness. The following 5 points are copied from the
-Ceylon specification\footnote{\url{https://ceylon-lang.org/documentation/1.3/spec/html_single/}}.
+We pick 3 points next, copied from the
+Ceylon specification\footnote{\url{https://ceylon-lang.org/documentation/1.3/spec/html_single/}}, which are quite general and they can be related to our
+own definitions of disjointness. 
 According to the specification, two types X and Y are disjoint when:
 
 \begin{enumerate}
-  \item{X is a subtype of a type A and Y is a subtype of a type B, where A and B are distinct cases of an enumerated type}
   \item{X and Y are both classes and X is not a subclass of Y and Y is not a subclass of X}
   \item{X is a union type $[[A \/ B]]$ and both Y and A are disjoint and Y and B are disjoint}
-  \item{X is an enumerated type with cases A1|A2|... and for every case Ai of X, Y and Ai are disjoint}
   \item{X is an intersection type $[[A/\B]]$ and either Y and A are disjoint or Y and B are disjoint}
 \end{enumerate}
-\bruno{Did you cut some text in point 5? You finssh the sentence with ``or''.}
-\baber{I droppped or, it refers to next point in documentation
-which is about generic type and intersections.}
 
-\noindent All these points are trivially covered by our formal disjointness \Cref{def:inter:disj}.
-\bruno{Since there are only 5 points, instead of just picking 2 points next, talk about all
-the 5 points and explain how they relate. You should give a few more details next.}
-\baber{I think we should drop point 1 and 4. They are not directly related to our calculus.
-or shall we relate enumerated types with intersection types in our calculus? But if we do that
-then there is point 3 that talks about union types separately.}
-For example, (2) is one specific case of \Cref{def:inter:disj}.\bruno{I guess what you may
-  want to say is that we can prove something like: $not (A <: B)$ and $not (B <: A)$ implies $A * B$?
-You can make a stronger point by proving this lemma and show it here.}
-\baber{I doubt if this property hold in our calculus. For example,
-A = (Char $\wedge$ Bool) $\vee$ Int, B = (String $\wedge$ Float) $\vee$ Int.
-A and B are not subtypes of each other.
-But they do share an ordinary subtype Int.
-I think this is the counter example, considering Float and Int are non-overlapping types?}
-When both types $[[A]]$ and
-$[[B]]$ are not subtypes of each other, they naturally do not share any common ordinary subtype.
-\baber{I added text for point 3 below.}
-Point (3) is essentially the algorithmic
+\noindent
+Point (1) is one specific case of \Cref{def:inter:disj}.
+When two types X and Y are not subtypes of each other, they naturally do not share any common ordinary subtype.
+Point (2) is essentially the algorithmic
 rule for union disjointness (\rref{ad-orl} in Section~\ref{sec:union}) in \cal.
-Point (5) is also a specific case of \Cref{def:inter:disj}.
+Point (3) corresponds to the following lemmas that can be proved
+for the disjointness specification of \name with intersection types:
+
+\begin{comment}
 When a component type (either $[[A]]$ or $[[B]]$) of an intersection type $[[A /\ B]]$
 is disjoint to some type $[[C]]$. Then that specific
 component type (either $[[A]]$ or $[[B]]$) and type $[[C]]$ 
@@ -237,12 +209,13 @@ is disjoint to $[[Bool]]$.
 Following \Cref{def:inter:disj}, $[[Int]]$ and $[[Bool]]$ do not share any
 ordinary subtype and so $[[Int /\ Top]]$ and $[[Bool]]$.
 We show this property with following two lemmas in \name:
+\end{comment}
 
 \begin{lemma}[Left Component Type in Intersection Type Disjoint]
   If $[[A *s C]]$ then $[[(A /\ B) *s C]]$.
 \label{lemma:discussion:comp:left:inter}
 \end{lemma}
-
+\vspace{-15pt}
 \begin{lemma}[Right Component Type in Intersection Type Disjoint]
   If $[[B *s C]]$ then $[[(A /\ B) *s C]]$.
 \label{lemma:discussion:comp:right:inter}
