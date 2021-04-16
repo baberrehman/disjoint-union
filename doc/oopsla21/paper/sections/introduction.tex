@@ -2,13 +2,13 @@
 \label{sec:intro}
 
 Most programming languages support some mechanism to express terms
-with alternative types. Algol 68~\cite{} included a form of
+with alternative types. Algol 68~\cite{van1969report,van2012revised} included a form of
 \emph{tagged} unions for this purpose. With tagged unions
 an explicit tag distinguishes between different cases in the
 union type.
 Such an approach has been adopted by functional languages, like Haskell, ML, or
-OCaml, which allow tagged unions (or sum types~\cite{}), typically via
-either \emph{algebraic datatypes}~\cite{} or \emph{variant types}~\cite{}.
+OCaml, which allow tagged unions (or sum types~\cite{cartwright1991soft}), typically via
+either \emph{algebraic datatypes}~\cite{hope} or \emph{variant types}~\cite{garrigue98}.
 Languages like C or C++ support \emph{untagged} union types where
 values of the alternative types are simply stored at the same memory
 location. However, there is no checking of types when accessing values of
@@ -16,8 +16,8 @@ such untagged types. Thus, it is up to the programmer to ensure that the proper
 values are accessed correctly in different contexts. Otherwise the
 program may produce errors by accessing the value at the incorrect type.
 
-Modern OOP languages, such as Scala~\cite{}, Flow~\cite{},
-TypeScript~\cite{} or Ceylon~\cite{} support a form
+Modern OOP languages, such as Scala~\cite{odersky2004overview}, Flow~\cite{chaudhuri2015flow},
+TypeScript~\cite{bierman2014understanding} or Ceylon~\cite{king2013ceylon} support a form
 of untagged union types.
 In such languages a union type $[[A \/ B]]$ denotes expressions which can have type
 $[[A]]$ or type $[[B]]$. Union types can be useful in many situations.
@@ -35,8 +35,9 @@ To safely access values with union types, some form of
 this is typically done by employing a language construct that checks
 the types of the values at runtime, and acts as the elimination
 construct. Several elimination constructs for (untagged) union types
-have also been studied in the research literature~\cite{}. Typically,
-such constructs take the form of a type-based case analysis
+have also been studied in the research literature~
+\cite{benzaken2003cduce,dunfield2014elaborating,castagna:settheoretic}.
+Typically, such constructs take the form of a type-based case analysis
 expression.
 
 A complication is that the presence of subtyping introduces the
@@ -58,7 +59,8 @@ commonly used for overloading, is to employ a \emph{best-match
   semantics}, where we attempt to find the case with the type that
 best matches the value. Yet another option is to employ a
 \emph{first-match semantics}, which employs the order of the branches
-in the case. Various existing elimination constructs for unions~\cite{}
+in the case. Various existing elimination constructs for unions
+~\cite{benzaken2003cduce,castagna:settheoretic}
 employ a first-match approach. All of these three options have been explored
 and studied in the literature. 
 
@@ -127,7 +129,7 @@ of that work is on algorithmic formulations of subtyping
 with unions types, intersection types and various distributivity
 rules for subtyping. No semantics of the switch construct is given.
 Disjointness is informally defined in various sentences in the
-Ceylon documentation. It involves a set of 14 rules described in English\footnote{\url{http://web.mit.edu/ceylon_v1.3.3/ceylon-1.3.3/doc/en/spec/html_single}}. Some of the rules are relatively generic, while
+Ceylon documentation. It involves a set of 14 rules described in English\footnote{\url{http://web.mit.edu/ceylon_v1.3.3/ceylon-1.3.3/doc/en/spec/html_single/\#disjointtypes}}. Some of the rules are relatively generic, while
 others are quite language specific. 
 Interestingly, a notion
 of disjointness has been already studied in the literature
