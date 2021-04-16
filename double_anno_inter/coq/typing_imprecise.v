@@ -1238,12 +1238,12 @@ Lemma imprecise_lemma21 : forall e v v1,
     inverts H.
     assert (wexpr (e_ann (e_str s) t_str)) by auto.
     contradiction.
-  - 
+  - inverts red.
     inverts erase.
     eapply multi_step; eauto.
     eapply multi_refl.
-    inverts erase. admit.
-    inverts H. admit. admit.
+    inverts erase.
+    
     admit.
   - inverts red.
     inverts erase.
