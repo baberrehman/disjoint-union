@@ -1,17 +1,8 @@
 Require Import TLC.LibLN.
-Require Import syntax_imprecise.
+Require Import syntax.
 
 (*
-This file is created on April 14, 2021
-
-syntax_imprecise.v is the syntax file for this semantics
-
-This file contains type safety and deterministic lemmas
-associated with syntax_imprecise.v
-
-Bool and String primitive type
-
-Removed top from ordinary types
+This file is created on April 15, 2021
 
 April 06, 2021:
 --------------
@@ -20,58 +11,15 @@ April 06, 2021:
 
 April 09, 2020:
 ---------------
--> extended from typing_wvalue.v
+-> extended from typing_wvalue_no_gen_sub.v
 -> step-beta updated
 -> changeanno inductive changed to changeanno definition
 
-April 14, 2020:
+April 15, 2020:
 ---------------
 -> extended from typing_wvalue_beta.v
--> Imprecise semantics
+-> general subtyping rule dropped
 *)
-
-(** definitions *)
-
-(* defns PreValue *)
-Inductive pexpr : exp -> Prop :=    (* defn pexpr *)
- | pexpr_int : forall i5,
-     pexpr (e_lit i5)
- | pexpr_bool : forall b,
-     pexpr (e_bool b)
- | pexpr_str : forall s,
-     pexpr (e_str s)
- | pexpr_abs : forall (e:exp) (A B:typ),
-     lc_exp (e_abs e) ->
-     pexpr (e_ann  ( (e_abs e) )  (t_arrow A B)).
-
-(* defns wexpr *)
-Inductive wexpr : exp -> Prop :=    (* defn wexpr *)
- | wexpr_pexpr : forall (p:exp) (A:typ),
-     pexpr p ->
-     wexpr (e_ann p A).
-
-(* defns value *)
-Inductive value : exp -> Prop :=    (* defn value *)
- | val_wexpr : forall (e:exp),
-     wexpr e ->
-     value e
- | val_abs : forall (L:vars) e,
-    (forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e (e_var_f x) )  )  ->
-     value (e_abs e).
-
-(* defns FindType *)
-Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
- | findtype_int : forall i5,
-     findtype (e_lit i5) t_int
- | findtype_bool : forall b,
-     findtype (e_bool b) t_bool
- | findtype_str : forall s,
-     findtype (e_str s) t_str
- | findtype_arrow : forall (e:exp) (A B:typ),
-     lc_exp (e_abs e) ->
-     findtype  ( (e_ann  ( (e_abs e) )  (t_arrow A B)) )   (t_arrow A B).
-
-Hint Constructors pexpr wexpr value findtype : core.
 
 (* defns changeanno *)
 Definition changeanno (v:exp) (A:typ) (B:typ) :=    (* defn changeanno *)
@@ -80,6 +28,7 @@ Definition changeanno (v:exp) (A:typ) (B:typ) :=    (* defn changeanno *)
    | (e_abs e)   => (e_ann (e_ann (e_abs e) A) B)
    | _           => v
  end.
+
 
 (* defns Typing *)
 Inductive typing : env -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
@@ -167,7 +116,6 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
 where "e --> e'" := (step e e') : env_scope.
 
 Hint Constructors typing step : core.
-
 
 (** Gathering free names already used in the proofs *)
 
@@ -614,7 +562,6 @@ Proof.
       forwards*: typing_through_subst_ee.
       rewrite* (@subst_ee_intro y).
       unfold changeanno. forwards*: typing_regular.
-      inversion H3.
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
@@ -679,9 +626,6 @@ Proof.
   clear st. gen_eq E: (@empty typ).  gen U1 U2.
   induction Typ; introv EQT EQE;
    try solve [ inverts* Val | inversion EQT | eauto ].
-  - inverts EQT. inverts H0.
-  - inverts EQT. inverts H0.
-  - inverts EQT. inverts H0.
   - subst. assert (B <: (t_arrow U1 U2)). {
     eapply sub_transitivity. apply H. apply EQT. }
     eapply IHTyp. apply Val. apply H0. auto.
@@ -798,11 +742,11 @@ inductions Typ; intros EQ; subst.
    * inverts* H.
     inverts* H1. inverts Typ1. inverts H.
     (*i infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
+    inverts H3. inverts H. inverts H1.
     (*b infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
+    inverts H3. inverts H. inverts H1.
     (*s infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
+    inverts H3. inverts H. inverts H1.
     (*step-beta*)
     exists* (e_ann (e_ann (open_exp_wrt_exp e (changeanno e2 A A0)) B0) B).
     inverts Typ1.
@@ -1027,335 +971,4 @@ Proof.
         forwards*: H18.
         unfold not in H1.
         forwards*: H1.
-Qed.
-
-(*********************************
- Imprecise semantics starts here
-**********************************)
-
-(* defns imprecise value *)
-Inductive ivalue : exp -> Prop :=    (* defn value *)
- | ival_wexpr : forall (e:exp),
-     pexpr e ->
-     ivalue e
- | ival_abs : forall (L:vars) e,
-    (forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e (e_var_f x) )  )  ->
-    ivalue (e_abs e).
-
-Hint Constructors ivalue : core.
-
-(* defns imprecise changeanno *)
-Definition ichangeanno (v:exp) (C:typ) :=    (* defn changeanno *)
- match v with
-   | e_lit i5    => e_lit i5
-   | e_bool b    => e_bool b
-   | e_str s     => e_str s
-   | e_ann (e_abs e) (t_arrow A B) => e_ann (e_abs e) (t_arrow A B)
-   | (e_abs e)   => e_ann (e_abs e) C
-   | _           => v
- end.
-
-(* defns imprecise Reduction *)
-Reserved Notation "e ~~> e'" (at level 80).
-Inductive istep : exp -> exp -> Prop :=    (* defn step *)
- | istep_appl : forall (e1 e2 e1':exp),
-     lc_exp e2 ->
-     e1 ~~> e1' ->
-     (e_app e1 e2) ~~> (e_app e1' e2)
- | istep_appr : forall (v e e':exp),
-     pexpr v ->
-     e ~~> e' ->
-     (e_app v e) ~~> (e_app v e')
- | istep_beta : forall (e:exp) (A B:typ) (v:exp),
-     lc_exp (e_abs e) ->
-     value v ->
-     (e_app (e_ann (e_abs e)  (t_arrow A B)) v) ~~> (e_ann (open_exp_wrt_exp e (ichangeanno v A)) B)
- | istep_ann : forall (e:exp) (A:typ) (e':exp),
-     e ~~> e' ->
-     (e_ann e A) ~~> (e_ann e' A)
- | istep_rm_ann : forall (p:exp) (A:typ),
-     pexpr p ->
-     (e_ann p A) ~~> p
- | istep_typeof : forall (e:exp) (A:typ) (e1:exp) (B:typ) (e2 e':exp),
-     lc_exp (e_typeof e A e1 B e2) ->
-     e ~~> e' ->
-     (e_typeof e A e1 B e2) ~~> (e_typeof e' A e1 B e2)
- | istep_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
-     lc_exp (e_typeof p A e1 B e2) ->
-     pexpr p ->
-     findtype p C ->
-     subtyping C A ->
-     e_typeof p A e1 B e2 ~~>  (open_exp_wrt_exp e1 (e_ann p A) )
- | istep_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
-    lc_exp (e_typeof p A e1 B e2) ->
-     pexpr p ->
-     findtype p C ->
-     subtyping C B ->
-     e_typeof p A e1 B e2 ~~> (open_exp_wrt_exp e2 (e_ann p B) )
-where "e ~~> e'" := (istep e e') : env_scope.
-
-Hint Constructors istep : core.
-
-(*****************************
-Imprecise semantics ends here
-******************************)
-
-(*
-Properties of semantics and imprecise semantics
-*)
-
-Lemma imprecise_lemma1 : forall e e', e --> e' ->
-(exists v, ivalue v -> e = v) \/ (e ~~> e').
-Proof.
-    intros e e' red.
-    inductions red; eauto.
-Qed.
-
-Definition relation (X : Type) := X -> X -> Prop.
-
-Inductive multi {X : Type} (R : relation X) : relation X :=
-  | multi_refl : forall (x : X), multi R x x
-  | multi_step : forall (x y z : X),
-                        R x y ->
-                        multi R y z ->
-                        multi R x z.
-
-Notation " t '-->*' t' " := (multi step t t') (at level 40).
-Notation " t '~~>*' t' " := (multi istep t t') (at level 40).
-
-(* defns erase value *)
-Definition erasevalue (v:exp) :=    (* defn erasevalue *)
- match v with
-   | (e_ann (e_lit i5) A) => (e_lit i5)
-   | (e_ann (e_bool b) A) => (e_bool b)
-   | (e_ann (e_str s) A) => (e_str s)
-   | (e_ann (e_ann (e_abs e) (t_arrow A1 B1)) A) => (e_ann (e_abs e) (t_arrow A1 B1))
-   | _           => v
- end.
-
-Inductive erasevalue1 : exp -> exp -> Prop :=
-  | erase_pexpr : forall p A,
-            pexpr p ->
-            erasevalue1 (e_ann p A) p
-  | erase_lam   : forall e,
-            erasevalue1 (e_abs e) (e_abs e).
-
-Lemma imprecise_lemma2 : forall e v, e -->* v -> e ~~>* erasevalue v.
- Proof.
-  intros e v red.
-  lets red': red.
-  induction e.
-  - inverts red. simpl.
-    eapply multi_refl; eauto.
-    inversion H.
-  - inverts red. simpl.
-    eapply multi_refl; eauto.
-    inverts H.
-  - inverts red. simpl.
-    eapply multi_refl; eauto.
-    inverts H.
-    inverts H0.
-    simpl.
-    eapply multi_refl; eauto.
-    inverts* H.
-    assert (wexpr (e_ann (e_lit n) t_int)) by auto.
-    contradiction.
-  - inverts red. simpl.
-    eapply multi_refl; eauto.
-    inverts H.
-    inverts H0.
-    simpl.
-    eapply multi_refl; eauto.
-    inverts* H.
-    assert (wexpr (e_ann (e_bool b) t_bool)) by auto.
-    contradiction.
-  - inverts red. simpl.
-    eapply multi_refl; eauto.
-    inverts H.
-    inverts H0.
-    simpl.
-    eapply multi_refl; eauto.
-    inverts* H.
-    assert (wexpr (e_ann (e_str s) t_str)) by auto.
-    contradiction.
-  - inverts red.
-    admit.
-    admit.
-  - inverts red.
-    simpl.
-    eapply multi_refl; eauto.
-    inversion H.
-  - inverts red.
-    simpl.
-    eapply multi_refl; eauto.
-    admit.
-  - inverts red.
-    simpl.
-    eapply multi_refl; eauto.
-    inverts H.
-    admit.
-    admit.
-    admit.
-Admitted.
-
-Lemma imprecise_lemma21 : forall e v v1 A dir,
-  typing empty e dir A ->
-  e -->* v ->
-  erasevalue1 v v1 -> 
-  e ~~>* v1.
- Proof.
-  intros e v v1 A dir typ red erase. gen v1.
-  inductions e; intros.
-  - inverts red.
-    inverts erase.
-    inversion H.
-  - inverts red.
-    inverts erase.
-    inverts H.
-  - inverts red.
-    inverts erase.
-    inverts H.
-    inverts H0.
-    inverts erase.
-    eapply multi_refl.
-    inverts H.
-    assert (wexpr (e_ann (e_lit n) t_int)) by auto.
-    contradiction.
-  - inverts red.
-    inverts erase.
-    inverts H.
-    inverts H0.
-    inverts erase.
-    eapply multi_refl.
-    inverts H.
-    assert (wexpr (e_ann (e_bool b) t_bool)) by auto.
-    contradiction.
-  - inverts red.
-    inverts erase.
-    inverts H.
-    inverts H0.
-    inverts erase.
-    eapply multi_refl.
-    inverts H.
-    assert (wexpr (e_ann (e_str s) t_str)) by auto.
-    contradiction.
-  - inverts red.
-    inverts erase.
-    eapply multi_step; eauto.
-    eapply multi_refl.
-    inverts erase.
-    admit.
-    admit.
-  - inverts red.
-    inverts erase.
-    eapply multi_refl.
-    inversion H.
-  - inverts typ.
-    inverts* H2.
-    apply binds_empty_inv in H0. inversion H0.
-    inverts erase.
-    eapply multi_step in H; eauto.
-    inverts H.
-    inductions H.
-    inverts H0.
-    inverts erase.
-    inverts H.
-    admit.
-    admit.
-    admit.
-  - admit.
-Admitted.
-     
-Lemma itype_safety : forall e e' dir T,
-typing empty e dir T ->
-e ~~> e' ->
-(ivalue e') /\ (exists B, typing empty e' dir B /\ B <: T)
-\/ (exists e'', e' ~~> e'').
-Proof.
-introv Typ red. gen_eq E: (@empty typ). lets Typ': Typ.
-inductions Typ; intros EQ; subst.
-(*case int*)
- - inversion red.
- (*case bool*)
- - inversion red.
- (*case string*)
- - inversion red.
- (*case var*)
- - apply binds_empty_inv in H0. inversion H0.
- (*case anno*)
- - inverts red.
-   destruct* IHTyp.
-   admit.
-   destruct H.
-   destruct H0. destruct H0.
-   inverts H0.
-   left. split*. exists B.
-   split*.
-   eapply sub_transitivity; eauto.
-   left. split*.
-   inverts Typ. exists B. split*.
-   inversion H2. inversion H2.
-(*case typ-app*)
- - inverts red. 
-  destruct* IHTyp1.
-  destruct* IHTyp2.
-   * inverts* H.
-    inverts* H1. inverts Typ1. inverts H.
-    (*i infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
-    (*b infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
-    (*s infers arrow*)
-    inverts H3. inverts H. inverts H1. inverts H.
-    (*step-beta*)
-    exists* (e_ann (e_ann (open_exp_wrt_exp e (changeanno e2 A A0)) B0) B).
-    inverts Typ1.
-    (*case step-appr*)
-   * destruct H0.
-     destruct H.
-   { exists* (e_app e x). }
-   { inverts Typ1. }
-   (*case step-appl*)
-  + destruct H. 
-    exists (e_app x e2). apply* step_appl.
-    forwards*: typing_regular Typ2.
-(*case typ-sub*)
- - destruct~ IHTyp.
-(*case typ-abs*)
- - left. forwards*: typing_regular Typ'.
-   destruct~ H1. inverts* H2.
-(*case typ-typeof*)
- - right. destruct* IHTyp.
-  + inverts H4. inverts H5. 
-    apply check_pexpr_ann in Typ; auto.
-    eapply check_or_typ in Typ; eauto.
-    destruct Typ.
-   * forwards*: pexpr_inf_typ H4.
-     destruct H6 as [S [H41 H51]].
-     exists (open_exp_wrt_exp e1 (e_ann p A)).
-     pick_fresh y.
-     assert (y \notin L) by auto.
-     lets: H y H6.
-     eapply step_typeofl with (C:=S); eauto.
-     forwards*: typing_regular Typ'.
-     inverts H5; inverts* H41.
-     inversion H4. 
-     inverts H4. eauto. inversion H4.
-   * forwards*: pexpr_inf_typ H4.
-     destruct H6 as [S [H41 H51]].
-     exists (open_exp_wrt_exp e2 (e_ann p B)).
-     pick_fresh y.
-     assert (y \notin L) by auto.
-     lets: H1 y H6.
-     eapply step_typeofr with (C:=S); eauto.
-     forwards*: typing_regular Typ'.
-     inverts H5; inverts* H41.
-     inversion H4.
-     inverts H4. eauto.
-     inversion H4.
-   * inverts Typ. inversion H4.
-  + destruct H4.
-     exists (e_typeof x A e1 B e2).
-     apply step_typeof; auto.
-     forwards*: typing_regular Typ'.
 Qed.

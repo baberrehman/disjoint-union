@@ -17,23 +17,46 @@ our calculus. Organization of folders is:
 |------------------|----------------------------------------------|--------------------------|
 
 
-Each folder further has two files, namely syntax.v and typing.v.
+Organization within each folder is as follows:
 
-------
-syntax.v:
-------
-This file defines syntax of the calculus and disjointness properties
-
--------
-typing.v:
--------
-This file contains semantics and properties related to type-safety.
-typing.v depends upon syntax.v.
+======
+union
+======
+syntax.v contains syntax of the respective calculus and disjointness properties.
+typing.v contains semantics and properties related to type-safety.
+1) typing.v depends upon syntax.v.
 
 
-------------
+===========
+union-inter
+===========
+syntax.v contains syntax of the respective calculus and disjointness properties.
+typing.v contains semantics and properties related to type-safety.
+1) typing.v depends upon syntax.v.
+
+
+=================
+general-subtyping
+=================
+syntax.v contains syntax of the respective calculus and disjointness properties.
+typing.v contains semantics and properties related to type-safety.
+1) typing.v depends upon syntax.v.
+
+
+==============
+distributivity
+==============
+equivalence.v contains distributive subtyping.
+syntax.v contains syntax of the respective calculus and disjointness properties.
+typing.v contains semantics and properties related to type-safety.
+1) syntax.v depends upon equivalence.v.
+2) typing.v depends upon syntax.v and equivalence.v.
+3) equivalence.v depends upon LibTactics.v.
+
+
+============
 Dependencies
-------------
+============
 
 
 Coq Version:
