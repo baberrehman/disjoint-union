@@ -28,22 +28,12 @@ The rule breaks type preservation under
 the conventional reduction strategy of lambda calculus.
 \citet{barbanera1995intersection} solved the problem by reducing all
 copies of the same redex in parallel.
-\citet{dunfield2003type} took another approach to support
-mutable references. They restricted the typing rules to only allow single
-occurence of the subterm of union type in the typing expression.
-%Also, \citet{macqueen1984ideal} did not define dynamic
-%semantics.
-\snow{I think the following discussion can be more precise. I feel
-  dunfield2003type is very similar to dunfield2014elaborating.}
-Later, union types have been studied in the literature in various
-contexts. As discussed in \Cref{subsec:elimination},
-\citet{pierce1991programming} and \cite{dunfield2014elaborating} support
-single-branch elimination. However, as both calculi support intersection types,
-with single-branch elimination the system can also be used to support form of
-overloading. \citet{pierce1991programming} does not give the dynamic semantics.
-On the other hand, \cite{dunfield2014elaborating} provides
-a nondeterministic dynamic semantics, which can give different
-results when eliminating union types.
+\citet{dunfield2014elaborating} took another approach to support
+mutable references. They restricted the typing rule to only allow single
+occurrence of the subterm of union type in the typing expression.
+\citet{pierce1991programming} proposed a novel single-branch case construct
+for unions. As pointed out by \citet{dunfield2003type}, compared to the single
+occurrence approach, the only effect of it is to make the elimination explicit.
 \begin{comment}
 Moreover, while \citet{dunfield2014elaborating} shows that
 subtyping is not necessary for elaboration, it is not obvious how to generalize
@@ -167,12 +157,11 @@ although they mention some Ceylon examples using such expressions.
 
 \paragraph{Occurrence Typing}
 Occurence typing or flow typing \cite{tobin2008design} specializes or refines
-the type of variable in a type test. For example, with occurrence typing we
-could have:
+the type of variable in a type test. For example, code with occurrence typing:
 
 \begin{lstlisting}
-Int occurence(Int | String val) {
-  if (val is Int) { return val+1; }
+Integer occurence(Integer | String val) {
+  if (val is Integer) { return val+1; }
   else { return toInt(val)+2; }
 }
 \end{lstlisting}
@@ -228,7 +217,7 @@ we can use the following definition of disjointness:
 
 \begin{definition}
 \label{def:related:disj}
-  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\rightarrow$ \ $\neg$ \ ($[[A <: C]]$ and $[[B <: C]]$).
+  A $*_s$ B $\Coloneqq$ $\forall$ C, \ $[[ordinary C]]$ \ $\Longrightarrow$ \ $\neg$ \ ($[[A <: C]]$ and $[[B <: C]]$).
 \end{definition}
 
 \noindent which is, in essence, the dual notion of the definition presented in

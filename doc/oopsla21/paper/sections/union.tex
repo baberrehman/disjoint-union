@@ -32,7 +32,7 @@ type.
 %Details of \typeof expression will further be discussed in typing
 %and operational semantics sections.
 
-\paragraph{Values, pre-values and annotated values}
+\paragraph{Values and pre-values}
 
 In \name there are two kinds of values ($[[v]]$): annotated values $[[w]]$; and unannotated
 lambda expressions ($[[\x.e]]$). In annotated values, which have the form $[[p
@@ -270,14 +270,15 @@ We illustrate this definition with a few examples:
     $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types, since again all common subtypes are bottom-like.
     In general, the type $[[Bot]]$ (or any bottom-like type)
     is disjoint to any other type.
-  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int]]:}$ \\
-        $[[Int]]$ and $[[Int]]$ are not disjoint types because they share a common subtype $[[Int]]$ which
-        is not \emph{bottom-like}. In general, one type is not disjoint with
-        itself, unless it is bottom-like.
+%  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int]]:}$ \\
+%        $[[Int]]$ and $[[Int]]$ are not disjoint types because they share a common subtype $[[Int]]$ which
+%        is not \emph{bottom-like}. In general, one type is not disjoint with
+%        itself, unless it is bottom-like.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
         $[[Int]]$ and $[[Top]]$ are not disjoint types because they share a common
     subtype $[[Int]]$ which is not \emph{bottom-like}. In general no type
     is disjoint to $[[Top]]$, except for bottom-like types.
+    Also, one type is not disjoint with itself, unless it is bottom-like.
   \item $\boldsymbol{A = [[Int -> Bool]], \ B = \ [[String -> Char]]:}$
     The types $[[Int -> Bool]]$ and $[[String -> Char]]$ are not disjoint,
     since we can find non-bottom-like types that are subtypes
@@ -513,8 +514,8 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
     \begin{tabular}{|lcl|}
       \multicolumn{3}{c}{Beta Value $[[betavalue v A B]]$} \\
       \hline
-      $[[betavalue p:A B C]]$ & = & $[[p:C]]$ \\
-      $[[betavalue \x.e B C]]$ & = & $[[\x.e:B:C]]$ \\
+      $[[betavalue p:C A B]]$ & = & $[[p:B]]$ \\
+      $[[betavalue \x.e A B]]$ & = & $[[\x.e:A:B]]$ \\
       \hline
     \end{tabular} }
   \bigskip
@@ -540,7 +541,7 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
 annotated lambda value $[[\x.e : A1 -> B1 : A2 -> B2]]$ to input
 value $[[v]]$. Substitution replaces free occurences of variable
 $[[x]]$ with beta value ($[[betavalue v A2 A1]]$).
-The definition of beta value ($[[betavalue v B C]]$) is shown at the lower part in
+The definition of beta value ($[[betavalue v A B]]$) is shown at the lower part in
 \Cref{fig:union:os}.
 Beta value is a function which takes
 value $[[v]]$ and both static and dynamic input types
@@ -563,7 +564,7 @@ the following example:
 We assume the lambda that contains a switch expression that anaylzes the function input.
 Say $[[e]]$ is $[[switch x Char e1 Bool e2]]$.
 It is acceptable because $[[x]]$ has type $[[Top]]$.
-The function expects an term of type top, but it is given a integer to.
+The function expects a term of type top, but it is given a integer to.
 The switch expression $[[e]]$, if we subsititute $[[x]]$ in it by $[[1 : Int]]$
 it will be comes illegal because it has no branch dealt with an integer.
 So we have to use the dynamic type $[[Top]]$ instead. And that is why
@@ -605,8 +606,8 @@ In such case, substitution uses $[[\x.e:A2:A1]]$ as the value being substituted.
 %argument of a function is a non-annotated lambda expression.
 
 \Rref{step-ann}
-reduces an annotated expression only if it is not an annotated value and $[[e]]$
-reduces to some $[[e']]$. \Rref{step-rmann} drops inner
+reduces an annotated expression only if it is not a value.
+\Rref{step-rmann} drops inner
 annotations, while keeping the static type.
 \Rref{step-lamann} adds one more type annotation to
 lambda expressions with only single type annotation to make them values.
@@ -781,8 +782,8 @@ switch expressions are not order-sensitive: at any time, only one of the
 \rref{Step-Switchl,Step-Switchr} can be applied to a well-typed expression.
 An essential property of \cal for determinism of case expression is
 that a pre-value cannot check against two disjoint types as stated in
-\Cref{lemma:union:check-both-disj-false}. This is in general true for
-all expressions, not just pre-values.
+\Cref{lemma:union:check-both-disj-false}.
+%This is in general true for all expressions, not just pre-values.
 
 \begin{theorem}[Determinism]
 \label{lemma:union:determinism}
@@ -853,7 +854,7 @@ equivalent to the previous definition of disjointness
 (\Cref{def:union:disj}).
 
 \begin{lemma}[Disjointness Equivalence]
-A $*_{s}$ B $\longleftrightarrow$ A $*_{s1}$ B.
+A $*_{s}$ B $\Longleftrightarrow$ A $*_{s1}$ B.
 \end{lemma}
 
 \noindent Why do we introduce the new definition of disjointness? It turns out that

@@ -48,14 +48,11 @@ In \cal they are primitive types: integers and function types.
 %types in \cal with intersection types.
 
 \begin{figure}[t]
-    \centering
     \begin{tabular}{lrcl} \toprule
       Types & $[[A]], [[B]]$ & $\Coloneqq$ & $ ... \mid [[A /\ B]] $ \\
       \bottomrule
     \end{tabular}
-    \centering
     \drules[s]{$ [[A <: B ]] $}{Additional Subtyping Rules}{anda, andb, andc}
-    \centering
     \drules[ord]{$[[ordinary A]]$}{Ordinary Types}{int, arrow}
 %    \centering
 %    {\renewcommand{\arraystretch}{1.2}
@@ -70,7 +67,7 @@ In \cal they are primitive types: integers and function types.
 %     $[[findsubtypes A /\ B]]$ & = & $ [[findsubtypes A]] \cap [[findsubtypes B]] $\\
 %      \hline
 %    \end{tabular} }
-  \caption{Additional Types, Subtyping and Ordinary Types for \cal with intersection types.}
+  \caption{Additional types, subtyping and ordinary types for \cal with intersection types.}
   \label{fig:inter:system}
 \end{figure}
 
@@ -225,14 +222,14 @@ We further illustrate
     $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types.
     In general, the $[[Bot]]$ type is disjoint to all types because $[[Bot]]$ does not
     have any ordinary subtype.
-  \item $\boldsymbol{A = [[Int /\ (Int -> Bool)]], \ B = \ [[Int]]:}$ There is no ordinary type that is a subtype of both $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$.
-        Therefore, $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$ are disjoint types.
-        In general, an intersection of two disjoint types ($[[Int /\ (Int -> Bool)]]$ in this case)
-        is always disjoint to all types.
+%  \item $\boldsymbol{A = [[Int /\ (Int -> Bool)]], \ B = \ [[Int]]:}$ There is no ordinary type that is a subtype of both $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$.
+%        Therefore, $[[Int /\ (Int -> Bool)]]$ and $[[Int]]$ are disjoint types.
+%        In general, an intersection of two disjoint types ($[[Int /\ (Int -> Bool)]]$ in this case)
+%        is always disjoint to all types.
   \item $\boldsymbol{A = [[Int /\ Bool]], \ B = \ [[Int \/ Bool]]:}$ There is no ordinary type that is a subtype of both $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$.
         Therefore, $[[Int /\ Bool]]$ and $[[Int \/ Bool]]$ are disjoint types.
-        This follows from the description in example (3) that type $[[Int /\ Bool]]$ will always be
-        disjoint to any type.
+        In general, an intersection of two disjoint types ($[[Int /\ Bool]]$ in this case)
+        is always disjoint to all types.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ In this case, $[[Int]]$ and $[[Top]]$ share a common ordinary subtype which is $[[Int]]$.
     Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
      $[[Top]]$ overlaps with any other types.

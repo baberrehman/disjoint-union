@@ -55,10 +55,9 @@ tag of \lstinline{x}, where \lstinline{show} takes an \lstinline{Int} and
 returns back its string representation.
 
 \begin{lstlisting}
-function tostring (x: String | Int) : String =
-  switch (x)
-    inj1 str -> str
-    inj2 num -> show num
+function tostring (x: String | Int) : String = switch (x)
+                                                 inj1 str -> str
+                                                 inj2 num -> show num
 \end{lstlisting}
 
 \noindent Combining union type construction in \lstinline{safediv} and its elimination in
@@ -299,7 +298,7 @@ behavior and its evaluation result.
 \paragraph{Union types as an alternative to overloading}
 One motivation of such type-directed union elimination in Ceylon is to
 model a form of function overloading.
-The following example, which is adapted from TypeScript's documentation\footnote{https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html},
+The following example, which is adapted from TypeScript's documentation\footnote{\url{https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html}},
 demonstrates how to define an ``overloaded'' function \lstinline{padLeft},
 which adds some padding to a string. The idea is that there can be two versions
 of \lstinline{padLeft}: one where the second argument is a string; and
@@ -315,7 +314,6 @@ String padLeft(String v, String|Integer x) {
 	case (is String) { return x+v; }
 	case (is Integer) { return space(x)+v; }
 }
-
 print( padLeft("?", 5) ); // "     ?"
 print( padLeft("World", "Hello ") ); // "Hello World"
 \end{lstlisting}
