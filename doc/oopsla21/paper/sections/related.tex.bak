@@ -157,12 +157,12 @@ they do not study the semantics of disjoint switch expressions.
 %although they mention some Ceylon examples using such expressions.
 
 \paragraph{Occurrence Typing}
-Occurrence typing or flow typing \cite{tobin2008design} specializes or refines
+Occurence typing or flow typing \cite{tobin2008design} specializes or refines
 the type of variable in a type test. For example, the following code
 uses occurrence typing:
 
 \begin{lstlisting}
-Integer occurrence(Integer | String val) {
+Integer occurence(Integer | String val) {
   if (val is Integer) { return val+1; }
   else                { return toInt(val)+2; }
 }
@@ -181,7 +181,7 @@ which resulted into the development of Typed Racket.
 Variants of occurrence typing are nowadays employed in mainstream languages
 such as TypeScript or Flow.
 \cite{castagna2019revisiting} proposed a more general formulation of
-occurrence typing. He extended occurrence typing to refine the type of
+occurence typing. He extended occurrence typing to refine the type of
 generic expressions, not just variables. He also studied the combination
 with gradual typing. Occurrence typing provides an alternative
 means to eliminate union types using a first-match semantics. That is the
