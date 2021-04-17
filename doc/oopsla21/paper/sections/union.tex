@@ -418,7 +418,7 @@ and infers type $[[A]]$.
 function application. In \rref{typ-app}, note that the type of the
 function $[[e1]]$ is inferred. Thus the expression $[[e1]]$ should carry
 its own type information, and it will typically include annotated lambdas.
-On the other hand, the argument expression $[[e2]]$ is checked against type $A$,
+On the other hand, the argument expression $[[e2]]$ is checked against type $[[A]]$,
 and can itself be a function. For instance we could have $[[e2]] = \lambda x. x$
 and $[[A]] = [[Int->Int]]$. In such case, during reduction, the argument would be
 the unannotated value $\lambda x. x$.
@@ -606,7 +606,7 @@ In such case, substitution uses $[[\x.e:A2:A1]]$ as the value being substituted.
 %argument of a function is a non-annotated lambda expression.
 
 \Rref{step-ann}
-reduces an annotated expression only if it is not a value.
+reduces an annotated expression only if it is not an annotated value.
 \Rref{step-rmann} drops inner
 annotations, while keeping the static type.
 \Rref{step-lamann} adds one more type annotation to
@@ -640,7 +640,7 @@ of \emph{switch} expressions.
 \Rref{step-switchl} evaluates
 the left branch of the \emph{switch} expression if the dynamic type of $[[p]]$ is
 a subtype of type of left branch. \Rref{step-switchr} evaluates the right
-branch if the type of $[[e]]$ is a subtype
+branch if the type of $[[p]]$ is a subtype
 of type of the right branch. The subtyping condition in
 \rref{step-switchl,step-switchr} is important, as it provides
 flexibility for the value to have various subtypes of $[[A]]$ and $[[B]]$, instead
