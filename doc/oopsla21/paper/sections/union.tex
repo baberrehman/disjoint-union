@@ -156,7 +156,7 @@ for reflexivity and transitivity as these are quite standard.}
 \subsection{Disjointness}
 \label{sec:union:disj}
 Now we turn to the notion of disjointness for
-union types and case expression for \cal. In essence, disjointness for \cal is
+switch expressions in \cal. In essence, disjointness for \cal is
 the dual to the disjointness notion in $\lambda_i$~\cite{oliveira2016disjoint},
 a calculus with disjoint intersection types.
 In $\lambda_i$, two
@@ -436,7 +436,7 @@ The most interesting and novel typing rule is for
 %union types and case expression and have been studied in various
 %calculi (\baber{reference to calculi}).
 The first condition ($[[G |-
-    e <= A \/ B]]$) ensures that case expression $[[e]]$ is well-typed
+    e <= A \/ B]]$) ensures that the expression $[[e]]$ is well-typed
 and checks against type $[[A \/ B]]$. Note that this condition ensures
 \emph{exhaustiveness} of the cases in the switch: $e$ must
 check against the types in the branches of the switch.
@@ -449,7 +449,7 @@ second branch in the extended context.
 %\snow{So they are exhaustive for all possible values of $e$. In other words,
 %at least one branch matches with the runtime type of $e$.}
 The last condition
-$[[A *s B]]$, guarantees \emph{disjointness} of $[[A]]$ and $[[B]]$.
+$[[A *s B]]$, guarantees the \emph{disjointness} of $[[A]]$ and $[[B]]$.
 This ensures that overlapping types for the branches of case expressions
 are forbidden. Otherwise, overlapping types could lead to
 non-deterministic results.
@@ -826,7 +826,7 @@ Or we need to provide some intuition for ordinary types themselves.}
 
 The current definition of disjointness (\Cref{def:union:disj}) is inspired
 by work on disjoint intersection types~\cite{oliveira2016disjoint}. This definition works well
-for the calculus presented in this section. However it is not the only
+for the calculus presented in this section. However, it is not the only
 possible formulation of disjointness.
 An equivalent formulation of disjointness is:
 
