@@ -143,7 +143,7 @@ For instance, their framework could be useful to derive an algorithmic
 formulation for the subtyping relation presented in Figure~\ref{fig:discussion:ds}.
 They also briefly cover disjointness in their work. As part of their framework, they
 can also check disjointness given some disjointness axioms. For instance,
-for \name, such axioms could be similar to \rref{ad-mtmr} or \rref{ad-intl}
+for \name, such axioms could be similar to \rref{ad-btmr} or \rref{ad-intl}
 in Figure~\ref{fig:union:disj-typ}.
 However, they do not have a formal
 specification of disjointness. Instead they assume that some sound specification
@@ -171,7 +171,7 @@ Integer occurrence(Integer | String val) {
 \noindent In such code, \lstinline{val} initially has type $[[Int \/ String]]$.
 The conditional checks if the \lstinline{val} is of type $[[Int]]$.
 If the condition succeeds, it is safe to assume that \lstinline{val} is of type $[[Int]]$,
-and the type of \lstinline{val} is refined in the branch to be \lstinline{Int}.
+and the type of \lstinline{val} is refined in the branch to be $[[Int]]$.
 Otherwise, it is safe to assume that \lstinline{val} is of type $[[String]]$, in the
 other branch (and the type is refined accordingly).
 The motivation to study occurrence typing was to introduce typing in dynamically
@@ -199,8 +199,8 @@ to give a coherent calculus for intersection types with a merge
 operator. The notion of disjointness used in \cal, discussed in \Cref{sec:union},
 is inspired by the notion of disjointness of $\lambda_{i}$. In essence,
 disjointness in \cal is the dual notion: while in $\lambda_{i}$ two types
-are disjoint if they only have top-like supertypes, in \cal two types
-are disjoint if they only have bottom-like supertypes.
+are disjoint if they only have \emph{top-like} supertypes, in \cal two types
+are disjoint if they only have \emph{bottom-like} subtypes.
 
 None of calculi with disjoint intersection types~\cite{oliveira2016disjoint,bi_et_al:LIPIcs:2018:9227,alpuimdisjoint,Huang:typedirected} in the literature
 includes union types. One interesting discovery of our work is that the
@@ -224,7 +224,7 @@ we can use the following definition of disjointness:
 
 \noindent which is, in essence, the dual notion of the definition presented in
 Section~\ref{sec:inter}. Under this definition $[[Int]]$ and $[[Bool]]$ would
-be disjoint since we cannot find an common ordinary supertype (and $[[Int \/ Bool]]$
+be disjoint since we cannot find a common ordinary supertype (and $[[Int \/ Bool]]$
 is a supertype, but it is not ordinary). Furthermore, there should be a
 dual notion to LOS, capturing the greatest ordinary supertypes. Moreover,
 if a calculus includes both disjoint switches and a merge operator,
@@ -234,12 +234,12 @@ This will be an interesting path of exploration for future work.
 \paragraph{Overloading}
 Union types also provide a form of function overloading or ad-hoc
 polymorphism using the switch and type-based case analysis. A programmer
-may define the argument type to a union type. By
+may define the argument type to be a union type. By
 using type-based case analysis, it is possible to execute different code
 for each specific type of input.  Intersection types have also been
-studied for function overloading. For example a function with type
+studied for function overloading. For example, a function with type
 $[[Int -> Int /\ Bool -> Bool]]$ can take input values either of type
-$[[Int]]$ or $[[Bool]]$.  In such case, we return either $[[Int]]$ or $[[Bool]]$
+$[[Int]]$ or $[[Bool]]$.  In such case, it returns either $[[Int]]$ or $[[Bool]]$
 depending upon the input type.  Function overloading has been studied
 in detail in the literature by \cite{castagna1995calculus},
 \cite{cardelli1985understanding}, \cite{stuckey2005theory} among
