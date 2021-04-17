@@ -144,7 +144,7 @@ and intersection as set intersection, then intersecting disjoint sets
 is the empty set. In other words, we would get a type that has no inhabitants.
 For instance the set of all integers is disjoint to the set of all booleans,
 and the intersection of those sets is empty.
-However we do not adopt the Ceylon solution here two reasons:
+However we do not adopt the Ceylon solution here for two reasons:
 
 \begin{enumerate}
 
@@ -232,7 +232,7 @@ We further illustrate
         is always disjoint to all types.
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ In this case, $[[Int]]$ and $[[Top]]$ share a common ordinary subtype which is $[[Int]]$.
     Therefore, $[[Int]]$ and $[[Top]]$ are not disjoint types.
-     $[[Top]]$ overlaps with any other types.
+     %$[[Top]]$ overlaps with any other types.
 \end{enumerate}
 
 %The
@@ -264,7 +264,7 @@ notion of \emph{lowest ordinary subtypes}.
      $[[findsubtypes A /\ B]]$ & = & $ [[findsubtypes A]] \cap [[findsubtypes B]] $\\
       \hline
     \end{tabular} }
-  \caption{Lowest Ordinary Subtypes function for \cal with intersection types.}
+  \caption{Lowest ordinary subtypes function for \cal with intersection types.}
   \label{fig:inter:los}
 \end{figure}
 
@@ -283,9 +283,9 @@ of all function types.
 Ordinary
 subtypes of $[[Top]]$ are $[[Int]]$ and $[[Top -> Bot]]$.
 In the case of union types $[[A \/ B]]$, the
-algorithm is collects the LOS of $[[A]]$ and $[[B]]$ and returns the union of the
-two sets. For intersection types $[[A
-    /\ B]]$ the algorithm collects the LOS of $[[A]]$ and $[[B]]$
+algorithm collects the LOS of $[[A]]$ and $[[B]]$ and returns the union of the
+two sets. For intersection types $[[A/\ B]]$
+the algorithm collects the LOS of $[[A]]$ and $[[B]]$
 and returns the intersection of the two sets.
 Note that LOS is defined as a structurally recursive function and therefore
 its decidability is immediate.
