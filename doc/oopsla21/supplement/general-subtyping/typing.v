@@ -685,7 +685,7 @@ destruct~ IHe. inverts* lc.
   inverts* H0. inverts* lc. 
 Qed.
 
-(* need to be strengthened *)
+
 Lemma progress : forall e dir T,
 typing empty e dir T -> (value e) \/ (exists e', e --> e').
 Proof.

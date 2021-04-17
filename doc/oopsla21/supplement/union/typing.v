@@ -66,13 +66,7 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      lc_exp (e_abs e) ->
      value v ->
      (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) (v) ) --> (e_ann (e_ann  (  (open_exp_wrt_exp  e (changeanno v A2 A1) )  )  B1) B2)
-(*
-     | step_beta_abs : forall (e:exp) (A1 B1 A2 B2:typ) (p:exp) (C:typ) x,
-     lc_exp (e_abs e) ->
-     p = (e_abs x) ->
-     (e_app  ( (e_ann (e_ann  ( (e_abs e) )  (t_arrow A1 B1)) (t_arrow A2 B2)) ) ( p ) ) --> (e_ann (e_ann  (  (open_exp_wrt_exp  e (e_ann (e_ann p A2) A1) )  )  B1) B2)
-*)
-     | step_ann : forall (e:exp) (A:typ) (e':exp),
+ | step_ann : forall (e:exp) (A:typ) (e':exp),
       not ( wexpr (e_ann e A) )  ->
      step e e' ->
      step (e_ann e A) (e_ann e' A)
@@ -632,7 +626,6 @@ destruct~ IHe. inverts* lc.
   inverts* H0. inverts* lc. 
 Qed.
 
-(* need to be strengthened *)
 Lemma progress : forall e dir T,
 typing empty e dir T -> (value e) \/ (exists e', e --> e').
 Proof.

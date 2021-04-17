@@ -15,15 +15,13 @@ section 5.2 in paper Union Types with Disjoint Switches.
 
 *)
 
-(** syntax *)
+(*
 
-(*Inductive typ : Set :=  (*r type *)
- | t_top : typ
- | t_int : typ
- | t_bot : typ
- | t_arrow : typ -> typ -> typ
- | t_union : typ -> typ -> typ
- | t_and : typ -> typ -> typ.*)
+Note:
+-----
+Types and subtyping relation is in equivalence.v
+
+*)
 
 Inductive exp : Set :=  (*r expression *)
  | e_var_b  : nat -> exp
@@ -258,24 +256,6 @@ Proof.
     inverts H3.
 Defined.
 
-(*Lemma sub_or : forall A B C, (t_union A B) <: C -> A <: C /\ B <: C.
-Proof.
-intros; inductions H; try solve [split*].
-specialize (IHsubtyping1 A B).
-destruct IHsubtyping1; auto; split; eapply s_trans; eauto.
-split. apply s_orb.
-specialize (IHsubtyping A B).
-forwards* : IHsubtyping.
-specialize (IHsubtyping A B).
-forwards* : IHsubtyping.
-specialize (IHsubtyping1 A B).
-specialize (IHsubtyping2 A B).
-forwards*: IHsubtyping1.
-lets: union_findsubtypes_empty_elim  (FindSubtypes (t_union A B)) A B.
-lets: H0 (FindSubtypes A) (FindSubtypes B).
-forwards*: H1.
-Defined.*)
-
 Lemma sub_and : forall A B C, A <: (t_and B C) -> A <: B /\ A <: C.
 Proof.
 intros; dependent induction H; try solve [split*].
@@ -324,7 +304,7 @@ Defined.
 
 (*
 Properties
-Trivially proveable in equivalent algorithmic formulization
+Trivially proveable
 *)
 
 Lemma ord_eq : forall A, Ord A -> ordu A.

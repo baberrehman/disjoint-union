@@ -222,9 +222,9 @@ Notation "A *s B" := (DisjSpec A B) (at level 80).
 
 Hint Constructors pexpr value wexpr findtype bottomlike disjointness subtyping lc_exp ok okt : core.
 
-(**********************************)
-(*****  Subtyping Properties  *****)
-(**********************************)
+(***************************************************)
+(*****  Subtyping and Disjointness Properties  *****)
+(***************************************************)
 
 Lemma BL_soundness : forall A, bottomlike A -> forall C, A <: C.
 Proof.
@@ -332,9 +332,9 @@ generalize H0 H; clear H0; clear H; generalize A; clear A.
   inductions H; eauto.
 Qed.
 
-(*
-Equivalance of Disjointness
-*)
+(********************************
+** Equivalance of Disjointness **
+*********************************)
 
 (*************************)
 (***** Ordinary Types ****)
@@ -349,12 +349,6 @@ Hint Constructors Ord : core.
 (****************************************)
 (**********  Dijoint Specs    ***********)
 (****************************************)
-
-(*
-
-A *s B = not (exists C, Ord C -> C <: A /\ C <: B)
-
-*)
 
 Definition DisjSpec1 A B := forall C, Ord C -> not (C <: A /\ C <: B).
 Notation "A *s1 B" := (DisjSpec1 A B) (at level 80).

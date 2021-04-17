@@ -258,7 +258,6 @@ Inductive Ord : typ -> Prop :=
 | o_bool  : Ord t_bool
 | o_str   : Ord t_str
 | o_arrow : forall t1 t2, Ord (t_arrow t1 t2).
-(*| o_union : forall t1 t2, Ord t1 -> Ord t2 -> Ord (t_union t1 t2).*)
 
 Hint Constructors Ord : core.
 
