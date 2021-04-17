@@ -262,19 +262,19 @@ $[[botlike C]]$ also handles this case.
 We illustrate this definition with a few examples:
 
 \begin{enumerate}
-  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$ \\
+  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$
         $[[Int]]$ and $[[Int -> Bool]]$ are disjoint types. All common subtypes
         of $[[Int]]$ and $[[Int -> Bool]]$ are bottom-like types,
         including $[[Bot]]$ and unions of $[[Bot]]$ types.
-  \item $\boldsymbol{A = [[Int \/ Bool]], \ B = \ [[Bot]]:}$ \\
-    $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types, since again all common subtypes are bottom-like.
+  \item $\boldsymbol{A = [[Int \/ Bool]], \ B = \ [[Bot]]:}$
+    $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types. Again all common subtypes are bottom-like.
     In general, the type $[[Bot]]$ (or any bottom-like type)
     is disjoint to any other type.
 %  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int]]:}$ \\
 %        $[[Int]]$ and $[[Int]]$ are not disjoint types because they share a common subtype $[[Int]]$ which
 %        is not \emph{bottom-like}. In general, one type is not disjoint with
 %        itself, unless it is bottom-like.
-  \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$ \\
+  \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$
         $[[Int]]$ and $[[Top]]$ are not disjoint types because they share a common
     subtype $[[Int]]$ which is not \emph{bottom-like}. In general no type
     is disjoint to $[[Top]]$, except for bottom-like types.
@@ -299,7 +299,7 @@ We illustrate this definition with a few examples:
 \end{comment}
 
 \paragraph{Algorithmic Disjointness}
-The declarative disjointness does not directly lead to an algorithm.
+Declarative disjointness does not directly lead to an algorithm.
 We present an algorithmic version of disjointness in
 the middle part of \Cref{fig:union:disj-typ}.
 \Rref{ad-btmr,ad-btml} state that the $[[Bot]]$
@@ -541,7 +541,7 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
 annotated lambda value $[[\x.e : A1 -> B1 : A2 -> B2]]$ to input
 value $[[v]]$. Substitution replaces free occurences of variable
 $[[x]]$ with beta value ($[[betavalue v A2 A1]]$).
-The definition of beta value ($[[betavalue v A B]]$) is shown at the lower part in
+The definition of beta value ($[[betavalue v A B]]$) is shown at the lower part of
 \Cref{fig:union:os}.
 Beta value is a function which takes
 value $[[v]]$ and both static and dynamic input types
@@ -551,9 +551,8 @@ Recall that the values in \cal consist of $[[w]]$ and $[[\x.e]]$.
 For first case, when $[[v]]$ is $[[w]]$ ($[[p:A]]$), beta value replaces the static type
 $[[A]]$ (from $[[p:A]]$) by $[[A1]]$ and returns $[[p:A1]]$.
 This is to keep the most specific type in the annotation, for beta-reduction.
-%
-Assuming we did not keep the dynamic type of lambdas, here we will not be able
-to know $[[A1]]$. And only using $[[A2]]$ may lead to ill-typed programs, like
+\begin{comment}
+Using only $[[A2]]$ may lead to ill-typed programs. Consider
 the following example:
 \[
   [[ (\x . e : Top -> Int : Int -> Int) (1:Int) ]]
@@ -561,18 +560,19 @@ the following example:
   [[-->]] [[ e [ x~>1:Int ] ]]
 \]
 %
-We assume the lambda that contains a switch expression that anaylzes the function input.
-Say $[[e]]$ is $[[switch x Char e1 Bool e2]]$.
+Here we assume that reduction does not keep the dynamic type of lambdas,
+and we will not be able to know $[[A1]]$ when doing beta-reduction.
+We further assume the lambda that contains a switch expression that analyzes
+the function input. Say $[[e]]$ is $[[switch x Char e1 Bool e2]]$.
 It is acceptable because $[[x]]$ has type $[[Top]]$.
 The function expects a term of type top, but it is given a integer to.
 The switch expression $[[e]]$, if we subsititute $[[x]]$ in it by $[[1 : Int]]$
 it will be comes illegal because it has no branch dealt with an integer.
 So we have to use the dynamic type $[[Top]]$ instead. And that is why
 we need to keep two annotations for an lambda.
-
-
-For second case, $[[v]]$ can also be an unnanotated lambda value $[[\x.e]]$.
-With bi-directional type-checking an expression such as:
+\end{comment}
+For the second case, $[[v]]$ can also be an unnanotated lambda value $[[\x.e]]$.
+With bi-directional type-checking an expression such as
 $([[\f.f 1: (Int -> Int -> Int)]]) ([[\x.x]])$
 is well-typed, since bi-directional type-checking propagates
 type information to the arguments. Thus, the dynamic semantics
@@ -640,7 +640,7 @@ of \emph{switch} expressions.
 \Rref{step-switchl} evaluates
 the left branch of the \emph{switch} expression if the dynamic type of $[[p]]$ is
 a subtype of type of left branch. \Rref{step-switchr} evaluates the right
-branch if type of $[[e]]$ is a subtype
+branch if the type of $[[e]]$ is a subtype
 of type of the right branch. The subtyping condition in
 \rref{step-switchl,step-switchr} is important, as it provides
 flexibility for the value to have various subtypes of $[[A]]$ and $[[B]]$, instead
@@ -780,7 +780,7 @@ obvious as many operational semantics rules distinguish between pre-values,
 values and annotated values. Also, by proving determinism, we guarantee that
 switch expressions are not order-sensitive: at any time, only one of the
 \rref{Step-Switchl,Step-Switchr} can be applied to a well-typed expression.
-An essential property of \cal for determinism of case expression is
+An essential property of \cal for determinism of the switch expression is
 that a pre-value cannot check against two disjoint types as stated in
 \Cref{lemma:union:check-both-disj-false}.
 %This is in general true for all expressions, not just pre-values.
