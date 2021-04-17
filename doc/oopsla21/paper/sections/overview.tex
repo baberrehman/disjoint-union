@@ -3,7 +3,7 @@
 
 This section provides some background on union types, and some common approaches
 to eliminate union types. Then it describes the Ceylon approach to Union types.
-Finally, it presents the key ideas and challenges in our work and \name.
+Finally, it presents the key ideas and challenges in our work.
 
 \subsection{Tagged Union Types}
 
@@ -25,7 +25,7 @@ For example, we can have:
 
 \begin{lstlisting}
 inj1 "foo": String | Int
-inj2 1 : String | Int
+inj2   1  : String | Int
 \end{lstlisting}
 
 \noindent Note that in the code above we write union types as
@@ -151,7 +151,7 @@ systems~\cite{castagna:settheoretic} support
 \begin{lstlisting}
 function tostring3 (x: String | Int) : String = switch (x)
                                                   (y : String) -> y
-                                                  (y : Int) -> show y
+                                                  (y : Int)    -> show y
 \end{lstlisting}
 
 \noindent Note that here \lstinline{show} does not need to be overloaded,
@@ -159,7 +159,7 @@ as the type-directed elimination
 \textit{turns} the variable \lstinline{x} of type \lstinline{String | Int} into
 the variable \lstinline{y} of type \lstinline{Int}.
 
-However, compared to tag-directed elimination, extra care must to taken with
+However, compared to tag-directed elimination, extra care must be taken with
 type-directed elimination. In particular, while we can easily distinguish tags,
 in type-directed elimination, ambiguity may arise when types in a union type
 overlap. For example, consider the type \lstinline{Person | Student}, where we
@@ -168,7 +168,7 @@ elimination, we can write the following function:
 
 \begin{lstlisting}
 function isstudent (x: Person | Student) : Bool = switch (x)
-                                                     inj1 person -> False
+                                                     inj1 person  -> False
                                                      inj2 student -> True
 \end{lstlisting}
 
@@ -207,7 +207,7 @@ can encode \lstinline{isstudent3} as a function, which has different
 behaviors when the type of the argument differs.
 
 \begin{lstlisting}
-boolean isstudent3 (Person x) { return False; }
+boolean isstudent3 (Person x)  { return False; }
 boolean isstudent3 (Student x) { return True; }
 \end{lstlisting}
 
@@ -216,7 +216,7 @@ the \textit{best} type signature that describes the argument. If we
 apply \lstinline{isstudent3} to a term of type \lstinline{Student}, the second
 implementation is chosen, as \lstinline{Student} is the best type describing the
 argument. As we can see, such best-match strategy gets rid of the
-order-sensitive problem, as Java always try to find the best-match one despite
+order-sensitive problem, as Java always try to find the best-match despite
 the order of the methods. In other words, in Java the order of methods does not matter:
 in this case,
 we have the method for \lstinline{Person} before the one for \lstinline{Student}, but Java still finds
@@ -241,7 +241,7 @@ of the method for \lstinline{Student} would be chosen instead, since the person
 is indeed a student in this case. This can be confusing and lead to subtle bugs.
 
 Moreover there are other tricky situations
-that arize when employing a best-match strategy. For example, suppose
+that arise when employing a best-match strategy. For example, suppose
 that the type \lstinline{Pegasus} is a subtype of both type \lstinline{Bird} and type
 \lstinline{Horse}. If a method \lstinline{isbird} is overloaded for
 \lstinline{Bird} and \lstinline{Horse}, then which method implementation should
@@ -261,13 +261,13 @@ or type-inference.
 \subsection{Eliminating Union Types in Ceylon}
 
 The Ceylon language~\cite{king2013ceylon} supports type-directed union elimination by a
-switch expression with multiple branches. The following program is an example
+switch expression with branches. The following program is an example
 with union types using Ceylon's syntax:
 
 \begin{lstlisting}
 void print(String|Integer|Float x) {
 	switch (x)
-	case (is String) { print("String: ``x``"); }
+	case (is String)        { print("String: ``x``"); }
 	case (is Integer|Float) { print("Number: ``x``"); }
 }
 \end{lstlisting}
@@ -276,7 +276,7 @@ void print(String|Integer|Float x) {
 For the switch expression, Ceylon enforces static type checking with two
 guarantees: \textit{exhaustiveness}, and \textit{disjointness}. First, Ceylon
 ensures that all cases in a switch expression are \textit{exhaustive}. In the above
-example, \lstinline{x} can be either a string, an integer or a floating point
+example, \lstinline{x} can either be a string, an integer or a floating point
 number. The types used in the cases do not have to exactly match with the types
 of \lstinline{x}. Nevertheless, the combination of all cases must be able to
 handle all possibilities. If the last case only dealt with
@@ -289,7 +289,7 @@ Second, Ceylon enforces that all cases in a switch expression are
 Section~\ref{subsec:elimination}, in Ceylon, it is impossible to have two
 branches that match with the input at the same time. For instance, if the first
 case used the type \lstinline{String | Float} instead of \lstinline{String}, the
-program would be rejected statically with a type error. Indeed, if the program
+program would be rejected statically with an error. Indeed, if the program
 were to be accepted, then the call \lstinline{print(3.0)} would be ambiguous,
 since there are two branches that could deal with the floating point number. Note that, since
 the cases in a switch cannot overlap, their order is irrelevant to the program's
@@ -307,15 +307,15 @@ the other where the second argument is an integer:
 \begin{lstlisting}
 String space(Integer n){
   if (n==0) { return ""; }
-  else { return " "+space(n-1); }
+  else      { return " "+space(n-1); }
 }
 String padLeft(String v, String|Integer x) {
 	switch (x)
-	case (is String) { return x+v; }
+	case (is String)  { return x+v; }
 	case (is Integer) { return space(x)+v; }
 }
-print( padLeft("?", 5) ); // "     ?"
-print( padLeft("World", "Hello ") ); // "Hello World"
+print(padLeft("?", 5)); // "     ?"
+print(padLeft("World", "Hello ")); // "Hello World"
 \end{lstlisting}
 %
 
@@ -384,7 +384,7 @@ in Ceylon:
 \begin{lstlisting}
 String | Integer safediv3 (Integer x, Integer y){
   if (y==0) { return "Divided by zero"; }
-  else { return (x/y); }
+  else      { return (x/y); }
 }
 \end{lstlisting}
 %
@@ -622,10 +622,10 @@ switch x {
 are disjoint or not. In other words, we wish to determine whether, for any possible
 (dynamic) type that $[[x]]$ can have, it is unambiguous which branch to choose.
 In this case, it turns out that there is ambiguity. For instance, if $[[x]]$ is an integer,
-then either branch can be choosen. Thus \cal rejects this program with a disjointness error.
+then either branch can be chosen. Thus \cal rejects this program with a disjointness error.
 In this example, the reason to reject the program is basically that $[[Int <: String \/ Int]]$
 and $[[Int <: Int \/ Bool]]$. That is we can find a common subtype ($[[Int]]$) of the
-types in both branches. Moreover that subtype can be inhabited by values (integer values
+types in both branches. Moreover, that subtype can be inhabited by values (integer values
 in this case). If the only common subtypes of the types in the two branches
 would be types like $[[Bot]]$ (which has no inhabitants), then the switch should
 be safe because we would not be able to find a value for $[[x]]$ that would trigger
@@ -640,14 +640,14 @@ is exactly this. Formally, we have:
 \end{definition}
 
 \noindent Here the notation $[[A]] *_s [[B]]$ denotes that types $[[A]]$ and $[[B]]$ are disjoint,
-and $[[botlike C]]$ means that type $[[C]]$ is bottom-like (i.e. $[[C <: Bot]]$)).
+and $[[botlike C]]$ means that type $[[C]]$ is bottom-like (i.e. $[[C <: Bot]]$).
 Prior work on disjoint intersection types is also helpful
 to find an algorithmic formulation of disjointness: essentially we can find an algorithmic
 formulation that employs dual rules to those for disjoint intersection types.
 
-\paragraph{Disjointness in the presence on intersection types.}
+\paragraph{Disjointness in the presence of intersection types.}
 The variant of \cal in Section~\ref{sec:union} does not include intersection types.
-Unfortunately the disjointness definition above does not work in the presence of
+Unfortunately, the disjointness definition above does not work in the presence of
 intersection types. The reason is simple: with intersection types we can always find
 common subtypes, such as $[[Int /\ Bool]]$, which are not bottom-like, and yet
 they have no inhabitants. That is,
@@ -679,7 +679,7 @@ of \name with intersection types is:
 \end{comment}
 
 \noindent Under this definition we can check that $[[Int]]$ and $[[Bool]]$ are disjoint,
-since no ordinary type is a subtype of both these two types. This definition avoids
+since no ordinary type is a subtype of both of these two types. This definition avoids
 the issue with \Cref{def:disjointness}, which would not consider these two types disjoint.
 Moreover, this definition is a generalization of the previous one, and in the
 variant with union types only the two definitions coincide.
