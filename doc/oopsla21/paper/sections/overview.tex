@@ -2,7 +2,7 @@
 \label{sec:overview}
 
 This section provides some background on union types, and some common approaches
-to eliminate union types. Then it describes the Ceylon approach to Union types.
+to eliminate union types. Then it describes the Ceylon approach to union types.
 Finally, it presents the key ideas and challenges in our work.
 
 \subsection{Tagged Union Types}
@@ -20,7 +20,7 @@ or (polymorphic) variants~\cite{garrigue98} support tagged union types.
 In their basic form, there are two introduction forms:
 $\mathsf{inj_1} :: [[A -> A \/ B]]$ turn the type of an expression of type
 $[[A]]$ into type $[[A \/ B]]$; and $\mathsf{inj_2} :: [[B -> A \/ B]]$
-turns the type of an expressions of type $[[B]]$ into type $[[A \/ B]]$
+turns the type of an expressions of type $[[B]]$ into type $[[A \/ B]]$.
 For example, we can have:
 
 \begin{lstlisting}
@@ -296,7 +296,7 @@ the cases in a switch cannot overlap, their order is irrelevant to the program's
 behavior and its evaluation result.
 
 \paragraph{Union types as an alternative to overloading}
-One motivation of such type-directed union elimination in Ceylon is to
+One motivation for such type-directed union elimination in Ceylon is to
 model a form of function overloading.
 The following example, which is adapted from TypeScript's documentation\footnote{\url{https://www.typescriptlang.org/docs/handbook/unions-and-intersections.html}},
 demonstrates how to define an ``overloaded'' function \lstinline{padLeft},
@@ -319,7 +319,7 @@ print(padLeft("World", "Hello ")); // "Hello World"
 \end{lstlisting}
 %
 
-\noindent In two cases of the switch construct, there are two different implementations
+\noindent In the two cases of the switch construct, there are two different implementations
 of the \lstinline{padLeft} function: one that appends a string to the left of \lstinline{v},
 and the other that calls function \lstinline{space} to generate a string with \lstinline{x} spaces,
 and then append that to \lstinline{v}.
