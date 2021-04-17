@@ -1,6 +1,6 @@
 \section{Discussion}
 \label{sec:discussion}
-In this section we discuss some extensions and provide a comparison with the Ceylon approach.
+In this section we discuss some extensions and provide a comparision with the Ceylon approach.
 
 \subsection{A More General Subtyping Rule for Bottom  Types}
 \label{sec:inter:refactoring}
@@ -71,7 +71,7 @@ Ceylon employs an enriched
 distributive subtyping relation~\cite{muehlboeck2018empowering}
 that is based on the
 B+ logic~\cite{routley1972semantics,van2000minimal}.
-Distributive subtyping is more expressive and accommodates more programs than what we discussed in
+Distributive subtyping is more expressive and accomodates more programs than what we discussed in
 \Cref{sec:union,sec:inter}. Here we add distributive subtyping in the variant of \cal with
 intersection types.
 
@@ -123,7 +123,7 @@ variable <Integer | Boolean> & <String | Boolean> x = true; do(x);
 We have studied a variant of \name with intersection types and subtyping distributivity.
 All the metatheory for this variant is proved in Coq. The variant preserves
 type soundness, soundness and completeness of disjointness and determinism.
-Additionally, subtyping distributivity
+Additionaly, subtyping distributivity
 does not affect the disjointness definitions (both declarative and algorithmic)
 and these definitions are just the same as those discussed in \Cref{sec:inter}.
 

@@ -6,7 +6,7 @@ type-based union elimination construct based on disjointness. We presented the
 type-directed semantics of the calculus, and showed that it is
 type-sound and deterministic. Disjointness plays a crucial role for
 the determinism result, as it ensures that only one branch in the
-switch elimination construct can apply for any given value. A nice
+switch elimination contruct can apply for any given value. A nice
 aspect of the work was that we were able to adapt the notion of
 disjointness used in disjoint intersection types to our variant of
 \name with union types. We believe that this reinforces fundamental
