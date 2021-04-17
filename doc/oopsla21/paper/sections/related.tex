@@ -22,7 +22,7 @@ do not use labels and provide type-based union elimination.
 %a sound and deterministic union elimination construct for type-based
 %union elimination have been a challenge in research community.
 \end{comment}
-The union type constructor was first introduced by \citet{macqueen1984ideal}.
+The union type constructor was first introduced by \citep{macqueen1984ideal}.
 They proposed a typing rule that eliminates union implicitly.
 The rule breaks type preservation under
 the conventional reduction strategy of the lambda calculus.
@@ -32,7 +32,7 @@ copies of the same redex in parallel.
 mutable references. They restricted the typing rule to only allow single
 occurrence of the subterm of union type in the typing expression.
 \citet{pierce1991programming} proposed a novel single-branch case construct
-for unions. As pointed out by \citet{dunfield2003type}, compared to the single
+for unions. As pointed out by \citep{dunfield2003type}, compared to the single
 occurrence approach, the only effect of Pierce's approach
 is to make the elimination explicit.
 \begin{comment}
@@ -81,7 +81,7 @@ follows a first-match semantics. Work on the more foundational aspects
 of CDuce, and in particular on \emph{semantic subtyping}~\cite{frisch2002semantic}
 and set-theoretic types,
 also employs a form of first-match semantics elimination construct, though in a different form.
-In particular, work by \citet{castagna2005gentle,castagna2017gradual}
+In particular, work by \citep{castagna2005gentle,castagna2017gradual}
 proposes a conditional construct that can test whether a value matches a type.
 If it matches then the first branch is executed and the type for the value is refined.
 Otherwise, the second branch is executed and the type of the value is refined to be
@@ -180,10 +180,11 @@ Occurrence typing was further studied by \cite{tobin2010logical},
 which resulted into the development of Typed Racket.
 Variants of occurrence typing are nowadays employed in mainstream languages
 such as TypeScript, Ceylon or Flow.
-\cite{castagna2019revisiting} proposed a more general formulation of
-occurrence typing. He extended occurrence typing to refine the type of
-generic expressions, not just variables. He also studied the combination
-with gradual typing. Occurrence typing in a conditional construct, such as the above, provides an alternative
+\citet{castagna2019revisiting} proposed a more general formulation of
+occurrence typing. They extended occurrence typing to refine the type of
+generic expressions, not just variables. They also studied the combination
+with gradual typing. Occurrence typing in a conditional construct,
+such as the above, provides an alternative
 means to eliminate union types using a first-match semantics. That is the
 order of the type tests determines the priority that is given to the various
 types being tested.
