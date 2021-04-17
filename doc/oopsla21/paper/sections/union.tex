@@ -170,8 +170,8 @@ is not \emph{bottom-like}.
 
 \paragraph{Bottom-Like Types}
 \emph{Bottom-like} types are types that are isomorphic (i.e.
-both supertypes and subtypes) of the bottom type $\bot$. Therefore
-any bottom-like types behave like the $[[Bot]]$ type.
+both supertypes and subtypes) of the bottom type $\bot$. Therefore,
+\emph{bottom-like} types behave like the $[[Bot]]$ type.
 In \name, there
 are infinitely many such types, including, for example $\bot \lor \bot$,
 $\bot \lor \bot \lor \bot$, as well as $\bot$ itself.
@@ -182,14 +182,14 @@ $\bot \lor \bot \lor \bot$, as well as $\bot$ itself.
 %it is important to understand the notion of \emph{bottom-like} types
 %before diving into the details of disjointness.
 
-An inductive definition that captures all the bottom-like types
+An inductive definition that captures all the \emph{bottom-like} types
 is shown at the top of \Cref{fig:union:disj-typ}.
 Type $[[Bot]]$ is obviously a \emph{bottom-like} type
 (\rref{bl-bot}), and a union type of two \emph{bottom-like} types is also
 a \emph{bottom-like} type (\rref{bl-or}).  It is trivial to conclude
 that a union type is \emph{bottom-like} only if all the
 types in union are $[[Bot]]$. The correctness of our definition for
-bottom-like types is established by the following properties:
+\emph{bottom-like} types is established by the following properties:
 
 %\snow{Why we need an extra definition for bottom-like rather than
 %directly using ``A<:Bot"? And the notation overlaps with the
@@ -218,10 +218,10 @@ bottom-like types is established by the following properties:
 \label{lemma:union:bl-completeness}
 \end{lemma}
 
-\noindent The soundness lemma states that if a type is bottom-like, then it is
+\noindent The soundness lemma states that if a type is \emph{bottom-like}, then it is
 a subtype of any other type (and, in particular, it is a subtype of $[[Bot]]$).
-The completeness lemma states that if $[[A]]$ is a subtype of $[[Bot]]$ then $A$
-is bottom-like.
+The completeness lemma states that if $[[A]]$ is a subtype of $[[Bot]]$ then
+$[[A]]$ is \emph{bottom-like}.
 
 \begin{comment}
 \begin{proof}
@@ -243,7 +243,7 @@ The declarative definition for disjointness is as follows:
 \label{def:union:disj}
 \end{definition}
 
-\noindent That is, two types are disjoint if all their common subtypes are bottom-like.
+\noindent That is, two types are disjoint if all their common subtypes are \emph{bottom-like}.
 \begin{comment}
 With this definition we have that different primitive types are disjoint. For example
 $[[Int]] * [[Bool]]$ since the only common subtypes of $[[Int]]$ and $[[Bool]]$
@@ -264,11 +264,11 @@ We illustrate this definition with a few examples:
 \begin{enumerate}
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Int -> Bool]]:}$
         $[[Int]]$ and $[[Int -> Bool]]$ are disjoint types. All common subtypes
-        of $[[Int]]$ and $[[Int -> Bool]]$ are bottom-like types,
+        of $[[Int]]$ and $[[Int -> Bool]]$ are \emph{bottom-like} types,
         including $[[Bot]]$ and unions of $[[Bot]]$ types.
   \item $\boldsymbol{A = [[Int \/ Bool]], \ B = \ [[Bot]]:}$
-    $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types. Again all common subtypes are bottom-like.
-    In general, the type $[[Bot]]$ (or any bottom-like type)
+    $[[Int \/ Bool]]$ and $[[Bot]]$ are disjoint types. Again all common subtypes are \emph{bottom-like}.
+    In general, the type $[[Bot]]$ (or any \emph{bottom-like} type)
     is disjoint to any other type.
 %  \item $\boldsymbol{A = [[Int]], \ B = \ [[Int]]:}$ \\
 %        $[[Int]]$ and $[[Int]]$ are not disjoint types because they share a common subtype $[[Int]]$ which
@@ -277,14 +277,14 @@ We illustrate this definition with a few examples:
   \item $\boldsymbol{A = [[Int]], \ B = \ [[Top]]:}$
         $[[Int]]$ and $[[Top]]$ are not disjoint types because they share a common
     subtype $[[Int]]$ which is not \emph{bottom-like}. In general no type
-    is disjoint to $[[Top]]$, except for bottom-like types.
-    Also, one type is not disjoint with itself, unless it is bottom-like.
+    is disjoint to $[[Top]]$, except for \emph{bottom-like} types.
+    Also, one type is not disjoint with itself, unless it is \emph{bottom-like}.
   \item $\boldsymbol{A = [[Int -> Bool]], \ B = \ [[String -> Char]]:}$
     The types $[[Int -> Bool]]$ and $[[String -> Char]]$ are not disjoint,
     since we can find non-bottom-like types that are subtypes
     of both types. For instance $[[Top -> Bot]]$ is a subtype of both types.
     More generally, any two function types can never be disjoint: it is always
-    possible to find a common subtype, which is not bottom-like.
+    possible to find a common subtype, which is not \emph{bottom-like}.
 \end{enumerate}
 
 \begin{comment}
