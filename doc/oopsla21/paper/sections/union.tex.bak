@@ -539,7 +539,7 @@ to an annotated value ($[[w]]$): non-annotated lambda expressions
 %\bruno{Following text needs to be fixed after changes in Figure.}
 \Rref{step-beta} is the beta-reduction rule. It applies a dually
 annotated lambda value $[[\x.e : A1 -> B1 : A2 -> B2]]$ to input
-value $[[v]]$. Substitution replaces free occurrences of variable
+value $[[v]]$. Substitution replaces free occurences of variable
 $[[x]]$ with beta value ($[[betavalue v A2 A1]]$).
 The definition of beta value ($[[betavalue v A B]]$) is shown at the lower part of
 \Cref{fig:union:os}.
@@ -566,12 +566,12 @@ We further assume the lambda that contains a switch expression that analyzes
 the function input. Say $[[e]]$ is $[[switch x Char e1 Bool e2]]$.
 It is acceptable because $[[x]]$ has type $[[Top]]$.
 The function expects a term of type top, but it is given a integer to.
-The switch expression $[[e]]$, if we substitute $[[x]]$ in it by $[[1 : Int]]$
+The switch expression $[[e]]$, if we subsititute $[[x]]$ in it by $[[1 : Int]]$
 it will be comes illegal because it has no branch dealt with an integer.
 So we have to use the dynamic type $[[Top]]$ instead. And that is why
 we need to keep two annotations for an lambda.
 \end{comment}
-For the second case, $[[v]]$ can also be an unannotated lambda value $[[\x.e]]$.
+For the second case, $[[v]]$ can also be an unnanotated lambda value $[[\x.e]]$.
 With bi-directional type-checking an expression such as
 $([[\f.f 1: (Int -> Int -> Int)]]) ([[\x.x]])$
 is well-typed, since bi-directional type-checking propagates
@@ -614,7 +614,7 @@ lambda expressions with only single type annotation to make them values.
 
 \begin{comment}
 \Rref{step-beta} deals with a special case, that occurs when the
-argument of a function is a non-annotated lambda expression.
+argument of a function is a non-annotatted lambda expression.
 With bi-directional type-checking an expression such as:
 ($[[\f.f 1:(Int -> Int -> Int) : (Int -> Int -> Int)]]$)($[[\x.x]]$)
 \bruno{example here.} \baber{Done.}
