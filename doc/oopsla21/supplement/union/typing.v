@@ -3,15 +3,10 @@ Require Import syntax.
 
 (*
 
-Update start on April 09, 2021.
-
-This is typing file for syntax_wvalue.
-
-April 09, 2020:
----------------
--> extended from typing_wvalue.v
--> step-beta updated
--> changeanno inductive changed to changeanno definition
+This file contains Coq code for semantics
+and properties related to type-safety and determinism.
+Associated with union calculus,
+section 3 in paper Union Types with Disjoint Switches.
 
 *)
 

@@ -3,17 +3,15 @@ Require Import equivalence.
 Require Import syntax.
 
 (*
-This file is created on March 19, 2021
 
-This is the main semantics file for disjoint union types
-with intersection types and declerative subtyping.
-
-This file contains type safety and deterministic lemmas
-associated with syntax_with_equivalence.v
-
-declarative subtyping with distributivity rules.
+This file contains Coq code for semantics
+and properties related to type-safety and determinism.
+Associated with union calculus with intersection types
+and distributive subtyping,
+section 5.2 in paper Union Types with Disjoint Switches.
 
 *)
+
 
 (** Gathering free names already used in the proofs *)
 

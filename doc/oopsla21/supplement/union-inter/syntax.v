@@ -1,48 +1,17 @@
-
-(*
-Update started on April 06, 2021
-
-This is the main syntax file for disjoint union types
-with intersection types.
-
-All redundant lemmas dropped in this version.
-*)
-
-(*
-This file contains the updates suggested by Bruno with Bool and String primitive type.
-
-Redundant subtyping rule from bottom type removed in this version.
-
-Subtying algorithm with Coq definition added in this version
-
-A *a B = findsubtypes A `inter` findsubtypes B == []
-
-Bool and String primitive type
-
-******************************************************************
-Redundant subtyping rule for bottom type removed in this version.
-******************************************************************
-
-Top removed from FindSubTypes
-
-April 06, 2021:
---------------
--> extended from syntax_no_top_findsubtypes.v
--> wexpr added
-
-April 15, 2021:
---------------
--> extended from syntax_wvalue.v
--> generalized subtyping dropped
-
-*)
-
 Require Import TLC.LibLN.
 Require Import Program.Equality.
 Require Import Coq.Lists.ListSet.
 From Coq Require Export Lists.List.
 Export ListNotations.
 Require Import Coq.Strings.String.
+
+(*
+
+This file contains Coq code for syntax and disjointness
+associated with union calculus with intersection types,
+section 4 in paper Union Types with Disjoint Switches.
+
+*)
 
 (** syntax *)
 

@@ -1,22 +1,3 @@
-
-(*
-Update started on March 19, 2021
-*)
-
-(*
-
-A *a B = findsubtypes A `inter` findsubtypes B == []
-
-FindSubtypes B = []
--------------------
-     B <: A
-
-Declarative subtyping
-
-Subtyping used from equivalence.v
-
-*)
-
 Require Import TLC.LibLN.
 Require Import Program.Equality.
 Require Import Coq.Lists.ListSet.
@@ -24,6 +5,15 @@ From Coq Require Export Lists.List.
 Export ListNotations.
 Require Import Coq.Strings.String.
 Require Import equivalence.
+
+(*
+
+This file contains Coq code for syntax and disjointness
+associated with union calculus with intersection types
+and distributive subtyping,
+section 5.2 in paper Union Types with Disjoint Switches.
+
+*)
 
 (** syntax *)
 

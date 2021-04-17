@@ -2,24 +2,14 @@ Require Import TLC.LibLN.
 Require Import syntax.
 
 (*
-This file is created on April 15, 2021
 
-April 06, 2021:
---------------
--> extended from typing_no_top_findsubtypes.v
--> wexpr added
+This file contains Coq code for semantics
+and properties related to type-safety and determinism.
+Associated with union calculus with intersection types,
+section 4 in paper Union Types with Disjoint Switches.
 
-April 09, 2020:
----------------
--> extended from typing_wvalue_no_gen_sub.v
--> step-beta updated
--> changeanno inductive changed to changeanno definition
-
-April 15, 2020:
----------------
--> extended from typing_wvalue_beta.v
--> general subtyping rule dropped
 *)
+
 
 (* defns changeanno *)
 Definition changeanno (v:exp) (A:typ) (B:typ) :=    (* defn changeanno *)

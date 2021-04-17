@@ -2,31 +2,15 @@ Require Import TLC.LibLN.
 Require Import syntax.
 
 (*
-This file is created on April 09, 2021
 
-This is the main semantics file for disjoint union types
-with intersection types.
+This file contains Coq code for semantics
+and properties related to type-safety and determinism.
+Associated with union calculus with intersection types
+and generalized subtyping rule for bottom type,
+section 5.1 in paper Union Types with Disjoint Switches.
 
-syntax.v is the syntax file for this semantics
-
-This file contains type safety and deterministic lemmas
-associated with syntax_wvalue.v
-
-Bool and String primitive type
-
-Removed top from ordinary types
-
-April 06, 2021:
---------------
--> extended from typing_no_top_findsubtypes.v
--> wexpr added
-
-April 09, 2020:
----------------
--> extended from typing_wvalue.v
--> step-beta updated
--> changeanno inductive changed to changeanno definition
 *)
+
 
 (* defns changeanno *)
 Definition changeanno (v:exp) (A:typ) (B:typ) :=    (* defn changeanno *)

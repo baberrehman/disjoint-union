@@ -1,8 +1,23 @@
-This folder contains supplementry material associated with
-the paper Union Types with Disjoint Switches.
 
-Each folder contains Coq files for a variant of
-our calculus. Organization of folders is:
+========================================================
+This file explains supplementry material associated with
+paper Union Types with Disjoint Switches.
+========================================================
+
+
+===============
+Code Structure:
+===============
+
+There are 4 folders in this folder:
+1) union
+2) union-inter
+3) general-subtyping
+4) distributivity
+
+Each folder contains Coq formulization files for a variant
+of our calculus discussed in paper.
+Organization of folders is:
 
 |------------------|----------------------------------------------|--------------------------|
 |  Folder          |   Systam                                     | Reference in paper       |
@@ -22,33 +37,36 @@ Organization within each folder is as follows:
 ======
 union
 ======
-syntax.v contains syntax of the respective calculus and disjointness properties.
-typing.v contains semantics and properties related to type-safety.
+syntax.v contains syntax and disjointness properties of the union calculus.
+typing.v contains semantics and properties related to type-safety and determinism.
 1) typing.v depends upon syntax.v.
 
 
 ===========
 union-inter
 ===========
-syntax.v contains syntax of the respective calculus and disjointness properties.
-typing.v contains semantics and properties related to type-safety.
+syntax.v contains syntax and disjointness properties of the 
+union calculus with intersection types.
+typing.v contains semantics and properties related to type-safety and determinism.
 1) typing.v depends upon syntax.v.
 
 
 =================
 general-subtyping
 =================
-syntax.v contains syntax of the respective calculus and disjointness properties.
-typing.v contains semantics and properties related to type-safety.
+syntax.v contains syntax and disjointness properties of the
+union calculus with intersection types and general subtyping rule.
+typing.v contains semantics and properties related to type-safety and determinism.
 1) typing.v depends upon syntax.v.
 
 
 ==============
 distributivity
 ==============
+syntax.v contains syntax and disjointness properties of the
+union calculus with intersection types and distributive subtyping.
+typing.v contains semantics and properties related to type-safety and determinism.
 equivalence.v contains distributive subtyping.
-syntax.v contains syntax of the respective calculus and disjointness properties.
-typing.v contains semantics and properties related to type-safety.
 1) syntax.v depends upon equivalence.v.
 2) typing.v depends upon syntax.v and equivalence.v.
 3) equivalence.v depends upon LibTactics.v.
@@ -71,3 +89,12 @@ steps: https://coq.inria.fr/opam-using.html
 External Library:
 ----------------
 TLC library is required to run the files.
+
+
+==========
+How to Run
+==========
+Makefile is available for each variant in each
+respective folder. Simply run make command to compile the code.
+For example, open terminal in union folder and run make as:
+> make
