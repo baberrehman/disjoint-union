@@ -518,7 +518,7 @@ that two types are disjoint or not.
 
 Disjointness is the foundation of
 Ceylon's deterministic and order-irrelevant semantics of the switch construct.
-Forcing all cases to be disjoint eliminates ambiguity, and avoid subtle bugs that may arise from overlapping cases.
+Forcing all cases to be disjoint eliminates ambiguity, and avoid subtle bugs that may arize from overlapping cases.
 %
 People may argue that the programmer should be free to use overlapping cases
 and arrange their order intentionally. The following example provides a scenario
@@ -632,7 +632,7 @@ be safe because we would not be able to find a value for $[[x]]$ that would trig
 two branches. Now it should be clear what the relationship with disjointness for intersection
 types is. For the switch construct the dual notion -- two types are disjoint if the only
 common subtypes are bottom-like types -- seems to be helpful.
-Indeed the notion of disjointness employed in the first variant \cal in Section~\ref{sec:union}
+Indeed the notion of disjointness employeed in the first variant \cal in Section~\ref{sec:union}
 is exactly this. Formally, we have:
 
 \begin{definition}\label{def:disjointness}
@@ -849,7 +849,7 @@ in OOP languages and languages with subtyping, where often preservation
 needs to be weakened to allow the type after reduction to be a subtype.
 For instance, in Featherweight Java~\cite{DBLP:journals/toplas/IgarashiPW01}
 the preservation theorem states that the type after reduction is a
-subtype (and not necessarily the original type of the expression). In our
+subtype (and not necessarely the original type of the expression). In our
 operational semantics we opted to keep track of the static types instead,
 and preserve the original type. Thus the resulting value is $[[1 : Int \/ String]]$.
 This considerably simplifies the metatheory, although in an actual
