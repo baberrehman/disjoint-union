@@ -12,7 +12,7 @@ either \emph{algebraic datatypes}~\cite{hope} or \emph{variant types}~\cite{garr
 Languages like C or C++ support \emph{untagged} union types where
 values of the alternative types are simply stored at the same memory
 location. However, there is no checking of types when accessing values of
-such untagged types. Thus, it is up to the programmer to ensure that the proper
+such untagged types. It is up to the programmer to ensure that the proper
 values are accessed correctly in different contexts. Otherwise the
 program may produce errors by accessing the value at the incorrect type.
 
@@ -64,7 +64,7 @@ in the case. Various existing elimination constructs for unions
 employ a first-match approach. All of these three options have been explored
 and studied in the literature. 
 
-The Ceylon language is a JVM-based language that aims to provide an
+The Ceylon language~\cite{king2013ceylon} is a JVM-based language that aims to provide an
 alternative to Java. The type system is interesting
 in that it departs from existing language designs, in particular
 with respect to union types and method overloading.
