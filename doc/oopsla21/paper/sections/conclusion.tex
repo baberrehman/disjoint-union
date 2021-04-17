@@ -1,18 +1,48 @@
 \section{Conclusion and Future Work}
 \label{sec:conclusion}
 
-We develop a union calculus (\cal) for type-based union elimination.
-Technical details for \cal are discussed in \Cref{sec:union}.
-We also add intersection types in \cal and discuss technical details in \Cref{sec:inter}.
-The calculus is proved to be sound, complete, type-safe and deterministic.
-Such calculi have a variety of practical applications such as in switch expressions
-and function overloading. We plan to extend \cal for practical programming languages
-with more advance features.
+This work develops the union calculus (\cal) with union types and a
+type-based union elimination construct based on disjointness. We presented the
+type-directed semantics of the calculus, and showed that it is
+type-sound and deterministic. Disjointness plays a crutial role for
+the determinism result, as it ensures that only one branch in the
+switch elimination contruct can apply for any given value. A nice
+aspect of the work was that we were able to adapt the notion of
+disjointness used in disjoint intersection types to our variant of
+\name with union types. We believe that this reinforces fundamental
+connections between union and intersection types via duality.  The
+addition of intersection types to \name lead to some interesting
+discoveries.  In particular, it showed that the notion of disjointness
+that we were able to formulate, inspired by the work on disjoint
+intersection types, breaks.  This is not showing that the duality stops
+working. Instead, it shows that the combination of intersections
+and unions in the same system affects disjointness. None of the
+previous works on disjoint intersection types included union
+types. However, as discussed in Section~\ref{sec:related}, adding
+union types to disjoint intersection types leads to a similar problem,
+and the solution in \name can inspire solutions for adding union types to
+disjoint intersection types.
 
-A future research direction for \cal is to study it with merge operator.
-Intersection types are of significant interest with merge operator. But it is non-trivial
-to naivly add the merge operator for calculi with intersection types.
-One major problem with naive merge operator is that merge operator induces (in)coherence problem.
-Therefore, special care has to be taken to study \cal with merge operator.
-Another domain of future interest is to embed dynamic dispatch in \cal by defining a weak
-and more expressive disjointness. Dynamic dispatch will allow type checking more programs.
+We plan to extend \cal for practical programming languages with more
+advanced features. An interesting line of research is adding polymorphism.
+\emph{Disjoint polymorphism}~\cite{alpuimdisjoint} has been studied for
+calculi with disjoint intersection
+types, and we believe a similar notion can be adopted in calculi like \name.
+Another research direction for \cal is to study
+the addition of the merge operator, which calculi with disjoint
+intersection types include. The main challenge is that types such as
+$[[Int /\ Bool]]$ become inhabited. 
+Therefore, special care has to be taken
+to study \cal with a merge operator.
+It could also be interesting to to study a variant of \name that uses
+a best-match approach based on the dynamic type. This would relate
+to the extensive line of research on \emph{multi-methods}~\cite{Chambers92}
+and \emph{multiple dispatching}~\cite{CliftonLCM2000}. 
+
+
+\begin{comment}
+Another domain of future interest
+is to embed dynamic dispatch in \cal by defining a weak and more
+expressive disjointness. Dynamic dispatch will allow type checking
+more programs.
+\end{comment}
