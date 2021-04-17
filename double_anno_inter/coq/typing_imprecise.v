@@ -1198,12 +1198,13 @@ Lemma imprecise_lemma2 : forall e v, e -->* v -> e ~~>* erasevalue v.
     admit.
 Admitted.
 
-Lemma imprecise_lemma21 : forall e v v1, 
+Lemma imprecise_lemma21 : forall e v v1 A dir,
+  typing empty e dir A ->
   e -->* v ->
   erasevalue1 v v1 -> 
   e ~~>* v1.
  Proof.
-  intros e v v1 red erase. gen v1.
+  intros e v v1 A dir typ red erase. gen v1.
   inductions e; intros.
   - inverts red.
     inverts erase.
@@ -1249,10 +1250,15 @@ Lemma imprecise_lemma21 : forall e v v1,
     inverts erase.
     eapply multi_refl.
     inversion H.
-  - inverts red.
+  - inverts typ.
+    inverts* H2.
+    apply binds_empty_inv in H0. inversion H0.
     inverts erase.
-    inverts erase.
+    eapply multi_step in H; eauto.
+    inverts H.
+    inductions H.
     inverts H0.
+    inverts erase.
     inverts H.
     admit.
     admit.
