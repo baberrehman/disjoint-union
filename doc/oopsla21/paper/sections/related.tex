@@ -25,7 +25,7 @@ do not use labels and provide type-based union elimination.
 The union type constructor was first introduced by \citet{macqueen1984ideal}.
 They proposed a typing rule that eliminates union implicitly.
 The rule breaks type preservation under
-the conventional reduction strategy of lambda calculus.
+the conventional reduction strategy of the lambda calculus.
 \citet{barbanera1995intersection} solved the problem by reducing all
 copies of the same redex in parallel.
 \citet{dunfield2003type,dunfield2014elaborating} took another approach to support
@@ -189,8 +189,8 @@ order of the type tests determines the priority that is given to the various
 types being tested.
 
 \paragraph{Disjoint Intersection Types}
-\citet{pottinger1980type} and \citet{coppo1981functional} initially
-studied intersection types the research
+\citet{pottinger1980type} and \citet{coppo1981functional} were the first to study
+intersection types in the research
 literature. Forsythe~\cite{reynolds1988preliminary} is the first
 programming language to have intersection types, but it did not
 have union types.  Disjoint intersection types were first
