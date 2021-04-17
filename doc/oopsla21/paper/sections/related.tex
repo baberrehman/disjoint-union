@@ -28,12 +28,13 @@ The rule breaks type preservation under
 the conventional reduction strategy of lambda calculus.
 \citet{barbanera1995intersection} solved the problem by reducing all
 copies of the same redex in parallel.
-\citet{dunfield2014elaborating} took another approach to support
+\citet{dunfield2003type,dunfield2014elaborating} took another approach to support
 mutable references. They restricted the typing rule to only allow single
 occurrence of the subterm of union type in the typing expression.
 \citet{pierce1991programming} proposed a novel single-branch case construct
 for unions. As pointed out by \citet{dunfield2003type}, compared to the single
-occurrence approach, the only effect of it is to make the elimination explicit.
+occurrence approach, the only effect of Pierce's approach
+is to make the elimination explicit.
 \begin{comment}
 Moreover, while \citet{dunfield2014elaborating} shows that
 subtyping is not necessary for elaboration, it is not obvious how to generalize
@@ -152,12 +153,13 @@ would lead to a problematic algorithm for checking disjointness.
 In our work we provide specifications for disjointness together
 with sound and complete algorithmic formulations.
 In addition, unlike us,
-they do not study the semantics of disjoint switch expressions,
-although they mention some Ceylon examples using such expressions.
+they do not study the semantics of disjoint switch expressions.
+%although they mention some Ceylon examples using such expressions.
 
 \paragraph{Occurrence Typing}
 Occurence typing or flow typing \cite{tobin2008design} specializes or refines
-the type of variable in a type test. For example, code with occurrence typing:
+the type of variable in a type test. For example, the following code
+uses occurrence typing:
 
 \begin{lstlisting}
 Integer occurence(Integer | String val) {
@@ -188,7 +190,7 @@ types being tested.
 
 \paragraph{Disjoint Intersection Types}
 \citet{pottinger1980type} and \citet{coppo1981functional} initially
-studied intersection types in programming languages
+studied intersection types the research
 literature. Forsythe~\cite{reynolds1988preliminary} is the first
 programming language to have intersection types, but it did not
 have union types.  Disjoint intersection types were first
@@ -200,7 +202,7 @@ disjointness in \cal is the dual notion: while in $\lambda_{i}$ two types
 are disjoint if they only have top-like supertypes, in \cal two types
 are disjoint if they only have bottom-like supertypes.
 
-None of calculi with disjoint intersection types~\cite{oliveira2016disjoint,bi_et_al:LIPIcs:2018:9227,alpuimdisjoint} in the literature
+None of calculi with disjoint intersection types~\cite{oliveira2016disjoint,bi_et_al:LIPIcs:2018:9227,alpuimdisjoint,Huang:typedirected} in the literature
 includes union types. One interesting discovery of our work is that the
 presence of both intersections and unions in a calculus can affect disjointness.
 In particular, as we have seen in Section~\ref{sec:inter}, adding intersection types
