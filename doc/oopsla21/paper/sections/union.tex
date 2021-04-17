@@ -573,7 +573,7 @@ we need to keep two annotations for an lambda.
 \end{comment}
 For the second case, $[[v]]$ can also be an unannotated lambda value $[[\x.e]]$.
 With bi-directional type-checking an expression such as
-$([[\f.f 1: (Int -> Int -> Int)]]) ([[\x.x]])$
+$([[\f.f 1: ((Int -> Int) -> Int)]]) ([[\x.x]])$
 is well-typed, since bi-directional type-checking propagates
 type information to the arguments. Thus, the dynamic semantics
 needs to deal with such programs.
