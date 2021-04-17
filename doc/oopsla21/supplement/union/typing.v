@@ -1,5 +1,5 @@
 Require Import TLC.LibLN.
-Require Import syntax_wvalue.
+Require Import syntax.
 
 (*
 
