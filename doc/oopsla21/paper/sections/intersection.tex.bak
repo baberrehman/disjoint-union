@@ -77,7 +77,7 @@ In \cal they are primitive types: integers and function types.
 \subsection{Disjointness Specification}
 \label{sec:inter:disj}
 Disjointness is the most interesting aspect of the extension of \cal with
-intersection types. Unfortunately, \Cref{def:union:disj} does not work with intersection
+intersection types. Unfortunatelly, \Cref{def:union:disj} does not work with intersection
 types. In what follows, we first explain why \Cref{def:union:disj} does not work, and then
 we show how to introduce disjointness in the presence of intersection types. 
 
@@ -114,7 +114,7 @@ But it fails if  $[[A]]$ = $[[Int /\ Bool]]$ and
 $[[B]]$ = $[[Int /\ Bool]]$.
 Because $[[A]]$ ($[[Int /\ Bool]]$) and $[[B]]$ ($[[Int /\ Bool]]$) are subtypes
 of each other and are not bottom-like as per \rref{bl-andsub}.
-So, naive addition of \rref{bl-andsub} skips potential bottom-like types.
+So, naive addition of \rref{bl-andsub} skips potential bottem-like types.
 Another alternative may be:
 
 \begin{center}
@@ -155,7 +155,7 @@ However we do not adopt the Ceylon solution here for two reasons:
   challenges for the metatheory. In particular, the completeness proof
   for disjointness becomes quite challenging.
 
-\item Additionally, the assumption that intersections of disjoint types
+\item Additionaly, the assumption that intersections of disjoint types
   are equivalent to $[[Bot]]$ is too strong for some calculi with intersection
   types. If a merge operator~\cite{reynolds1988preliminary} is allowed in the calculus, 
   intersection types
@@ -194,7 +194,7 @@ We extend our previous example of type $[[Int]]$ and type $[[Bool]]$ and show ho
 disjointness based upon ordinary types categorize them as disjoint types.
 An important observation at this point is common subtypes of type $[[Int]]$ and type $[[Bool]]$
 cannot include either $[[Int]]$ or $[[Bool]]$. Problematic types are the intersection types
-such as $[[Int /\ Bool]]$. We emphasize the point that ordinary types in \cal does not contain
+such as $[[Int /\ Bool]]$. We empahsize the point that ordinary types in \cal does not contain
 intersection types. Further, all ordinary types are non-overlapping in \cal.
 Therefore, now we say that
 two types are disjoint if they do not have any common ordinary subtype. $[[Int]]$ and $[[Bool]]$
