@@ -212,7 +212,7 @@ boolean isstudent3 (Student x) { return True; }
 \end{lstlisting}
 
 \noindent Java resolves overloading by finding in all method implementations the one with
-the \textit{best} type signature that describes the argument. That means, if we
+the \textit{best} type signature that describes the argument. If we
 apply \lstinline{isstudent3} to a term of type \lstinline{Student}, the second
 implementation is chosen, as \lstinline{Student} is the best type describing the
 argument. As we can see, such best-match strategy gets rid of the
@@ -279,7 +279,7 @@ ensures that all cases in a switch expression are \textit{exhaustive}. In the ab
 example, \lstinline{x} can be either a string, an integer or a floating point
 number. The types used in the cases do not have to exactly match with the types
 of \lstinline{x}. Nevertheless, the combination of all cases must be able to
-handle all possibilities. That means, if the last case only dealt with
+handle all possibilities. If the last case only dealt with
 \lstinline{Integer} (instead of \lstinline{Integer|Float}), then the program
 would be statically rejected, since no case would deal with a floating point
 number.
@@ -329,24 +329,6 @@ As such, when values with such types are passed to the function,
 the corresponding branch is chosen and executed.
 
 \paragraph{Other applications of union types}
-Besides being used for overloading, union types can be used for other purposes too.
-For instance, we can easily encode the \lstinline{safediv} function in Section~\ref{subsec:elimination}
-in Ceylon:
-%
-\begin{lstlisting}
-String | Integer safediv3 (Integer x, Integer y){
-  if (y==0) { return "Divided by zero"; }
-  else { return (x/y); }
-}
-\end{lstlisting}
-%
-The return value can be a string or an integer.
-No tag is needed for any of them to be a \lstinline{String|Integer},
-since union types can be implicitly introduced.
-For the declared return type of the function, as long as it is
-a supertype of all possible return values, it is valid
-in Ceylon.
-
 \begin{wrapfigure}{R}{0.35\textwidth}
 \tikzset{
   state/.style={
@@ -377,7 +359,8 @@ in Ceylon.
 \end{tikzpicture}
 \end{center}
 \end{wrapfigure}
-Furthermore, another interesting application of union types in Ceylon is to
+Besides being used for overloading, union types can be used for other purposes too.
+An interesting application of union types in Ceylon is to
 encode \textit{nullable types} (or \textit{optional types}) in a type-safe way.
 A similar approach to nullable types has also been recently proposed for
 Scala~\citep{nieto20nulls}. In those languages, the type \lstinline{Null} is
@@ -393,6 +376,26 @@ enumerated class. \lstinline{Anything} is also a supertype of
 \lstinline{Object}, which is the root of primitive types, function types, all
 interfaces and any user-defined class. Notably, \lstinline{Null} is disjoint to
 \lstinline{Object}, and therefore, to all these types.
+
+Moreover, union types can also be used for error handling.
+We can easily encode the \lstinline{safediv} function in Section~\ref{subsec:elimination}
+in Ceylon:
+%
+\begin{lstlisting}
+String | Integer safediv3 (Integer x, Integer y){
+  if (y==0) { return "Divided by zero"; }
+  else { return (x/y); }
+}
+\end{lstlisting}
+%
+The return value can be a string or an integer.
+No tag is needed for any of them to be a \lstinline{String|Integer},
+since union types can be implicitly introduced.
+For the declared return type of the function, as long as it is
+a supertype of all possible return values, it is valid
+in Ceylon.
+
+
 
 
 
@@ -616,7 +619,7 @@ switch x {
 \end{lstlisting}
 
 \noindent Here we wish to determine whether $[[String \/ Int]]$ and $[[Int \/ Bool]]$
-are disjoint or not. In other words, we wish to determine whether for any possible
+are disjoint or not. In other words, we wish to determine whether, for any possible
 (dynamic) type that $[[x]]$ can have, it is unambiguous which branch to choose.
 In this case, it turns out that there is ambiguity. For instance, if $[[x]]$ is an integer,
 then either branch can be choosen. Thus \cal rejects this program with a disjointness error.
