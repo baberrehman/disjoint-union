@@ -1080,18 +1080,18 @@ Inductive istep : exp -> exp -> Prop :=    (* defn step *)
      lc_exp (e_typeof e A e1 B e2) ->
      e ~~> e' ->
      (e_typeof e A e1 B e2) ~~> (e_typeof e' A e1 B e2)
- | istep_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
+ | istep_typeofl : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (C:typ),
      lc_exp (e_typeof p A e1 B e2) ->
      pexpr p ->
      findtype p C ->
      subtyping C A ->
-     e_typeof p A e1 B e2 ~~>  (open_exp_wrt_exp e1 (e_ann p A) )
- | istep_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (x:var) (C:typ),
+     e_typeof p A e1 B e2 ~~>  (open_exp_wrt_exp e1 p)
+ | istep_typeofr : forall (p:exp) (A:typ) (e1:exp) (B:typ) (e2:exp) (C:typ),
     lc_exp (e_typeof p A e1 B e2) ->
      pexpr p ->
      findtype p C ->
      subtyping C B ->
-     e_typeof p A e1 B e2 ~~> (open_exp_wrt_exp e2 (e_ann p B) )
+     e_typeof p A e1 B e2 ~~> (open_exp_wrt_exp e2 p)
 where "e ~~> e'" := (istep e e') : env_scope.
 
 Hint Constructors istep : core.
