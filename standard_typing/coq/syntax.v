@@ -1,40 +1,13 @@
 
 (*
-Update started on April 14, 2021
+Update started on April 22, 2021
 *)
 
 (*
-This file contains the updates suggested by Bruno with Bool and String primitive type.
 
-Redundant subtyping rule from bottom type removed in this version.
-
-Subtying algorithm with Coq definition added in this version
-
-A *a B = findsubtypes A `inter` findsubtypes B == []
-
-FindSubtypes B = []
--------------------
-     B <: A
-
-Transitivity Proved
-
-Bool and String primitive type
-
-******************************************************************
-Redundant subtyping rule for bottom type removed in this version.
-******************************************************************
-
-Top removed from FindSubTypes
-
-April 06, 2021:
---------------
--> extended from syntax_no_top_findsubtypes.v
--> wexpr added
-
-April 14, 2021:
+April 22, 2021:
 ---------------
--> extended from syntax_wvalue.v
--> Imprecise syntax suggested by Bruno
+-> Bidirectional to standard typing judgement
 
 *)
 
@@ -59,14 +32,9 @@ Inductive exp : Set :=  (*r expression *)
  | e_var_b  : nat -> exp
  | e_var_f  : var -> exp
  | e_lit    : nat -> exp
- | e_ann    : exp -> typ -> exp
  | e_abs    : exp -> exp
  | e_app    : exp -> exp -> exp
  | e_typeof : exp -> typ -> exp -> typ -> exp -> exp.
-
-Inductive dirflag : Set :=  (*r typing direction *)
- | infer : dirflag
- | check : dirflag.
 
 (** Binding are mapping to term variables.
  [x ~: T] is a typing assumption *)
@@ -98,7 +66,6 @@ Fixpoint open_exp_wrt_exp_rec (k:nat) (e_5:exp) (e__6:exp) {struct e__6}: exp :=
   | (e_var_b nat) => If (k = nat) then e_5 else (e_var_b nat)
   | (e_var_f x) => e_var_f x
   | (e_lit i5) => e_lit i5
-  | (e_ann e A) => e_ann (open_exp_wrt_exp_rec k e_5 e) A
   | (e_abs e) => e_abs (open_exp_wrt_exp_rec (S k) e_5 e)
   | (e_app e1 e2) => e_app (open_exp_wrt_exp_rec k e_5 e1) (open_exp_wrt_exp_rec k e_5 e2)
   | (e_typeof e A e1 B e2) => e_typeof (open_exp_wrt_exp_rec k e_5 e) A (open_exp_wrt_exp_rec (S k) e_5 e1) B (open_exp_wrt_exp_rec (S k) e_5 e2)
@@ -120,9 +87,6 @@ Inductive lc_exp : exp -> Prop :=    (* defn lc_exp *)
      (lc_exp (e_var_f x))
  | lc_e_lit : forall i5,
      (lc_exp (e_lit i5))
- | lc_e_ann : forall (e:exp) (A:typ),
-     (lc_exp e) ->
-     (lc_exp (e_ann e A))
  | lc_e_abs : forall (L:vars) (e:exp),
       ( forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e (e_var_f x) )  )  ->
      (lc_exp (e_abs e))
@@ -142,7 +106,6 @@ Fixpoint fv_exp (e_5:exp) : vars :=
   | (e_var_b nat) => \{}
   | (e_var_f x) => \{x}
   | (e_lit i5) => \{}
-  | (e_ann e A) => (fv_exp e)
   | (e_abs e) => (fv_exp e)
   | (e_app e1 e2) => (fv_exp e1) \u (fv_exp e2)
   | (e_typeof e A e1 B e2) => (fv_exp e) \u (fv_exp e1) \u (fv_exp e2)
@@ -154,7 +117,6 @@ Fixpoint subst_exp (e_5:exp) (x5:var) (e__6:exp) {struct e__6} : exp :=
   | (e_var_b nat) => e_var_b nat
   | (e_var_f x) => (If x = x5 then e_5 else (e_var_f x))
   | (e_lit i5) => e_lit i5
-  | (e_ann e A) => e_ann (subst_exp e_5 x5 e) A
   | (e_abs e) => e_abs (subst_exp e_5 x5 e)
   | (e_app e1 e2) => e_app (subst_exp e_5 x5 e1) (subst_exp e_5 x5 e2)
   | (e_typeof e A e1 B e2) => e_typeof (subst_exp e_5 x5 e) A (subst_exp e_5 x5 e1) B (subst_exp e_5 x5 e2)

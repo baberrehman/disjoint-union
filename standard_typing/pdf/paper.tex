@@ -58,9 +58,10 @@
 
 \begin{align*}
 &Type &A, B&::= [[Top]] ~ | ~[[Bot]]~|~ Int ~|~ [[A->B]]~ |~ [[A \/ B]] ~ |~ [[A /\ B]]\\
-&Expr &e &::= x ~|~ n ~|~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[switch e A e1 B e2]]\\
-&PExpr & p &::= n ~|~ [[\x.e : A->B]] \\
-&Value &v &::= p ~|~ [[\x.e]] \\
+&Expr &e &::= x ~|~ n ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[switch e A e1 B e2]]\\
+%&Preval & p &::= n ~|~ [[\x.e : A->B]] \\
+%&Aval & w &::= [[p : A]] \\
+&Value &v &::= n ~|~ [[\x.e]] \\
 &Context & [[G]] &::= empty~ |~ [[G , x : A]]
 \end{align*}
 
@@ -103,22 +104,13 @@
 \ottdefnsReduction
 
   \begin{center}
-  {\renewcommand{\arraystretch}{1.2}
-    \begin{tabular}{|lcl|}
-      \multicolumn{3}{c}{Beta Value $[[betavalue v A]]$} \\
-      \hline
-      $[[betavalue p A]]$ & = & $[[p]]$ \\
-      $[[betavalue \x.e A]]$ & = & $[[\x.e:A]]$ \\
-      \hline
-    \end{tabular} }
-  \bigskip
   %\begin{small}
   {\renewcommand{\arraystretch}{1.2}
     \begin{tabular}{|lcl|}
-      \multicolumn{3}{c}{Dynamic Type $[[statictype p]]$} \\
+      \multicolumn{3}{c}{Dynamic Type $[[statictype v]]$} \\
       \hline
       $[[statictype i]]$ & = & $[[Int]]$ \\
-      $\rceil [[\x.e: A -> B]] \lceil$ & = & $[[A -> B]]$ \\
+      $\rceil [[\x.e]] \lceil$ & = & $[[Top -> Bot]]$ \\
       \hline
     \end{tabular} }
   \end{center}

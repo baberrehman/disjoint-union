@@ -523,9 +523,9 @@ Proof.
      * inverts Typ1.
       do 3 dependent destruction H6.
       { (* infer lam *)
+      {  
         dependent destruction H6.
       }
-      {  
         dependent destruction H3.
         constructor.
         pick_fresh x.

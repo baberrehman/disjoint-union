@@ -41,7 +41,7 @@ grammar
     | switch e A e1 B e2   ::   :: switch {{ tex switch \ [[e]] \ \{(x:[[A]])[[->]][[e1]], (y:[[B]])[[->]][[e2]]\}  }}
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
-    | betavalue v A      ::   :: betavalue {{ tex [[v]] \mathbin{\lhd} [[A]] }}
+    | betavalue v A B      ::   :: betavalue {{ tex [[v]] \mathbin{\lhd} [[A]] \mathbin{\lhd} [[B]] }}
 
 substitutions
   single exp x   :: subst
@@ -175,6 +175,22 @@ FindType :: '' ::=
     findtype ((\x.e) : A -> B) (A -> B)
 
 
+%defns
+%betavalue :: '' ::=
+  
+%  defn
+%  betavalue v A B ::   :: betavalue :: 'betavalue_'
+%  {{ com Beta Value }}
+%  {{ tex \rceil[[v]][[A]][[B]]\lceil }}
+%  by
+
+%    ---------------- :: pval
+%    betavalue (p:A) p
+
+%    ---------------------- :: abs
+%    betavalue (\x.e) (\x.e)
+
+
 defns
 FindSubTypes :: '' ::=
   
@@ -206,15 +222,9 @@ Ordinary :: '' ::=
   ---------------- :: int
   ordinary Int
 
-
   ---------------- :: arrow
   ordinary A -> B
 
-
-%  ordinary A
-%  ordinary B
-%  ---------------- :: union
-%  ordinary A \/ B
 
 
 % following definition is just to display A *s B
@@ -300,6 +310,16 @@ Disjointness :: '' ::=
     -------------------- :: btml
     Bot * A
 
+
+%	botlike A
+%	----------------------        :: btml
+%	A * B
+
+
+%	botlike B
+%	----------------------        :: btmr
+%	A * B
+
     -------------------- :: intl
     Int * A -> B
   
@@ -314,7 +334,44 @@ Disjointness :: '' ::=
     A * B
     A * C
     -------------------------     :: orr
-    A * B \/ C  
+    A * B \/ C
+
+    A * C
+    -------------------------     :: andla
+    A /\ B * C
+
+    B * C
+    -------------------------     :: andlb
+    A /\ B * C
+
+    A * B
+    -------------------------     :: andra
+    A * B /\ C
+
+    A * C
+    -------------------------     :: andrb
+    A * B /\ C
+
+    
+    findsubtypes (A /\ B)
+    ------------------------- :: disjl
+    A * B
+
+    findsubtypes (B /\ A)
+    ------------------------- :: disjr
+    A * B
+
+
+%    A * B
+%    -------------------------     :: disjl
+%    A /\ B * C
+
+
+%    A * B
+%    -------------------------     :: disjr
+%    C * A /\ B
+
+  
 
 
 defns
@@ -330,13 +387,10 @@ Subtyping :: '' ::=
     -------------------- :: top
     A <: Top
 
-    -------------------- :: bot
-    Bot <: A
-  
     -------------------- :: int
     Int <: Int
 
-  
+
     B1 <: A1 
     A2 <: B2
     -------------------------     :: arrow
@@ -372,6 +426,79 @@ Subtyping :: '' ::=
     -------------------------      :: los
     A <: B
 
+defns
+DSubtyping :: '' ::=
+
+  defn
+  A <<: B ::  :: dsubtyping :: ds_
+  {{ com Declarative Subtyping }}
+  {{ tex [[A]] \ \underline{\textless} \ [[B]] }}
+  
+  by
+
+    -------------------- :: refl
+    A <<: A
+
+    A <<: B
+    B <<: C
+    -------------------- :: trans
+    A <<: C
+
+    -------------------- :: top
+    A <<: Top
+
+    -------------------- :: btm
+    Bot <<: A
+  
+    -------------------- :: int
+    Int <<: Int
+  
+    B1 <<: A1 
+    A2 <<: B2
+    -------------------------     :: arrow
+    A1 -> A2 <<: B1 -> B2
+  
+    A1 <<: A
+    A2 <<: A
+    -------------------------     :: ora
+    A1 \/ A2 <<: A
+  
+    -------------------------     :: orb
+    A1 <<: A1 \/ A2 
+
+    -------------------------     :: orc
+    A2 <<: A1 \/ A2
+
+    A <<: A1
+    A <<: A2
+    -------------------------     :: anda
+    A <<: A1 /\ A2
+  
+    -------------------------     :: andb
+    A1 /\ A2 <<: A1 
+
+    -------------------------     :: andc
+    A1 /\ A2 <<: A2
+
+    ----------------------------------------- :: distarr
+    (A -> B1) /\ (A -> B2) <<: A -> (B1 /\ B2)
+
+    ---------------------------------------- :: distarrrev
+    A -> (B1 /\ B2) <<: (A -> B1) /\ (A -> B2)
+
+    ----------------------------------------- :: distarru
+    (A1 -> B) /\ (A2 -> B) <<: (A1 \/ A2) -> B
+
+    ----------------------------------------- :: distarrurev
+    (A1 \/ A2) -> B <<: (A1 -> B) /\ (A2 -> B)
+
+    ----------------------------------------- :: distor
+    (A1 \/ B) /\ (A2 \/ B) <<: (A1 /\ A2) \/ B
+
+    ---------------------------------------- :: distand
+    (A1 \/ A2) /\ B <<: (A1 /\ B) \/ (A2 /\ B)
+
+
 
 defns
 Typing :: '' ::=
@@ -386,14 +513,6 @@ Typing :: '' ::=
     uniq G
     ----------------- :: int
     G |- i => Int
-
-    uniq G
-    ----------------- :: bool
-    G |- b => Bool
-
-    uniq G
-    ----------------- :: str
-    G |- s => String
 
     uniq G
     x : A in G
@@ -437,6 +556,11 @@ Reduction :: '' ::=
   {{ tex [[e]] \longrightarrow [[e']] }}
   by
 
+
+    ------------------------ :: int
+    i --> i : Int
+
+
     e1 --> e1'
     ---------------- :: appl
     e1 e2 --> e1' e2
@@ -444,12 +568,18 @@ Reduction :: '' ::=
 
     e --> e'
     ---------------- :: appr
-    v e --> v e'
+    w e --> w e'
 
     ---------------------------------------------------------------- :: beta
-    ((\x.e):A->B) v --> (e [x ~> (betavalue v A)]):B
+    ((\x.e):A1->B1:A2->B2) v --> (e [x ~> (betavalue v A2 A1)]):B1:B2
 
 
+    ----------------------------------------------------------------------- :: absbeta
+    ((\x.e1):A1->B1:A2->B2) (\x.e2) --> ((e1 [x ~> ((\x.e2):A2):A1]):B1):B2
+
+
+
+    not avalue e:A
     e --> e'
     ----------------------- :: ann
     e : A --> e' : A
@@ -457,7 +587,11 @@ Reduction :: '' ::=
 
     prevalue p
     --------------------- :: rmann
-    p : A --> p
+    p : A : B --> p : B
+
+    
+    --------------------------------- :: lamann
+    (\x.e):A->B --> (\x.e):A->B:A->B
 
 
     e --> e'
@@ -468,10 +602,10 @@ Reduction :: '' ::=
     prevalue p
     statictype p <: A
     ------------------------------------------------- :: switchl
-    switch p A e1 B e2 --> e1 [x ~> p]
+    switch (p:D) A e1 B e2 --> e1 [x ~> p:A]
 
 
     prevalue p
     statictype p <: B
     ------------------------------------------------- :: switchr
-    switch p A e1 B e2 --> e2 [y ~> p]
+    switch (p:D) A e1 B e2 --> e2 [y ~> p:B]

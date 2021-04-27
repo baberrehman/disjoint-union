@@ -59,8 +59,9 @@
 \begin{align*}
 &Type &A, B&::= [[Top]] ~ | ~[[Bot]]~|~ Int ~|~ [[A->B]]~ |~ [[A \/ B]] ~ |~ [[A /\ B]]\\
 &Expr &e &::= x ~|~ n ~|~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[switch e A e1 B e2]]\\
-&PExpr & p &::= n ~|~ [[\x.e : A->B]] \\
-&Value &v &::= p ~|~ [[\x.e]] \\
+&Preval & p &::= n ~|~ [[\x.e : A->B]] \\
+&Aval & w &::= [[p : A]] \\
+&Value &v &::= w ~|~ [[\x.e]] \\
 &Context & [[G]] &::= empty~ |~ [[G , x : A]]
 \end{align*}
 
@@ -105,10 +106,10 @@
   \begin{center}
   {\renewcommand{\arraystretch}{1.2}
     \begin{tabular}{|lcl|}
-      \multicolumn{3}{c}{Beta Value $[[betavalue v A]]$} \\
+      \multicolumn{3}{c}{Beta Value $[[betavalue v A B]]$} \\
       \hline
-      $[[betavalue p A]]$ & = & $[[p]]$ \\
-      $[[betavalue \x.e A]]$ & = & $[[\x.e:A]]$ \\
+      $[[betavalue p:C A B]]$ & = & $[[p:B]]$ \\
+      $[[betavalue \x.e A B]]$ & = & $[[\x.e:A:B]]$ \\
       \hline
     \end{tabular} }
   \bigskip
