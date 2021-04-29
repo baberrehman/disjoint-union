@@ -58,7 +58,7 @@
 
 \begin{align*}
 &Type &A, B&::= [[Top]] ~ | ~[[Bot]]~|~ Int ~|~ [[A->B]]~ |~ [[A \/ B]] ~ |~ [[A /\ B]]\\
-&Expr &e &::= x ~|~ n ~|~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[switch e A e1 B e2]]\\
+&Expr &e &::= x ~|~ n ~|~ e:A ~|~[[\x.e]] ~ | ~ e1e2 ~|~ [[switch e A e1 B e2]] ~ | ~ [[e1,,e2]]\\
 &Preval & p &::= n ~|~ [[\x.e : A->B]] \\
 &Aval & w &::= [[p : A]] \\
 &Value &v &::= w ~|~ [[\x.e]] \\

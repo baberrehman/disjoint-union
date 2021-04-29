@@ -726,10 +726,10 @@
 
 
 \newcommand{\ottdruletypXXsub}[1]{\ottdrule[#1]{%
-\ottpremise{\Gamma  \vdash  \ottnt{e}  \ottsym{:}  \ottnt{B}}%
-\ottpremise{ \ottnt{B}  <:  \ottnt{A} }%
+\ottpremise{\Gamma  \vdash  \ottnt{e}  \ottsym{:}  \ottnt{A}}%
+\ottpremise{ \ottnt{A}  <:  \ottnt{B} }%
 }{
-\Gamma  \vdash  \ottnt{e}  \ottsym{:}  \ottnt{A}}{%
+\Gamma  \vdash  \ottnt{e}  \ottsym{:}  \ottnt{B}}{%
 {\ottdrulename{typ\_sub}}{}%
 }}
 
@@ -767,13 +767,6 @@
 
 % defns Reduction
 %% defn step
-\newcommand{\ottdrulestepXXint}[1]{\ottdrule[#1]{%
-}{
- \ottmv{i}  \longrightarrow  \ottmv{i}  \ottsym{:}   \mathsf{Int}  }{%
-{\ottdrulename{step\_int}}{}%
-}}
-
-
 \newcommand{\ottdrulestepXXappl}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{e_{{\mathrm{1}}}}  \longrightarrow  \ottnt{e'_{{\mathrm{1}}}} }%
 }{
@@ -785,7 +778,7 @@
 \newcommand{\ottdrulestepXXappr}[1]{\ottdrule[#1]{%
 \ottpremise{ \ottnt{e}  \longrightarrow  \ottnt{e'} }%
 }{
- \ottnt{v} \, \ottnt{e}  \longrightarrow  \ottnt{w} \, \ottnt{e'} }{%
+ \ottnt{v} \, \ottnt{e}  \longrightarrow  \ottnt{v} \, \ottnt{e'} }{%
 {\ottdrulename{step\_appr}}{}%
 }}
 
@@ -823,7 +816,6 @@
 }}
 
 \newcommand{\ottdefnstep}[1]{\begin{ottdefnblock}[#1]{$ \ottnt{e}  \longrightarrow  \ottnt{e'} $}{\ottcom{Small-step operational semantics}}
-\ottusedrule{\ottdrulestepXXint{}}
 \ottusedrule{\ottdrulestepXXappl{}}
 \ottusedrule{\ottdrulestepXXappr{}}
 \ottusedrule{\ottdrulestepXXbeta{}}

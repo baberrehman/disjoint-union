@@ -42,6 +42,7 @@ grammar
     | ( e )                :: S :: paren   {{ coq ([[e]]) }}
     | e1 [ x ~> e2 ]       :: M :: subst   {{ coq (open_exp_wrt_exp [[x e1]] [[e2]]) }}
     | betavalue v A B      ::   :: betavalue {{ tex [[v]] \mathbin{\lhd} [[A]] \mathbin{\lhd} [[B]] }}
+    | e1,,e2               ::   :: merge
 
 substitutions
   single exp x   :: subst
