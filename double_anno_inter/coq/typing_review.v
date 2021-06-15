@@ -110,9 +110,11 @@ Inductive step : exp -> exp -> Prop :=    (* defn step *)
      findtype p C ->
      subtyping C B ->
      step (e_typeof (e_ann p D) A e1 B e2)  (open_exp_wrt_exp  e2 (e_ann p B) )
- | step_inter_ann : forall (e:exp) (A B:typ),
+(*
+     | step_inter_ann : forall (e:exp) (A B:typ),
      lc_exp (e_abs e) ->
      step (e_ann  ( (e_abs e) )  (t_and A B)) (e_ann (e_ann  ( (e_abs e) )  (t_and A B)) (t_and A B))
+  *)
 where "e --> e'" := (step e e') : env_scope.
 
 Hint Constructors typing step : core.
@@ -444,20 +446,6 @@ Proof.
   inverts* H1; inverts* H2.
 Qed.
 
-Lemma pexpr_sub_inter : forall G p A B C,
-  pexpr p ->
-  typing G p check (t_and A B) ->
-  (t_and A B) <: C -> A <: C \/ B <: C.
-Proof.
-  intros. gen p.
-  inductions H1; intros; eauto.
-  forwards*: IHsubtyping A B H0.
-  forwards*: IHsubtyping A B H0.
-  forwards*: IHsubtyping1 A B H0.
-  forwards*: IHsubtyping2 A B H0.
-  destruct H1. destruct H2.
-  left*.
-Admitted.
 
 Lemma wexpr_inf_unique : forall w A B,
   wexpr w ->
@@ -777,14 +765,6 @@ destruct~ IHe. inverts* lc.
   inverts* H0. inverts* lc. 
 Qed.
 
-Lemma inv_app : forall E e1 e2 A,
-typing E (e_app e1 e2) infer A ->
-exists A1 B1, typing E e1 infer (t_arrow A1 B1) /\ typing E e2 check A1.
-Proof.
-  introv Typ.
-  inductions Typ.
-  exists* A B.
-Qed.
 
 (* need to be strengthened *)
 Lemma progress : forall e dir T,
@@ -812,6 +792,7 @@ inductions Typ; intros EQ; subst.
      apply* step_lam_ann.
      (*need a new reduction rule*)
      right. exists* (e_ann (e_ann (e_abs e0)(t_and A0 B))(t_and A0 B) ).
+     admit.
   + destruct H.
     dependent destruction Typ.
      { inverts* Typ.
@@ -826,7 +807,6 @@ inductions Typ; intros EQ; subst.
          forwards*: typing_regular Typ'.
          left*.
          right.  exists*.
-         admit.
        }
        { right. exists (e_ann x A). apply* step_ann.
          unfold not. intros. inversion H3. inversion H5. 
@@ -836,8 +816,9 @@ inductions Typ; intros EQ; subst.
      { right. exists (e_ann x C). apply* step_ann.
        unfold not. intros. inversion H3. inversion H5. }
     { 
-      right. exists* (e_ann (e_ann (e_abs e0)(t_and A0 B))(t_and A0 B) ).
+      right. exists* (e_ann (e_ann (e_abs e)(t_and A B))(t_and A B) ).
         (*another progress rule*)
+       admit.
      }
 (*case typ-app*)
  - right. destruct* IHTyp1.
@@ -881,11 +862,7 @@ inductions Typ; intros EQ; subst.
      lets: H y H6.
      eapply step_typeofl with (C:=S); eauto.
      forwards*: typing_regular Typ'.
-     inverts H5; inverts* H41.
-     inversion H4. 
-     inverts H4. eauto. inversion H4.
-     inversion H4. inversion H4. subst. auto.
-     inversion H4.
+     inverts H51; inverts* H4.
    * forwards*: pexpr_inf_typ H4.
      destruct H6 as [S [H41 H51]].
      exists (open_exp_wrt_exp e2 (e_ann p B)).
@@ -894,12 +871,7 @@ inductions Typ; intros EQ; subst.
      lets: H1 y H6.
      eapply step_typeofr with (C:=S); eauto.
      forwards*: typing_regular Typ'.
-     inverts H5; inverts* H41.
-     inversion H4.
-     inverts H4. eauto.
-     inversion H4.
-     inversion H4. inversion H4. subst. auto.
-     inversion H4.
+     inverts H51; inverts* H4.
    * inverts Typ. inversion H4.
   + destruct H4.
      exists (e_typeof x A e1 B e2).
@@ -907,6 +879,41 @@ inductions Typ; intros EQ; subst.
      forwards*: typing_regular Typ'.
  - destruct~ IHTyp1.
 Admitted.
+
+Lemma inv_app : forall E e1 e2 A dir,
+typing E (e_app e1 e2) dir A ->
+exists A1 B1, typing E e1 infer (t_arrow A1 B1) /\ typing E e2 check A1.
+Proof.
+  introv Typ.
+  inductions Typ.
+  exists* A B.
+  inverts Typ.
+  exists* A0 B.
+  forwards*: IHTyp1.
+Qed.
+
+Lemma inv_anno : forall E e A B dir,
+typing E (e_ann e A) dir B ->
+exists C, typing E e check C.
+Proof.
+  introv Typ.
+  inductions Typ.
+  exists* A.
+  inverts Typ.
+  exists* B.
+  forwards*: IHTyp1.
+Qed.
+
+Lemma inv_typeof : forall E e e1 e2 A B C dir,
+typing E (e_typeof e A e1 B e2) dir C ->
+exists D, typing E e check D.
+Proof.
+  introv Typ.
+  inductions Typ.
+  forwards*: IHTyp.
+  inverts* Typ.
+  forwards*: IHTyp1.
+Qed.
 
 Lemma determinism_dir : forall E e e1 e2 A dir, typing E e dir A -> 
 e --> e1 -> e --> e2 -> e1 = e2.
@@ -921,11 +928,10 @@ Proof.
   - inverts* He2.
   (*case step-appl*)
   - inverts* He2.
-   + inverts Typ.
+   + forwards* (?&?&?&?): inv_app. inverts H0.
      forwards*: IHHe1. rewrite* H0.
-     inverts H0. eapply typ_sub with (A:=(t_arrow A0 B)) in H7; eauto.
      forwards*: IHHe1. rewrite* H0.
-     admit.
+     forwards*: IHHe1. rewrite* H0.
    + inverts* H2. inverts* H0. 
     * inverts He1. assert (value (e_ann (e_lit i5) A0)) by auto. 
       inverts H0. contradiction.
@@ -950,10 +956,8 @@ Proof.
     * inverts* H4. assert (wexpr (e_ann (e_ann (e_abs e0) (t_arrow A1 B)) A0)) by auto.
      contradiction.
      inversion H6.
-   + inverts Typ.
-     forwards*: IHHe1 H8. rewrite* H0.
-     inverts H0. forwards*: IHHe1 H8. rewrite* H0.
-     admit.
+   + forwards* (?&?&?&?): inv_app.
+     forwards*: IHHe1 H1. rewrite* H3.
    + inverts H4. inverts H0. inverts H1. 
     * inverts He1.
      assert (wexpr (e_ann (e_lit i5) A0)) by auto. contradiction.
@@ -979,10 +983,9 @@ Proof.
       inversion H7.
     * inversion H5.
 (*case step-ann*)
-  - inverts* He2. 
-    inverts Typ. forwards*: IHHe1 H7. rewrite* H0.
-    inverts H0. forwards*: IHHe1 H6. rewrite* H0.
-    admit.
+  - inverts* He2.
+    forwards* (?&?): inv_anno.
+    forwards*: IHHe1 H0. rewrite* H1.
     inverts H3.
    + inverts He1. assert (wexpr (e_ann (e_lit i5) A1)) by auto. contradiction.
    + inverts He1. assert (wexpr (e_ann (e_bool b) A1)) by auto. contradiction.
@@ -1002,9 +1005,8 @@ Proof.
   - inverts* He2. inversion H4.
 (*case step-typeof*)
  - inverts* He2.
-  + inverts Typ. inverts H0.
-    forwards*: IHHe1 H10. rewrite* H0.
-    admit.
+  + forwards (?&?): inv_typeof Typ.
+    forwards*: IHHe1 H0. rewrite* H1.
   + inverts H8.
    * inverts He1. assert (wexpr (e_ann (e_lit i5) D)) by auto. contradiction.
    * inverts He1. assert (wexpr (e_ann (e_bool b) D)) by auto. contradiction.
