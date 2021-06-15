@@ -1,5 +1,84 @@
-#Review A
-===========
+## Review A
+
+### The research problem
+
+This paper is focused on the problem of elimination forms
+for union types.
+
+- Type-soundness
+- determinism
+- exclusivity of branches
+
+### Tags and type-directed elimination
+
+Two different aspects to understand union types:
+
+1) Are tags needed to build expressions in the language with union types?
+
+2) Is some extra information present at runtime (a tag or type) to help
+indentifying the origin of the value?
+
+We are talking about tagged vs untagged in the sense of 1). Our source
+expressions do not need tags to build expressions that have union types.
+We illustrate this with examples ...
+
+Our semantics does indeed require types to be present at runtime, we will clarify this.
+
+```
+                                  |   C/C++ | Sum types   | Union Types in this paper (and much RW)
+-------------------------------------------------------------------------------------------------
+Tags for introduction of unions   |   No    | Yes         |     No
+-------------------------------------------------------------------------------------------------
+Tags or Types present at runtime  |   No    | Yes (Tags)  |     Yes (Type annotations)
+```
+
+### Two systems
+
+There are several reasons for presenting two systems separately:
+
+1) In PL Theory papers it is quite usual to identify minimal calculi with the
+essence of the feature. Intersection types are an interesting feature that usually comes
+paired up with union types, but they can be viewed as orthogonal/complementary.
+Some languages, for example Julia, support union types
+but not intersection types (at least as far as we know). Therefore, the designers
+of such languages may be interested in calculi that have disjoint switches but not necessarely
+intersections.
+
+2) One important point of our work is to establish the relationship to the line
+of work on disjoint intersection types. Again, in PL theory there are many papers
+where people explore the design of new features but in way that establish a
+relationship (in this case via duality) to other more well-studied language features.
+
+The formulation of disjointness in Section 3 is the direct dual of the notion
+of disjointness for intersection types from past work, and the system with
+union types, disjoint switches and the notion of disjointness can be viewed
+as duals to notions that exist in calculi with dijoint intersection types.
+If we discarded the calculus in Section 3 and the first notion of disjointness
+this connection would not so direct or obvious.
+
+(From Ningning: TODO integrate ideas)
+I think the replies to the last two weakness points can be something like:
+
+tagged unions are sum types, so you have limited finite possibilities
+of a switch of a particular type, while using type-directed we inspect
+a value’s runtime type to make the choices. We use “tags” in a strict
+way as used in the literature, so type-directed elimination is not
+using “tags”. But of course some information is needed during runtime
+to really “pick” a specific branch, whether it’s type or something
+else
+
+11:52
+
+As unions are usually treated as a dual to intersections, a natural
+method to disjoint union is to follow disjoint intersections. We
+explore the design space, identify the problems, and make design
+decisions, which is in general useful to this line of research
+
+
+### Minor questions
+
+NINGNING: I don't think we need to answer all of them. But if we do, put this
+part at the end of the reply.
 
 - L 211: "Without overloaded functions the construct would not be very
 useful."  The example would be better if it showed an overloading.
@@ -79,88 +158,8 @@ In this judgement the <=> is an argument of the relation (the mode), and
 
 In Figure 1 (explained in lines 477-478 in the text).
 
-1.  What is the problem the paper is trying to solve?
-What properties should a solution to that problem have?
 
-This paper is focused on the problem of elimination forms
-for union types.
-
-- Type-soundness
-- determinism
-- exclusivity of branches
-
-2.  How are "dynamic types" different from the tags in tagged unions?
-
-Two different aspects to understand union types:
-
-1) Are tags needed to build expressions in the language with union types?
-
-2) Is some extra information present at runtime (a tag or type) to help
-indentifying the origin of the value?
-
-We are talking about tagged vs untagged in the sense of 1). Our source
-expressions do not need tags to build expressions that have union types.
-We illustrate this with examples ...
-
-Our semantics does indeed require types to be present at runtime, we will clarify this.
-
-                                  |   C/C++ | Sum types   | Union Types in this paper (and much RW)
--------------------------------------------------------------------------------------------------
-Tags for introduction of unions   |   No    | Yes         |     No
--------------------------------------------------------------------------------------------------
-Tags or Types present at runtime  |   No    | Yes (Tags)  |     Yes (Type annotations)
-
-3) What is the point of including Definition 2.1 and the material
-that depends on it, rather than proceeding directly to Definition 2.2
-and its consequences?
-&
-The paper presents two systems, one that supports intersection
-types, and one that does not.  Why not just use the more powerful
-one?
-
-There are several reasons for this:
-
-1) In PL Theory papers it is quite usual to identify minimal calculi with the
-essence of the feature. Intersection types are an interesting feature that usually comes
-paired up with union types, but they can be viewed as orthogonal/complementary.
-Some languages, for example Julia, support union types
-but not intersection types (at least as far as we know). Therefore, the designers
-of such languages may be interested in calculi that have disjoint switches but not necessarely
-intersections.
-
-2) One important point of our work is to establish the relationship to the line
-of work on disjoint intersection types. Again, in PL theory there are many papers
-where people explore the design of new features but in way that establish a
-relationship (in this case via duality) to other more well-studied language features.
-
-The formulation of disjointness in Section 3 is the direct dual of the notion
-of disjointness for intersection types from past work, and the system with
-union types, disjoint switches and the notion of disjointness can be viewed
-as duals to notions that exist in calculi with dijoint intersection types.
-If we discarded the calculus in Section 3 and the first notion of disjointness
-this connection would not so direct or obvious.
-
-(From Ningning: TODO integrate ideas)
-I think the replies to the last two weakness points can be something like:
-
-tagged unions are sum types, so you have limited finite possibilities
-of a switch of a particular type, while using type-directed we inspect
-a value’s runtime type to make the choices. We use “tags” in a strict
-way as used in the literature, so type-directed elimination is not
-using “tags”. But of course some information is needed during runtime
-to really “pick” a specific branch, whether it’s type or something
-else
-
-11:52
-
-As unions are usually treated as a dual to intersections, a natural
-method to disjoint union is to follow disjoint intersections. We
-explore the design space, identify the problems, and make design
-decisions, which is in general useful to this line of research
-
-
-#Review B
-===========
+## Review B
 
 - I realize that “why” is not the focus of this paper. It is a “what and
 how” paper. However, that makes it premature. Are you able to refer to
@@ -185,15 +184,16 @@ Section 5.1.
 Note that our notation |A| means the LOS of A.
 
 
-#Review C
-===========
+## Review C
 
-* Is there a closed expression of an intersection type?
+### Closed expressions of an intersection type?
 
 Yes, there is. In the first calculus in Section 4, such expressions are
 admitably trivial, but they do exist. For example:
 
-```\x . x+1 : Int -> Int : (Int -> Int) /\ (Int -> Top)```
+```
+\x . x+1 : Int -> Int : (Int -> Int) /\ (Int -> Top)
+```
 
 For the calculus with distributive subtyping in Section 5.2
 we can build more interesting expressions with intersection types.
@@ -220,8 +220,7 @@ T |- e <= A & B
 - it’s supplementary to our main contributions, i.e., having this rule or not does not change the contributions of this paper
 
 
-#Review D
-===========
+## Review D
 
 - p.9 l.397
 "Disjointness in the presence of intersection types"
