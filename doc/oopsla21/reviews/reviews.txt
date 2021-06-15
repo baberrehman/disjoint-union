@@ -66,7 +66,7 @@ Comments for author
 I clearly do not understand what this paper is driving at.  The
 comments below represent my best efforts to understand its goals.  I
 hope that they at least make my misunderstandings evident to the
-authors. 
+authors.
 
 L 169 "Eliminating tagged union types".   I read this as meaning
 "here's how you change the language so you don't have to use tagged
