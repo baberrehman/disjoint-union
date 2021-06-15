@@ -61,7 +61,13 @@ Inductive typing : env -> exp -> dirflag -> typ -> Prop :=    (* defn typing *)
  | typ_inter : forall G e A B,
      typing G e check A ->
      typing G e check B ->
-     typing G e check (t_and A B).
+     typing G e check (t_and A B)
+ | typ_unionl : forall G e A B,
+     typing G e check A ->
+     typing G e check (t_union A B)
+ | typ_unionr : forall G e A B,
+     typing G e check B ->
+     typing G e check (t_union A B).
 
 (* defns Reduction *)
 Reserved Notation "e --> e'" (at level 80).
@@ -356,6 +362,8 @@ Proof.
     forwards*: H x. apply_ih_bind (H0 x); eauto.
     forwards*: H1 x. apply_ih_bind (H2 x); eauto.
   - apply* typ_inter.
+  - apply* typ_unionl.
+  - apply* typ_unionr.
 Qed.
 
 (************************************************************************ *)
@@ -416,6 +424,8 @@ inductions TypT; introv; simpl.
    rewrite~ <- concat_assoc.
    apply typing_regular in TypU. destruct~ TypU.
  - apply* typ_inter.
+ - apply* typ_unionl.
+ - apply* typ_unionr.
 Qed.
 
 Lemma chk_inf1 : forall G e A B,
@@ -424,6 +434,8 @@ Proof.
   intros.
   inductions H. inverts H. auto.
   forwards*: IHtyping1.
+  forwards*: IHtyping.
+  forwards*: IHtyping.
 Qed.
 
 Lemma chk_inf : forall G e A,
