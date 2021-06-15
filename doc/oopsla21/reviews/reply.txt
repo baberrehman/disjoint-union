@@ -122,6 +122,25 @@ as duals to notions that exist in calculi with dijoint intersection types.
 If we discarded the calculus in Section 3 and the first notion of disjointness
 this connection would not so direct or obvious.
 
+(From Ningning: TODO integrate ideas)
+I think the replies to the last two weakness points can be something like:
+
+tagged unions are sum types, so you have limited finite possibilities
+of a switch of a particular type, while using type-directed we inspect
+a value’s runtime type to make the choices. We use “tags” in a strict
+way as used in the literature, so type-directed elimination is not
+using “tags”. But of course some information is needed during runtime
+to really “pick” a specific branch, whether it’s type or something
+else
+
+11:52
+
+As unions are usually treated as a dual to intersections, a natural
+method to disjoint union is to follow disjoint intersections. We
+explore the design space, identify the problems, and make design
+decisions, which is in general useful to this line of research
+
+
 #Review B
 
 - I realize that “why” is not the focus of this paper. It is a “what and
@@ -174,6 +193,10 @@ T |- e <= A     T |- e <= B
 ---------------------------
 T |- e <= A & B
 ```
+
+(From Ningning) So we should argue:
+- it’s not difficult to do. We have (maybe TODO) added this rule and all our metatheories still hold
+- it’s supplementary to our main contributions, i.e., having this rule or not does not change the contributions of this paper
 
 #Review D
 
