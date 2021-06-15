@@ -915,6 +915,17 @@ Proof.
   forwards*: IHTyp1.
 Qed.
 
+Lemma inv_typeof1 : forall E e e1 e2 A B C dir,
+typing E (e_typeof e A e1 B e2) dir C ->
+A *s B.
+Proof.
+  introv Typ.
+  inductions Typ.
+  forwards*: IHTyp.
+  auto.
+  forwards*: IHTyp1.
+Qed.
+
 Lemma determinism_dir : forall E e e1 e2 A dir, typing E e dir A -> 
 e --> e1 -> e --> e2 -> e1 = e2.
 Proof.
@@ -1053,7 +1064,20 @@ Proof.
      forwards*: H18.
      unfold not in H1.
      forwards*: H1.
-   * admit.
+   * forwards: inv_typeof1 H3.
+     inverts H1; inverts* H12.
+     forwards*: H5 t_int.
+     unfold not in H1. false.
+     apply* H1.
+     forwards*: H5 t_bool.
+     unfold not in H1. false.
+     apply* H1.
+     forwards*: H5 t_str.
+     unfold not in H1. false.
+     apply* H1.
+     forwards*: H5 (t_arrow A0 B1).
+     unfold not in H1. false.
+     apply* H1.
 (*case step-typeofr*) 
 - inverts* He2.
      + inverts H1. 
@@ -1086,5 +1110,18 @@ Proof.
         forwards*: H18.
         unfold not in H1.
         forwards*: H1.
-      * admit.
-Admitted.
+      * forwards: inv_typeof1 H3.
+      inverts H1; inverts* H12.
+      forwards*: H5 t_int.
+      unfold not in H1. false.
+      apply* H1.
+      forwards*: H5 t_bool.
+      unfold not in H1. false.
+      apply* H1.
+      forwards*: H5 t_str.
+      unfold not in H1. false.
+      apply* H1.
+      forwards*: H5 (t_arrow A0 B1).
+      unfold not in H1. false.
+      apply* H1.
+Qed.
