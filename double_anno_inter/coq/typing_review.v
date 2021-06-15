@@ -419,12 +419,12 @@ inductions TypT; introv; simpl.
 Qed.
 
 Lemma chk_inf1 : forall G e A B,
-    typing G (e_ann e B) check A -> typing G (e_ann e A) infer A.
+    typing G (e_ann e A) check B -> typing G (e_ann e A) infer A.
 Proof.
   intros.
-  inverts H. inverts H0. auto.
-  assert (typing G (e_ann e B) check (t_and A0 B0)). auto.
-  inverts* H. inverts* H2.
+  inductions H. inverts H. auto.
+  forwards*: IHtyping1.
+Qed.
 
 Lemma chk_inf : forall G e A,
     typing G (e_ann e A) check A <-> typing G (e_ann e A) infer A.
