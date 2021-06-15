@@ -496,7 +496,7 @@ Proof.
   inverts Typ.
   eapply pexpr_chk_sub; eauto.
   forwards*: IHTyp1 Prev.
-Qed.
+Admitted.
 
 (*
 
@@ -536,22 +536,6 @@ forwards*: IHTyp1.
 forwards*: IHTyp2.
 destruct H as [B1]. destruct H.
 destruct H0 as [B2]. destruct H0.
--  dependent destruction Typ. dependent destruction Typ.
-   exists* t_int.
-   assert (typing G (e_lit i5) check (t_and A B)) by auto.
-   admit.
-- exists t_bool. constructor. constructor.
-  apply typing_regular in Typ. destruct~ Typ.
-  dependent destruction Typ. dependent destruction Typ. auto.
-  admit.
-- exists t_str. constructor. constructor.
-  apply typing_regular in Typ. destruct~ Typ.
-  dependent destruction Typ. dependent destruction Typ. auto.
-  admit.
-- dependent destruction Typ.
-  dependent destruction Typ.
-  exists (t_arrow A0 B). constructor. auto. auto.
-  exists (t_and A B0). split*.
   admit.
 Admitted.
 
@@ -641,6 +625,8 @@ Proof.
           forwards*: typing_through_subst_ee.
           rewrite* (@subst_ee_intro y).
       }
+      admit.
+      admit.
   - (* typeof *)
     inverts* Red.
     + pick_fresh y. assert (y \notin L) by auto.
