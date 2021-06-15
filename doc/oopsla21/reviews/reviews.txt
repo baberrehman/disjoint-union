@@ -157,25 +157,63 @@ Review confidence
 
 Paper summary
 -------------
-At a high level, the paper discusses a known extension to languages – union types - which is not often included or well-implemented, re-justifies it, and presents a formal proof of the extension in lambda calculus.
+At a high level, the paper discusses a
+known extension to languages – union types - which is not often
+included or well-implemented, re-justifies it, and presents a formal
+proof of the extension in lambda calculus.
 
-Union types are inherently complicated because the semantics are uncertain. The paper does a good job of explaining the problems. It promotes the Ceylon language (an extension of Java) which employs the switch construct for union types, enabling overlaps to be statically rejected. An advantage is that union types can stand in for method overloading, making for more compact, but still correct, code. They can also be used for nullable types which are finding their way into an extension to Scala 3.
+Union types are inherently complicated because the semantics are
+uncertain. The paper does a good job of explaining the problems. It
+promotes the Ceylon language (an extension of Java) which employs the
+switch construct for union types, enabling overlaps to be statically
+rejected. An advantage is that union types can stand in for method
+overloading, making for more compact, but still correct, code. They
+can also be used for nullable types which are finding their way into
+an extension to Scala 3.
 
 Strengths and Weaknesses
 ------------------------
-The first nine pages of the paper are a review of Ceylon’s approach to union types. The following eleven present a calculus for union types covering typing, operational semantics and disjointedness. The whole paper is well written (except see below) and supported by the literature. The first part of the paper is sound, and is interesting for a person who works with imperative programming languages. I did not review the calculus sections.
+
+The first nine pages of the paper are a review of Ceylon’s approach to
+union types. The following eleven present a calculus for union types
+covering typing, operational semantics and disjointedness. The whole
+paper is well written (except see below) and supported by the
+literature. The first part of the paper is sound, and is interesting
+for a person who works with imperative programming languages. I did
+not review the calculus sections.
 
 Comments for author
 -------------------
-My concern about the paper is its importance. For those interested in a) details of emerging features of new languages and/or b) proofs in lambda calculus, the paper serves as an interesting read. But there are no takeaways. Apart from admiration of good work, what can the reader take to build on? As a language designer or implementer, I would like to whether this avenue of work is WORTH it. It has been lying fallow for quite a long time, and has now been resuscitated by a few small groups. Some evidence is required in order to support its value. Are there large systems that have been rewritten with union types and shown speedup? Is there a trial (even of students) that shows that union types are easier to write and understand than overloaded methods? What is the contribution of this work to computer science at large?
+
+My concern about the paper is its importance. For those interested in
+a) details of emerging features of new languages and/or b) proofs in
+lambda calculus, the paper serves as an interesting read. But there
+are no takeaways. Apart from admiration of good work, what can the
+reader take to build on? As a language designer or implementer, I
+would like to whether this avenue of work is WORTH it. It has been
+lying fallow for quite a long time, and has now been resuscitated by a
+few small groups. Some evidence is required in order to support its
+value. Are there large systems that have been rewritten with union
+types and shown speedup? Is there a trial (even of students) that
+shows that union types are easier to write and understand than
+overloaded methods? What is the contribution of this work to computer
+science at large?
 
 Minor points
-- The abstract has several grammar errors (missing articles mainly). Please go over it carefully. 
-- I was confused by the claim in the abstract regarding empty types. The text of the paper refers only to the empty set. Where do the two converge?
+
+- The abstract has several grammar errors (missing articles
+  mainly). Please go over it carefully.
+
+- I was confused by the claim in the abstract regarding empty
+  types. The text of the paper refers only to the empty set. Where do
+  the two converge?
 
 Questions for authors’ response
 ---------------------------------
-I realize that “why” is not the focus of this paper. It is a “what and how” paper. However, that makes it premature. Are you able to refer to positive evidence (maybe in Ceylon) as to why it is vital to have these constructs.
+I realize that “why” is not the focus of this paper. It is a “what and
+how” paper. However, that makes it premature. Are you able to refer to
+positive evidence (maybe in Ceylon) as to why it is vital to have
+these constructs.
 
 
 
@@ -272,7 +310,14 @@ Review confidence
 
 Paper summary
 -------------
-This work presents a fully mechanised formalization of a calculus of union types supporting disjoint switches as defined in the Java-like language Ceylon. Several extensions are considered including intersection types, a more general rule for bottom types as supported in Ceylon, and subtyping distributivity. Several interesting properties are proved including type soundness, and soundness and completeness of disjointness algorithms
+
+This work presents a fully mechanised formalization of a calculus of
+union types supporting disjoint switches as defined in the Java-like
+language Ceylon. Several extensions are considered including
+intersection types, a more general rule for bottom types as supported
+in Ceylon, and subtyping distributivity. Several interesting
+properties are proved including type soundness, and soundness and
+completeness of disjointness algorithms
 
 Strengths and Weaknesses
 ------------------------
@@ -284,15 +329,25 @@ CONS
 
 Comments for author
 -------------------
+
 p.1 l.39
-"The idea is that a function that takes an argument with a union type acts similarly to an overloaded function"
-This does not allow accurate types for overloaded functions with different return types;
-for more accurate typing intersection types are needed (authors clarify this only later in the paper, anyway I suggest to add a first comment here)
+
+"The idea is that a function that takes an argument with a union type
+acts similarly to an overloaded function"
+
+This does not allow accurate types for overloaded functions with
+different return types; for more accurate typing intersection types
+are needed (authors clarify this only later in the paper, anyway I
+suggest to add a first comment here)
 
 p.1 l.41
-"an integer is returned upon successful computation of the result; and a string (an error message) is
-returned if an error happens."
-This is not a very principled way to deal with errors, I would prefer an example based on optional types (which, in the end, are disjoint union types)
+
+"an integer is returned upon successful computation of the result; and
+a string (an error message) is returned if an error happens."
+
+This is not a very principled way to deal with errors, I would prefer
+an example based on optional types (which, in the end, are disjoint
+union types)
 
 p.5 l.198 
 "union type A ∨ B that supports only one branch"
@@ -300,7 +355,9 @@ this is not very clear, some more explanation would be useful
 
 p.5 l.240
 "so the second branch will never get evaluated!"
-some approaches prevent this with a static error similarly as what happens in Java with catch clauses to handle exceptions
+
+some approaches prevent this with a static error similarly as what
+happens in Java with catch clauses to handle exceptions
 
 p.6 l.263
 "implicit upcasting (e.g., by subtyping)"
@@ -308,7 +365,9 @@ I would prefer the term 'static resolution of overloading'
 
 p.6 l.276
 "In such case, we have an ambiguity"
-It would worth mentioning that languages as Java and C# statically reject this example
+
+It would worth mentioning that languages as Java and C# statically
+reject this example
 
 p.6 l.292
 "do not have to exactly match with the types of x" the sentence is a bit ambiguous
@@ -317,7 +376,9 @@ Maybe authors mean "to coincide with"
 
 p.7 l.308
 "and the other where the second argument is an integer"
-it should be pointed out that the example works because the two functions return the same type
+
+it should be pointed out that the example works because the two
+functions return the same type
 
 p.7 l.337
 "To illustrate the subtle difference, the diagram on the right presents part of"
@@ -335,12 +396,15 @@ see the suggested references in my comments to the related work
 
 p.8 l.370
 "top-like types"
-terms as top-like and bottom-like types are a bit misleading:
-⊤ and ⊤ ∧ ⊤ are two different type expressions denoting the same type (as happens for expressions and values as 0 and 0*0)
+terms as top-like and bottom-like types are a bit misleading: ⊤ and ⊤
+∧ ⊤ are two different type expressions denoting the same type (as
+happens for expressions and values as 0 and 0*0)
 
 p.9 l.397
 "Disjointness in the presence of intersection types"
-The given reason is debatable: in many type systems all types which are not inhabited are equivalent to the bottom type, therefore  Int ∧ Bool should be equivalent to ⊥
+The given reason is debatable: in many type systems all types which
+are not inhabited are equivalent to the bottom type, therefore Int ∧
+Bool should be equivalent to ⊥
 
 p.9 l.413
 "Since the lowest ordinary subtypes of any type is a
