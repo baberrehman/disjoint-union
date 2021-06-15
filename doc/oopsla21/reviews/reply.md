@@ -157,19 +157,26 @@ No, it is included by w in the definition of values.
 
 ## Review B
 
+### Importance
+
+NINGNING: actualy, I think we should have a `## Motivation` or maybe (`##
+Contributions`) at the very top of the reply before individual answers to each
+reviewer. In that part we should try to answer `the research problem` from
+review A and also the `importantce of this area` from review B
+
+## not sure
+
 - I realize that “why” is not the focus of this paper. It is a “what and
 how” paper. However, that makes it premature. Are you able to refer to
 positive evidence (maybe in Ceylon) as to why it is vital to have
 these constructs.
 
-- I was confused by the claim in the abstract regarding empty
-  types. The text of the paper refers only to the empty set. Where do
-  the two converge?
+## Empty types and empty sets
 
-By empty types we mean types that have no values inhabiting them.
-For instance the Bottom type is uninhabited. Our LOS definition
-in Fig 5, provides a way to find a class of empty types. In essence,
-we have that:
+We would like to clarify that by empty types we mean types that have no values
+inhabiting them. For instance the Bottom type is uninhabited. Our LOS definition
+in Fig 5, provides a way to find a class of empty types. In essence, we have
+that:
 
 if   |A| = {}   then A is an empty type.
 
@@ -184,8 +191,9 @@ Note that our notation |A| means the LOS of A.
 
 ### Closed expressions of an intersection type
 
-Yes, there is. In the first calculus in Section 4, such expressions are
-admitably trivial, but they do exist. For example:
+We would like to point out that there is closed expressions of an intersection
+type. In the first calculus in Section 4, such expressions are admitably
+trivial, but they do exist. For example:
 
 ```
 \x . x+1 : Int -> Int : (Int -> Int) /\ (Int -> Top)
