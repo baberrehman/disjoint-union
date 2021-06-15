@@ -1,3 +1,6 @@
+We thank the reviewers for their insightful and constructive comments. We will
+incorporate the reviewers' helpful suggestions in our revision.
+
 ## Review A
 
 ### The research problem
@@ -74,8 +77,57 @@ method to disjoint union is to follow disjoint intersections. We
 explore the design space, identify the problems, and make design
 decisions, which is in general useful to this line of research
 
+### Clarification
 
-### Minor questions
+We thank the reviewer for all the questions regarding the presentation. We would
+improve our presentation during revision. We would like to clarify the following
+confusions:
+
+> L 429: Is there a difference between A \/ B and A|B ?
+
+There is no difference between `A \/ B` and `A | B`. As we have explained in
+L159, in the code examples we write `A | B` since it is a common notations in
+many programming languages, while `A \/ B` is more commonly used in formalism
+of union calculi.
+
+> There are two kinds of values: annotated values and unannotated lambda
+> expressions ($\lambda x. e$)." This is not consistent with Figure 1.
+
+We would like to clarify that the description is consistent with Fig 1. In
+particular, values are defined in Fig 1 as `v ::= w | \x. e`, where `w` is
+_annotated values_ and _\x. e_ are unannotated lambda expressions.
+
+> Figure 2 shows no rule for typing something of the form $\lambda x.e : A \to
+> B$.
+
+We would like to point out that our rules can type expressions like `\x. e: A -> B`.
+In particular, it is standard in bidirectional type systems that typing an
+annotated expression like `e : A` is done by checking `e` against `A`, and then
+we can use `Typ-abs` to type-check the lambda. Specifically,
+
+```
+ Typ-var --------------------
+          x: Int |- x => Int   Int <: Int
+ Typ-sub ----------------------------------
+          x: Int |- x <= Int
+ Typ-abs ----------------------------------------
+          . |- \x. x <= Int -> Int
+ Typ-ann --------------------------------------------
+          . |- \x. x : Int -> Int => Int -> Int
+```
+
+> L 698: $e \Leftrightarrow A$ is not a judgement of Figure 2.
+
+We want to clarify that `e <=> A` is part of a judgment in Figure 2, as shown in
+the box of Figure 2. More formally, Figure 1 has given the following definition,
+and the corresponding text is in L477-478.
+
+```
+<=>  ::=   => | <=
+```
+
+
+### Minor
 
 NINGNING: I don't think we need to answer all of them. But if we do, put this
 part at the end of the reply.
@@ -89,47 +141,6 @@ on overloaded function with two implementations. For instance, we could have:
 function show (x: String) = x
 function show (x: Int) = show(x/10) ++ [ digit2Char(x%10) ]
 
-- L 429: Is there a difference between A \/ B and A|B ?
-
-No. In the code examples, we write union types as A|B (instead of A \/ B), since
-this is a common notation in many programming languages, including Ceylon.
-(L159)
-
-- "There are two kinds of values: annotated values and
-unannotated lambda expressions ($\lambda x. e$)."  This is not
-consistent with Figure 1
-
-We believe it is consistent. Values are defined in Fig 1 as:
-
-Value     v ::= w | \x . e
-
-w      --> annotated values (or AValue)
-\x . e --> unannotated lambda expressions
-
-- On the other hand, Figure 2 shows no rule for typing something of the
-form $\lambda x.e : A \to B$
-
-A value or expression of the form $\lambda x.e : A \to B$ is composed of two
-different expressions:
-
-1) an (unnanotted) lambda expression:  \lambda x.e;
-
-2) and an annotated expression (e : A).
-
-Encoding $\lambda x.e : A \to B$ in terms of those 2 expressions is a standard thing
-todo in bidirectional type systems and it is basically found in most
-papers that use bi-directional type-checking. For example, here is
-a simple derivation tree that shows how to type-check `\x. x : Int -> Int`
-
- Typ-var --------------------
-          x: Int |- x => Int   Int <: Int
- Typ-sub ----------------------------------
-          x: Int |- x <= Int
- Typ-abs ----------------------------------------
-          . |- \x. x <= Int -> Int
- Typ-ann --------------------------------------------
-          . |- \x. x : Int -> Int => Int -> Int
-
 
 - L 535: Now we have types in bold face, and yet more colons (again in
 bold face).  Do these mean something different?
@@ -142,21 +153,6 @@ something new?
 
 No, it is included by w in the definition of values.
 
-- L 698: $e \Leftrightarrow A$ is not a judgement of Figure 2.
-
-Yes, it is! It is the judgment Bi-directional Typing, whose form
-shows up on line 600 inside a box. The notation for the judgement
-form is exactly the same as the one used in the theorems that
-the reviewer is complaining about:
-
-T |- e <=> A
-
-In this judgement the <=> is an argument of the relation (the mode), and
-<=> is defined as:
-
-<=>  ::=   => | <=
-
-In Figure 1 (explained in lines 477-478 in the text).
 
 
 ## Review B
@@ -186,7 +182,7 @@ Note that our notation |A| means the LOS of A.
 
 ## Review C
 
-### Closed expressions of an intersection type?
+### Closed expressions of an intersection type
 
 Yes, there is. In the first calculus in Section 4, such expressions are
 admitably trivial, but they do exist. For example:
