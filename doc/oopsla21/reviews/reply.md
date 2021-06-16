@@ -1,20 +1,129 @@
 We thank the reviewers for their insightful and constructive comments. We will
 incorporate the reviewers' helpful suggestions in our revision.
 
+## General
+
+## Relevance/Importance of the problem
+
+Reviewers A and B have concerns regarding the relevance/importance of
+this work. Importance is indeed one of the 4 typical criteria employed
+to evaluate research papers. Here is what OOPSLA states regarding
+importance in its paper selection criteria:
+
+*Importance: The paper contributes to the advancement of knowledge 
+in the field. We also welcome papers that diverge from the dominant 
+trajectory of the field.*
+
+(From: https://2021.splashcon.org/track/splash-2021-oopsla#Call-for-Papers)
+
+We believe that it is useful to answer two questions here:
+
+1) Are union types relevant in practice?  (Reviewer B questions the
+relevance of union types in general, are programmers using them,
+etc.)
+
+2) Is the particular approach presented here with disjoint switches
+relevant?
+
+Regarding 1) we believe that the fact that many major programming
+languages such as Scala 3, TypeScript, Flow or Julia all implement
+some form of union types is already providing some evidence of the
+practical relevance of union types.
+
+We have also conducted a set of small google queries to investigate
+the extent of programmers are using union types, and comparing union types
+with some other features.  We performed the following google queries,
+and got the following results (in our machine):
+
+```
+Google query                                | number of results
+---------------------------------------------------------------
+"union type" site:stackoverflow.com         | 6990
+"intersection type" site:stackoverflow.com  | 746
+"gradual typing" site:stackoverflow.com     | 144
+"dependent type" site:stackoverflow.com     | 2760
+```
+
+The queries search on stackoverflow questions that mention some
+programming language features that are not yet available in mainstream
+languages like Java or C\#, but are available in some other widely
+used languages (and are also hot topics in PL research at the
+moment). Somewhat to our surprise union types actually have the
+largest number of results. From a quick look at the first 20 pages,
+most questions are done by TypeScript programmers. We believe that
+this provides some evidence that union types are being used in practice to a
+significant extent (at least in TypeScript).
+
+Regarding 2) We first wish to point out part of what the call for papers
+states regarding importance:
+
+"We also welcome papers that diverge from the dominant trajectory of the field."
+
+Our approach, based on disjointness, does indeed diverge in some ways
+from the approaches to union types that are taken in TypeScript or
+Flow, which can be viewed as the more dominant approaches to union
+types. In our paper, we make some arguments as to why an approach with
+disjoint switches is worth considering. For example, they can be an
+easier to reason alternative to certain forms of overloading; or they
+can be used for dealing with failure in various way. Reviewer B
+concretely asks about takeaways, and for positive evidence why the
+constructs in our paper are useful. We believe that the most
+interesting and distinctive application of disjoint switch is their
+application to dealing with Null values, and this would be
+a useful takeaway of interest for mainstream programmers.
+
+Such application relies of disjointness and cannot be emulated by
+union types a la TypeScript (for example). In Ceylon, unless
+specified otherwise, objects cannot have the null value. For an
+object to have the null value it must be declared to be nullable. For
+example:
+
+```Integer x = null;```
+
+is a type-error in Ceylon. If we wish to have objects that are null,
+we have to use optional types. With optional types, the following is allowed:
+
+```Integer? x = null;```
+
+An optional type `Integer?` is just syntactic sugar for the
+union type `Integer|Null`. As the diagram in page 7 shows
+the Null type is disjoint to all other types, except for the
+Bottom (Nothing) type. The eliminators of union types then
+become relevant to use such union types, since to use a value
+of type `Integer|Null` we must check whether we get null or an integer.
+
+As the reviewer may imagine, optional types and eliminators
+for those optional types are quite pervasibly used in Ceylon:
+everytime we use null, we are using union types in Ceylon.
+
 ## Review A
 
-### The research problem
+### The problem we solve and Question 1)
 
-This paper is focused on the problem of elimination forms
-for union types.
+This paper is focused on the problem of elimination forms for union
+types. In particular the paper investigates elimination forms based
+on disjointness of branches. Such elimination forms have not, as far
+as we know, been formally studied in the PL theory literature. The
+technical properties that a solution should have are:
 
-- Type-soundness
-- determinism
-- exclusivity of branches
+a) Type-soundness;
+b) determinism;
+c) exclusivity of branches in switch expressions.
 
-### Tags and type-directed elimination
+We have lemmas in the paper for the 3 properties above. For c)
+the relevant lemma is Lemma 3.10. Furthermore, the central
+notion that is needed for c) to hold is disjointness.
+One of the contributions of the paper is also formal definitions
+for disjointness (both declarative and algorithmic). Therefore
+2 additional properties that we are interested on are:
 
-Two different aspects to understand union types:
+d) soundness/completeness of disjointness
+
+(we also have proofs for d)).
+
+### Tags and type-directed elimination and Question 2)
+
+There are two different aspects that can be used to classify union types:
 
 1) Are tags needed to build expressions in the language with union types?
 
@@ -23,9 +132,12 @@ indentifying the origin of the value?
 
 We are talking about tagged vs untagged in the sense of 1). Our source
 expressions do not need tags to build expressions that have union types.
-We illustrate this with examples ...
+We illustrate this with examples in Section 2. For instance:
 
-Our semantics does indeed require types to be present at runtime, we will clarify this.
+FILL ME
+
+Our semantics does indeed require type annotations
+to be present at runtime, we will clarify this.
 
 ```
                                   |   C/C++ | Sum types   | Union Types in this paper (and much RW)
@@ -35,47 +147,32 @@ Tags for introduction of unions   |   No    | Yes         |     No
 Tags or Types present at runtime  |   No    | Yes (Tags)  |     Yes (Type annotations)
 ```
 
-### Two systems
+### Two systems; Why not just use the more powerful
+  one? and Question 3)
 
-There are several reasons for presenting two systems separately:
+There a few reasons for presenting two systems separately:
 
-1) In PL Theory papers it is quite usual to identify minimal calculi with the
-essence of the feature. Intersection types are an interesting feature that usually comes
-paired up with union types, but they can be viewed as orthogonal/complementary.
-Some languages, for example Julia, support union types
-but not intersection types (at least as far as we know). Therefore, the designers
-of such languages may be interested in calculi that have disjoint switches but not necessarely
+1) In PL theory papers it is usual to identify minimal calculi with
+the essence of the feature. Intersection types are an interesting
+feature that usually comes paired up with union types, but they can be
+viewed as orthogonal/complementary. Some languages, for example
+Julia, support union types but not intersection types (at least as far
+as we know). Therefore, the designers of such languages may be
+interested in calculi that have disjoint switches but not necessarely
 intersections.
 
-2) One important point of our work is to establish the relationship to the line
-of work on disjoint intersection types. Again, in PL theory there are many papers
-where people explore the design of new features but in way that establish a
-relationship (in this case via duality) to other more well-studied language features.
+2) One important point of our work is to establish the relationship to
+the line of work on disjoint intersection types. Again, in PL theory
+there are many papers where people explore the design of new features
+but in way that establish a relationship (in this case via duality) to
+other more well-studied language features.
 
 The formulation of disjointness in Section 3 is the direct dual of the notion
-of disjointness for intersection types from past work, and the system with
+of disjointness for intersection types from past work. The system with
 union types, disjoint switches and the notion of disjointness can be viewed
 as duals to notions that exist in calculi with dijoint intersection types.
 If we discarded the calculus in Section 3 and the first notion of disjointness
 this connection would not so direct or obvious.
-
-(From Ningning: TODO integrate ideas)
-I think the replies to the last two weakness points can be something like:
-
-tagged unions are sum types, so you have limited finite possibilities
-of a switch of a particular type, while using type-directed we inspect
-a value’s runtime type to make the choices. We use “tags” in a strict
-way as used in the literature, so type-directed elimination is not
-using “tags”. But of course some information is needed during runtime
-to really “pick” a specific branch, whether it’s type or something
-else
-
-11:52
-
-As unions are usually treated as a dual to intersections, a natural
-method to disjoint union is to follow disjoint intersections. We
-explore the design space, identify the problems, and make design
-decisions, which is in general useful to this line of research
 
 ### Clarification
 
@@ -103,7 +200,7 @@ _annotated values_ and _\x. e_ are unannotated lambda expressions.
 We would like to point out that our rules can type expressions like `\x. e: A -> B`.
 In particular, it is standard in bidirectional type systems that typing an
 annotated expression like `e : A` is done by checking `e` against `A`, and then
-we can use `Typ-abs` to type-check the lambda. Specifically,
+we can use `Typ-abs` to type-check the lambda. A concrete example using our rules is:
 
 ```
  Typ-var --------------------
@@ -151,8 +248,7 @@ in this case.
 - L 634: "A dually annotated lambda value..."  Is "dually annotated"
 something new?
 
-No, it is included by w in the definition of values.
-
+No, it just means "A lambda value with 2 type annotations".
 
 
 ## Review B
