@@ -765,6 +765,17 @@ destruct~ IHe. inverts* lc.
   inverts* H0. inverts* lc. 
 Qed.
 
+Lemma inv_arrow : forall G e A dir, 
+typing G (e_abs e) dir A ->
+exists A1 B1, (exists L, forall x , x \notin  L ->
+typing (G & x ~: A1) (e open_ee_var x) check B1).
+Proof.
+  introv Typ.
+  inductions Typ.
+  forwards*: IHTyp.
+  exists A B. exists* L.
+  forwards*: IHTyp1.
+Qed.
 
 (* need to be strengthened *)
 Lemma progress : forall e dir T,
@@ -816,7 +827,8 @@ inductions Typ; intros EQ; subst.
      { right. exists (e_ann x C). apply* step_ann.
        unfold not. intros. inversion H3. inversion H5. }
     { 
-      right. exists* (e_ann (e_ann (e_abs e)(t_and A B))(t_and A B) ).
+      right. exists (e_ann x (t_and A B) ). apply* step_ann.
+      unfold not. intro. inverts H0.
         (*another progress rule*)
        admit.
      }
