@@ -71,8 +71,13 @@ constructs in our paper are useful. We believe that the most
 interesting and distinctive application of disjoint switch is their
 application to dealing with Null values, and this would be
 a useful takeaway of interest for mainstream programmers.
+The Ceylon approach to null values has not gone
+unnoticed to a more general programmers audience. See for instance, the
+JOOQ article:
 
-Such application relies of disjointness and cannot be emulated by
+https://blog.jooq.org/2016/03/15/ceylon-might-just-be-the-only-language-that-got-nulls-right/
+
+Ceylon's approach relies of disjointness and cannot be emulated by
 union types a la TypeScript (for example). In Ceylon, unless
 specified otherwise, objects cannot have the null value. For an
 object to have the null value it must be declared to be nullable. For
