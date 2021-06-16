@@ -5,10 +5,10 @@ incorporate the reviewers' helpful suggestions in our revision.
 
 ## Relevance/Importance of the problem
 
-Both reviewer B and reviewer A have concerns regarding the
-relevance/importance of this work. Importance is indeed one of the 4
-typical criteria employed to evaluate research papers. Here is
-what OOPSLA states regarding importance in its paper selection criteria:
+Reviewers A and B have concerns regarding the relevance/importance of
+this work. Importance is indeed one of the 4 typical criteria employed
+to evaluate research papers. Here is what OOPSLA states regarding
+importance in its paper selection criteria:
 
 *Importance: The paper contributes to the advancement of knowledge 
 in the field. We also welcome papers that diverge from the dominant 
@@ -20,7 +20,7 @@ We believe that it is useful to answer two questions here:
 
 1) Are union types relevant in practice?  (Reviewer B questions the
 relevance of union types in general, are programmers using them,
-etc. )
+etc.)
 
 2) Is the particular approach presented here with disjoint switches
 relevant?
@@ -30,10 +30,10 @@ languages such as Scala 3, TypeScript, Flow or Julia all implement
 some form of union types is already providing some evidence of the
 practical relevance of union types.
 
-We have also conducted a set of small google queries to investigate whether
-programmers are using union types and comparing union types with some other features.
-We performed the following google queries, and got the following results
-(in our machine):
+We have also conducted a set of small google queries to investigate
+the extent of programmers are using union types, and comparing union types
+with some other features.  We performed the following google queries,
+and got the following results (in our machine):
 
 ```
 Google query                                | number of results
@@ -41,28 +41,58 @@ Google query                                | number of results
 "union type" site:stackoverflow.com         | 6990
 "intersection type" site:stackoverflow.com  | 746
 "gradual typing" site:stackoverflow.com     | 144
-"dependent types" site:stackoverflow.com    | 2760
+"dependent type" site:stackoverflow.com     | 2760
 ```
 
-The queries search on stackoverflow questions that mention
-some programming language features that are not yet
-available in mainstream languages like Java or C\#, but are available
-in some other widely used languages (and are also hot topics in PL research
-at the moment). Somewhat to our surprise union types
-actually have the largest number of results. From a quick look
-at the first 20 pages, most questions are done by TypeScript programmers. 
-We believe that this provides some evidence that programmers are actually
-using union types (at least in TypeScript).
+The queries search on stackoverflow questions that mention some
+programming language features that are not yet available in mainstream
+languages like Java or C\#, but are available in some other widely
+used languages (and are also hot topics in PL research at the
+moment). Somewhat to our surprise union types actually have the
+largest number of results. From a quick look at the first 20 pages,
+most questions are done by TypeScript programmers. We believe that
+this provides some evidence that union types are being used in practice to a
+significant extent (at least in TypeScript).
 
-Regarding 2) We first wish to point out what the call for paper states
-regarding importance:
+Regarding 2) We first wish to point out part of what the call for papers
+states regarding importance:
 
 "We also welcome papers that diverge from the dominant trajectory of the field."
 
-We mention this because the approach that we are exploring, based on disjointness
-does indeed diverge in some ways from the approaches to union types that
-are taken in TypeScript, Flow, 
+Our approach, based on disjointness, does indeed diverge in some ways
+from the approaches to union types that are taken in TypeScript or
+Flow, which can be viewed as the more dominant approaches to union
+types. In our paper, we make some arguments as to why an approach with
+disjoint switches is worth considering. For example, they can be an
+easier to reason alternative to certain forms of overloading; or they
+can be used for dealing with failure in various way. Reviewer B
+concretely asks about takeaways, for positive evidence why the
+constructs in our paper are useful. We believe that the most
+interesting and distinctive application of disjoint switch is their
+application to dealing with Null values, and this would be
+a useful takeaway of interest for mainstream programmers.
 
+Such application relies of disjointness and cannot be emulated by
+union types a la TypeScript (for example). In Ceylon, unless
+specified otherwise, objects cannot have the null value. For an
+object to have the null value it must be declared to be nullable. For
+example:
+
+```Integer x = null;```
+
+is a type-error in Ceylon. If we wish to have objects that are null,
+we have to use optional types. With optional types, the following is allowed:
+
+```Integer? x = null;```
+
+An optional type `Integer?` is just syntactic sugar for the
+union type `Integer|Null`. The eliminators of union types then
+become relevant to use such union types, since to use a value
+of type `Integer|Null` we must check whether we get null or an integer.
+
+As the reviewer may imagine, optional types and eliminators
+for those optional types are quite pervasibly used in Ceylon.
+Thus everytime we use null, we are using union types in Ceylon.
 
 ## Review A
 
@@ -89,7 +119,6 @@ d) soundness/completeness of disjointness
 
 (we also have proofs for d)).
 
-
 ### Tags and type-directed elimination and Question 2)
 
 There are two different aspects that can be used to classify union types:
@@ -105,7 +134,8 @@ We illustrate this with examples in Section 2. For instance:
 
 FILL ME
 
-Our semantics does indeed require types to be present at runtime, we will clarify this.
+Our semantics does indeed require type annotations
+to be present at runtime, we will clarify this.
 
 ```
                                   |   C/C++ | Sum types   | Union Types in this paper (and much RW)
