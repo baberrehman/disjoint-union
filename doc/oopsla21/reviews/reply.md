@@ -31,9 +31,9 @@ some form of union types is already providing some evidence of the
 practical relevance of union types.
 
 We have also conducted a set of small google queries to investigate
-the extent of programmers are using union types, and comparing union types
+the extent to which programmers are using union types, and comparing union types
 with some other features.  We performed the following google queries,
-and got the following results (in our machine):
+and got the following results:
 
 ```
 Google query                                | number of results
@@ -57,7 +57,7 @@ significant extent (at least in TypeScript).
 Regarding 2) We first wish to point out part of what the call for papers
 states regarding importance:
 
-"We also welcome papers that diverge from the dominant trajectory of the field."
+"*We also welcome papers that diverge from the dominant trajectory of the field.*"
 
 Our approach, based on disjointness, does indeed diverge in some ways
 from the approaches to union types that are taken in TypeScript or
@@ -71,8 +71,13 @@ constructs in our paper are useful. We believe that the most
 interesting and distinctive application of disjoint switch is their
 application to dealing with Null values, and this would be
 a useful takeaway of interest for mainstream programmers.
+The Ceylon approach to null values has not gone
+unnoticed to a more general programmers audience. See for instance, the
+JOOQ article:
 
-Such application relies of disjointness and cannot be emulated by
+https://blog.jooq.org/2016/03/15/ceylon-might-just-be-the-only-language-that-got-nulls-right/
+
+Ceylon's approach relies of disjointness and cannot be emulated by
 union types a la TypeScript (for example). In Ceylon, unless
 specified otherwise, objects cannot have the null value. For an
 object to have the null value it must be declared to be nullable. For
@@ -86,13 +91,15 @@ we have to use optional types. With optional types, the following is allowed:
 ```Integer? x = null;```
 
 An optional type `Integer?` is just syntactic sugar for the
-union type `Integer|Null`. The eliminators of union types then
+union type `Integer|Null`. As the diagram in page 7 shows
+the Null type is disjoint to all other types, except for the
+Bottom (Nothing) type. The eliminators of union types then
 become relevant to use such union types, since to use a value
 of type `Integer|Null` we must check whether we get null or an integer.
 
 As the reviewer may imagine, optional types and eliminators
-for those optional types are quite pervasibly used in Ceylon.
-Thus everytime we use null, we are using union types in Ceylon.
+for those optional types are quite pervasibly used in Ceylon:
+everytime we use null, we are using union types in Ceylon.
 
 ## Review A
 
@@ -164,11 +171,10 @@ the line of work on disjoint intersection types. Again, in PL theory
 there are many papers where people explore the design of new features
 but in way that establish a relationship (in this case via duality) to
 other more well-studied language features.
-
 The formulation of disjointness in Section 3 is the direct dual of the notion
 of disjointness for intersection types from past work. The system with
 union types, disjoint switches and the notion of disjointness can be viewed
-as duals to notions that exist in calculi with dijoint intersection types.
+as duals to notions that exist in calculi with disjoint intersection types.
 If we discarded the calculus in Section 3 and the first notion of disjointness
 this connection would not so direct or obvious.
 
@@ -357,7 +363,7 @@ transitivity elimination is non-trivial (we cannot simply drop the transitivity 
 Our Coq formalization comes with a formalization of a sound and complete algorithm
 as well (which is not a contribution of our paper, but rather from a paper
 that has just been conditionaly accepted at ICFP). But there are also a few
-other algorithms in previous that could be employed.
+other algorithms in previous work that could be employed.
 
 In short, because the declarative rules are simpler, and the algorithmic formulation
 that we use in Coq is not a contribution of this paper, we just present the declarative
