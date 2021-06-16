@@ -207,37 +207,7 @@ following definition, and the corresponding text is in L477-478.
 ```
 
 
-### Minor
-
-NINGNING BEGIN: I would probably remove this part.
-
-- L 211: "Without overloaded functions the construct would not be very
-useful." The example would be better if it showed an overloading.
-
-We do not show the definition of `show`, but the point is that show
-would be on overloaded function with two implementations. For
-instance, we could have:
-
-function show (x: String) = x function show (x: Int) = show(x/10) ++ [
-digit2Char(x%10) ]
-
-
-- L 535: Now we have types in bold face, and yet more colons (again in
-bold face). Do these mean something different?
-
-No, the bold face is just highlighting the examples, and the colon is
-a punctiation mark in this case.
-
-- L 634: "A dually annotated lambda value..." Is "dually annotated"
-something new?
-
-No, it just means "A lambda value with 2 type annotations".
-
-NINGNING END
-
-
 ## Review B
-
 
 ### Empty types and empty sets
 
