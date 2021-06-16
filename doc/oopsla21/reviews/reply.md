@@ -7,16 +7,14 @@ incorporate the reviewers' helpful suggestions in our revision.
 
 Both reviewer B and reviewer A have concerns regarding the
 relevance/importance of this work. Importance is indeed one of the 4
-typical criteria employed to evaluate research papers, and OOPSLA
-explicitly mentions importance in its paper selection criteria:
-
-https://2021.splashcon.org/track/splash-2021-oopsla#Call-for-Papers
-
-Here is what is said about Importance:
+typical criteria employed to evaluate research papers. Here is
+what OOPSLA states regarding importance in its paper selection criteria:
 
 *Importance: The paper contributes to the advancement of knowledge 
 in the field. We also welcome papers that diverge from the dominant 
 trajectory of the field.*
+
+(From: https://2021.splashcon.org/track/splash-2021-oopsla#Call-for-Papers)
 
 We believe that it is useful to answer two questions here:
 
