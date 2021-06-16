@@ -66,7 +66,7 @@ types. In our paper, we make some arguments as to why an approach with
 disjoint switches is worth considering. For example, they can be an
 easier to reason alternative to certain forms of overloading; or they
 can be used for dealing with failure in various way. Reviewer B
-concretely asks about takeaways, for positive evidence why the
+concretely asks about takeaways, and for positive evidence why the
 constructs in our paper are useful. We believe that the most
 interesting and distinctive application of disjoint switch is their
 application to dealing with Null values, and this would be
