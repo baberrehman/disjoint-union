@@ -86,13 +86,15 @@ we have to use optional types. With optional types, the following is allowed:
 ```Integer? x = null;```
 
 An optional type `Integer?` is just syntactic sugar for the
-union type `Integer|Null`. The eliminators of union types then
+union type `Integer|Null`. As the diagram in page 7 shows
+the Null type is disjoint to all other types, except for the
+Bottom (Nothing) type. The eliminators of union types then
 become relevant to use such union types, since to use a value
 of type `Integer|Null` we must check whether we get null or an integer.
 
 As the reviewer may imagine, optional types and eliminators
-for those optional types are quite pervasibly used in Ceylon.
-Thus everytime we use null, we are using union types in Ceylon.
+for those optional types are quite pervasibly used in Ceylon:
+everytime we use null, we are using union types in Ceylon.
 
 ## Review A
 
