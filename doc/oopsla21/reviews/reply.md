@@ -10,8 +10,8 @@ this work. Importance is indeed one of the 4 typical criteria employed
 to evaluate research papers. Here is what OOPSLA states regarding
 importance in its paper selection criteria:
 
-*Importance: The paper contributes to the advancement of knowledge 
-in the field. We also welcome papers that diverge from the dominant 
+*Importance: The paper contributes to the advancement of knowledge
+in the field. We also welcome papers that diverge from the dominant
 trajectory of the field.*
 
 (From: https://2021.splashcon.org/track/splash-2021-oopsla#Call-for-Papers)
@@ -285,18 +285,9 @@ Note that our notation |A| means the LOS of A.
 
 ### Closed expressions of an intersection type
 
-We would like to point out that there is closed expressions of an intersection
-type. In the first calculus in Section 4, such expressions are admitably
-trivial, but they do exist. For example:
-
-```
-\x . x+1 : Int -> Int : (Int -> Int) /\ (Int -> Top)
-```
-
-For the calculus with distributive subtyping in Section 5.2
-we can build more interesting expressions with intersection types.
-For example, we can write overloaded functions that have intersection types,
-and where the match construct can serve the purpose of introducing intersections:
+We would like to point out that there are some values of an intersection
+type. For example, we can write overloaded functions where the match construct
+can serve the purpose of introducing intersections:
 
 ```
 \x . switch x {
@@ -305,7 +296,7 @@ and where the match construct can serve the purpose of introducing intersections
      } : (Int \/ Bool) -> Int : (Int ->  Int) /\ (Bool -> Int)
 ```
 
-TODO: Study adding
+It would also be possible to extend our system by the conventional typing rule
 
 ```
 T |- e <= A     T |- e <= B
@@ -313,9 +304,15 @@ T |- e <= A     T |- e <= B
 T |- e <= A & B
 ```
 
-(From Ningning) So we should argue:
-- it’s not difficult to do. We have (maybe TODO) added this rule and all our metatheories still hold
-- it’s supplementary to our main contributions, i.e., having this rule or not does not change the contributions of this paper
+to accept more terms of an intersection type
+
+```
+\x. x : (Int -> Int) & (Bool -> Bool)
+```
+
+But it does not really change the expressiveness, since the typing rule of
+function application requires the function to have an arrow type.
+
 
 
 ## Review D
