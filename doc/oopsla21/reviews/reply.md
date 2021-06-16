@@ -83,12 +83,16 @@ specified otherwise, objects cannot have the null value. For an
 object to have the null value it must be declared to be nullable. For
 example:
 
-```Integer x = null;```
+```
+Integer x = null;
+```
 
 is a type-error in Ceylon. If we wish to have objects that are null,
 we have to use optional types. With optional types, the following is allowed:
 
-```Integer? x = null;```
+```
+Integer? x = null;
+```
 
 An optional type `Integer?` is just syntactic sugar for the
 union type `Integer|Null`. As the diagram in page 7 shows
