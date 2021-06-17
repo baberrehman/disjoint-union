@@ -44,19 +44,22 @@ forms of overloading; and they can be used for dealing with failure in
 various way. One of the most interesting and distinctive application
 of disjoint switch is their application to dealing with Null values,
 and this would be a useful takeaway of interest for mainstream
-programmers. The Ceylon approach to null values has not gone unnoticed
-to a more general programmers audience (e.g., [1]). Ceylon's approach,
-built on top of disjointness, cannot be emulated by languages with
-only union types, e.g., TypeScript. In Ceylon, unless specified
-otherwise, objects cannot have the null value. For an object to have
-the null value it must be declared to be nullable, e.g., `Integer?`,
-which can be considered as syntactic sugar for the union type `Integer
-| Null`. The problem of null is ofcourse a very well-known in
-mainstream languages. We think a takeaway of the paper for mainstream
-programmers is that union types, disjointness and disjoint switches
-allow a clean and simple way to ensure that code that may contain null
-values checks for that possibility. Furthermore, there are other
-applications as briefly illustrated in the paper. 
+programmers.
+
+The Ceylon approach to null values has not gone unnoticed to a more
+general programmers audience (e.g., [1]). Disjointness plays a central
+role here. In Ceylon, unless specified otherwise, objects cannot have
+the null value.  For an object to have the null value it must be
+declared to be nullable, e.g., `Integer?`, which can be considered as
+syntactic sugar for the union type `Integer | Null`. Disjointness
+plays a crucial role in Ceylon's approach as we need to ensure that
+values of the Null type are disjoint to values of other objects.  The
+problem of null is ofcourse a very well-known in mainstream languages.
+We think a takeaway of the paper for mainstream programmers is that
+union types, disjointness and disjoint switches allow a clean and
+simple way to ensure that code that may contain null values checks for
+that possibility. Furthermore, there are other applications as briefly
+illustrated in the paper.
 
 Although the focus of our paper is not on the applications, but rather
 on the formalization of the semantics, we are happy to include more
