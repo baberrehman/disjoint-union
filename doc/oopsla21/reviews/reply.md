@@ -114,10 +114,9 @@ Therefore additional properties that we are interested on are:
 
 d) soundness/completeness of disjointness
 
-We have fully mechanized the proofs in Coq for those desirable
-properties.
+We have lemmas in the paper for all the properties above. And we have
+fully mechanized the proofs in Coq for those desirable properties.
 
-We have lemmas in the paper for all the properties above.
 
 ### Tags and type-directed elimination (Question 2)
 
