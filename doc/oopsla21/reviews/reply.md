@@ -1,30 +1,26 @@
 We thank the reviewers for their insightful and constructive comments.
-We will incorporate the reviewers' helpful suggestions in our
-revision.
+Below we first discuss the contributions, and then answer other main
+questions. We will incorporate the reviewers' helpful suggestions in
+our revision.
 
-## Relevance/Importance of the problem (Common concerns from Review A & B)
+# Overview
 
-Following the OOPSLA paper selection criteria on importance [1]:
+In the general overview of the reply we wish to mainly address the
+concerns by Reviewer A and B regarding relevance. We also discuss
+various other concerns in the detailed reply. 
 
-*Importance: The paper contributes to the advancement of knowledge in
-the field. We also welcome papers that diverge from the dominant
-trajectory of the field.*
+## Relevance and Contributions
 
-we would like to answer the question from the following two aspects:
-
-(1) Are union types relevant in practice?
-(2) Is the particular approach presented here with disjoint switches
-relevant?
-
-Regarding (1) we believe that the fact that many major programming
-languages such as Scala 3, TypeScript, Flow or Julia all implement
-some form of union types is already providing some evidence of the
+First, we would like to emphasize the relevance of union types. In
+particular, some form of union types has been implemented in many
+major programming languages such as Scala 3, TypeScript, Flow or
+Julia. We believe this is already providing some evidence of the
 practical relevance of union types.
 
 We have also conducted a set of small google queries to investigate
 the extent to which programmers are using union types, and comparing
-union types with some other features. We performed the following
-google queries, and got the following results:
+union types with some other language features under heavy development
+in the community. The queries the results are given below.
 
 ```
 Google query                                | number of results
@@ -35,95 +31,97 @@ Google query                                | number of results
 "dependent type" site:stackoverflow.com     | 2760
 ```
 
-The queries search on stackoverflow questions that mention some
-programming language features that are not yet available in mainstream
-languages like Java or C\#, but are available in some other widely
-used languages (and are also hot topics in PL research at the moment).
 Somewhat to our surprise union types actually have the largest number
 of results. From a quick look at the first 20 pages, most questions
-are done by TypeScript programmers. We believe that this provides some
+are done by TypeScript programmers. We view these results mostly as
 evidence that union types are being used in practice to a significant
-extent (at least in TypeScript).
+extent (at least in TypeScript), not as a direct comparison of
+absolute relevance between language features.
 
-Regarding 2) We first wish to point out part of what the call for
-papers states regarding importance:
-
-"*We also welcome papers that diverge from the dominant trajectory of
-the field.*"
-
-Our approach, based on disjointness, does indeed diverge in some ways
-from the approaches to union types that are taken in TypeScript or
-Flow, which can be viewed as the more dominant approaches to union
-types. In our paper, we make some arguments as to why an approach with
-disjoint switches is worth considering. For example, they can be an
-easier to reason alternative to certain forms of overloading; or they
-can be used for dealing with failure in various way. Reviewer B
-concretely asks about takeaways, and for positive evidence why the
-constructs in our paper are useful. We believe that the most
-interesting and distinctive application of disjoint switch is their
-application to dealing with Null values, and this would be a useful
-takeaway of interest for mainstream programmers. The Ceylon approach
-to null values has not gone unnoticed to a more general programmers
-audience. See for instance, the JOOQ article:
-
-https://blog.jooq.org/2016/03/15/ceylon-might-just-be-the-only-language-that-got-nulls-right/
-
-Ceylon's approach relies of disjointness and cannot be emulated by
-union types a la TypeScript (for example). In Ceylon, unless specified
+Second, our work, based on disjoint switches, contributes a novel
+approach in the general design space of union types that is different
+from the approaches to union types in TypeScript or Flow. As described
+in the paper, they can be an easier to reason alternative to certain
+forms of overloading; and they can be used for dealing with failure in
+various way. One of the most interesting and distinctive application
+of disjoint switch is their application to dealing with Null values,
+and this would be a useful takeaway of interest for mainstream
+programmers. The Ceylon approach to null values has not gone unnoticed
+to a more general programmers audience (e.g., [1]). Ceylon's approach,
+built on top of disjointness, cannot be emulated by languages with
+only union types, e.g., TypeScript. In Ceylon, unless specified
 otherwise, objects cannot have the null value. For an object to have
-the null value it must be declared to be nullable. For example:
+the null value it must be declared to be nullable, e.g., `Integer?`,
+which can be considered as syntactic sugar for the union type `Integer
+| Null`. The problem of null is ofcourse a very well-known in
+mainstream languages. We think a takeaway of the paper for mainstream
+programmers is that union types, disjointness and disjoint switches
+allow a clean and simple way to ensure that code that may contain null
+values checks for that possibility. Furthermore, there are other
+applications as briefly illustrated in the paper. 
 
-```
-Integer x = null;
-```
+Although the focus of our paper is not on the applications, but rather
+on the formalization of the semantics, we are happy to include more
+discussion about relevant in the revision. We will add a simple
+extension to our calculi (basically a Unit type with the single value
+null) to illustrate this particular application of union types and
+disjoint switches further in the paper.
 
-is a type-error in Ceylon. If we wish to have objects that are null,
-we have to use optional types. With optional types, the following is
-allowed:
+# Changes
 
-```
-Integer? x = null;
-```
+We plan todo the following changes to the revision:
 
-An optional type `Integer?` is just syntactic sugar for the union type
-`Integer|Null`. As the diagram in page 7 shows the Null type is
-disjoint to all other types, except for the Bottom (Nothing) type. The
-eliminators of union types then become relevant to use such union
-types, since to use a value of type `Integer|Null` we must check
-whether we get null or an integer.
+1) Add a Unit type to the calculi (with a single value null) and
+illustrate the approach to Nullable types in more detail.
 
-As the reviewer may imagine, optional types and eliminators for those
-optional types are quite pervasibly used in Ceylon: everytime we use
-null, we are using union types in Ceylon.
+2) Be clearer that while tags are not needed in source expressions,
+type annotations are needed at runtime and they play a similar role
+to tags there.
+
+3) Clarify that the calculi with intersection types can introduce
+non-trivial values with intersection types.
+
+4) Include more discussion about distributivity and algorithmic
+subtyping for the calculus in Section 5.2.
+
+5) Add related work on union types.
+
+6) Clarify various confusions and issues with notation pointed
+out by the reviewers.
+
+# Detailed Reply
 
 ## Review A
 
-### The problem we solve and Question 1)
+### The problem that this paper solves (Question 1)
 
-This paper is focused on the problem of elimination forms for union
-types. In particular the paper investigates elimination forms based on
-disjointness of branches. Such elimination forms have not, as far as
-we know, been formally studied in the PL theory literature. The
-technical properties that a solution should have are:
+This paper is focused on the design of elimination forms for union
+types. In particular the paper investigates novel elimination forms
+based on disjointness of branches. Such elimination forms have not, as
+far as we know, been formally studied in the PL theory literature.
+We believe such forms are important, as emphasized above.
+
+Technically, we are interested in a solution that enjoys:
 
 a) Type-soundness; b) determinism; c) exclusivity of branches in
 switch expressions.
 
-We have lemmas in the paper for the 3 properties above. For c) the
-relevant lemma is Lemma 3.10. Furthermore, the central notion that is
-needed for c) to hold is disjointness. One of the contributions of the
-paper is also formal definitions for disjointness (both declarative
-and algorithmic). Therefore 2 additional properties that we are
-interested on are:
+Furthermore, the central notion that is needed for c) to hold is
+disjointness. One of the contributions of the paper is also formal
+definitions for disjointness (both declarative and algorithmic).
+Therefore additional properties that we are interested on are:
 
 d) soundness/completeness of disjointness
 
-(we also have proofs for d)).
+We have fully mechanized the proofs in Coq for those desirable
+properties.
 
-### Tags and type-directed elimination and Question 2)
+We have lemmas in the paper for all the properties above.
 
-There are two different aspects that can be used to classify union
-types:
+### Tags and type-directed elimination (Question 2)
+
+We believe there are two different aspects that can be used to
+classify union types:
 
 1) Are tags needed to build expressions in the language with union
 types?
@@ -131,14 +129,25 @@ types?
 2) Is some extra information present at runtime (a tag or type) to
 help indentifying the origin of the value?
 
-We are talking about tagged vs untagged in the sense of 1). Our source
-expressions do not need tags to build expressions that have union
-types. We illustrate this with examples in Section 2. For instance:
+The discussion on tagged vs untagged in the paper is in the sense of
+1). Our source expressions do not need tags to build expressions that have union
+types, as illustrated in Section 2.
 
-FILL ME
+The fact that tags are not present in source expressions creates
+quite different challenges for the design of languages, compared to
+traditional tagged sum types. In particular, as we explain in both the
+Introduction and Section 2, we have to deal with complications that
+arize from subtyping and types that can overlap on branches. Language
+designs with tagged sum types, do not have such problems. 
 
-Our semantics does indeed require type annotations to be present at
-runtime, we will clarify this.
+On the other hand, we will make it more clear during revision that our
+semantics requires type annotations to be present at runtime. We
+believe this is a reasonable approach (and is adopted by many
+approaches), as it provides significant flexibility, while ensuring
+type safety.
+
+The follwing table provides an overview of different approaches to
+union types:
 
 ```
                                   |   C/C++ | Sum types   | Union Types in this paper (and much RW)
@@ -148,30 +157,29 @@ Tags for introduction of unions   |   No    | Yes         |     No
 Tags or Types present at runtime  |   No    | Yes (Tags)  |     Yes (Type annotations)
 ```
 
-### Two systems; Why not just use the more powerful
-  one? and Question 3)
+### Presentation of Two Systems (and Question 3)
 
 There a few reasons for presenting two systems separately:
 
 1) In PL theory papers it is usual to identify minimal calculi with
 the essence of the feature. Intersection types are an interesting
-feature that usually comes paired up with union types, but they can be
-viewed as orthogonal/complementary. Some languages, for example Julia,
+feature that often comes paired up with union types, but they can be
+viewed as being orthogonal/complementary. Some languages, for example Julia,
 support union types but not intersection types (at least as far as we
 know). Therefore, the designers of such languages may be interested in
 calculi that have disjoint switches but not necessarely intersections.
 
 2) One important point of our work is to establish the relationship to
 the line of work on disjoint intersection types. Again, in PL theory
-there are many papers where people explore the design of new features
+there are many papers that explore the design of new features
 but in way that establish a relationship (in this case via duality) to
 other more well-studied language features. The formulation of
 disjointness in Section 3 is the direct dual of the notion of
-disjointness for intersection types from past work. The system with
-union types, disjoint switches and the notion of disjointness can be
-viewed as duals to notions that exist in calculi with disjoint
+disjointness for intersection types from past work. In the system with
+union types only, the notion of disjointness can be
+viewed as a direct dual to notions that exist in calculi with disjoint
 intersection types. If we discarded the calculus in Section 3 and the
-first notion of disjointness this connection would not so direct or
+first notion of disjointness this connection would not be direct or
 obvious.
 
 ### Clarification
@@ -185,15 +193,15 @@ would like to clarify the following confusions:
 There is no difference between `A \/ B` and `A | B`. As we have
 explained in L159, in the code examples we write `A | B` since it is a
 common notations in many programming languages, while `A \/ B` is more
-commonly used in formalism of union calculi.
+commonly used in calculi with union types.
 
 > There are two kinds of values: annotated values and unannotated
 > lambda expressions ($\lambda x. e$)." This is not consistent with
 > Figure 1.
 
-We would like to clarify that the description is consistent with
-Fig 1. In particular, values are defined in Fig 1 as `v ::= w | \x.
-e`, where `w` is _annotated values_ and _\x. e_ are unannotated lambda
+We believe that the description is consistent with Fig 1. In
+particular, values are defined in Fig 1 as `v ::= w | \x. e`, where
+`w` are _annotated values_ and `\x. e` are unannotated lambda
 expressions.
 
 > Figure 2 shows no rule for typing something of the form $\lambda
@@ -227,50 +235,7 @@ following definition, and the corresponding text is in L477-478.
 ```
 
 
-### Minor
-
-NINGNING: I don't think we need to answer all of them. But if we do,
-put this part at the end of the reply.
-
-- L 211: "Without overloaded functions the construct would not be very
-useful." The example would be better if it showed an overloading.
-
-We do not show the definition of `show`, but the point is that show
-would be on overloaded function with two implementations. For
-instance, we could have:
-
-function show (x: String) = x function show (x: Int) = show(x/10) ++ [
-digit2Char(x%10) ]
-
-
-- L 535: Now we have types in bold face, and yet more colons (again in
-bold face). Do these mean something different?
-
-No, the bold face is just highlighting the examples, and the colon is
-a punctiation mark in this case.
-
-- L 634: "A dually annotated lambda value..." Is "dually annotated"
-something new?
-
-No, it just means "A lambda value with 2 type annotations".
-
-
 ## Review B
-
-### Importance
-
-NINGNING: actualy, I think we should have a `## Motivation` or maybe
-(`## Contributions`) at the very top of the reply before individual
-answers to each reviewer. In that part we should try to answer `the
-research problem` from review A and also the `importantce of this
-area` from review B
-
-### not sure
-
-- I realize that “why” is not the focus of this paper. It is a “what
-and how” paper. However, that makes it premature. Are you able to
-refer to positive evidence (maybe in Ceylon) as to why it is vital to
-have these constructs.
 
 ### Empty types and empty sets
 
@@ -292,7 +257,7 @@ Note that our notation |A| means the LOS of A.
 
 ### Closed expressions of an intersection type
 
-We would like to point out that there are some values of an
+We would like to point out that there are (non-trivial) values of an
 intersection type. For example, we can write overloaded functions
 where the match construct can serve the purpose of introducing
 intersections:
@@ -304,8 +269,20 @@ intersections:
      } : (Int \/ Bool) -> Int : (Int ->  Int) /\ (Bool -> Int)
 ```
 
-It would also be possible to extend our system by the conventional
-typing rule
+It is also worthwhile noting that, more generally, in calculi with union
+and intersection types, elimination/introduction constructs for
+union/intersection types can often be dually used to serve as the
+introduction/elimination construct for intersection/union types.
+For instance, Dunfield notes that her merge operator (which is
+primarely presented as a way to introduce values with intersection types)
+can also be viewed/used as an elimination form for union types
+(see the discussion in the last paragraph of page 7 in the reference
+that we provide). 
+
+It would also be possible to extend our system by the following
+conventional typing rule to accept more terms of an intersection type
+like `\x. x : (Int -> Int) & (Bool -> Bool)`. Although such extension
+would be orthogonal to the main contributions of this work.
 
 ```
 T |- e <= A     T |- e <= B
@@ -313,70 +290,31 @@ T |- e <= A     T |- e <= B
 T |- e <= A & B
 ```
 
-to accept more terms of an intersection type
-
-```
-\x. x : (Int -> Int) & (Bool -> Bool)
-```
-
-But it does not really change the expressiveness, since the typing
-rule of function application requires the function to have an arrow
-type.
-
-
 
 ## Review D
 
-- p.9 l.397 "Disjointness in the presence of intersection types" The
-given reason is debatable: in many type systems all types which are
-not inhabited are equivalent to the bottom type, therefore Int ∧ Bool
-should be equivalent to ⊥
+### Declarative specification of λu
 
-We agree that this depends on what systems you are considering, and we
-get back to this matter later on in the paper. In particular, one of
-the extensions that we consider, in Section 5.1, will indeed make `Int
-/\ Bool` equivalent to Bottom.
+We believe that it is simpler to illustrate the key idea by presenting
+the declarative specification. In subtyping relations with
+distributivity laws, presenting an algorithmic system which eliminates
+transitivity is non-trivial, as it cannot be simply dropped.
+In our Coq formalization we do have a sound, complete and decidable
+algorithmic formulation of the subtyping relation. This is not,
+however, a contribution of our work. There are a few algorithms in
+previous work that could be employed.
 
-- "(2) Additionally, the assumption ..." This is a weak motivation; in
-the calculus of Oliveira et al. also Int and Bool are inhabited by
-1,,True
+We would be happy to include more discussion about subtyping
+distributivity, and the algorithmic system in the revision.
 
-Similarly to the previous answer, we want to emphasize that in the
-paper we have also formalized a variant where Int /\ Bool are
-equivalent to bottom. See Section 5.1.
+### Related Work
 
-- p.19 sect.5.2 Subtyping Distributivity is a non-trivial extension
-which would deserve more comments, examples and explanations.
+We thank the review for pointing out additional related work on union
+types for OO languages. We will incorporate them in the revision.
 
-For the final version we will dedicate more space to distributivity,
-with more examples and a discussion about the algorithmic aspects.
-
-- Sect.6 Related Work I suggest to mention also the following papers
-which dea with union types for oo languages
-
-Thank you for the suggestions. We will look into the papers.
-
-
-- Why does sect.5.2 present a declarative version for λu ?
-
-The rules for the declarative version of subtyping are much simpler
-than the algorithmic formulation. In subtyping relations with
-distributivity laws, transitivity elimination is non-trivial (we
-cannot simply drop the transitivity rule).
-
-Our Coq formalization comes with a formalization of a sound and
-complete algorithm as well (which is not a contribution of our paper,
-but rather from a paper that has just been conditionaly accepted at
-ICFP). But there are also a few other algorithms in previous work that
-could be employed.
-
-In short, because the declarative rules are simpler, and the
-algorithmic formulation that we use in Coq is not a contribution of
-this paper, we just present the declarative formulation.
-
-However, for the revision of the paper we will talk more about the
-algorithmic formulation.
 
 ## Reference
 
-[1] https://2021.splashcon.org/track/splash-2021-oopsla#Call-for-Papers
+[1] https://blog.jooq.org/2016/03/15/ceylon-might-just-be-the-only-language-that-got-nulls-right/
+[2] Jana Dunfield, Elaborating Intersection and Union Types, JFP 2014
+(available at https://research.cs.queensu.ca/home/jana/papers/intcomp-jfp/Dunfield14_elaboration.pdf)
