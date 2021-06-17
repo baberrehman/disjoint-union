@@ -1,17 +1,17 @@
 
 (*
-This file is created on April 22, 2021
+This file is created on June 17, 2021
 
-syntax.v is the syntax file for this semantics
+syntax_unit.v is the syntax file for this semantics
 
-April 22, 2020:
+April 22, 2021:
 ---------------
--> Bidirectional to standard typing judgement
+-> Added unit type
 
 *)
 
 Require Import TLC.LibLN.
-Require Import syntax.
+Require Import syntax_unit.
 
 (** definitions *)
 
@@ -21,7 +21,9 @@ Inductive value : exp -> Prop :=    (* defn value *)
      value (e_lit i5)
  | val_abs : forall e,
      lc_exp (e_abs e) ->
-     value (e_abs e).
+     value (e_abs e)
+ | val_null :
+     value e_null.
 
 (* defns FindType *)
 Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
@@ -29,8 +31,11 @@ Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
      findtype (e_lit i5) t_int
  | findtype_arrow : forall (e:exp),
      lc_exp (e_abs e) ->
-     findtype  (e_abs e) (t_arrow t_top t_bot).
+     findtype  (e_abs e) (t_arrow t_top t_bot)
+ | findtype_null : 
+     findtype e_null t_unit.
 
+#[export]
 Hint Constructors value findtype : core.
 
 (* defns Typing *)
@@ -38,6 +43,9 @@ Inductive typing : env -> exp -> typ -> Prop :=    (* defn typing *)
  | typ_lit : forall (G:env) i5,
       okt  G  ->
      typing G (e_lit i5) t_int
+ | typ_null : forall G,
+      okt G ->
+      typing G e_null t_unit
  | typ_var : forall (G:env) (x:var) (A:typ),
       okt  G  ->
       binds  x A G  ->
@@ -234,6 +242,7 @@ Proof.
   induction 1; auto.
 Qed.
 
+#[export]
 Hint Extern 1 (ok _) => apply ok_from_okt : core.
 
 
@@ -266,6 +275,7 @@ Qed.
 
 (** Automation *)
 
+#[export]
 Hint Immediate okt_strengthen : core.
 
 (* ********************************************************************** *)
@@ -296,6 +306,7 @@ Proof.
   induction 1; autos*.
 Qed.
 
+#[export]
 Hint Immediate value_regular : core.
 
 (* ********************************************************************** *)
@@ -309,6 +320,7 @@ Lemma typing_weakening : forall E F G e T,
 Proof.
   introv Typ. gen F. inductions Typ; introv Ok.
   - apply* typ_lit.
+  - apply* typ_null.
   - apply* typ_var. apply* binds_weaken.
   - apply* typ_app.
   - apply* typ_sub.
@@ -335,6 +347,8 @@ lets TypT': TypT.
 inductions TypT; introv; simpl.
 (*case int*)
  - apply* typ_lit.
+ - (*case null*)
+   apply* typ_null.
 (*case var*)
  - case_var.
   + binds_get H0.
@@ -416,6 +430,17 @@ Proof.
   split*.
 Qed.
 
+Lemma inv_null : forall E A,
+typing E e_null A -> typing E e_null t_unit /\ t_unit <: A.
+Proof.
+  introv Typ.
+  inductions Typ. 
+  (*case typ_int*)
+ - split*.
+  (*case typ_sub*)
+ - forwards*: IHTyp.
+Qed.
+
 Lemma check_or_typ : forall E e A B,
    value e ->
    typing E e (t_union A B) ->
@@ -431,6 +456,8 @@ Proof.
    destruct H as [H].
    destruct H as [L].
    inverts* H0.
+ - apply inv_null in H0. destruct H0.
+   inverts* H0.
 Qed.
 
 Lemma val_check_disjoint_types : forall E v A B,
@@ -442,19 +469,23 @@ Proof.
   introv Disj Val Typ1 Typ2.
   unfold DisjSpec in Disj. unfold not in Disj.
   inverts Val.
-  apply inv_int in Typ1. destruct Typ1.
-  apply inv_int in Typ2. destruct Typ2.
-  forwards*: Disj t_int.
-  apply inv_arrow in Typ1.
-  destruct Typ1 as [A1 [B1]]. destruct H0.
-  assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)). auto.
-  apply inv_arrow in Typ2.
-  destruct Typ2 as [A2 [B2]]. destruct H3.
-  assert ((t_arrow t_top t_bot) <: (t_arrow A2 B2)). auto.
-  eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A1 B1)) (C:=A) in H2; auto.
-  eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A2 B2)) (C:=B) in H5; auto.
-  forwards*: Disj (t_arrow t_top t_bot).
-Qed.
+  - apply inv_int in Typ1. destruct Typ1.
+    apply inv_int in Typ2. destruct Typ2.
+    forwards*: Disj t_int.
+  - apply inv_arrow in Typ1.
+    destruct Typ1 as [A1 [B1]]. destruct H0.
+    assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)). auto.
+    apply inv_arrow in Typ2.
+    destruct Typ2 as [A2 [B2]]. destruct H3.
+    assert ((t_arrow t_top t_bot) <: (t_arrow A2 B2)). auto.
+    eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A1 B1)) (C:=A) in H2; auto.
+    eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A2 B2)) (C:=B) in H5; auto.
+    forwards*: Disj (t_arrow t_top t_bot).
+  - apply inv_null in Typ1. destruct Typ1.
+    apply inv_null in Typ2. destruct Typ2.
+    forwards*: Disj t_unit.
+    admit.
+Admitted.
 
 Lemma check_find_type : forall E e A B,
 typing E e A ->
@@ -463,13 +494,14 @@ B <: A.
 Proof.
   introv Typ Find.
   inductions Find.
-  apply inv_int in Typ.
-  destruct~ Typ.
-  apply inv_arrow in Typ.
-  destruct Typ as [A1 [B1]].
-  destruct H0. destruct H0 as [L].
-  assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)) by auto.
-  eapply sub_transitivity; eauto.
+  - apply inv_int in Typ.
+    destruct~ Typ.
+  - apply inv_arrow in Typ.
+    destruct Typ as [A1 [B1]].
+    destruct H0. destruct H0 as [L].
+    assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)) by auto.
+    eapply sub_transitivity; eauto.
+  - apply inv_null in Typ. destruct~ Typ.
 Qed.
 
 (*******************************)
@@ -525,6 +557,7 @@ Proof.
        destruct H12.
        forwards*: H3 t_int.
        forwards*: H3 (t_arrow t_top t_bot).
+       admit.
     +  (* value checks against disjoint types *)
       lets temp: check_or_typ G e A B H11.
       lets DisjOr: temp Typ.
@@ -536,6 +569,7 @@ Proof.
         destruct H12.
         forwards*: H3 t_int.
         forwards*: H3 (t_arrow t_top t_bot).
+        admit.
      * (*true goal*)  
         pick_fresh y. assert (y \notin L) by auto.
         forwards*: H1 H5.
@@ -546,7 +580,7 @@ Proof.
         rewrite H8.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
-Qed.
+Admitted.
 
 
 (*******************************)
@@ -560,6 +594,8 @@ introv Typ. gen_eq E: (@empty typ). lets Typ': Typ.
 inductions Typ; intros EQ; subst.
 (*case int*)
  - left*.
+ (*case null*)
+ - left*.
  (*case var*)
  - apply binds_empty_inv in H0. inversion H0.
  (*case typ-app*)
@@ -570,6 +606,9 @@ inductions Typ; intros EQ; subst.
      apply inv_int in Typ1.
      destruct Typ1.
      inverts H1. inverts H2.
+     apply inv_null in Typ1.
+     destruct Typ1. inverts* H1.
+     admit.
      (*case step-appl*)
    * destruct H0.
      exists* (e_app e1 x).
@@ -608,6 +647,9 @@ inductions Typ; intros EQ; subst.
       eapply step_typeofl with (C:=(t_arrow t_top t_bot)); eauto.
       forwards*: typing_regular Typ'.
      }
+     {
+       admit.  
+     }
    * (*case typeofr*)
      destruct H4.
      apply inv_int in H5. destruct H5.
@@ -631,12 +673,15 @@ inductions Typ; intros EQ; subst.
       eapply step_typeofr with (C:=(t_arrow t_top t_bot)); eauto.
       forwards*: typing_regular Typ'.
      }
+     {
+         admit.
+     }
   + (*case typeof*)
     destruct H4.
     exists (e_typeof x A e1 B e2).
     apply step_typeof; auto.
     forwards*: typing_regular Typ'.
-Qed.
+Admitted.
 
 (*******************************)
 (*****  Determinism Lemma  *****)
@@ -696,7 +741,7 @@ Proof.
   + inverts H8; inverts He1.
 (*case step-typeofl*)
  - inverts* He2.
-  + inverts H0. inverts H10. inverts H10.
+  + inverts H0. inverts H10. inverts H10. inverts H10.
   + apply inv_typeof in Typ.
     destruct Typ as [D]. destruct H3 as [H3 Disj].
     inverts H0.
@@ -708,6 +753,8 @@ Proof.
       inverts H11.
       unfold DisjSpec in Disj. unfold not in Disj.
       forwards*: Disj (t_arrow t_top t_bot).
+    * inverts H1. inverts H11.
+      admit.
 (*case step-typeofr*) 
 - inverts* He2.
   + inverts H0; inverts H10. 
@@ -722,4 +769,5 @@ Proof.
       inverts H11.
       unfold DisjSpec in Disj. unfold not in Disj.
       forwards*: Disj (t_arrow t_top t_bot).
-Qed.
+    * admit.
+Admitted.

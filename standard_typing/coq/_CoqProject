@@ -1,3 +1,5 @@
 -R . Top
+syntax_unit.v
 syntax.v
+typing_unit.v
 typing.v

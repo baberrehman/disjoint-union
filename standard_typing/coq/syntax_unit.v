@@ -1,13 +1,13 @@
 
 (*
-Update started on April 22, 2021
+Update started on June 17, 2021
 *)
 
 (*
 
-April 22, 2021:
+June 17, 2021:
 ---------------
--> Bidirectional to standard typing judgement
+-> Added unit type and value
 
 *)
 
@@ -26,7 +26,8 @@ Inductive typ : Set :=  (*r type *)
  | t_bot : typ
  | t_arrow : typ -> typ -> typ
  | t_union : typ -> typ -> typ
- | t_and : typ -> typ -> typ.
+ | t_and : typ -> typ -> typ
+ | t_unit : typ.
 
 Inductive exp : Set :=  (*r expression *)
  | e_var_b  : nat -> exp
@@ -34,7 +35,8 @@ Inductive exp : Set :=  (*r expression *)
  | e_lit    : nat -> exp
  | e_abs    : exp -> exp
  | e_app    : exp -> exp -> exp
- | e_typeof : exp -> typ -> exp -> typ -> exp -> exp.
+ | e_typeof : exp -> typ -> exp -> typ -> exp -> exp
+ | e_null   : exp.
 
 (** Binding are mapping to term variables.
  [x ~: T] is a typing assumption *)
@@ -69,7 +71,9 @@ Fixpoint open_exp_wrt_exp_rec (k:nat) (e_5:exp) (e__6:exp) {struct e__6}: exp :=
   | (e_abs e) => e_abs (open_exp_wrt_exp_rec (S k) e_5 e)
   | (e_app e1 e2) => e_app (open_exp_wrt_exp_rec k e_5 e1) (open_exp_wrt_exp_rec k e_5 e2)
   | (e_typeof e A e1 B e2) => e_typeof (open_exp_wrt_exp_rec k e_5 e) A (open_exp_wrt_exp_rec (S k) e_5 e1) B (open_exp_wrt_exp_rec (S k) e_5 e2)
+  | (e_null) => e_null
 end.
+
 
 Definition open_exp_wrt_exp e_5 e__6 := open_exp_wrt_exp_rec 0 e__6 e_5.
 
@@ -98,7 +102,9 @@ Inductive lc_exp : exp -> Prop :=    (* defn lc_exp *)
      (lc_exp e) ->
      ( forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e1 (e_var_f x) )  ) ->
      ( forall x , x \notin  L  -> lc_exp  ( open_exp_wrt_exp e2 (e_var_f x) )  ) ->
-     (lc_exp (e_typeof e A e1 B e2)).
+     (lc_exp (e_typeof e A e1 B e2))
+ | lec_e_null :
+     lc_exp e_null.
 
 (** free variables *)
 Fixpoint fv_exp (e_5:exp) : vars :=
@@ -109,6 +115,7 @@ Fixpoint fv_exp (e_5:exp) : vars :=
   | (e_abs e) => (fv_exp e)
   | (e_app e1 e2) => (fv_exp e1) \u (fv_exp e2)
   | (e_typeof e A e1 B e2) => (fv_exp e) \u (fv_exp e1) \u (fv_exp e2)
+  | (e_null) => \{}
 end.
 
 (** substitutions *)
@@ -120,6 +127,7 @@ Fixpoint subst_exp (e_5:exp) (x5:var) (e__6:exp) {struct e__6} : exp :=
   | (e_abs e) => e_abs (subst_exp e_5 x5 e)
   | (e_app e1 e2) => e_app (subst_exp e_5 x5 e1) (subst_exp e_5 x5 e2)
   | (e_typeof e A e1 B e2) => e_typeof (subst_exp e_5 x5 e) A (subst_exp e_5 x5 e1) B (subst_exp e_5 x5 e2)
+  | (e_null) => e_null
 end.
 
 (****************************************)
@@ -142,6 +150,7 @@ Fixpoint FindSubtypes (A: typ) :=
     | t_arrow A1 B1 => [t_arrow t_top t_bot]
     | t_union A1 B1 => (FindSubtypes A1) `union` (FindSubtypes B1)
     | t_and A1 B1   => (FindSubtypes A1) `inter` (FindSubtypes B1)
+    | t_unit        => []
     end.
 
 (* defns Subtyping *)
@@ -150,6 +159,8 @@ Inductive subtyping : typ -> typ -> Prop :=    (* defn subtyping *)
  | s_top : forall A, A <: t_top
  | s_int :
      t_int <: t_int
+ | s_unit :
+    t_unit <: t_unit
  | s_arrow : forall (A1 A2 B1 B2:typ),
      B1 <: A1 ->
      A2 <: B2 ->
@@ -322,6 +333,7 @@ Proof.
       left. apply set_inter_intro; auto.
       destruct H2 as [x1 [x2]]. destruct H2. inversion H2.
     * destruct H1 as [x1 [x2]]. destruct H1. inversion H1.
+   + inverts H. inverts H0.
   - induction B; simpl; auto.
    + right. exists* t1 t2.
    + inversion H. simpl in H0; inversion H0.
@@ -358,6 +370,7 @@ Proof.
         destruct H2 as [x3 [x4]]. destruct H2.
         right. exists x1 x2. split*.
         apply set_inter_intro; auto. }
+    + inverts H. inverts H0.
 Defined.
 
 Lemma ord_sub_findsubtypes_not_empty : forall A B, 
@@ -403,6 +416,7 @@ Proof.
   - simpl in H.
     apply set_inter_elim1 in H.
     apply IHA1; auto.
+  - simpl in H. inverts H.
 Defined.
 
 Lemma inter_not_empty_elim : forall A l,
@@ -476,6 +490,7 @@ Proof.
     apply IHA1; auto.
     apply set_inter_elim2 in H. 
     apply IHA2; auto.
+  - inverts H.
 Defined.
 
 (*
@@ -571,7 +586,7 @@ generalize H0 H; clear H0; clear H; generalize A; clear A.
   inverts H0. inverts H1.
   inverts H0. inverts H1.
   induction A; try solve[inverts* H].
-  inverts* H0. inverts* H. 
+  inverts* H0. inverts* H. inverts H0. inverts H1. 
 - intros. apply sub_or in H0. destruct H0.
   inductions H; eauto.
 - intros. apply sub_and in H. destruct H.
@@ -579,6 +594,7 @@ generalize H0 H; clear H0; clear H; generalize A; clear A.
   assert (A <: t_and B1 B2) by auto.
   apply s_disj.
   apply findsubtypes_sub_empty with (A1:=B1) (A2:=B2). auto. auto.
+ - intros; inductions H; eauto.
 Defined.
 
 Lemma bot_sub_all : forall A, t_bot <: A.
