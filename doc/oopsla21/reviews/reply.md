@@ -120,7 +120,7 @@ fully mechanized the proofs in Coq for those desirable properties.
 
 ### Tags and type-directed elimination (Question 2)
 
-We believe there are two different aspects can be used to classify union types:
+We believe two different aspects can be used to classify union types:
 
 1) Are tags needed to build expressions in the language with union
 types?
