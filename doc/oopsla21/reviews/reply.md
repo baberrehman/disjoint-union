@@ -309,7 +309,7 @@ distributivity, and the algorithmic system in the revision.
 
 ### Related Work
 
-We thank the review for pointing out additional related work on union
+We thank the reviewer for pointing out additional related work on union
 types for OO languages. We will incorporate them in the revision.
 
 
