@@ -50,11 +50,11 @@ The Ceylon approach to null values has not gone unnoticed to a more
 general programmers audience (e.g., [1]). Disjointness plays a central
 role here. In Ceylon, unless specified otherwise, objects cannot have
 the null value.  For an object to have the null value it must be
-declared to be nullable, e.g., `Integer?`, which can be considered as
+declared to be nullable, e.g., `Integer?`, which is
 syntactic sugar for the union type `Integer | Null`. Disjointness
 plays a crucial role in Ceylon's approach as we need to ensure that
 values of the Null type are disjoint to values of other objects. The
-problem of null is ofcourse a very well-known in mainstream languages.
+problem of null is ofcourse a very well-known one in mainstream languages.
 We think a takeaway of the paper for mainstream programmers is that
 union types, disjointness and disjoint switches allow a clean and
 simple way to ensure that code that may contain null values checks for
@@ -306,7 +306,7 @@ algorithmic formulation of the subtyping relation. This is not,
 however, a contribution of our work. There are a few algorithms in
 previous work that could be employed.
 
-We would be happy to include more discussion about subtyping
+We will include more discussion about subtyping
 distributivity, and the algorithmic system in the revision.
 
 ### Related Work
@@ -315,7 +315,7 @@ We thank the reviewer for pointing out additional related work on union
 types for OO languages. We will incorporate them in the revision.
 
 
-## Reference
+## References
 
 [1] https://blog.jooq.org/2016/03/15/ceylon-might-just-be-the-only-language-that-got-nulls-right/
 
