@@ -6,7 +6,11 @@ syntax_unit.v is the syntax file for this semantics
 
 June 17, 2021:
 ---------------
--> Added unit type
+-> Intersection introduction rule
+
+e : A     e : B
+---------------
+   e : A & B   
 
 *)
 
@@ -66,7 +70,11 @@ Inductive typing : env -> exp -> typ -> Prop :=    (* defn typing *)
      ( forall x , x \notin  L  -> typing  (G & x ~: A )   ( open_exp_wrt_exp e1 (e_var_f x) ) C ) ->
      ( forall x , x \notin  L  -> typing  (G & x ~: B )   ( open_exp_wrt_exp e2 (e_var_f x) ) C ) ->
      A *s B ->
-     typing G (e_typeof e A e1 B e2) C.
+     typing G (e_typeof e A e1 B e2) C
+ | typ_inter : forall G e A B,
+     typing G e A ->
+     typing G e B ->
+     typing G e (t_and A B).
 
 (* defns Reduction *)
 Reserved Notation "e --> e'" (at level 80).
@@ -330,6 +338,7 @@ Proof.
   - apply_fresh* typ_typeof as x.
     forwards*: H x. apply_ih_bind (H0 x); eauto.
     forwards*: H1 x. apply_ih_bind (H2 x); eauto.
+  - apply* typ_inter.
 Qed.
 
 (************************************************************************ *)
@@ -394,6 +403,7 @@ inductions TypT; introv; simpl.
    rewrite~ concat_assoc.
    rewrite~ <- concat_assoc.
    apply typing_regular in TypU. destruct~ TypU.
+- apply* typ_inter.
 Qed.
 
 
@@ -412,6 +422,8 @@ Proof.
   forwards*: IHTyp. destruct H0.
   split*.
   eapply sub_transitivity; eauto.
+  - forwards*: IHTyp1. destruct H.
+    forwards*: IHTyp2.
 Qed.
 
 Lemma inv_arrow : forall G e A, 
@@ -421,14 +433,35 @@ typing (G & x ~: A1) (e open_ee_var x) B1) /\ (t_arrow A1 B1) <: A.
 Proof.
   introv Typ.
   inductions Typ.
-  forwards*: IHTyp.
+ - forwards*: IHTyp.
   destruct H0 as [y [z]].
   exists y z . destruct H0.
   split*.
   eapply sub_transitivity; eauto.
-  exists A B.
-  split*.
-Qed.
+ - exists A B.
+   split*.
+ - forwards*: IHTyp1. destruct H as [x1 [x2]]. destruct H.
+   forwards*: IHTyp2. destruct H1 as [x3 [x4]]. destruct H1.
+   exists t_top t_bot. split*.
+Admitted.
+
+Lemma inv_arrow1 : forall G e A, 
+typing G (e_abs e) A ->
+exists A1 B1, typing G (e_abs e) (t_arrow A1 B1) /\ (t_arrow A1 B1) <: A.
+Proof.
+    introv Typ.
+    inductions Typ.
+    - forwards*: IHTyp.
+      destruct H0 as [x1[x2[H4 H5]]].
+      exists x1 x2. split*.
+      eapply sub_transitivity; eauto.
+    - exists* A B.
+    - forwards*: IHTyp1.
+      forwards*: IHTyp2.
+      destruct H as [t1 [t2 [H4 H5]]].
+      destruct H0 as [t3 [t4 [H6 H7]]].
+      exists t_top t_bot. split.
+Admitted.
 
 Lemma inv_null : forall E A,
 typing E e_null A -> typing E e_null t_unit /\ t_unit <: A.
@@ -441,6 +474,7 @@ Proof.
  - forwards*: IHTyp. destruct H0.
    split*.
    eapply sub_transitivity; eauto.
+ - forwards*: IHTyp1.
 Qed.
 
 Lemma check_or_typ : forall E e A B,
@@ -581,6 +615,7 @@ Proof.
         rewrite H8.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
+    - forwards*: IHTyp1.
 Qed.
 
 
@@ -695,6 +730,7 @@ inductions Typ; intros EQ; subst.
     exists (e_typeof x A e1 B e2).
     apply step_typeof; auto.
     forwards*: typing_regular Typ'.
+  - destruct~ IHTyp1.
 Qed.
 
 (*******************************)
@@ -707,9 +743,10 @@ exists A1 B1, typing E e1 (t_arrow A1 B1) /\ typing E e2 A1.
 Proof.
   introv Typ.
   inductions Typ.
-  exists* A B.
-  specialize (IHTyp e1 e2).
+ - exists* A B.
+ - specialize (IHTyp e1 e2).
   forwards*: IHTyp.
+ - forwards*: IHTyp1.
 Qed.
 
 Lemma inv_typeof : forall E e e1 e2 A B C,
@@ -718,9 +755,10 @@ exists D, typing E e D /\ A *s B.
 Proof.
   introv Typ.
   inductions Typ.
-  specialize (IHTyp e e1 e2 A B).
-  forwards*: IHTyp.
-  exists* (t_union A B).
+  - specialize (IHTyp e e1 e2 A B).
+    forwards*: IHTyp.
+  - exists* (t_union A B).
+  - forwards*: IHTyp1.
 Qed.
 
 Lemma determinism_dir : forall E e e1 e2 A, typing E e A -> 
