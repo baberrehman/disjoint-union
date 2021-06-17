@@ -144,13 +144,13 @@ Notation "l1 `inter` l2" := (set_inter eq_dec l1 l2) (at level 80).
 
 Fixpoint FindSubtypes (A: typ) :=
     match A with
-    | t_top         => [t_int; t_arrow t_top t_bot]
+    | t_top         => [t_int; t_arrow t_top t_bot; t_unit]
     | t_bot         => []
     | t_int         => [t_int]
     | t_arrow A1 B1 => [t_arrow t_top t_bot]
     | t_union A1 B1 => (FindSubtypes A1) `union` (FindSubtypes B1)
     | t_and A1 B1   => (FindSubtypes A1) `inter` (FindSubtypes B1)
-    | t_unit        => []
+    | t_unit        => [t_unit]
     end.
 
 (* defns Subtyping *)
@@ -199,7 +199,8 @@ Hint Constructors subtyping lc_exp ok okt : core.
 
 Inductive Ord : typ -> Prop :=
 | o_int   : Ord t_int
-| o_arrow : forall t1 t2, Ord (t_arrow t1 t2).
+| o_arrow : forall t1 t2, Ord (t_arrow t1 t2)
+| o_unit  : Ord t_unit.
 (*| o_union : forall t1 t2, Ord t1 -> Ord t2 -> Ord (t_union t1 t2).*)
 
 #[export]
@@ -300,7 +301,7 @@ Proof.
   intros. inductions C; try solve [simpl in H; destruct H; inversion H].
  - simpl in H. destruct H. inversion H.
    destruct H. inversion H. auto.
-   inversion H.
+   inversion H. inversion H0. inversion H0.
  - simpl in H. destruct H. inversion H. auto. inversion H.
  - simpl in H.
    apply set_union_elim in H. destruct H.
@@ -371,6 +372,24 @@ Proof.
         right. exists x1 x2. split*.
         apply set_inter_intro; auto. }
     + inverts H. inverts H0.
+ - induction B; simpl; auto.
+   + inverts H. inverts H0.
+   + inverts H. inverts H0.
+   + inverts H. inverts H0.
+   + inverts H.
+     * destruct~ IHB1.
+       left. apply set_union_intro; auto.
+       destruct H as [x1 [x2 [H1 H3]]]. inverts H1.
+     * destruct~ IHB2.
+       left. apply set_union_intro; auto.
+       destruct H as [x1 [x2 [H1 H3]]]. inverts H1.
+     * inverts H0.
+    + apply sub_and in H. destruct H.
+      destruct~ IHB1.
+     * destruct~ IHB2.
+       left. apply set_inter_intro; auto.
+       destruct H2 as [x1 [x2 [H2 H3]]]. inverts H2.
+     * destruct H1 as [x1 [x2 [H2 H3]]]. inverts H2.
 Defined.
 
 Lemma ord_sub_findsubtypes_not_empty : forall A B, 
@@ -398,16 +417,15 @@ Lemma elem_in_findsubtypes_ord : forall A B,
 Proof.
   intros.
   inductions A.
-  - simpl in H.
-    destruct H. rewrite <- H. auto.
-    destruct H. rewrite <- H. auto.
+  - simpl in H;
+    destruct H as [H1 | [H1 | [H1 | H1]]];
+    try rewrite <- H1; auto; inversion H1.
+  - simpl in H;
+    destruct H; try rewrite <- H; auto;
     inversion H.
-  - simpl in H. 
-    destruct H. rewrite <- H. auto.
-    inversion H.
-  - simpl in H. inversion H.
-  - simpl in H.
-    destruct H. rewrite <- H. auto.
+  - simpl in H; inversion H.
+  - simpl in H;
+    destruct H; try rewrite <- H; auto;
     inversion H.
   - simpl in H.
     apply set_union_elim in H. destruct H. 
@@ -416,14 +434,15 @@ Proof.
   - simpl in H.
     apply set_inter_elim1 in H.
     apply IHA1; auto.
-  - simpl in H. inverts H.
+  - simpl in H. inverts* H.
 Defined.
 
 Lemma inter_not_empty_elim : forall A l,
 l = FindSubtypes A ->
 l <> [] ->
 set_In t_int l \/ 
-set_In (t_arrow t_top t_bot) l.
+set_In (t_arrow t_top t_bot) l \/
+set_In t_unit l.
 Proof.
   intros.
   destruct l.
@@ -436,12 +455,14 @@ Proof.
   induction H1.
  - left. apply elem_append_in_list.
  - apply arrow_in_top_bot in H1'. inverts H1'.
-   right. apply elem_append_in_list.
+   right. left. apply elem_append_in_list.
+ - right. right. apply elem_append_in_list.
 Defined.
 
 Lemma not_in : forall A B,
 not (set_In t_int (FindSubtypes (t_and A B))) /\
-not (set_In (t_arrow t_top t_bot) (FindSubtypes (t_and A B))) ->
+not (set_In (t_arrow t_top t_bot) (FindSubtypes (t_and A B))) /\
+not (set_In t_unit (FindSubtypes (t_and A B))) ->
 (FindSubtypes (t_and A B)) = [].
 Proof.
   intros.
@@ -450,14 +471,15 @@ Proof.
   - rewrite H0. auto.
   - destructs H. 
     apply inter_not_empty_elim with (A:=(t_and A B)) in H0.
-    destruct H0 as [H5 | H5 ].
+    destruct H0 as [H5 | [H5 | H5] ].
+    contradiction.
     contradiction.
     contradiction.
     auto.
 Defined.
 
-Lemma demorgan : forall P Q : Prop, 
-~ (P \/ Q) -> ~ P /\ ~ Q.
+Lemma demorgan : forall P Q R : Prop, 
+~ (P \/ Q \/ R) -> ~ P /\ ~ Q /\ ~ R.
 Proof.
   intros.
   unfold not in *.
@@ -470,7 +492,7 @@ Proof.
   intros.
   inductions A.
   - simpl in H.
-    destruct H as [H | [H | H ] ]; 
+    destruct H as [H | [H | [H | H] ] ]; 
     try solve [rewrite <- H; auto].
     inversion H.
   - simpl in H.
@@ -490,7 +512,7 @@ Proof.
     apply IHA1; auto.
     apply set_inter_elim2 in H. 
     apply IHA2; auto.
-  - inverts H.
+  - inverts* H. inverts H0.
 Defined.
 
 (*
@@ -512,6 +534,8 @@ Proof.
       rewrite H in H1. simpl in H1. inversion H1.
       destruct H1 as [x1 [x2]]. destruct H1.
       rewrite H in H2. simpl in H2. inversion H2.
+    - destruct~ H2. rewrite H in H1. inverts H1.
+      destruct H1 as [x1 [x2 [H2 H3]]]. inverts H2.
 Defined.
 
 Lemma findsubtypes_not_empty : forall A,
@@ -633,11 +657,12 @@ Proof.
   unfold DisjAlgo.
   eapply not_in.
   apply demorgan. unfold not. intros.
-  destruct H0 as [H1 | H1];
+  destruct H0 as [H1 | [H1 | H1]];
   lets H1': H1;
   apply elem_in_findsubtypes_sub in H1';
   lets H1'': H1;
   apply elem_in_findsubtypes_ord in H1''.
+  eapply H; eauto.
   eapply H; eauto.
   eapply H; eauto.
 Qed.

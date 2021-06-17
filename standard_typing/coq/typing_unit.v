@@ -438,7 +438,9 @@ Proof.
   (*case typ_int*)
  - split*.
   (*case typ_sub*)
- - forwards*: IHTyp.
+ - forwards*: IHTyp. destruct H0.
+   split*.
+   eapply sub_transitivity; eauto.
 Qed.
 
 Lemma check_or_typ : forall E e A B,
@@ -484,8 +486,7 @@ Proof.
   - apply inv_null in Typ1. destruct Typ1.
     apply inv_null in Typ2. destruct Typ2.
     forwards*: Disj t_unit.
-    admit.
-Admitted.
+Qed.
 
 Lemma check_find_type : forall E e A B,
 typing E e A ->
@@ -557,7 +558,7 @@ Proof.
        destruct H12.
        forwards*: H3 t_int.
        forwards*: H3 (t_arrow t_top t_bot).
-       admit.
+       forwards*: H3 t_unit.
     +  (* value checks against disjoint types *)
       lets temp: check_or_typ G e A B H11.
       lets DisjOr: temp Typ.
@@ -569,7 +570,7 @@ Proof.
         destruct H12.
         forwards*: H3 t_int.
         forwards*: H3 (t_arrow t_top t_bot).
-        admit.
+        forwards*: H3 t_unit.
      * (*true goal*)  
         pick_fresh y. assert (y \notin L) by auto.
         forwards*: H1 H5.
@@ -580,7 +581,7 @@ Proof.
         rewrite H8.
         forwards*: typing_through_subst_ee.
         rewrite* (@subst_ee_intro y).
-Admitted.
+Qed.
 
 
 (*******************************)
@@ -607,8 +608,8 @@ inductions Typ; intros EQ; subst.
      destruct Typ1.
      inverts H1. inverts H2.
      apply inv_null in Typ1.
-     destruct Typ1. inverts* H1.
-     admit.
+     destruct Typ1.
+     inverts H1. inverts H2.
      (*case step-appl*)
    * destruct H0.
      exists* (e_app e1 x).
@@ -626,8 +627,8 @@ inductions Typ; intros EQ; subst.
     destruct Typ.
     (*case typeofl*)
    * destruct H4.
-     apply inv_int in H5. destruct H5.
      { (*case e = int*)
+      apply inv_int in H5. destruct H5.
       exists (open_exp_wrt_exp e1 (e_lit i5)).
       pick_fresh y.
       assert (y \notin L) by auto.
@@ -648,7 +649,14 @@ inductions Typ; intros EQ; subst.
       forwards*: typing_regular Typ'.
      }
      {
-       admit.  
+       (*case e = null*)
+       apply inv_null in H5. destruct H5.
+       exists (open_exp_wrt_exp e1 e_null).
+       pick_fresh y.
+       assert (y \notin L) by auto.
+       lets: H y H6.
+       eapply step_typeofl with (C:=t_unit); eauto.
+       forwards*: typing_regular Typ'.
      }
    * (*case typeofr*)
      destruct H4.
@@ -673,15 +681,21 @@ inductions Typ; intros EQ; subst.
       eapply step_typeofr with (C:=(t_arrow t_top t_bot)); eauto.
       forwards*: typing_regular Typ'.
      }
-     {
-         admit.
+     { (*case e = null*)
+       apply inv_null in H5. destruct H5.
+       exists (open_exp_wrt_exp e2 e_null).
+       pick_fresh y.
+       assert (y \notin L) by auto.
+       lets: H y H6.
+       eapply step_typeofr with (C:=t_unit); eauto.
+       forwards*: typing_regular Typ'.
      }
   + (*case typeof*)
     destruct H4.
     exists (e_typeof x A e1 B e2).
     apply step_typeof; auto.
     forwards*: typing_regular Typ'.
-Admitted.
+Qed.
 
 (*******************************)
 (*****  Determinism Lemma  *****)
@@ -754,7 +768,9 @@ Proof.
       unfold DisjSpec in Disj. unfold not in Disj.
       forwards*: Disj (t_arrow t_top t_bot).
     * inverts H1. inverts H11.
-      admit.
+      forwards*: Disj t_unit.
+      assert (t_unit <: (t_and A B)) by auto.
+      contradiction.
 (*case step-typeofr*) 
 - inverts* He2.
   + inverts H0; inverts H10. 
@@ -769,5 +785,8 @@ Proof.
       inverts H11.
       unfold DisjSpec in Disj. unfold not in Disj.
       forwards*: Disj (t_arrow t_top t_bot).
-    * admit.
-Admitted.
+    * inverts H1. inverts H11.
+      forwards*: Disj t_unit.
+      assert (t_unit <: (t_and A B)) by auto.
+      contradiction.
+Qed.

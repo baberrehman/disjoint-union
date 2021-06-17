@@ -31,6 +31,7 @@ Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
      lc_exp (e_abs e) ->
      findtype  (e_abs e) (t_arrow t_top t_bot).
 
+#[export]     
 Hint Constructors value findtype : core.
 
 (* defns Typing *)
@@ -234,6 +235,7 @@ Proof.
   induction 1; auto.
 Qed.
 
+#[export]
 Hint Extern 1 (ok _) => apply ok_from_okt : core.
 
 
@@ -266,6 +268,7 @@ Qed.
 
 (** Automation *)
 
+#[export]
 Hint Immediate okt_strengthen : core.
 
 (* ********************************************************************** *)
@@ -296,6 +299,7 @@ Proof.
   induction 1; autos*.
 Qed.
 
+#[export]
 Hint Immediate value_regular : core.
 
 (* ********************************************************************** *)
