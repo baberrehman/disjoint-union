@@ -36,13 +36,13 @@ evidence that union types are being used in practice to a significant
 extent (at least in TypeScript), not as a direct comparison of
 absolute relevance between language features.
 
-Second, our work, based on disjoint switches, contributes a novel
+Second, our work, based on disjoint switches, contributes an alternative
 approach in the general design space of union types that is different
 from the approaches to union types in TypeScript or Flow. As described
 in the paper, such an approach can be an easier to reason alternative to certain
 forms of overloading; and be used for dealing with failure in
 various way. One of the most interesting and distinctive application
-of disjoint switch is their application to dealing with Null values,
+of disjoint switches is their application to dealing with Null values,
 and this would be a useful takeaway of interest for mainstream
 programmers.
 
