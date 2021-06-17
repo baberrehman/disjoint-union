@@ -70,7 +70,7 @@ disjoint switches further in the paper.
 
 # Changes
 
-We plan to do the following changes to the revision:
+We plan to do the following changes in the revision:
 
 1) Add a Unit type to the calculi (with a single value null) and
 illustrate the approach to Nullable/Optional types in more detail.
@@ -136,7 +136,7 @@ The fact that tags are not present in source expressions creates
 quite different challenges for the design of languages, compared to
 traditional tagged sum types. In particular, as we explain in both the
 Introduction and Section 2, we have to deal with complications that
-arise from subtyping and types that can overlap on branches. Language
+arise from subtyping and types that can overlap in branches. Language
 designs with tagged sum types, do not have such problems.
 
 While we have a paragraph in Section 2 called "The role of type
@@ -144,7 +144,7 @@ annotations in the dynamic semantics" (line 417),
 we will make it more clear during revision that our
 semantics requires type annotations to be present at runtime. We
 believe this is a reasonable approach (and is adopted by many
-approaches), as it provides significant flexibility, while ensuring
+calculi), as it provides significant flexibility, while ensuring
 type safety.
 
 The following table provides an overview of different approaches to
@@ -192,7 +192,7 @@ would like to clarify the following confusions:
 > L 429: Is there a difference between A \/ B and A|B ?
 
 There is no difference between `A \/ B` and `A | B`. As we have
-explained in L159, in the code examples we write `A | B` since it is a
+explained at L159, in the code examples we write `A | B` since it is a
 common notation in many programming languages, while `A \/ B` is more
 commonly used in calculi with union types.
 
@@ -270,7 +270,7 @@ intersections:
      } : (Int \/ Bool) -> Int : (Int ->  Int) /\ (Bool -> Int)
 ```
 
-It is also worthwhile noting that, more generally, in calculi with union
+It is also worth noting that, more generally, in calculi with union
 and intersection types, elimination/introduction constructs for
 union/intersection types can often be dually used to serve as the
 introduction/elimination construct for intersection/union types.
