@@ -39,8 +39,8 @@ absolute relevance between language features.
 Second, our work, based on disjoint switches, contributes a novel
 approach in the general design space of union types that is different
 from the approaches to union types in TypeScript or Flow. As described
-in the paper, they can be an easier to reason alternative to certain
-forms of overloading; and they can be used for dealing with failure in
+in the paper, such an approach can be an easier to reason alternative to certain
+forms of overloading; and be used for dealing with failure in
 various way. One of the most interesting and distinctive application
 of disjoint switch is their application to dealing with Null values,
 and this would be a useful takeaway of interest for mainstream
@@ -53,7 +53,7 @@ the null value.  For an object to have the null value it must be
 declared to be nullable, e.g., `Integer?`, which can be considered as
 syntactic sugar for the union type `Integer | Null`. Disjointness
 plays a crucial role in Ceylon's approach as we need to ensure that
-values of the Null type are disjoint to values of other objects.  The
+values of the Null type are disjoint to values of other objects. The
 problem of null is ofcourse a very well-known in mainstream languages.
 We think a takeaway of the paper for mainstream programmers is that
 union types, disjointness and disjoint switches allow a clean and
