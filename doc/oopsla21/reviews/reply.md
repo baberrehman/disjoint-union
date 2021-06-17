@@ -39,24 +39,27 @@ absolute relevance between language features.
 Second, our work, based on disjoint switches, contributes a novel
 approach in the general design space of union types that is different
 from the approaches to union types in TypeScript or Flow. As described
-in the paper, they can be an easier to reason alternative to certain
-forms of overloading; and they can be used for dealing with failure in
+in the paper, such an approach can be an easier to reason alternative to certain
+forms of overloading; and be used for dealing with failure in
 various way. One of the most interesting and distinctive application
 of disjoint switch is their application to dealing with Null values,
 and this would be a useful takeaway of interest for mainstream
-programmers. The Ceylon approach to null values has not gone unnoticed
-to a more general programmers audience (e.g., [1]). Ceylon's approach,
-built on top of disjointness, cannot be emulated by languages with
-only union types, e.g., TypeScript. In Ceylon, unless specified
-otherwise, objects cannot have the null value. For an object to have
-the null value it must be declared to be nullable, e.g., `Integer?`,
-which can be considered as syntactic sugar for the union type `Integer
-| Null`. The problem of null is ofcourse a very well-known in
-mainstream languages. We think a takeaway of the paper for mainstream
-programmers is that union types, disjointness and disjoint switches
-allow a clean and simple way to ensure that code that may contain null
-values checks for that possibility. Furthermore, there are other
-applications as briefly illustrated in the paper. 
+programmers.
+
+The Ceylon approach to null values has not gone unnoticed to a more
+general programmers audience (e.g., [1]). Disjointness plays a central
+role here. In Ceylon, unless specified otherwise, objects cannot have
+the null value.  For an object to have the null value it must be
+declared to be nullable, e.g., `Integer?`, which can be considered as
+syntactic sugar for the union type `Integer | Null`. Disjointness
+plays a crucial role in Ceylon's approach as we need to ensure that
+values of the Null type are disjoint to values of other objects. The
+problem of null is ofcourse a very well-known in mainstream languages.
+We think a takeaway of the paper for mainstream programmers is that
+union types, disjointness and disjoint switches allow a clean and
+simple way to ensure that code that may contain null values checks for
+that possibility. Furthermore, there are other applications as briefly
+illustrated in the paper.
 
 Although the focus of our paper is not on the applications, but rather
 on the formalization of the semantics, we are happy to include more
@@ -111,10 +114,9 @@ Therefore additional properties that we are interested on are:
 
 d) soundness/completeness of disjointness
 
-We have fully mechanized the proofs in Coq for those desirable
-properties.
+We have lemmas in the paper for all the properties above. And we have
+fully mechanized the proofs in Coq for those desirable properties.
 
-We have lemmas in the paper for all the properties above.
 
 ### Tags and type-directed elimination (Question 2)
 
@@ -138,7 +140,9 @@ Introduction and Section 2, we have to deal with complications that
 arise from subtyping and types that can overlap on branches. Language
 designs with tagged sum types, do not have such problems. 
 
-On the other hand, we will make it more clear during revision that our
+While we have a paragraph in Section 2 called "The role of type
+annotations in the dynamic semantics" (line 417),
+we will make it more clear during revision that our
 semantics requires type annotations to be present at runtime. We
 believe this is a reasonable approach (and is adopted by many
 approaches), as it provides significant flexibility, while ensuring
