@@ -227,13 +227,12 @@ the lambda. A concrete example using our rules is:
 
 > L 698: $e \Leftrightarrow A$ is not a judgement of Figure 2.
 
-We want to clarify that `e <=> A` is part of a judgment in Figure 2,
+We want to clarify that $e \Leftrightarrow A$ is part of a judgment in Figure 2,
 as shown in the box of Figure 2. More formally, Figure 1 has given the
 following definition, and the corresponding text is in L477-478.
 
-```
-<=>  ::=   => | <=
-```
+
+$\Leftrightarrow$   ```::=```   $\Rightarrow$ | $\Leftarrow$
 
 
 ## Review B
