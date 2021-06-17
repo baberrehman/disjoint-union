@@ -1,13 +1,11 @@
 We thank the reviewers for their insightful and constructive comments.
-Below we first discuss the contributions, and then answer other main
-questions. We will incorporate the reviewers' helpful suggestions in
-our revision.
 
 # Overview
 
 In the general overview of the reply we wish to mainly address the
 concerns by Reviewer A and B regarding relevance. We also discuss
-various other concerns in the detailed reply. 
+various other concerns in the detailed reply. We will incorporate the
+reviewers' helpful suggestions in our revision.
 
 ## Relevance and Contributions
 
@@ -20,7 +18,7 @@ practical relevance of union types.
 We have also conducted a set of small google queries to investigate
 the extent to which programmers are using union types, and comparing
 union types with some other language features under heavy development
-in the community. The queries the results are given below.
+in the community. The results are given below.
 
 ```
 Google query                                | number of results
@@ -62,7 +60,7 @@ applications as briefly illustrated in the paper.
 
 Although the focus of our paper is not on the applications, but rather
 on the formalization of the semantics, we are happy to include more
-discussion about relevant in the revision. We will add a simple
+discussion about relevance in the revision. We will add a simple
 extension to our calculi (basically a Unit type with the single value
 null) to illustrate this particular application of union types and
 disjoint switches further in the paper.
@@ -72,7 +70,7 @@ disjoint switches further in the paper.
 We plan todo the following changes to the revision:
 
 1) Add a Unit type to the calculi (with a single value null) and
-illustrate the approach to Nullable types in more detail.
+illustrate the approach to Nullable/Optional types in more detail.
 
 2) Be clearer that while tags are not needed in source expressions,
 type annotations are needed at runtime and they play a similar role
@@ -137,7 +135,7 @@ The fact that tags are not present in source expressions creates
 quite different challenges for the design of languages, compared to
 traditional tagged sum types. In particular, as we explain in both the
 Introduction and Section 2, we have to deal with complications that
-arize from subtyping and types that can overlap on branches. Language
+arise from subtyping and types that can overlap on branches. Language
 designs with tagged sum types, do not have such problems. 
 
 On the other hand, we will make it more clear during revision that our
@@ -146,7 +144,7 @@ believe this is a reasonable approach (and is adopted by many
 approaches), as it provides significant flexibility, while ensuring
 type safety.
 
-The follwing table provides an overview of different approaches to
+The following table provides an overview of different approaches to
 union types:
 
 ```
@@ -154,7 +152,7 @@ union types:
 -------------------------------------------------------------------------------------------------
 Tags for introduction of unions   |   No    | Yes         |     No
 -------------------------------------------------------------------------------------------------
-Tags or Types present at runtime  |   No    | Yes (Tags)  |     Yes (Type annotations)
+Tags or Types present at runtime  |   No    | Yes (Tags)  |     Yes (Types)
 ```
 
 ### Presentation of Two Systems (and Question 3)
@@ -273,7 +271,7 @@ It is also worthwhile noting that, more generally, in calculi with union
 and intersection types, elimination/introduction constructs for
 union/intersection types can often be dually used to serve as the
 introduction/elimination construct for intersection/union types.
-For instance, Dunfield notes that her merge operator (which is
+For instance, Dunfield [2] notes that her merge operator (which is
 primarely presented as a way to introduce values with intersection types)
 can also be viewed/used as an elimination form for union types
 (see the discussion in the last paragraph of page 7 in the reference
@@ -309,12 +307,13 @@ distributivity, and the algorithmic system in the revision.
 
 ### Related Work
 
-We thank the review for pointing out additional related work on union
+We thank the reviewer for pointing out additional related work on union
 types for OO languages. We will incorporate them in the revision.
 
 
 ## Reference
 
 [1] https://blog.jooq.org/2016/03/15/ceylon-might-just-be-the-only-language-that-got-nulls-right/
+
 [2] Jana Dunfield, Elaborating Intersection and Union Types, JFP 2014
 (available at https://research.cs.queensu.ca/home/jana/papers/intcomp-jfp/Dunfield14_elaboration.pdf)
