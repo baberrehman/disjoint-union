@@ -140,7 +140,9 @@ Introduction and Section 2, we have to deal with complications that
 arise from subtyping and types that can overlap on branches. Language
 designs with tagged sum types, do not have such problems. 
 
-On the other hand, we will make it more clear during revision that our
+While we have a paragraph in Section 2 called "The role of type
+annotations in the dynamic semantics" (line 417),
+we will make it more clear during revision that our
 semantics requires type annotations to be present at runtime. We
 believe this is a reasonable approach (and is adopted by many
 approaches), as it provides significant flexibility, while ensuring
