@@ -271,7 +271,7 @@ It is also worthwhile noting that, more generally, in calculi with union
 and intersection types, elimination/introduction constructs for
 union/intersection types can often be dually used to serve as the
 introduction/elimination construct for intersection/union types.
-For instance, Dunfield notes that her merge operator (which is
+For instance, Dunfield [2] notes that her merge operator (which is
 primarely presented as a way to introduce values with intersection types)
 can also be viewed/used as an elimination form for union types
 (see the discussion in the last paragraph of page 7 in the reference
@@ -314,5 +314,6 @@ types for OO languages. We will incorporate them in the revision.
 ## Reference
 
 [1] https://blog.jooq.org/2016/03/15/ceylon-might-just-be-the-only-language-that-got-nulls-right/
+
 [2] Jana Dunfield, Elaborating Intersection and Union Types, JFP 2014
 (available at https://research.cs.queensu.ca/home/jana/papers/intcomp-jfp/Dunfield14_elaboration.pdf)
