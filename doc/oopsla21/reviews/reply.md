@@ -15,8 +15,8 @@ major programming languages such as Scala 3, TypeScript, Flow or
 Julia. We believe this is already providing some evidence of the
 practical relevance of union types.
 
-We have also conducted a set of small google queries to investigate
-the extent to which programmers are using union types, and comparing
+We have also conducted a set of small google queries on stackoverflow
+to investigate the extent to which programmers are using union types, and comparing
 union types with some other language features under heavy development
 in the community. The results are given below.
 
