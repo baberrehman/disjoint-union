@@ -1,4 +1,3 @@
-
 (*
 This file is created on June 17, 2021
 
@@ -10,7 +9,7 @@ June 17, 2021:
 
 e : A     e : B
 ---------------
-   e : A & B   
+   e : A & B
 
 *)
 
@@ -40,7 +39,7 @@ Inductive findtype : exp -> typ -> Prop :=    (* defn findtype *)
  | findtype_arrow : forall (e:exp),
      lc_exp (e_abs e) ->
      findtype  (e_abs e) (t_arrow t_top t_bot)
- | findtype_null : 
+ | findtype_null :
      findtype e_null t_unit.
 
 #[export]
@@ -418,7 +417,7 @@ Lemma inv_int : forall E A i5,
 typing E (e_lit i5) A -> typing E (e_lit i5) t_int /\ t_int <: A.
 Proof.
   introv Typ.
-  inductions Typ. 
+  inductions Typ.
   (*case typ_int*)
  - split*.
   (*case typ_sub*)
@@ -430,7 +429,7 @@ Proof.
     forwards*: IHTyp2.
 Qed.
 
-Lemma inv_arrow : forall G e A, 
+Lemma inv_arrow : forall G e A,
 typing G (e_abs e) A ->
 exists A1 B1, (exists L, forall x , x \notin  L ->
 typing (G & x ~: A1) (e open_ee_var x) B1) /\ (t_arrow A1 B1) <: A.
@@ -448,7 +447,7 @@ Proof.
 Admitted.
 
 Lemma inv_and_arrow : forall A1 A2 B1 B2,
-  t_and A1 A2 <: t_arrow B1 B2 -> 
+  t_and A1 A2 <: t_arrow B1 B2 ->
   A1 <: t_arrow B1 B2 \/ A2 <: t_arrow B1 B2.
 Proof.
   intros.
@@ -457,7 +456,7 @@ Proof.
   inverts* H.
 Admitted.
 
-Lemma inv_arrow2 : forall G e A, 
+Lemma inv_arrow2 : forall G e A,
 typing G (e_abs e) A ->
 exists A1 B1, (t_arrow A1 B1) <: A.
 Proof.
@@ -480,7 +479,7 @@ Qed.
 
 Lemma inv_and_arrow' : forall G e A1 A2 B1 B2,
   typing G (e_abs e) (t_and A1 A2) ->
-  t_and A1 A2 <: t_arrow B1 B2 -> 
+  t_and A1 A2 <: t_arrow B1 B2 ->
   A1 <: t_arrow B1 B2 \/ A2 <: t_arrow B1 B2.
 Proof.
   introv Typ Sub.
@@ -497,7 +496,7 @@ Proof.
   false. apply H. auto.
 Qed.
 
-Lemma inv_arrow' : forall G e A, 
+Lemma inv_arrow' : forall G e A,
 typing G (e_abs e) A ->
 exists A1 B1, (exists L, forall x , x \notin  L ->
 typing (G & x ~: A1) (e open_ee_var x) B1) /\ (t_arrow A1 B1) <: A.
@@ -514,7 +513,32 @@ Proof.
    apply sub_and in H0. destruct H0.
 Admitted.
 
-Lemma inv_arrow'' : forall G e A1 A2, 
+Lemma inv_abs_sub : forall e A B1 B2,
+    typing nil (e_abs e) A ->
+    A <: (t_arrow B1 B2) ->
+         exists C1 C2,
+           (exists L, forall x , x \notin  L -> typing ([] & x ~: C1) (e open_ee_var x) C2)
+           /\ (t_arrow C1 C2) <: (t_arrow B1 B2).
+Proof.
+  introv Typ Sub.
+  inductions Typ; jauto.
+  - assert (HS: B <: t_arrow B1 B2) by applys sub_transitivity H Sub.
+    forwards* (?&?&?&?): IHTyp HS.
+  - forwards* [HS|HS]: inv_and_arrow' Sub.
+Qed.
+
+Lemma inv_arrow'' : forall e A1 A2,
+    typing nil (e_abs e) (t_arrow A1 A2) ->
+    exists B1 B2, (exists L, forall x , x \notin  L -> typing ([] & x ~: B1) (e open_ee_var x) B2)
+                  /\ (t_arrow B1 B2) <: (t_arrow A1 A2).
+Proof.
+  introv Typ.
+  inverts Typ.
+  - forwards*: inv_abs_sub H.
+  - exists* A1 A2.
+Qed.
+
+Lemma inv_arrow'' : forall G e A1 A2,
 typing G (e_abs e) (t_arrow A1 A2) ->
 exists B1 B2, (exists L, forall x , x \notin  L ->
 typing (G & x ~: B1) (e open_ee_var x) B2) /\ (t_arrow B1 B2) <: (t_arrow A1 A2).
@@ -523,11 +547,11 @@ Proof.
   inductions Typ; eauto.
   clear IHTyp.
   inductions B; eauto.
-  admit. admit. admit. admit. admit. 
+  admit. admit. admit. admit. admit.
   admit.
 Admitted.
 
-Lemma inv_arrow1 : forall G e A, 
+Lemma inv_arrow1 : forall G e A,
 typing G (e_abs e) A ->
 exists A1 B1, typing G (e_abs e) (t_arrow A1 B1) /\ (t_arrow A1 B1) <: A.
 Proof.
@@ -548,7 +572,7 @@ Proof.
   exists* A B.
 Qed.
 
-Lemma inv_arrow31 : forall G e A, 
+Lemma inv_arrow31 : forall G e A,
 typing G (e_abs e) A ->
 exists A1 B1, (exists L, forall x , x \notin  L ->
 typing (G & x ~: A1) (e open_ee_var x) B1).
@@ -557,7 +581,7 @@ Proof.
   inductions Typ; eauto.
 Qed.
 
-Lemma inv_arrow4 : forall G e A B, 
+Lemma inv_arrow4 : forall G e A B,
 typing G (e_abs e) (t_arrow A B) ->
 exists A1 B1, (exists L, forall x , x \notin  L ->
 typing (G & x ~: A1) (e open_ee_var x) B1).
@@ -571,11 +595,11 @@ typing G (e_abs e) (t_union A B) ->
 exists A1 B1, (t_arrow A1 B1) <: (t_union A B) /\ typing G (e_abs e)  (t_arrow A1 B1).
 Proof.
   introv Typ.
-  lets Typ': Typ. 
+  lets Typ': Typ.
   inductions Typ.
 Admitted.
 
-Lemma inv_arrow6 : forall G e A B, 
+Lemma inv_arrow6 : forall G e A B,
 typing G (e_abs e) (t_arrow A B) ->
 (exists L, forall x , x \notin  L ->
 typing (G & x ~: A) (e open_ee_var x) B).
@@ -592,7 +616,7 @@ Proof.
 Admitted.
 
 
-Lemma inv_arrow7 : forall G e A1 A2, 
+Lemma inv_arrow7 : forall G e A1 A2,
 forall B1 B2, t_arrow A1 A2 <: t_arrow B1 B2 ->
 (exists L, forall x , x \notin  L ->
 typing (G & x ~: A1) (e open_ee_var x) A2) ->
@@ -606,7 +630,7 @@ Proof.
   inverts* H2.
 Admitted.
 
-Lemma inv_arrow8 : forall G e A1 A2, 
+Lemma inv_arrow8 : forall G e A1 A2,
 typing G (e_abs e) (t_arrow A1 A2) ->
 forall B1 B2, t_arrow A1 A2 <: t_arrow B1 B2 ->
 typing G (e_abs e) (t_arrow B1 B2).
@@ -615,7 +639,7 @@ Proof.
   inductions Typ; eauto.
 Qed.
 
-Lemma inv_arrow9 : forall G e A1 A2, 
+Lemma inv_arrow9 : forall G e A1 A2,
 typing G (e_abs e) (t_arrow A1 A2) ->
 exists B1 B2, t_arrow A1 A2 <: t_arrow B1 B2 /\
 (exists L, forall x , x \notin  L ->
@@ -631,7 +655,7 @@ Lemma inv_null : forall E A,
 typing E e_null A -> typing E e_null t_unit /\ t_unit <: A.
 Proof.
   introv Typ.
-  inductions Typ. 
+  inductions Typ.
   (*case typ_int*)
  - split*.
   (*case typ_sub*)
@@ -765,7 +789,7 @@ Proof.
         forwards*: H3 t_int.
         forwards*: H3 (t_arrow t_top t_bot).
         forwards*: H3 t_unit.
-     * (*true goal*)  
+     * (*true goal*)
         pick_fresh y. assert (y \notin L) by auto.
         forwards*: H1 H5.
         assert  (G & y ~: B = G & y ~: B & empty).
@@ -809,7 +833,7 @@ inductions Typ; intros EQ; subst.
    * destruct H0.
      exists* (e_app e1 x).
    (*case step-appr*)
-  + destruct H. 
+  + destruct H.
     exists (e_app x e2). apply* step_appl.
     forwards*: typing_regular Typ2.
 (*case typ-sub*)
@@ -856,7 +880,7 @@ inductions Typ; intros EQ; subst.
    * (*case typeofr*)
      destruct H4.
      apply inv_int in H5. destruct H5.
-     { (*case e = int*) 
+     { (*case e = int*)
       exists (open_exp_wrt_exp e2 (e_lit i5)).
       pick_fresh y.
       assert (y \notin L) by auto.
@@ -921,7 +945,7 @@ Proof.
   - forwards*: IHTyp1.
 Qed.
 
-Lemma determinism_dir : forall E e e1 e2 A, typing E e A -> 
+Lemma determinism_dir : forall E e e1 e2 A, typing E e A ->
 e --> e1 -> e --> e2 -> e1 = e2.
 Proof.
   introv Typ He1. gen e2 A.
@@ -942,7 +966,7 @@ Proof.
    + inverts H4; inverts He1.
 (*case step-beta*)
   - inverts* He2.
-   + inverts* H5. 
+   + inverts* H5.
    + inverts H0; inverts H5.
 (*case step-typeof*)
  - inverts* He2.
@@ -969,9 +993,9 @@ Proof.
       forwards*: Disj t_unit.
       assert (t_unit <: (t_and A B)) by auto.
       contradiction.
-(*case step-typeofr*) 
+(*case step-typeofr*)
 - inverts* He2.
-  + inverts H0; inverts H10. 
+  + inverts H0; inverts H10.
   + apply inv_typeof in Typ.
     destruct Typ as [D]. destruct H3 as [H3 Disj].
     inverts H0.
