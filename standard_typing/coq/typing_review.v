@@ -16,6 +16,10 @@ e : A     e : B
 
 Require Import TLC.LibLN.
 Require Import syntax_unit.
+Require Import Program.Equality.
+Require Import Coq.Lists.ListSet.
+From Coq Require Export Lists.List.
+Export ListNotations.
 
 (** definitions *)
 
@@ -432,17 +436,95 @@ exists A1 B1, (exists L, forall x , x \notin  L ->
 typing (G & x ~: A1) (e open_ee_var x) B1) /\ (t_arrow A1 B1) <: A.
 Proof.
   introv Typ.
-  inductions Typ.
+  inductions Typ; eauto.
  - forwards*: IHTyp.
   destruct H0 as [y [z]].
   exists y z . destruct H0.
   split*.
   eapply sub_transitivity; eauto.
- - exists A B.
-   split*.
  - forwards*: IHTyp1. destruct H as [x1 [x2]]. destruct H.
    forwards*: IHTyp2. destruct H1 as [x3 [x4]]. destruct H1.
-   exists t_top t_bot. split*.
+   exists x1 x2. split*.
+Admitted.
+
+Lemma inv_and_arrow : forall A1 A2 B1 B2,
+  t_and A1 A2 <: t_arrow B1 B2 -> 
+  A1 <: t_arrow B1 B2 \/ A2 <: t_arrow B1 B2.
+Proof.
+  intros.
+  dependent induction H; eauto.
+  apply (s_disj (t_and A1 A2) (t_arrow B1 B2)) in H.
+  inverts* H.
+Admitted.
+
+Lemma inv_arrow2 : forall G e A, 
+typing G (e_abs e) A ->
+exists A1 B1, (t_arrow A1 B1) <: A.
+Proof.
+    introv Typ.
+    inductions Typ.
+    - forwards*: IHTyp. destruct H0 as [x1[x2 H3]].
+      exists x1 x2. eapply sub_transitivity; eauto.
+    - exists* A B.
+    - forwards*: IHTyp1.
+      forwards*: IHTyp2.
+      destruct H as [x1 [x2 H3]].
+      destruct H0 as [x3 [x4 H4]].
+      exists t_top t_bot.
+      apply s_anda.
+      assert (t_arrow t_top t_bot <: t_arrow x1 x2); eauto.
+      eapply sub_transitivity; eauto.
+      assert (t_arrow t_top t_bot <: t_arrow x3 x4); eauto.
+      eapply sub_transitivity; eauto.
+Qed.
+
+Lemma inv_and_arrow' : forall G e A1 A2 B1 B2,
+  typing G (e_abs e) (t_and A1 A2) ->
+  t_and A1 A2 <: t_arrow B1 B2 -> 
+  A1 <: t_arrow B1 B2 \/ A2 <: t_arrow B1 B2.
+Proof.
+  introv Typ Sub.
+  inductions Sub; eauto.
+  inductions Typ.
+  apply inv_arrow2 in Typ.
+  destruct Typ as [A3 [A4]].
+  eapply sub_transitivity in H0; eauto.
+  apply (findsubtypes_empty_not_ord (t_and A1 A2) (t_arrow A3 A4)) in H; auto.
+  false. apply H. auto.
+  forwards*: typ_inter Typ1 Typ2.
+  lets* [A3 [A4]]: inv_arrow2 H0.
+  apply (findsubtypes_empty_not_ord (t_and A1 A2) (t_arrow A3 A4)) in H; auto.
+  false. apply H. auto.
+Qed.
+
+Lemma inv_arrow' : forall G e A, 
+typing G (e_abs e) A ->
+exists A1 B1, (exists L, forall x , x \notin  L ->
+typing (G & x ~: A1) (e open_ee_var x) B1) /\ (t_arrow A1 B1) <: A.
+Proof.
+  introv Typ.
+  inductions Typ; eauto.
+ - forwards*: IHTyp.
+  destruct H0 as [y [z]].
+  exists y z . destruct H0.
+  split*.
+  eapply sub_transitivity; eauto.
+ - lets*: typ_inter Typ1 Typ2.
+   lets* [A3 [A4]]: inv_arrow2 H.
+   apply sub_and in H0. destruct H0.
+Admitted.
+
+Lemma inv_arrow'' : forall G e A1 A2, 
+typing G (e_abs e) (t_arrow A1 A2) ->
+exists B1 B2, (exists L, forall x , x \notin  L ->
+typing (G & x ~: B1) (e open_ee_var x) B2) /\ (t_arrow B1 B2) <: (t_arrow A1 A2).
+Proof.
+  introv Typ.
+  inductions Typ; eauto.
+  clear IHTyp.
+  inductions B; eauto.
+  admit. admit. admit. admit. admit. 
+  admit.
 Admitted.
 
 Lemma inv_arrow1 : forall G e A, 
@@ -452,15 +534,97 @@ Proof.
     introv Typ.
     inductions Typ.
     - forwards*: IHTyp.
-      destruct H0 as [x1[x2[H4 H5]]].
-      exists x1 x2. split*.
-      eapply sub_transitivity; eauto.
+      admit.
     - exists* A B.
     - forwards*: IHTyp1.
       forwards*: IHTyp2.
-      destruct H as [t1 [t2 [H4 H5]]].
-      destruct H0 as [t3 [t4 [H6 H7]]].
-      exists t_top t_bot. split.
+Admitted.
+
+Lemma inv_arrow3 : forall G e A B,
+typing G (e_abs e) (t_arrow A B) ->
+exists A1 B1, (t_arrow A1 B1) <: (t_arrow A B) /\ typing G (e_abs e)  (t_arrow A1 B1).
+Proof.
+  introv Typ.
+  exists* A B.
+Qed.
+
+Lemma inv_arrow31 : forall G e A, 
+typing G (e_abs e) A ->
+exists A1 B1, (exists L, forall x , x \notin  L ->
+typing (G & x ~: A1) (e open_ee_var x) B1).
+Proof.
+  introv Typ.
+  inductions Typ; eauto.
+Qed.
+
+Lemma inv_arrow4 : forall G e A B, 
+typing G (e_abs e) (t_arrow A B) ->
+exists A1 B1, (exists L, forall x , x \notin  L ->
+typing (G & x ~: A1) (e open_ee_var x) B1).
+Proof.
+  introv Typ.
+  lets*: inv_arrow31 Typ.
+Qed.
+
+Lemma inv_arrow5 : forall G e A B,
+typing G (e_abs e) (t_union A B) ->
+exists A1 B1, (t_arrow A1 B1) <: (t_union A B) /\ typing G (e_abs e)  (t_arrow A1 B1).
+Proof.
+  introv Typ.
+  lets Typ': Typ. 
+  inductions Typ.
+Admitted.
+
+Lemma inv_arrow6 : forall G e A B, 
+typing G (e_abs e) (t_arrow A B) ->
+(exists L, forall x , x \notin  L ->
+typing (G & x ~: A) (e open_ee_var x) B).
+Proof.
+  introv Typ.
+  inductions Typ; eauto.
+  clear IHTyp.
+  induction B0; try solve [inverts H; inverts H0].
+  lets*[A3[A4]]: inv_arrow2 Typ. inverts H0. inverts H1.
+  clear IHB0_1 IHB0_2.
+  admit.
+  admit.
+  lets*: inv_and_arrow' Typ H.
+Admitted.
+
+
+Lemma inv_arrow7 : forall G e A1 A2, 
+forall B1 B2, t_arrow A1 A2 <: t_arrow B1 B2 ->
+(exists L, forall x , x \notin  L ->
+typing (G & x ~: A1) (e open_ee_var x) A2) ->
+(exists L, forall x , x \notin  L ->
+typing (G & x ~: B1) (e open_ee_var x) B2).
+Proof.
+  introv Sub. inverts Sub. intros.
+  inductions Sub; eauto.
+  intros. destruct H as [L].
+  exists L. intros.
+  inverts* H2.
+Admitted.
+
+Lemma inv_arrow8 : forall G e A1 A2, 
+typing G (e_abs e) (t_arrow A1 A2) ->
+forall B1 B2, t_arrow A1 A2 <: t_arrow B1 B2 ->
+typing G (e_abs e) (t_arrow B1 B2).
+Proof.
+  introv Typ.
+  inductions Typ; eauto.
+Qed.
+
+Lemma inv_arrow9 : forall G e A1 A2, 
+typing G (e_abs e) (t_arrow A1 A2) ->
+exists B1 B2, t_arrow A1 A2 <: t_arrow B1 B2 /\
+(exists L, forall x , x \notin  L ->
+typing (G & x ~: B1) (e open_ee_var x) B2).
+Proof.
+  introv Typ.
+  inductions Typ; eauto. admit.
+  intros. inverts H1. admit.
+  inverts* H2.
 Admitted.
 
 Lemma inv_null : forall E A,
@@ -508,14 +672,14 @@ Proof.
   - apply inv_int in Typ1. destruct Typ1.
     apply inv_int in Typ2. destruct Typ2.
     forwards*: Disj t_int.
-  - apply inv_arrow in Typ1.
-    destruct Typ1 as [A1 [B1]]. destruct H0.
+  - apply inv_arrow2 in Typ1.
+    destruct Typ1 as [A1 [B1]].
     assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)). auto.
-    apply inv_arrow in Typ2.
-    destruct Typ2 as [A2 [B2]]. destruct H3.
+    apply inv_arrow2 in Typ2.
+    destruct Typ2 as [A2 [B2]].
     assert ((t_arrow t_top t_bot) <: (t_arrow A2 B2)). auto.
-    eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A1 B1)) (C:=A) in H2; auto.
-    eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A2 B2)) (C:=B) in H5; auto.
+    eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A1 B1)) (C:=A) in H1; auto.
+    eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A2 B2)) (C:=B) in H3; auto.
     forwards*: Disj (t_arrow t_top t_bot).
   - apply inv_null in Typ1. destruct Typ1.
     apply inv_null in Typ2. destruct Typ2.
@@ -531,9 +695,8 @@ Proof.
   inductions Find.
   - apply inv_int in Typ.
     destruct~ Typ.
-  - apply inv_arrow in Typ.
+  - apply inv_arrow2 in Typ.
     destruct Typ as [A1 [B1]].
-    destruct H0. destruct H0 as [L].
     assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)) by auto.
     eapply sub_transitivity; eauto.
   - apply inv_null in Typ. destruct~ Typ.
@@ -553,22 +716,19 @@ Proof.
   - (* app *)
     inverts* Red.
     (* beta *)
-        forwards [A1 [B1]]: inv_arrow Typ1.
-        destruct H.
+        forwards* : inv_arrow6 Typ1.
         destruct H as [L].
-        inverts H0.
         pick_fresh x.
         assert (x \notin L) by auto.
         lets: H x H0.
-        assert (G & x ~: A1 = G & x ~: A1 & empty).
+        assert (G & x ~: A = G & x ~: A & empty).
         rewrite* concat_empty_r.
         rewrite H4 in H2.
         assert (G = G & empty).
         rewrite* concat_empty_r. rewrite H5.
         lets: typing_through_subst_ee.
-        forwards*: H7 H2.
+        forwards*: H6 H2.
         rewrite* (@subst_ee_intro x).
-        inverts H2.
   - (* typeof *)
     inverts* Red.
     + (* value checks against disjoint types *)
@@ -672,14 +832,14 @@ inductions Typ; intros EQ; subst.
       forwards*: typing_regular Typ'.
      }
      { (*case e = \x.e*)
-      apply inv_arrow in H5.
-      destruct H5 as [A1 [B1]]. destruct H5.
+      apply inv_arrow2 in H5.
+      destruct H5 as [A1 [B1]].
       assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)) by auto.
-      eapply sub_transitivity in H6; eauto.
+      eapply sub_transitivity in H5; eauto.
       exists (open_exp_wrt_exp e1 (e_abs e)).
       pick_fresh y.
       assert (y \notin L) by auto.
-      lets: H y H8.
+      lets: H y H7.
       eapply step_typeofl with (C:=(t_arrow t_top t_bot)); eauto.
       forwards*: typing_regular Typ'.
      }
@@ -705,14 +865,14 @@ inductions Typ; intros EQ; subst.
       forwards*: typing_regular Typ'.
      }
      { (*case e = \x.e*)
-      apply inv_arrow in H5.
-      destruct H5 as [A1 [B1]]. destruct H5.
+      apply inv_arrow2 in H5.
+      destruct H5 as [A1 [B1]].
       assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)) by auto.
-      eapply sub_transitivity in H6; eauto.
+      eapply sub_transitivity in H5; eauto.
       exists (open_exp_wrt_exp e2 (e_abs e)).
       pick_fresh y.
       assert (y \notin L) by auto.
-      lets: H1 y H8.
+      lets: H1 y H7.
       eapply step_typeofr with (C:=(t_arrow t_top t_bot)); eauto.
       forwards*: typing_regular Typ'.
      }
