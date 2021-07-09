@@ -429,6 +429,176 @@ Proof.
     forwards*: IHTyp2.
 Qed.
 
+Lemma abs_typ_arrow_sub : forall G e A,
+typing G (e_abs e) A ->
+exists A1 B1, (t_arrow A1 B1) <: A.
+Proof.
+    introv Typ.
+    inductions Typ.
+    - forwards*: IHTyp. destruct H0 as [x1[x2 H3]].
+      exists x1 x2. eapply sub_transitivity; eauto.
+    - exists* A B.
+    - forwards*: IHTyp1.
+      forwards*: IHTyp2.
+      destruct H as [x1 [x2 H3]].
+      destruct H0 as [x3 [x4 H4]].
+      exists t_top t_bot.
+      apply s_anda.
+      assert (t_arrow t_top t_bot <: t_arrow x1 x2); eauto.
+      eapply sub_transitivity; eauto.
+      assert (t_arrow t_top t_bot <: t_arrow x3 x4); eauto.
+      eapply sub_transitivity; eauto.
+Qed.
+
+Lemma inv_and_arrow : forall G e A1 A2 B1 B2,
+  typing G (e_abs e) (t_and A1 A2) ->
+  t_and A1 A2 <: t_arrow B1 B2 ->
+  A1 <: t_arrow B1 B2 \/ A2 <: t_arrow B1 B2.
+Proof.
+  introv Typ Sub.
+  inverts Sub; eauto.
+  apply abs_typ_arrow_sub in Typ.
+  destruct Typ as [A3 [A4]].
+  apply (findsubtypes_empty_not_ord (t_and A1 A2) (t_arrow A3 A4)) in H; auto.
+  false. apply H. auto.
+Qed.
+
+Lemma inv_abs_sub : forall G e A B1 B2,
+    typing G (e_abs e) A ->
+    A <: (t_arrow B1 B2) ->
+         exists C1 C2,
+           (exists L, forall x , x \notin  L -> typing (G & x ~: C1) (e open_ee_var x) C2)
+           /\ (t_arrow C1 C2) <: (t_arrow B1 B2).
+Proof.
+  introv Typ Sub.
+  inductions Typ; eauto.
+  - assert (HS: B <: t_arrow B1 B2) by applys sub_transitivity H Sub.
+    forwards* (?&?&?&?): IHTyp HS.
+  - forwards* [HS|HS]: inv_and_arrow Sub.
+Qed.
+
+Lemma inv_arrow : forall G e A1 A2,
+    typing G (e_abs e) (t_arrow A1 A2) ->
+    exists B1 B2, (exists L, forall x , x \notin  L -> typing (G & x ~: B1) (e open_ee_var x) B2)
+                  /\ (t_arrow B1 B2) <: (t_arrow A1 A2).
+Proof.
+  introv Typ.
+  inverts Typ.
+  - forwards*: inv_abs_sub H.
+  - exists* A1 A2.
+Qed.
+
+(*
+inv_and_union is false
+
+Counter example:
+
+A1 = Int -> Int
+A2 = Bool -> Bool
+
+B1 = A1 & A2
+B2 = A1 & A2
+
+A1 & A2 <: B1 | B2 --- True
+
+But:
+
+A1 <: B1 | B2  ----- False
+
+A2 <: B1 | B2  ----- False
+
+*)
+
+(*
+
+Lemma inv_and_union : forall G e A1 A2 B1 B2,
+  typing G (e_abs e) (t_and A1 A2) ->
+  t_and A1 A2 <: t_union B1 B2 ->
+  A1 <: t_union B1 B2 \/ A2 <: t_union B1 B2.
+Proof.
+  introv Typ Sub.
+  lets SubArr: abs_typ_arrow_sub Typ.
+  destruct SubArr as [C1[C2]].
+  admit.
+Admitted.
+
+Lemma inv_abs_union : forall G e A B1 B2,
+    typing G (e_abs e) A ->
+    A <: (t_union B1 B2) ->
+         exists C1 C2,
+           (exists L, forall x , x \notin  L -> typing (G & x ~: C1) (e open_ee_var x) C2)
+           /\ (t_arrow C1 C2) <: (t_union B1 B2).
+Proof.
+  introv Typ Sub.
+  inductions Typ; eauto.
+  - assert (HS: B <: t_union B1 B2) by applys sub_transitivity H Sub.
+    forwards* (?&?&?&?): IHTyp HS.
+  - forwards* [HS|HS]: inv_and_union Sub.
+Qed.
+
+*)
+
+(*
+
+\x.e : A1 | A2
+A1 = (Int -> Int) & (Bool -> Bool)
+A2 = (Int -> Int) & (Bool -> Bool)
+
+Int | Bool -> Int & Bool <: (Int -> Int) & (Bool -> Bool)
+
+*)
+
+(*
+
+Lemma inv_arrow_union : forall G e A1 A2,
+    typing G (e_abs e) (t_union A1 A2) ->
+    exists B1 B2, (exists L, forall x , x \notin  L -> typing (G & x ~: B1) (e open_ee_var x) B2)
+                  /\ (t_arrow B1 B2) <: (t_union A1 A2).
+Proof.
+  introv Typ.
+  inverts Typ.
+  - forwards*: inv_abs_union H H0.
+Qed.
+
+Lemma inv_abs_union1 : forall G e A B1 B2,
+    typing G (e_abs e) A ->
+    A <: (t_union B1 B2) ->
+         exists C1 C2, typing G (e_abs e) (t_arrow C1 C2)
+           /\ (t_arrow C1 C2) <: (t_union B1 B2).
+Proof.
+  introv Typ Sub.
+  inductions Typ; eauto.
+  - assert (HS: B <: t_union B1 B2) by applys sub_transitivity H Sub.
+    forwards* (?&?&?&?): IHTyp HS.
+  - forwards* [HS|HS]: inv_and_union Sub.
+Qed.
+
+Lemma inv_arrow_union1 : forall G e A1 A2,
+    typing G (e_abs e) (t_union A1 A2) ->
+    exists B1 B2, typing G (e_abs e) (t_arrow B1 B2)
+                  /\ (t_arrow B1 B2) <: (t_union A1 A2).
+Proof.
+  introv Typ.
+  inverts Typ.
+  - forwards*: inv_abs_union H H0.
+Qed.
+
+*)
+
+Lemma inv_abs_union : forall G e A A1 A2,
+    typing G (e_abs e) A ->
+    A <: (t_union A1 A2) ->
+    typing G (e_abs e) A1 \/ typing G (e_abs e) A2.
+Proof.
+  introv Typ Sub.
+  inductions Typ; eauto.
+  - eapply sub_transitivity in Sub; eauto.
+  - inverts* Sub.
+  - inverts* Sub.
+Qed.
+
+(*
+
 Lemma inv_arrow : forall G e A,
 typing G (e_abs e) A ->
 exists A1 B1, (exists L, forall x , x \notin  L ->
@@ -456,46 +626,6 @@ Proof.
   inverts* H.
 Admitted.
 
-Lemma inv_arrow2 : forall G e A,
-typing G (e_abs e) A ->
-exists A1 B1, (t_arrow A1 B1) <: A.
-Proof.
-    introv Typ.
-    inductions Typ.
-    - forwards*: IHTyp. destruct H0 as [x1[x2 H3]].
-      exists x1 x2. eapply sub_transitivity; eauto.
-    - exists* A B.
-    - forwards*: IHTyp1.
-      forwards*: IHTyp2.
-      destruct H as [x1 [x2 H3]].
-      destruct H0 as [x3 [x4 H4]].
-      exists t_top t_bot.
-      apply s_anda.
-      assert (t_arrow t_top t_bot <: t_arrow x1 x2); eauto.
-      eapply sub_transitivity; eauto.
-      assert (t_arrow t_top t_bot <: t_arrow x3 x4); eauto.
-      eapply sub_transitivity; eauto.
-Qed.
-
-Lemma inv_and_arrow' : forall G e A1 A2 B1 B2,
-  typing G (e_abs e) (t_and A1 A2) ->
-  t_and A1 A2 <: t_arrow B1 B2 ->
-  A1 <: t_arrow B1 B2 \/ A2 <: t_arrow B1 B2.
-Proof.
-  introv Typ Sub.
-  inductions Sub; eauto.
-  inductions Typ.
-  apply inv_arrow2 in Typ.
-  destruct Typ as [A3 [A4]].
-  eapply sub_transitivity in H0; eauto.
-  apply (findsubtypes_empty_not_ord (t_and A1 A2) (t_arrow A3 A4)) in H; auto.
-  false. apply H. auto.
-  forwards*: typ_inter Typ1 Typ2.
-  lets* [A3 [A4]]: inv_arrow2 H0.
-  apply (findsubtypes_empty_not_ord (t_and A1 A2) (t_arrow A3 A4)) in H; auto.
-  false. apply H. auto.
-Qed.
-
 Lemma inv_arrow' : forall G e A,
 typing G (e_abs e) A ->
 exists A1 B1, (exists L, forall x , x \notin  L ->
@@ -512,31 +642,6 @@ Proof.
    lets* [A3 [A4]]: inv_arrow2 H.
    apply sub_and in H0. destruct H0.
 Admitted.
-
-Lemma inv_abs_sub : forall e A B1 B2,
-    typing nil (e_abs e) A ->
-    A <: (t_arrow B1 B2) ->
-         exists C1 C2,
-           (exists L, forall x , x \notin  L -> typing ([] & x ~: C1) (e open_ee_var x) C2)
-           /\ (t_arrow C1 C2) <: (t_arrow B1 B2).
-Proof.
-  introv Typ Sub.
-  inductions Typ; jauto.
-  - assert (HS: B <: t_arrow B1 B2) by applys sub_transitivity H Sub.
-    forwards* (?&?&?&?): IHTyp HS.
-  - forwards* [HS|HS]: inv_and_arrow' Sub.
-Qed.
-
-Lemma inv_arrow'' : forall e A1 A2,
-    typing nil (e_abs e) (t_arrow A1 A2) ->
-    exists B1 B2, (exists L, forall x , x \notin  L -> typing ([] & x ~: B1) (e open_ee_var x) B2)
-                  /\ (t_arrow B1 B2) <: (t_arrow A1 A2).
-Proof.
-  introv Typ.
-  inverts Typ.
-  - forwards*: inv_abs_sub H.
-  - exists* A1 A2.
-Qed.
 
 Lemma inv_arrow'' : forall G e A1 A2,
 typing G (e_abs e) (t_arrow A1 A2) ->
@@ -615,7 +720,6 @@ Proof.
   lets*: inv_and_arrow' Typ H.
 Admitted.
 
-
 Lemma inv_arrow7 : forall G e A1 A2,
 forall B1 B2, t_arrow A1 A2 <: t_arrow B1 B2 ->
 (exists L, forall x , x \notin  L ->
@@ -651,6 +755,8 @@ Proof.
   inverts* H2.
 Admitted.
 
+*)
+
 Lemma inv_null : forall E A,
 typing E e_null A -> typing E e_null t_unit /\ t_unit <: A.
 Proof.
@@ -665,24 +771,33 @@ Proof.
  - forwards*: IHTyp1.
 Qed.
 
+
+(*
+
+e = \x.x
+\x.x : (Int -> Int) /\ (Bool -> Bool) | (Int -> Int) /\ (Bool -> Bool)
+
+\x.x : (Int -> Int) /\ (Bool -> Bool)
+\x.x : (Int -> Int) /\ (Bool -> Bool)
+
+*)
+
 Lemma check_or_typ : forall E e A B,
    value e ->
    typing E e (t_union A B) ->
    typing E e A \/ typing E e B.
 Proof.
-  intros.
-  inverts H.
+  introv Val Typ.
+  inverts Val.
   (*subsumption again*)
- - apply inv_int in H0. destruct H0.
+ - apply inv_int in Typ. destruct Typ.
    inverts* H0.
- - apply inv_arrow in H0.
-   destruct H0 as [A1 [B1]].
-   destruct H as [H].
-   destruct H as [L].
-   inverts* H0.
- - apply inv_null in H0. destruct H0.
+ - inverts Typ.
+   eapply inv_abs_union in H0; eauto.
+ - apply inv_null in Typ. destruct Typ.
    inverts* H0.
 Qed.
+
 
 Lemma val_check_disjoint_types : forall E v A B,
 A *s B ->
@@ -696,10 +811,10 @@ Proof.
   - apply inv_int in Typ1. destruct Typ1.
     apply inv_int in Typ2. destruct Typ2.
     forwards*: Disj t_int.
-  - apply inv_arrow2 in Typ1.
+  - apply abs_typ_arrow_sub in Typ1.
     destruct Typ1 as [A1 [B1]].
     assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)). auto.
-    apply inv_arrow2 in Typ2.
+    apply abs_typ_arrow_sub in Typ2.
     destruct Typ2 as [A2 [B2]].
     assert ((t_arrow t_top t_bot) <: (t_arrow A2 B2)). auto.
     eapply sub_transitivity with (A:=(t_arrow t_top t_bot)) (B:=(t_arrow A1 B1)) (C:=A) in H1; auto.
@@ -719,7 +834,7 @@ Proof.
   inductions Find.
   - apply inv_int in Typ.
     destruct~ Typ.
-  - apply inv_arrow2 in Typ.
+  - apply abs_typ_arrow_sub in Typ.
     destruct Typ as [A1 [B1]].
     assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)) by auto.
     eapply sub_transitivity; eauto.
@@ -740,21 +855,25 @@ Proof.
   - (* app *)
     inverts* Red.
     (* beta *)
-        forwards* : inv_arrow6 Typ1.
+        forwards* : inv_arrow Typ1.
+        destruct H as [A1[B1 [H H']]]. 
         destruct H as [L].
         pick_fresh x.
         assert (x \notin L) by auto.
         lets: H x H0.
-        assert (G & x ~: A = G & x ~: A & empty).
+        assert (G & x ~: A1 = G & x ~: A1 & empty).
         rewrite* concat_empty_r.
         rewrite H4 in H2.
         assert (G = G & empty).
         rewrite* concat_empty_r. rewrite H5.
         lets: typing_through_subst_ee.
+        inverts H'.
         forwards*: H6 H2.
         rewrite* (@subst_ee_intro x).
+        inverts H7.
   - (* typeof *)
     inverts* Red.
+    
     + (* value checks against disjoint types *)
       lets temp: check_or_typ G e A B H11.
       lets DisjOr: temp Typ.
@@ -856,7 +975,7 @@ inductions Typ; intros EQ; subst.
       forwards*: typing_regular Typ'.
      }
      { (*case e = \x.e*)
-      apply inv_arrow2 in H5.
+      apply abs_typ_arrow_sub in H5.
       destruct H5 as [A1 [B1]].
       assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)) by auto.
       eapply sub_transitivity in H5; eauto.
@@ -889,7 +1008,7 @@ inductions Typ; intros EQ; subst.
       forwards*: typing_regular Typ'.
      }
      { (*case e = \x.e*)
-      apply inv_arrow2 in H5.
+      apply abs_typ_arrow_sub in H5.
       destruct H5 as [A1 [B1]].
       assert ((t_arrow t_top t_bot) <: (t_arrow A1 B1)) by auto.
       eapply sub_transitivity in H5; eauto.
